@@ -92,7 +92,7 @@
       </div>
       <button onclick="openAdminModal()" class="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold shadow hover:bg-red-700 transition-colors flex items-center space-x-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-        <span id="txtAdminBtn">新增產品與直接上傳 PDF</span>
+        <span id="txtAdminBtn">新增產品資料 (免上傳檔案)</span>
       </button>
     </div>
   </section>
@@ -104,7 +104,7 @@
       <!-- Filters -->
       <div class="bg-white rounded-2xl p-4 sm:p-5 custom-shadow border border-slate-200/80 mb-6">
         <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <input type="text" id="searchInput" oninput="renderTable()" placeholder="搜尋產品名或牌號..." class="w-full sm:w-96 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+          <input type="text" id="searchInput" oninput="renderTable()" placeholder="搜尋 DOW EPDM 牌號或名稱..." class="w-full sm:w-96 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
           <div class="flex gap-2 text-xs">
             <button onclick="setCat('ALL')" class="cat-btn px-3 py-1.5 rounded-lg bg-brand-700 text-white font-bold" data-c="ALL" id="catAll">全部</button>
             <button onclick="setCat('RUBBER')" class="cat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" data-c="RUBBER" id="catRubber">橡膠</button>
@@ -122,8 +122,8 @@
               <tr>
                 <th class="py-3 px-4" id="thCat">分類</th>
                 <th class="py-3 px-4" id="thName">品名 (中/英)</th>
-                <th class="py-3 px-4" id="thGrade">牌號</th>
-                <th class="py-3 px-4 text-center" id="thAction">技術資料與安全手冊下載</th>
+                <th class="py-3 px-4" id="thGrade">DOW 牌號 / 規格</th>
+                <th class="py-3 px-4 text-center" id="thAction">技術資料與安全手冊操作</th>
               </tr>
             </thead>
             <tbody id="tableBody" class="divide-y divide-slate-100">
@@ -143,7 +143,7 @@
       <div class="bg-slate-800 text-white flex justify-between items-center px-6 py-4 border-b border-slate-700">
         <h2 class="text-xl font-bold text-white flex items-center space-x-2">
           <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded uppercase tracking-wide">Admin</span>
-          <span id="modalAdminTitle">新增規格資料庫產品 (免 Storage 方案)</span>
+          <span id="modalAdminTitle">新增產品資料 (文字規格)</span>
         </h2>
         <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white bg-slate-700 hover:bg-slate-600 p-1.5 rounded-full transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -156,7 +156,7 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpId">產品代碼 (ID, 不能重複)</label>
-              <input type="text" id="upId" placeholder="ex: epdm2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <input type="text" id="upId" placeholder="ex: dow-nordel-3720p" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpCat">所屬分類</label>
@@ -172,40 +172,22 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpZh">中文品名</label>
-              <input type="text" id="upNameZh" placeholder="三元乙丙橡膠" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <input type="text" id="upNameZh" placeholder="陶氏三元乙丙橡膠" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpEn">英文品名</label>
-              <input type="text" id="upNameEn" placeholder="EPDM Rubber" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <input type="text" id="upNameEn" placeholder="DOW Nordel EPDM" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
           </div>
 
           <div>
             <label class="block font-bold text-slate-600 mb-1" id="lblUpGr">代表牌號 (Grade)</label>
-            <input type="text" id="upGrade" placeholder="512E / 4725P" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
-          </div>
-
-          <!-- Direct PDF File Inputs -->
-          <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mt-4 space-y-4">
-            <h4 class="font-bold text-blue-800 text-xs uppercase flex items-center" id="txtFileUpTitle">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-              選取 PDF 檔案 (直接加密存入資料庫)
-            </h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="bg-white p-3 rounded-lg border border-blue-200">
-                <label class="block text-xs font-bold text-slate-500 mb-1">TDS 規格表 (PDF)</label>
-                <input type="file" id="fileTds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700">
-              </div>
-              <div class="bg-white p-3 rounded-lg border border-blue-200">
-                <label class="block text-xs font-bold text-slate-500 mb-1">SDS 安全表 (PDF)</label>
-                <input type="file" id="fileSds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-emerald-50 file:text-emerald-700">
-              </div>
-            </div>
+            <input type="text" id="upGrade" placeholder="Nordel 4725P / 3720P" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
           </div>
 
           <button onclick="submitUpload()" id="btnSubmitUpload" class="w-full py-3 mt-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-lg flex justify-center items-center space-x-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            <span id="txtBtnSubmit">確認新增產品與寫入 PDF</span>
+            <span id="txtBtnSubmit">確認新增產品</span>
           </button>
 
         </div>
@@ -243,6 +225,16 @@
     let currentCategory = 'ALL';
     let PRODUCTS = [];
 
+    // --- 預設 DOW (陶氏) EPDM 牌號資料 (當資料庫為空或初始化時自動載入) ---
+    const DEFAULT_DOW_PRODUCTS = [
+      { id: 'dow-4725p', category: 'RUBBER', nameZh: '陶氏三元乙丙橡膠', nameEn: 'DOW Nordel EPDM', grade: 'Nordel 4725P', descZh: '高門尼、高乙烯，適用於汽車密封條與建築防水卷材', descEn: 'High Mooney, high ethylene for automotive seals and roofing.' },
+      { id: 'dow-3720p', category: 'RUBBER', nameZh: '陶氏三元乙丙橡膠', nameEn: 'DOW Nordel EPDM', grade: 'Nordel 3720P', descZh: '中低門尼，優異的加工流動性與混煉分散性', descEn: 'Medium-low Mooney, excellent processability.' },
+      { id: 'dow-3745p', category: 'RUBBER', nameZh: '陶氏三元乙丙橡膠', nameEn: 'DOW Nordel EPDM', grade: 'Nordel 3745P', descZh: '通用型級別，兼具良好的機械強度與擠出表現', descEn: 'General purpose, balanced strength and extrusion.' },
+      { id: 'dow-4770r', category: 'RUBBER', nameZh: '陶氏三元乙丙橡膠', nameEn: 'DOW Nordel EPDM', grade: 'Nordel 4770R', descZh: '超高門尼，適用於高填充、低成本橡膠擠出製品', descEn: 'Ultra-high Mooney for high filler loading.' },
+      { id: 'dow-IP-5565', category: 'RUBBER', nameZh: '陶氏烴類共聚物彈性體', nameEn: 'DOW Nordel IP', grade: 'Nordel IP 5565', descZh: '催化劑先進技術，極佳的色澤穩定性與耐熱老化', descEn: 'Advanced catalyst tech, exceptional color stability.' },
+      { id: 'dow-IP-3640', category: 'RUBBER', nameZh: '陶氏烴類共聚物彈性體', nameEn: 'DOW Nordel IP', grade: 'Nordel IP 3640', descZh: '低結晶度，柔軟度佳，適用於耐寒彈性製品', descEn: 'Low crystallinity, high flexibility at low temp.' }
+    ];
+
     const ADMIN_EMAILS = ['marswu@example.com', 'ianteai.com@gmail.com', 'boss@ianteai.com'];
 
     const I18N = {
@@ -252,16 +244,16 @@
         txtLoginBtn: '管理員登入',
         txtLogoutBtn: '登出系統',
         txtAdminTitle: '總管理員控制台',
-        txtAdminBtn: '新增產品與直接上傳 PDF',
-        searchPh: '搜尋產品名或牌號...',
+        txtAdminBtn: '新增產品資料',
+        searchPh: '搜尋 DOW EPDM 牌號或名稱...',
         catAll: '全部', catRubber: '橡膠', catPlastics: '塑膠', catChem: '化工',
-        thCat: '分類', thName: '品名 (中/英)', thGrade: '牌號', thAction: '技術資料與安全手冊下載',
-        emptyData: '尚無資料，等待管理員新增產品',
-        modalAdminTitle: '新增規格資料庫產品 (免 Storage 方案)',
+        thCat: '分類', thName: '品名 (中/英)', thGrade: 'DOW 牌號 / 規格', thAction: '技術資料與安全手冊操作',
+        emptyData: '尚無資料',
+        modalAdminTitle: '新增產品資料 (文字規格)',
         lblUpId: '產品代碼 (ID, 不能重複)', lblUpCat: '所屬分類', lblUpZh: '中文品名', lblUpEn: '英文品名', lblUpGr: '代表牌號 (Grade)',
-        txtFileUpTitle: '選取 PDF 檔案 (直接加密存入資料庫)',
-        txtBtnSubmit: '確認新增產品與寫入 PDF',
-        btnDelete: '刪除'
+        txtBtnSubmit: '確認新增產品',
+        btnDelete: '刪除',
+        viewInfo: '查看規格說明'
       },
       en: {
         langBtn: '中文',
@@ -269,16 +261,16 @@
         txtLoginBtn: 'Admin Login',
         txtLogoutBtn: 'Logout',
         txtAdminTitle: 'Admin Dashboard',
-        txtAdminBtn: 'Add Product & Upload PDF',
-        searchPh: 'Search product or grade...',
+        txtAdminBtn: 'Add Product Data',
+        searchPh: 'Search DOW EPDM grade...',
         catAll: 'All', catRubber: 'Rubber', catPlastics: 'Plastics', catChem: 'Chemical',
-        thCat: 'Category', thName: 'Name', thGrade: 'Grade', thAction: 'TDS & SDS Download',
-        emptyData: 'No records found. Waiting for admin upload.',
-        modalAdminTitle: 'Add New Product (No Storage Needed)',
+        thCat: 'Category', thName: 'Name', thGrade: 'DOW Grade', thAction: 'Actions',
+        emptyData: 'No records found.',
+        modalAdminTitle: 'Add New Product (Text Specs)',
         lblUpId: 'Product ID (Unique)', lblUpCat: 'Category', lblUpZh: 'Name (ZH)', lblUpEn: 'Name (EN)', lblUpGr: 'Grade',
-        txtFileUpTitle: 'Select PDF Files (Stored in DB directly)',
-        txtBtnSubmit: 'Confirm & Save PDF to DB',
-        btnDelete: 'Delete'
+        txtBtnSubmit: 'Confirm Add Product',
+        btnDelete: 'Delete',
+        viewInfo: 'View Spec Info'
       }
     };
 
@@ -307,7 +299,6 @@
       document.getElementById('lblUpZh').innerText = t.lblUpZh;
       document.getElementById('lblUpEn').innerText = t.lblUpEn;
       document.getElementById('lblUpGr').innerText = t.lblUpGr;
-      document.getElementById('txtFileUpTitle').innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg> ${t.txtFileUpTitle}`;
       document.getElementById('txtBtnSubmit').innerText = t.txtBtnSubmit;
 
       renderTable();
@@ -365,6 +356,8 @@
       } else {
         currentUser = null;
         isAdmin = false;
+        btnLogin.classList.add('hidden'); // 預設隱藏登入按鈕，點擊網頁特定區域或保留
+        // 為了讓您隨時能點擊登入，我們讓登入按鈕顯示
         btnLogin.classList.remove('hidden');
         userProfile.classList.add('hidden');
         adminPanel.classList.add('hidden');
@@ -372,14 +365,30 @@
       renderTable();
     });
 
-    // --- DB Load ---
+    // --- DB Load & Auto Seed DOW EPDM ---
     function loadProductsFromDB() {
-      db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+      db.collection('products').orderBy('createdAt', 'desc').onSnapshot(async snapshot => {
         PRODUCTS = [];
         snapshot.forEach(doc => {
           PRODUCTS.push({ id: doc.id, ...doc.data() });
         });
-        renderTable();
+
+        // 如果資料庫完全沒有資料，自動把 DOW EPDM 牌號寫進去！
+        if (PRODUCTS.length === 0) {
+          for (let p of DEFAULT_DOW_PRODUCTS) {
+            await db.collection('products').doc(p.id).set({
+              category: p.category,
+              nameZh: p.nameZh,
+              nameEn: p.nameEn,
+              grade: p.grade,
+              descZh: p.descZh,
+              descEn: p.descEn,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+        } else {
+          renderTable();
+        }
       }, error => {
         console.error("讀取失敗", error);
       });
@@ -388,27 +397,10 @@
     loadProductsFromDB();
     applyLanguage();
 
-    // --- PDF Download (From Base64 in Firestore) ---
-    function handleDownloadBase64(e, base64Data, filename) {
-      e.preventDefault();
-      if(!base64Data) {
-        showToast(currentLang === 'zh' ? '該檔案尚未上傳' : 'File not uploaded yet', '⚠️');
-        return;
-      }
-      
-      // Convert Base64 to Blob & Trigger Download
-      const byteCharacters = atob(base64Data.split(',')[1]);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], {type: 'application/pdf'});
-      
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = filename || 'document.pdf';
-      link.click();
+    // --- Actions ---
+    function showInfo(descZh, descEn, grade) {
+      const text = currentLang === 'zh' ? `【DOW EPDM 牌號規格說明】\n牌號：${grade}\n特性：${descZh}` : `[DOW EPDM Spec]\nGrade: ${grade}\nDesc: ${descEn}`;
+      alert(text);
     }
 
     function handleDelete(id) {
@@ -456,11 +448,7 @@
                          
         const adminDel = isAdmin ? `<button onclick="handleDelete('${p.id}')" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100 ml-2 border border-red-200 transition-colors">${t.btnDelete}</button>` : '';
         const nameDisp = currentLang === 'zh' ? `${p.nameZh} <span class="text-xs text-slate-500 block">${p.nameEn}</span>` : `${p.nameEn} <span class="text-xs text-slate-500 block">${p.nameZh}</span>`;
-
-        const hasTds = !!p.tdsBase64;
-        const hasSds = !!p.sdsBase64;
-        const tdsStyle = hasTds ? 'bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100 cursor-pointer' : 'bg-slate-100 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed';
-        const sdsStyle = hasSds ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer' : 'bg-slate-100 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed';
+        const descText = currentLang === 'zh' ? (p.descZh || '陶氏優質 EPDM 橡膠原料') : (p.descEn || 'DOW high quality EPDM polymer.');
 
         return `
           <tr class="hover:bg-brand-50/50 transition-colors border-b border-slate-50">
@@ -468,11 +456,12 @@
             <td class="py-4 px-4">
               <strong class="text-slate-800">${nameDisp}</strong>
             </td>
-            <td class="py-4 px-4 font-mono text-sm text-slate-600">${p.grade}</td>
+            <td class="py-4 px-4 font-mono text-sm text-slate-700 font-bold">${p.grade}</td>
             <td class="py-4 px-4 text-center">
               <div class="flex justify-center items-center space-x-2">
-                <a href="#" onclick="handleDownload(event, '${p.tdsBase64}', '${p.id}-TDS.pdf')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center ${tdsStyle}"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> TDS</a>
-                <a href="#" onclick="handleDownload(event, '${p.sdsBase64}', '${p.id}-SDS.pdf')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center ${sdsStyle}"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> SDS</a>
+                <button onclick="showInfo('${p.descZh || ''}', '${p.descEn || ''}', '${p.grade}')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 transition-all flex items-center">
+                  <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> ${t.viewInfo}
+                </button>
                 ${adminDel}
               </div>
             </td>
@@ -481,7 +470,7 @@
       }).join('');
     }
 
-    // --- Admin Upload (Convert PDF to Base64 and save in Firestore directly) ---
+    // --- Admin Upload (Text Only) ---
     function openAdminModal() {
       if(!isAdmin) return;
       document.getElementById('adminModal').classList.remove('hidden');
@@ -493,74 +482,48 @@
       document.body.style.overflow = '';
     }
 
-    // Helper to convert File to Base64
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-      });
-    }
-
     async function submitUpload() {
       if(!isAdmin) return;
       
       const id = document.getElementById('upId').value.trim();
       const nameZh = document.getElementById('upNameZh').value.trim();
-      
-      const fileTds = document.getElementById('fileTds').files[0];
-      const fileSds = document.getElementById('fileSds').files[0];
+      const grade = document.getElementById('upGrade').value.trim();
       const btnSubmit = document.getElementById('btnSubmitUpload');
 
-      if(!id || !nameZh) {
-        alert(currentLang === 'zh' ? '請輸入產品 ID 與中文品名！' : 'ID and Name are required!');
+      if(!id || !nameZh || !grade) {
+        alert(currentLang === 'zh' ? '請填寫完整產品資訊！' : 'All fields are required!');
         return;
       }
 
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = currentLang === 'zh' ? '正在將 PDF 轉碼並寫入資料庫...' : 'Processing PDF...';
+      btnSubmit.innerHTML = currentLang === 'zh' ? '資料寫入中...' : 'Saving...';
       btnSubmit.classList.add('opacity-70');
 
-      let tdsBase64 = null;
-      let sdsBase64 = null;
-
       try {
-        if (fileTds) {
-          tdsBase64 = await fileToBase64(fileTds);
-        }
-        if (fileSds) {
-          sdsBase64 = await fileToBase64(fileSds);
-        }
-
-        // Directly store everything in Firestore Document (No Storage needed!)
         await db.collection('products').doc(id).set({
           category: document.getElementById('upCat').value,
           nameZh: nameZh,
           nameEn: document.getElementById('upNameEn').value || nameZh,
-          grade: document.getElementById('upGrade').value,
-          tdsBase64: tdsBase64,
-          sdsBase64: sdsBase64,
+          grade: grade,
+          descZh: '自定義新增規格資料',
+          descEn: 'Custom added product specification',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        showToast(currentLang === 'zh' ? `新增產品 [${nameZh}] 成功` : `Added ${nameZh} successfully`, '✅');
+        showToast(currentLang === 'zh' ? `新增牌號 [${grade}] 成功` : `Added ${grade} successfully`, '✅');
         
-        // Reset form
         document.getElementById('upId').value = '';
         document.getElementById('upNameZh').value = '';
         document.getElementById('upNameEn').value = '';
         document.getElementById('upGrade').value = '';
-        document.getElementById('fileTds').value = '';
-        document.getElementById('fileSds').value = '';
         closeAdminModal();
         
       } catch (error) {
         console.error("Upload error", error);
-        alert(currentLang === 'zh' ? '上傳失敗：檔案可能過大（Firestore 單一文件上限為 1MB）。建議 PDF 保持在 500KB 以下。' : 'Upload failed: File might be too large (>1MB limit per document).');
+        alert('儲存失敗，請檢查 Firestore 規則');
       } finally {
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg><span>${I18N[currentLang].txtBtnSubmit}</span>`;
+        btnSubmit.innerHTML = `<span>${I18N[currentLang].txtBtnSubmit}</span>`;
         btnSubmit.classList.remove('opacity-70');
       }
     }
