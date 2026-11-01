@@ -7,7 +7,7 @@
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase (v9 Compat) 加入 Storage 支援上傳 -->
+  <!-- Firebase (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -30,12 +30,11 @@
     ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
     .glass-nav { background: rgba(31, 73, 125, 0.96); backdrop-filter: blur(10px); }
     .custom-shadow { box-shadow: 0 4px 20px -2px rgba(15, 36, 62, 0.08), 0 2px 6px -1px rgba(15, 36, 62, 0.04); }
-    /* 等級專屬樣式 */
-    .badge-lv1 { background: #94A3B8; color: white; } /* 一般 */
-    .badge-lv2 { background: #38BDF8; color: white; } /* 進階 */
-    .badge-lv3 { background: #A78BFA; color: white; } /* 白金 */
-    .badge-lv4 { background: #34D399; color: white; } /* 鑽石 */
-    .badge-lv5 { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); font-weight: 900; border: 1px solid #B8860B; } /* 榮耀 */
+    .badge-lv1 { background: #94A3B8; color: white; } 
+    .badge-lv2 { background: #38BDF8; color: white; } 
+    .badge-lv3 { background: #A78BFA; color: white; } 
+    .badge-lv4 { background: #34D399; color: white; } 
+    .badge-lv5 { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); font-weight: 900; border: 1px solid #B8860B; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased pb-16 md:pb-6">
@@ -51,8 +50,8 @@
         </svg>
         <div>
           <h1 class="text-base sm:text-xl font-bold tracking-tight text-white flex items-center space-x-2">
-            <span>彥泰企業 IANTEAI</span>
-            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hidden md:inline">技術資料庫</span>
+            <span id="brandName">彥泰企業 IANTEAI</span>
+            <span id="brandTag" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hidden md:inline">技術資料庫</span>
           </h1>
         </div>
       </div>
@@ -60,12 +59,11 @@
       <!-- Auth Panel -->
       <div class="flex items-center space-x-3 text-sm">
         <div id="authContainer" class="flex items-center bg-brand-900/50 rounded-lg p-1.5 border border-brand-700">
-          <!-- 加入載入狀態 -->
-          <div id="authLoading" class="px-2 text-xs text-brand-300 animate-pulse hidden">登入中...</div>
+          <div id="authLoading" class="px-2 text-xs text-brand-300 animate-pulse hidden">Loading...</div>
           
           <button id="btnLogin" onclick="loginWithGoogle()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white text-slate-800 font-semibold hover:bg-slate-100 transition-colors text-xs">
             <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            <span>管理員登入</span>
+            <span id="txtLoginBtn">管理員登入</span>
           </button>
           <div id="userProfile" class="hidden flex items-center space-x-2.5 px-2">
             <img id="userAvatar" src="" class="w-7 h-7 rounded-full border border-brand-500">
@@ -73,29 +71,35 @@
               <div class="flex items-center space-x-1.5">
                 <span id="userName" class="font-bold text-[13px] truncate max-w-[90px]">User</span>
                 <span id="userLevelBadge" class="text-[10px] px-1.5 py-0.5 rounded tracking-wide badge-lv1">一般會員</span>
-                <span id="adminBadge" class="hidden bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">管理員</span>
+                <span id="adminBadge" class="hidden bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">Admin</span>
               </div>
               <div class="flex items-center space-x-2 text-[11px] text-sky-200">
                 <span id="userScoreDisplay">積分: 0</span>
-                <button onclick="logout()" class="hover:text-white underline">登出</button>
+                <button onclick="logout()" id="txtLogoutBtn" class="hover:text-white underline">登出</button>
               </div>
             </div>
           </div>
         </div>
+        
+        <!-- Language Toggle -->
+        <button onclick="toggleLanguage()" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all ml-2">
+          <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          <span id="langDisplay">EN</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- 2. ADMIN PANEL STRIP (Only visible to Admins) -->
+  <!-- 2. ADMIN PANEL STRIP -->
   <section id="adminPanel" class="hidden bg-red-50 border-b border-red-200 py-3 shadow-inner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 text-sm">
       <div class="flex items-center space-x-2 text-red-800 font-bold">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        <span>總管理員控制台</span>
+        <span id="txtAdminTitle">總管理員控制台</span>
       </div>
       <button onclick="openAdminModal()" class="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold shadow hover:bg-red-700 transition-colors flex items-center space-x-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-        <span>開啟後台 (會員清單 / 新增產品)</span>
+        <span id="txtAdminBtn">開啟後台 (會員清單 / 新增產品)</span>
       </button>
     </div>
   </section>
@@ -104,22 +108,22 @@
   <section class="bg-slate-800 text-white py-2 px-4 sm:px-8 shadow-inner border-b border-slate-900">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2 text-[11px] font-mono">
       <div class="flex items-center space-x-4">
-        <span class="font-bold text-amber-400">系統權限積分：</span>
-        <span>📥 下載檔案 +10 分</span>
+        <span class="font-bold text-amber-400" id="txtScoreRuleLabel">系統權限積分：</span>
+        <span>📥 <span id="txtRuleDl">下載檔案 +10 分</span></span>
         <span class="text-slate-500">|</span>
-        <span>📤 上傳檔案 +50 分</span>
+        <span>📤 <span id="txtRuleUp">上傳檔案 +50 分</span></span>
       </div>
       <div class="flex items-center space-x-2 md:space-x-3 overflow-x-auto whitespace-nowrap hide-scrollbar text-slate-300">
-        <span>LV.1 一般(0)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-sky-300">LV.2 進階(100)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-purple-300">LV.3 白金(500)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-emerald-300">LV.4 鑽石(1000)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-amber-400 font-bold px-1 bg-amber-400/20 rounded">👑 LV.5 榮耀會員(2000+)</span>
+        <span>LV.1 <span class="rule-lv1">一般</span>(0)</span> <span class="text-slate-600">&gt;</span>
+        <span class="text-sky-300">LV.2 <span class="rule-lv2">進階</span>(100)</span> <span class="text-slate-600">&gt;</span>
+        <span class="text-purple-300">LV.3 <span class="rule-lv3">白金</span>(500)</span> <span class="text-slate-600">&gt;</span>
+        <span class="text-emerald-300">LV.4 <span class="rule-lv4">鑽石</span>(1000)</span> <span class="text-slate-600">&gt;</span>
+        <span class="text-amber-400 font-bold px-1 bg-amber-400/20 rounded">👑 LV.5 <span class="rule-lv5">榮耀會員</span>(2000+)</span>
       </div>
     </div>
   </section>
 
-  <!-- 4. MAIN CONTENT (Publicly Accessible) -->
+  <!-- 4. MAIN CONTENT -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full relative">
     
     <div id="mainContent" class="transition-opacity duration-500">
@@ -129,10 +133,10 @@
         <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <input type="text" id="searchInput" oninput="renderTable()" placeholder="搜尋產品名或牌號..." class="w-full sm:w-96 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
           <div class="flex gap-2 text-xs">
-            <button onclick="setCat('ALL')" class="cat-btn px-3 py-1.5 rounded-lg bg-brand-700 text-white font-bold" data-c="ALL">全部</button>
-            <button onclick="setCat('RUBBER')" class="cat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" data-c="RUBBER">橡膠</button>
-            <button onclick="setCat('PLASTICS')" class="cat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" data-c="PLASTICS">塑膠</button>
-            <button onclick="setCat('CHEMICAL')" class="cat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" data-c="CHEMICAL">化工</button>
+            <button onclick="setCat('ALL')" class="cat-btn px-3 py-1.5 rounded-lg bg-brand-700 text-white font-bold" data-c="ALL" id="catAll">全部</button>
+            <button onclick="setCat('RUBBER')" class="cat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" data-c="RUBBER" id="catRubber">橡膠</button>
+            <button onclick="setCat('PLASTICS')" class="cat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" data-c="PLASTICS" id="catPlastics">塑膠</button>
+            <button onclick="setCat('CHEMICAL')" class="cat-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" data-c="CHEMICAL" id="catChem">化工</button>
           </div>
         </div>
       </div>
@@ -143,10 +147,10 @@
           <table class="w-full text-left text-sm text-slate-700">
             <thead class="bg-slate-100 font-bold border-b border-slate-200">
               <tr>
-                <th class="py-3 px-4">分類</th>
-                <th class="py-3 px-4">品名 (中/英)</th>
-                <th class="py-3 px-4">牌號</th>
-                <th class="py-3 px-4 text-center">技術資料與安全手冊下載</th>
+                <th class="py-3 px-4" id="thCat">分類</th>
+                <th class="py-3 px-4" id="thName">品名 (中/英)</th>
+                <th class="py-3 px-4" id="thGrade">牌號</th>
+                <th class="py-3 px-4 text-center" id="thAction">技術資料與安全手冊下載</th>
               </tr>
             </thead>
             <tbody id="tableBody" class="divide-y divide-slate-100">
@@ -162,12 +166,12 @@
   <div id="adminModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden transform transition-all">
       
-      <!-- Modal Header with Tabs -->
+      <!-- Modal Header -->
       <div class="bg-slate-800 text-white flex flex-col sm:flex-row sm:items-end justify-between px-6 pt-5 pb-0 border-b border-slate-700 shrink-0">
         <div>
           <h2 class="text-xl font-bold text-white mb-3 flex items-center space-x-2">
             <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded uppercase tracking-wide">Admin</span>
-            <span>系統管理後台</span>
+            <span id="modalAdminTitle">系統管理後台</span>
           </h2>
           <div class="flex space-x-1 text-sm font-medium">
             <button onclick="switchAdminTab('tabMembers')" id="btnTabMembers" class="px-4 py-2 bg-white text-slate-800 rounded-t-lg">👥 會員清單與權限</button>
@@ -179,47 +183,46 @@
         </button>
       </div>
 
-      <!-- Modal Body (Scrollable) -->
+      <!-- Modal Body -->
       <div class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6">
         
         <!-- TAB 1: 會員清單 -->
         <div id="tabMembers" class="space-y-4">
           <div class="flex justify-between items-center mb-2">
-            <h3 class="font-bold text-slate-700">註冊會員列表 (系統自動判定等級)</h3>
-            <span class="text-xs text-slate-500">※ 此清單為即時讀取 Firestore 使用者資料</span>
+            <h3 class="font-bold text-slate-700" id="txtMemListTitle">註冊會員列表 (系統自動判定等級)</h3>
+            <span class="text-xs text-slate-500" id="txtMemListSub">※ 此清單為即時讀取 Firestore 使用者資料</span>
           </div>
           <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <table class="w-full text-left text-sm text-slate-700">
               <thead class="bg-slate-100 border-b border-slate-200 text-xs text-slate-500 uppercase">
                 <tr>
-                  <th class="py-2.5 px-4">會員名稱</th>
-                  <th class="py-2.5 px-4">Email 信箱</th>
-                  <th class="py-2.5 px-4">目前積分</th>
-                  <th class="py-2.5 px-4">會員等級 (頭銜)</th>
-                  <th class="py-2.5 px-4 text-center">帳號權限</th>
+                  <th class="py-2.5 px-4" id="thMemName">會員名稱</th>
+                  <th class="py-2.5 px-4">Email</th>
+                  <th class="py-2.5 px-4" id="thMemScore">目前積分</th>
+                  <th class="py-2.5 px-4" id="thMemLv">會員等級</th>
+                  <th class="py-2.5 px-4 text-center" id="thMemRole">帳號權限</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100" id="membersTbody">
-                <!-- JS Injected Members from DB -->
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- TAB 2: 新增產品與檔案上傳 -->
+        <!-- TAB 2: 新增產品 -->
         <div id="tabUpload" class="hidden">
           <div class="bg-white border border-slate-200 rounded-xl p-5 sm:p-8 shadow-sm max-w-2xl mx-auto">
-            <h3 class="font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 mb-5">新增規格資料庫產品</h3>
+            <h3 class="font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 mb-5" id="txtUpTitle">新增規格資料庫產品</h3>
             
             <div class="space-y-4 text-sm">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block font-bold text-slate-600 mb-1">產品代碼 (英文ID，不能重複)</label>
-                  <input type="text" id="upId" placeholder="例如: epdm2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500">
+                  <label class="block font-bold text-slate-600 mb-1" id="lblUpId">產品代碼 (ID, 不能重複)</label>
+                  <input type="text" id="upId" placeholder="ex: epdm2" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
                 </div>
                 <div>
-                  <label class="block font-bold text-slate-600 mb-1">所屬分類</label>
-                  <select id="upCat" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500">
+                  <label class="block font-bold text-slate-600 mb-1" id="lblUpCat">所屬分類</label>
+                  <select id="upCat" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
                     <option value="RUBBER">橡膠 RUBBER</option>
                     <option value="PLASTICS">塑膠 PLASTICS</option>
                     <option value="CHEMICAL">化工填料 CHEMICAL</option>
@@ -230,44 +233,40 @@
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block font-bold text-slate-600 mb-1">中文品名</label>
+                  <label class="block font-bold text-slate-600 mb-1" id="lblUpZh">中文品名</label>
                   <input type="text" id="upNameZh" placeholder="三元乙丙橡膠" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
                 </div>
                 <div>
-                  <label class="block font-bold text-slate-600 mb-1">英文品名</label>
+                  <label class="block font-bold text-slate-600 mb-1" id="lblUpEn">英文品名</label>
                   <input type="text" id="upNameEn" placeholder="EPDM Rubber" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
                 </div>
               </div>
 
               <div>
-                <label class="block font-bold text-slate-600 mb-1">代表牌號 (Grade)</label>
+                <label class="block font-bold text-slate-600 mb-1" id="lblUpGr">代表牌號 (Grade)</label>
                 <input type="text" id="upGrade" placeholder="512E / 4725P" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
               </div>
 
-              <!-- 實體檔案上傳區塊 (真實上傳至 Storage) -->
               <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mt-4 space-y-4">
-                <h4 class="font-bold text-blue-800 text-xs uppercase flex items-center">
+                <h4 class="font-bold text-blue-800 text-xs uppercase flex items-center" id="txtFileUpTitle">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                  上傳實體文件至 Firebase Storage
+                  上傳實體文件 (PDF)
                 </h4>
-                
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div class="bg-white p-3 rounded-lg border border-blue-200 relative">
-                    <label class="block text-xs font-bold text-slate-500 mb-1">上傳 TDS 規格表 (PDF)</label>
-                    <input type="file" id="fileTds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    <div id="tdsUploadProgress" class="h-1 bg-blue-500 w-0 absolute bottom-0 left-0 transition-all duration-300"></div>
+                  <div class="bg-white p-3 rounded-lg border border-blue-200">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">TDS 規格表</label>
+                    <input type="file" id="fileTds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700">
                   </div>
-                  <div class="bg-white p-3 rounded-lg border border-blue-200 relative">
-                    <label class="block text-xs font-bold text-slate-500 mb-1">上傳 SDS 安全表 (PDF)</label>
-                    <input type="file" id="fileSds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                    <div id="sdsUploadProgress" class="h-1 bg-emerald-500 w-0 absolute bottom-0 left-0 transition-all duration-300"></div>
+                  <div class="bg-white p-3 rounded-lg border border-blue-200">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">SDS 安全表</label>
+                    <input type="file" id="fileSds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-emerald-50 file:text-emerald-700">
                   </div>
                 </div>
               </div>
 
-              <button onclick="submitUpload()" id="btnSubmitUpload" class="w-full py-3 mt-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-lg transition-colors flex justify-center items-center space-x-2">
+              <button onclick="submitUpload()" id="btnSubmitUpload" class="w-full py-3 mt-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-lg flex justify-center items-center space-x-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                <span>確認新增產品與檔案 (並領取 +50 積分)</span>
+                <span id="txtBtnSubmit">確認新增產品與檔案 (並領取 +50 積分)</span>
               </button>
 
             </div>
@@ -278,7 +277,7 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
+  <!-- Toast -->
   <div id="toastBox" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
     <div class="bg-slate-900/95 text-white text-sm px-5 py-3.5 rounded-xl shadow-2xl flex items-center space-x-3 border border-slate-700">
       <span id="toastIcon" class="text-xl">✅</span>
@@ -286,9 +285,8 @@
     </div>
   </div>
 
-  <!-- ==================== 6. FIREBASE & LOGIC ==================== -->
+  <!-- ==================== 6. FIREBASE & APP LOGIC ==================== -->
   <script>
-    // --- ⚠️ 您的 Firebase 設定檔 ---
     const firebaseConfig = {
       apiKey: "AIzaSyBpO_mIskiWSp_iueCV44GEB1bK0QZD-cA",
       authDomain: "ianteai-catalog.firebaseapp.com",
@@ -299,62 +297,165 @@
       measurementId: "G-X974ME7WQN"
     };
     
-    // 初始化 Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // --- State Management ---
+    let currentLang = 'zh';
     let currentUser = null;
     let userScore = 0;
     let isAdmin = false;
     let currentCategory = 'ALL';
-    let PRODUCTS = []; // 將從資料庫讀取
+    let PRODUCTS = [];
 
-    // ⚠️ 管理員名單設定區塊
-    const ADMIN_EMAILS = ['marswu@example.com', 'boss@ianteai.com', 'admin@ianteai.com'];
+    const ADMIN_EMAILS = ['marswu@example.com', 'ianteai.com@gmail.com', 'boss@ianteai.com'];
 
-    // --- 等級判斷系統 ---
+    // --- Language Translation Dictionary ---
+    const I18N = {
+      zh: {
+        langBtn: 'EN',
+        brandTag: '技術資料庫',
+        txtLoginBtn: '管理員登入',
+        txtLogoutBtn: '登出',
+        txtAdminTitle: '總管理員控制台',
+        txtAdminBtn: '開啟後台 (會員清單 / 新增產品)',
+        txtScoreRuleLabel: '系統權限積分：',
+        txtRuleDl: '下載檔案 +10 分',
+        txtRuleUp: '上傳檔案 +50 分',
+        searchPh: '搜尋產品名或牌號...',
+        catAll: '全部', catRubber: '橡膠', catPlastics: '塑膠', catChem: '化工',
+        thCat: '分類', thName: '品名 (中/英)', thGrade: '牌號', thAction: '技術資料與安全手冊下載',
+        emptyData: '尚無資料，等待管理員新增產品',
+        modalAdminTitle: '系統管理後台',
+        btnTabMembers: '👥 會員清單與權限',
+        btnTabUpload: '📦 新增產品與上傳',
+        txtMemListTitle: '註冊會員列表 (系統自動判定等級)',
+        txtMemListSub: '※ 此清單為即時讀取 Firestore 使用者資料',
+        thMemName: '會員名稱', thMemScore: '目前積分', thMemLv: '會員等級', thMemRole: '帳號權限',
+        txtUpTitle: '新增規格資料庫產品',
+        lblUpId: '產品代碼 (ID, 不能重複)', lblUpCat: '所屬分類', lblUpZh: '中文品名', lblUpEn: '英文品名', lblUpGr: '代表牌號 (Grade)',
+        txtFileUpTitle: '上傳實體文件 (PDF)',
+        txtBtnSubmit: '確認新增產品與檔案 (並領取 +50 積分)',
+        lv: ['一般', '進階', '白金', '鑽石', '榮耀會員'],
+        roleAdmin: '系統管理員', roleUser: '一般存取', btnDelete: '刪除'
+      },
+      en: {
+        langBtn: '中文',
+        brandTag: 'Database',
+        txtLoginBtn: 'Admin Login',
+        txtLogoutBtn: 'Logout',
+        txtAdminTitle: 'Admin Dashboard',
+        txtAdminBtn: 'Open Console (Users / Upload)',
+        txtScoreRuleLabel: 'XP Points Rule:',
+        txtRuleDl: 'Download +10 XP',
+        txtRuleUp: 'Upload +50 XP',
+        searchPh: 'Search product or grade...',
+        catAll: 'All', catRubber: 'Rubber', catPlastics: 'Plastics', catChem: 'Chemical',
+        thCat: 'Category', thName: 'Name', thGrade: 'Grade', thAction: 'TDS & SDS Download',
+        emptyData: 'No records found. Waiting for admin upload.',
+        modalAdminTitle: 'Admin Console',
+        btnTabMembers: '👥 Member List & Roles',
+        btnTabUpload: '📦 Add Product & Upload',
+        txtMemListTitle: 'Registered Member List',
+        txtMemListSub: '※ Real-time data from Firestore',
+        thMemName: 'Name', thMemScore: 'Current XP', thMemLv: 'Level', thMemRole: 'Role',
+        txtUpTitle: 'Add New Product',
+        lblUpId: 'Product ID (Unique)', lblUpCat: 'Category', lblUpZh: 'Name (ZH)', lblUpEn: 'Name (EN)', lblUpGr: 'Grade',
+        txtFileUpTitle: 'Upload PDF Files',
+        txtBtnSubmit: 'Confirm Upload (Claim +50 XP)',
+        lv: ['Basic', 'Pro', 'Platinum', 'Diamond', 'Glory VIP'],
+        roleAdmin: 'Administrator', roleUser: 'User', btnDelete: 'Delete'
+      }
+    };
+
     function getLevelInfo(score) {
-      if (score >= 2000) return { label: '👑 榮耀會員', cls: 'badge-lv5' };
-      if (score >= 1000) return { label: '💎 鑽石會員', cls: 'badge-lv4' };
-      if (score >= 500)  return { label: '⭐ 白金會員', cls: 'badge-lv3' };
-      if (score >= 100)  return { label: '🚀 進階會員', cls: 'badge-lv2' };
-      return { label: '一般會員', cls: 'badge-lv1' };
+      const texts = I18N[currentLang].lv;
+      if (score >= 2000) return { label: `👑 ${texts[4]}`, cls: 'badge-lv5' };
+      if (score >= 1000) return { label: `💎 ${texts[3]}`, cls: 'badge-lv4' };
+      if (score >= 500)  return { label: `⭐ ${texts[2]}`, cls: 'badge-lv3' };
+      if (score >= 100)  return { label: `🚀 ${texts[1]}`, cls: 'badge-lv2' };
+      return { label: texts[0], cls: 'badge-lv1' };
     }
 
-    // 在畫面一載入時，直接讀取產品資料庫，讓一般訪客也能看到
-    loadProductsFromDB();
+    // Initialize Language
+    function applyLanguage() {
+      const t = I18N[currentLang];
+      document.getElementById('langDisplay').innerText = t.langBtn;
+      document.getElementById('brandTag').innerText = t.brandTag;
+      document.getElementById('txtLoginBtn').innerText = t.txtLoginBtn;
+      document.getElementById('txtLogoutBtn').innerText = t.txtLogoutBtn;
+      document.getElementById('txtAdminTitle').innerText = t.txtAdminTitle;
+      document.getElementById('txtAdminBtn').innerText = t.txtAdminBtn;
+      document.getElementById('txtScoreRuleLabel').innerText = t.txtScoreRuleLabel;
+      document.getElementById('txtRuleDl').innerText = t.txtRuleDl;
+      document.getElementById('txtRuleUp').innerText = t.txtRuleUp;
+      document.getElementById('searchInput').placeholder = t.searchPh;
+      document.getElementById('catAll').innerText = t.catAll;
+      document.getElementById('catRubber').innerText = t.catRubber;
+      document.getElementById('catPlastics').innerText = t.catPlastics;
+      document.getElementById('catChem').innerText = t.catChem;
+      document.getElementById('thCat').innerText = t.thCat;
+      document.getElementById('thName').innerText = t.thName;
+      document.getElementById('thGrade').innerText = t.thGrade;
+      document.getElementById('thAction').innerText = t.thAction;
+      
+      document.getElementById('modalAdminTitle').innerText = t.modalAdminTitle;
+      document.getElementById('btnTabMembers').innerText = t.btnTabMembers;
+      document.getElementById('btnTabUpload').innerText = t.btnTabUpload;
+      document.getElementById('txtMemListTitle').innerText = t.txtMemListTitle;
+      document.getElementById('txtMemListSub').innerText = t.txtMemListSub;
+      document.getElementById('thMemName').innerText = t.thMemName;
+      document.getElementById('thMemScore').innerText = t.thMemScore;
+      document.getElementById('thMemLv').innerText = t.thMemLv;
+      document.getElementById('thMemRole').innerText = t.thMemRole;
+      
+      document.getElementById('txtUpTitle').innerText = t.txtUpTitle;
+      document.getElementById('lblUpId').innerText = t.lblUpId;
+      document.getElementById('lblUpCat').innerText = t.lblUpCat;
+      document.getElementById('lblUpZh').innerText = t.lblUpZh;
+      document.getElementById('lblUpEn').innerText = t.lblUpEn;
+      document.getElementById('lblUpGr').innerText = t.lblUpGr;
+      document.getElementById('txtFileUpTitle').innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg> ${t.txtFileUpTitle}`;
+      document.getElementById('txtBtnSubmit').innerText = t.txtBtnSubmit;
 
-    // --- 登入與 Firebase Auth 監聽 ---
+      // Update Level strips manually
+      document.querySelector('.rule-lv1').innerText = t.lv[0];
+      document.querySelector('.rule-lv2').innerText = t.lv[1];
+      document.querySelector('.rule-lv3').innerText = t.lv[2];
+      document.querySelector('.rule-lv4').innerText = t.lv[3];
+      document.querySelector('.rule-lv5').innerText = t.lv[4];
+
+      if(currentUser) updateScoreUI();
+      renderTable();
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      applyLanguage();
+    }
+
+    // --- Auth Logic ---
     function loginWithGoogle() {
-      const btn = document.getElementById('btnLogin');
-      const loading = document.getElementById('authLoading');
-      btn.classList.add('hidden');
-      loading.classList.remove('hidden');
-
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(error => {
-        console.error("登入失敗", error);
-        btn.classList.remove('hidden');
-        loading.classList.add('hidden');
-        showToast('登入失敗，請檢查網域授權設定', '❌');
-      });
+      // 使用 signInWithRedirect 解決第三方 Cookie 被擋、彈跳視窗閃退的問題
+      auth.signInWithRedirect(provider);
     }
+
+    // 處理 Redirect 登入後的結果 (如果是 Redirect 回來的，這段會捕獲錯誤)
+    auth.getRedirectResult().catch(error => {
+      console.error("登入跳轉失敗", error);
+      showToast('登入失敗，請檢查網域授權', '❌');
+    });
 
     function logout() {
       auth.signOut();
     }
 
-    // 監聽 Firebase 登入狀態變更
     auth.onAuthStateChanged(async (user) => {
       const btnLogin = document.getElementById('btnLogin');
-      const authLoading = document.getElementById('authLoading');
       const userProfile = document.getElementById('userProfile');
       const adminPanel = document.getElementById('adminPanel');
-
-      authLoading.classList.add('hidden');
 
       if (user) {
         currentUser = user;
@@ -363,7 +464,6 @@
         document.getElementById('userName').innerText = user.displayName;
         document.getElementById('userAvatar').src = user.photoURL;
 
-        // 同步並讀取使用者分數
         await syncUserToFirestore(user);
 
         if (isAdmin) {
@@ -386,18 +486,16 @@
         adminPanel.classList.add('hidden');
       }
       
-      // 無論是否登入，都重新渲染表格 (用以切換管理員的刪除按鈕)
       renderTable();
     });
 
-    // 將使用者資料與分數存入 Firestore
     async function syncUserToFirestore(user) {
       const userRef = db.collection('users').doc(user.uid);
       const doc = await userRef.get();
       if (doc.exists) {
         userScore = doc.data().score || 0;
       } else {
-        userScore = 0; // 新使用者
+        userScore = 0;
         await userRef.set({
           name: user.displayName,
           email: user.email,
@@ -409,7 +507,7 @@
       updateScoreUI();
     }
 
-    // --- 產品資料庫 (Firestore) 操作 ---
+    // --- DB Load ---
     function loadProductsFromDB() {
       db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
         PRODUCTS = [];
@@ -418,14 +516,17 @@
         });
         renderTable();
       }, error => {
-        console.error("資料讀取失敗，請確認 Firestore 安全規則是否允許 read: if true;", error);
+        console.error("讀取失敗，請確認 Firestore Rules", error);
       });
     }
 
-    // --- 積分與下載邏輯 ---
+    loadProductsFromDB();
+    applyLanguage();
+
+    // --- Score & Download ---
     function updateScoreUI() {
       if(!currentUser) return;
-      document.getElementById('userScoreDisplay').innerText = `目前積分: ${userScore}`;
+      document.getElementById('userScoreDisplay').innerText = currentLang === 'zh' ? `目前積分: ${userScore}` : `XP: ${userScore}`;
       const lv = getLevelInfo(userScore);
       const badge = document.getElementById('userLevelBadge');
       badge.className = `text-[10px] px-1.5 py-0.5 rounded tracking-wide ${lv.cls}`;
@@ -435,43 +536,36 @@
     function addScore(points, actionMsg) {
       if (!currentUser) return;
       userScore += points;
-      
-      // 寫入雲端資料庫
       db.collection('users').doc(currentUser.uid).update({
         score: firebase.firestore.FieldValue.increment(points)
       }).then(() => {
         updateScoreUI();
-        showToast(`${actionMsg}！積分 +${points} (目前: ${userScore})`, points > 20 ? '🎉' : '💎');
-      }).catch(err => {
-        console.error("更新積分失敗", err);
+        showToast(`${actionMsg}！XP +${points}`, points > 20 ? '🎉' : '💎');
       });
     }
 
     function handleDownload(e, type, fileUrl) {
       e.preventDefault();
       if(!fileUrl || fileUrl === '#') {
-        showToast('該檔案尚未上傳', '⚠️');
+        showToast(currentLang === 'zh' ? '該檔案尚未上傳' : 'File not uploaded yet', '⚠️');
         return;
       }
-      // 如果有登入才加分
       if(currentUser) {
-        addScore(10, `下載 ${type} 成功`);
+        addScore(10, currentLang === 'zh' ? `下載 ${type} 成功` : `Downloaded ${type}`);
       }
-      // 開啟檔案 (延遲一點讓加分動畫跑完)
       setTimeout(() => { window.open(fileUrl, '_blank'); }, 200);
     }
 
     function handleDelete(id) {
       if(!isAdmin) return;
-      if(!confirm('確認要從資料庫中刪除這筆產品嗎？(已上傳的PDF不會自動刪除)')) return;
+      const confirmMsg = currentLang === 'zh' ? '確認刪除？(上傳檔案不會被刪)' : 'Confirm delete?';
+      if(!confirm(confirmMsg)) return;
       db.collection('products').doc(id).delete().then(() => {
-        showToast('產品已刪除', '🗑️');
-      }).catch(err => {
-        alert("刪除失敗，請檢查權限");
+        showToast(currentLang === 'zh' ? '產品已刪除' : 'Deleted', '🗑️');
       });
     }
 
-    // --- 介面渲染 ---
+    // --- Render ---
     function setCat(cat) {
       currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -487,6 +581,7 @@
     function renderTable() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
       const tbody = document.getElementById('tableBody');
+      const t = I18N[currentLang];
       
       const filtered = PRODUCTS.filter(p => {
         if(currentCategory !== 'ALL' && p.category !== currentCategory) return false;
@@ -495,7 +590,7 @@
       });
 
       if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">尚無資料，等待管理員新增產品</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">${t.emptyData}</td></tr>`;
         return;
       }
 
@@ -503,9 +598,9 @@
         const catBadge = p.category === 'RUBBER' ? 'bg-sky-100 text-sky-800' :
                          p.category === 'PLASTICS' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800';
                          
-        const adminDel = isAdmin ? `<button onclick="handleDelete('${p.id}')" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100 ml-2 border border-red-200">刪除</button>` : '';
+        const adminDel = isAdmin ? `<button onclick="handleDelete('${p.id}')" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100 ml-2 border border-red-200">${t.btnDelete}</button>` : '';
+        const nameDisp = currentLang === 'zh' ? `${p.nameZh} <span class="text-xs text-slate-500 block">${p.nameEn}</span>` : `${p.nameEn} <span class="text-xs text-slate-500 block">${p.nameZh}</span>`;
 
-        // 如果沒有上傳檔案，按鈕變灰色
         const tdsUrl = p.tdsUrl || '#';
         const sdsUrl = p.sdsUrl || '#';
         const tdsStyle = p.tdsUrl ? 'bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100' : 'bg-slate-100 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed';
@@ -515,8 +610,7 @@
           <tr class="hover:bg-brand-50/50 transition-colors">
             <td class="py-4 px-4"><span class="px-2 py-1 rounded text-xs font-bold ${catBadge}">${p.category}</span></td>
             <td class="py-4 px-4">
-              <strong class="text-slate-800 block">${p.nameZh} <span class="text-[10px] font-normal text-slate-400 ml-1">ID: ${p.id}</span></strong>
-              <span class="text-xs text-slate-500">${p.nameEn}</span>
+              <strong class="text-slate-800">${nameDisp}</strong>
             </td>
             <td class="py-4 px-4 font-mono text-sm">${p.grade}</td>
             <td class="py-4 px-4 text-center">
@@ -531,7 +625,7 @@
       }).join('');
     }
 
-    // --- Admin Dashboard 控制 ---
+    // --- Admin Dashboard ---
     function openAdminModal() {
       if(!isAdmin) return;
       document.getElementById('adminModal').classList.remove('hidden');
@@ -547,19 +641,15 @@
     function switchAdminTab(tabId) {
       document.getElementById('tabMembers').classList.add('hidden');
       document.getElementById('tabUpload').classList.add('hidden');
-      
       document.getElementById('btnTabMembers').className = "px-4 py-2 bg-slate-700 text-slate-300 hover:text-white rounded-t-lg transition-colors";
       document.getElementById('btnTabUpload').className = "px-4 py-2 bg-slate-700 text-slate-300 hover:text-white rounded-t-lg transition-colors";
-
       document.getElementById(tabId).classList.remove('hidden');
-      if(tabId === 'tabMembers') {
-        document.getElementById('btnTabMembers').className = "px-4 py-2 bg-white text-slate-800 rounded-t-lg font-bold";
-      } else {
-        document.getElementById('btnTabUpload').className = "px-4 py-2 bg-white text-slate-800 rounded-t-lg font-bold";
-      }
+      if(tabId === 'tabMembers') document.getElementById('btnTabMembers').className = "px-4 py-2 bg-white text-slate-800 rounded-t-lg font-bold";
+      else document.getElementById('btnTabUpload').className = "px-4 py-2 bg-white text-slate-800 rounded-t-lg font-bold";
     }
 
     function loadMembersFromDB() {
+      const t = I18N[currentLang];
       db.collection('users').orderBy('score', 'desc').get().then(snapshot => {
         const tbody = document.getElementById('membersTbody');
         let html = '';
@@ -567,7 +657,7 @@
           const u = doc.data();
           const lv = getLevelInfo(u.score);
           const isAdm = ADMIN_EMAILS.includes(u.email);
-          const roleHtml = isAdm ? `<span class="bg-red-100 text-red-700 border border-red-300 px-2 py-1 rounded text-xs font-bold">系統管理員</span>` : `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">一般存取</span>`;
+          const roleHtml = isAdm ? `<span class="bg-red-100 text-red-700 border border-red-300 px-2 py-1 rounded text-xs font-bold">${t.roleAdmin}</span>` : `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">${t.roleUser}</span>`;
 
           html += `
             <tr class="hover:bg-slate-50 border-b border-slate-50">
@@ -576,7 +666,7 @@
                 <span>${u.name}</span>
               </td>
               <td class="py-3 px-4 font-mono text-slate-500">${u.email}</td>
-              <td class="py-3 px-4 font-bold text-brand-600">${u.score} 分</td>
+              <td class="py-3 px-4 font-bold text-brand-600">${u.score}</td>
               <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs ${lv.cls}">${lv.label}</span></td>
               <td class="py-3 px-4 text-center">${roleHtml}</td>
             </tr>
@@ -586,7 +676,6 @@
       });
     }
 
-    // --- 真實上傳功能邏輯 (Firestore + Storage) ---
     async function submitUpload() {
       if(!isAdmin) return;
       const id = document.getElementById('upId').value.trim();
@@ -597,74 +686,58 @@
       const btnSubmit = document.getElementById('btnSubmitUpload');
 
       if(!id || !nameZh) {
-        alert("請輸入產品 ID 與中文品名！");
+        alert(currentLang === 'zh' ? '請輸入 ID 與品名！' : 'ID and Name are required!');
         return;
       }
 
-      // 防止重複點擊
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = '檔案上傳與資料庫寫入中...';
+      btnSubmit.innerHTML = 'Uploading...';
       btnSubmit.classList.add('opacity-70');
 
       let tdsDownloadUrl = null;
       let sdsDownloadUrl = null;
 
       try {
-        // 1. 上傳 TDS 到 Firebase Storage
         if (fileTds) {
           const tdsRef = storage.ref(`docs/${id}-tds.pdf`);
-          const uploadTask = tdsRef.put(fileTds);
-          await uploadTask;
+          await tdsRef.put(fileTds);
           tdsDownloadUrl = await tdsRef.getDownloadURL();
-          document.getElementById('tdsUploadProgress').style.width = '100%';
         }
-
-        // 2. 上傳 SDS 到 Firebase Storage
         if (fileSds) {
           const sdsRef = storage.ref(`docs/${id}-sds.pdf`);
-          const uploadTask = sdsRef.put(fileSds);
-          await uploadTask;
+          await sdsRef.put(fileSds);
           sdsDownloadUrl = await sdsRef.getDownloadURL();
-          document.getElementById('sdsUploadProgress').style.width = '100%';
         }
 
-        // 3. 寫入資料到 Firestore Database
         await db.collection('products').doc(id).set({
           category: document.getElementById('upCat').value,
           nameZh: nameZh,
           nameEn: document.getElementById('upNameEn').value || nameZh,
           grade: document.getElementById('upGrade').value,
-          tdsUrl: tdsDownloadUrl, // 儲存雲端下載網址
-          sdsUrl: sdsDownloadUrl, // 儲存雲端下載網址
+          tdsUrl: tdsDownloadUrl,
+          sdsUrl: sdsDownloadUrl,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 4. 給予上傳獎勵
-        addScore(50, `成功新增產品資料 [${nameZh}]`);
+        addScore(50, currentLang === 'zh' ? `新增產品 [${nameZh}] 成功` : `Added ${nameZh}`);
         
-        // 5. 復原狀態
         document.getElementById('upId').value = '';
         document.getElementById('upNameZh').value = '';
         document.getElementById('upNameEn').value = '';
         document.getElementById('upGrade').value = '';
         document.getElementById('fileTds').value = '';
         document.getElementById('fileSds').value = '';
-        document.getElementById('tdsUploadProgress').style.width = '0%';
-        document.getElementById('sdsUploadProgress').style.width = '0%';
-        
         closeAdminModal();
-
       } catch (error) {
-        console.error("上傳失敗", error);
-        alert("上傳失敗，請確認 Firebase Storage 安全性規則是否允許寫入，或檔案大小是否合乎限制。");
+        console.error("Upload error", error);
+        alert("Upload failed. Check Firebase Rules.");
       } finally {
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg><span>確認新增產品與檔案 (並領取 +50 積分)</span>';
+        btnSubmit.innerHTML = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg><span>${I18N[currentLang].txtBtnSubmit}</span>`;
         btnSubmit.classList.remove('opacity-70');
       }
     }
 
-    // --- Toast UI ---
     function showToast(msg, icon) {
       const tb = document.getElementById('toastBox');
       document.getElementById('toastMessage').innerText = msg;
