@@ -65,7 +65,7 @@
           
           <button id="btnLogin" onclick="loginWithGoogle()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white text-slate-800 font-semibold hover:bg-slate-100 transition-colors text-xs">
             <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            <span>Google 登入</span>
+            <span>管理員登入</span>
           </button>
           <div id="userProfile" class="hidden flex items-center space-x-2.5 px-2">
             <img id="userAvatar" src="" class="w-7 h-7 rounded-full border border-brand-500">
@@ -86,7 +86,7 @@
     </div>
   </header>
 
-  <!-- 2. ADMIN PANEL STRIP -->
+  <!-- 2. ADMIN PANEL STRIP (Only visible to Admins) -->
   <section id="adminPanel" class="hidden bg-red-50 border-b border-red-200 py-3 shadow-inner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 text-sm">
       <div class="flex items-center space-x-2 text-red-800 font-bold">
@@ -100,45 +100,10 @@
     </div>
   </section>
 
-  <!-- 3. LEVEL RULES STRIP -->
-  <section class="bg-slate-800 text-white py-2 px-4 sm:px-8 shadow-inner border-b border-slate-900">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2 text-[11px] font-mono">
-      <div class="flex items-center space-x-4">
-        <span class="font-bold text-amber-400">系統權限積分：</span>
-        <span>📥 下載檔案 +10 分</span>
-        <span class="text-slate-500">|</span>
-        <span>📤 上傳檔案 +50 分</span>
-      </div>
-      <div class="flex items-center space-x-2 md:space-x-3 overflow-x-auto whitespace-nowrap hide-scrollbar text-slate-300">
-        <span>LV.1 一般(0)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-sky-300">LV.2 進階(100)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-purple-300">LV.3 白金(500)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-emerald-300">LV.4 鑽石(1000)</span> <span class="text-slate-600">&gt;</span>
-        <span class="text-amber-400 font-bold px-1 bg-amber-400/20 rounded">👑 LV.5 榮耀會員(2000+)</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4. MAIN CONTENT -->
+  <!-- 3. MAIN CONTENT (Publicly Accessible) -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full relative">
     
-    <!-- Not Logged In Overlay -->
-    <div id="loginRequiredMsg" class="absolute inset-0 z-10 bg-slate-50/80 backdrop-blur-sm flex flex-col items-center justify-center pt-20">
-      <div class="bg-white p-8 rounded-3xl shadow-2xl border border-slate-200 text-center max-w-md w-full mx-4">
-        <div class="w-16 h-16 bg-brand-100 text-brand-700 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-        </div>
-        <h2 class="text-2xl font-bold text-slate-800 mb-2">會員專屬資料庫</h2>
-        <p class="text-sm text-slate-500 mb-6">請使用 Google 帳號登入以解鎖 TDS / SDS 規格表下載權限。下載資料即可累積積分，升級至「榮耀會員」。</p>
-        <button onclick="loginWithGoogle()" class="w-full py-3 bg-brand-600 text-white font-bold rounded-xl shadow-lg hover:bg-brand-700 transition-all flex justify-center items-center space-x-2">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#fff"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/></svg>
-          <span>立即驗證並登入</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Product List UI (Only active when logged in) -->
-    <div id="mainContent" class="opacity-30 pointer-events-none transition-opacity duration-500">
+    <div id="mainContent" class="transition-opacity duration-500">
       
       <!-- Filters -->
       <div class="bg-white rounded-2xl p-4 sm:p-5 custom-shadow border border-slate-200/80 mb-6">
@@ -304,7 +269,7 @@
 
   <!-- ==================== 6. FIREBASE & LOGIC ==================== -->
   <script>
-    // --- ⚠️ 您的 Firebase 設定檔 (已更新) ---
+    // --- ⚠️ 您的 Firebase 設定檔 ---
     const firebaseConfig = {
       apiKey: "AIzaSyBpO_mIskiWSp_iueCV44GEB1bK0QZD-cA",
       authDomain: "ianteai-catalog.firebaseapp.com",
@@ -315,7 +280,7 @@
       measurementId: "G-X974ME7WQN"
     };
     
-    // 初始化 Firebase (開啟雲端連線)
+    // 初始化 Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -328,10 +293,10 @@
     let currentCategory = 'ALL';
     let PRODUCTS = []; // 將從資料庫讀取
 
-    // 管理員名單
+    // ⚠️ 管理員名單設定區塊
     const ADMIN_EMAILS = ['marswu@example.com', 'boss@ianteai.com', 'admin@ianteai.com'];
 
-    // --- 等級判斷系統 (包含 榮耀會員) ---
+    // --- 等級判斷系統 ---
     function getLevelInfo(score) {
       if (score >= 2000) return { label: '👑 榮耀會員', cls: 'badge-lv5' };
       if (score >= 1000) return { label: '💎 鑽石會員', cls: 'badge-lv4' };
@@ -339,6 +304,9 @@
       if (score >= 100)  return { label: '🚀 進階會員', cls: 'badge-lv2' };
       return { label: '一般會員', cls: 'badge-lv1' };
     }
+
+    // 在畫面一載入時，直接讀取產品資料庫，讓一般訪客也能看到
+    loadProductsFromDB();
 
     // --- 登入與 Firebase Auth 監聽 ---
     function loginWithGoogle() {
@@ -352,7 +320,7 @@
         console.error("登入失敗", error);
         btn.classList.remove('hidden');
         loading.classList.add('hidden');
-        showToast('登入失敗，請稍後再試', '❌');
+        showToast('登入失敗，請檢查網域授權設定', '❌');
       });
     }
 
@@ -362,8 +330,6 @@
 
     // 監聽 Firebase 登入狀態變更
     auth.onAuthStateChanged(async (user) => {
-      const loginOverlay = document.getElementById('loginRequiredMsg');
-      const mainContent = document.getElementById('mainContent');
       const btnLogin = document.getElementById('btnLogin');
       const authLoading = document.getElementById('authLoading');
       const userProfile = document.getElementById('userProfile');
@@ -391,25 +357,18 @@
 
         btnLogin.classList.add('hidden');
         userProfile.classList.remove('hidden');
-        
-        // 解鎖主要內容並載入產品資料庫
-        loginOverlay.classList.add('hidden');
-        mainContent.classList.remove('opacity-30', 'pointer-events-none');
-        
-        loadProductsFromDB();
       } else {
         currentUser = null;
         isAdmin = false;
         userScore = 0;
-        PRODUCTS = [];
         
         btnLogin.classList.remove('hidden');
         userProfile.classList.add('hidden');
         adminPanel.classList.add('hidden');
-        
-        loginOverlay.classList.remove('hidden');
-        mainContent.classList.add('opacity-30', 'pointer-events-none');
       }
+      
+      // 無論是否登入，都重新渲染表格 (用以切換管理員的刪除按鈕)
+      renderTable();
     });
 
     // 將使用者資料與分數存入 Firestore
@@ -439,11 +398,14 @@
           PRODUCTS.push({ id: doc.id, ...doc.data() });
         });
         renderTable();
+      }, error => {
+        console.error("資料讀取失敗，請確認 Firestore 安全規則是否允許 read: if true;", error);
       });
     }
 
     // --- 積分與下載邏輯 ---
     function updateScoreUI() {
+      if(!currentUser) return;
       document.getElementById('userScoreDisplay').innerText = `目前積分: ${userScore}`;
       const lv = getLevelInfo(userScore);
       const badge = document.getElementById('userLevelBadge');
@@ -461,6 +423,8 @@
       }).then(() => {
         updateScoreUI();
         showToast(`${actionMsg}！積分 +${points} (目前: ${userScore})`, points > 20 ? '🎉' : '💎');
+      }).catch(err => {
+        console.error("更新積分失敗", err);
       });
     }
 
@@ -470,14 +434,21 @@
         showToast('該檔案尚未上傳', '⚠️');
         return;
       }
-      addScore(10, `下載 ${type} 成功`);
-      setTimeout(() => { window.open(fileUrl, '_blank'); }, 400);
+      // 如果有登入才加分
+      if(currentUser) {
+        addScore(10, `下載 ${type} 成功`);
+      }
+      // 開啟檔案 (延遲一點讓加分動畫跑完)
+      setTimeout(() => { window.open(fileUrl, '_blank'); }, 200);
     }
 
     function handleDelete(id) {
+      if(!isAdmin) return;
       if(!confirm('確認要從資料庫中刪除這筆產品嗎？(已上傳的PDF不會自動刪除)')) return;
       db.collection('products').doc(id).delete().then(() => {
         showToast('產品已刪除', '🗑️');
+      }).catch(err => {
+        alert("刪除失敗，請檢查權限");
       });
     }
 
@@ -505,7 +476,7 @@
       });
 
       if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">尚無符合條件的產品</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">尚無資料，等待管理員新增產品</td></tr>`;
         return;
       }
 
@@ -543,6 +514,7 @@
 
     // --- Admin Dashboard 控制 ---
     function openAdminModal() {
+      if(!isAdmin) return;
       document.getElementById('adminModal').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       loadMembersFromDB();
@@ -597,6 +569,7 @@
 
     // --- 真實上傳功能邏輯 (Firestore + Storage) ---
     async function submitUpload() {
+      if(!isAdmin) return;
       const id = document.getElementById('upId').value.trim();
       const nameZh = document.getElementById('upNameZh').value.trim();
       
@@ -622,7 +595,6 @@
         if (fileTds) {
           const tdsRef = storage.ref(`docs/${id}-tds.pdf`);
           const uploadTask = tdsRef.put(fileTds);
-          // 這裡可以加上 on('state_changed') 做進度條，為求簡潔直接等它完成
           await uploadTask;
           tdsDownloadUrl = await tdsRef.getDownloadURL();
           document.getElementById('tdsUploadProgress').style.width = '100%';
