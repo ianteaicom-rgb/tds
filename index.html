@@ -108,11 +108,11 @@
       <div class="bg-white rounded-2xl p-4 sm:p-6 custom-shadow border border-slate-200/80 mb-6 space-y-4">
         <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
           <!-- 智慧即時搜索框 -->
-          <div class="relative w-full md:w-[420px]">
+          <div class="relative w-full md:w-[360px]">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </span>
-            <input type="text" id="searchInput" oninput="renderTable()" placeholder="快速搜索：輸入品牌 (DOW, Exxon)、牌號、乙烯含量或型態..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
+            <input type="text" id="searchInput" oninput="renderTable()" placeholder="快速搜索：品牌、牌號、乙烯..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
           </div>
           
           <!-- 膠種大分類快速按鈕 -->
@@ -121,6 +121,51 @@
             <button onclick="setCat('EPDM_INT')" class="cat-btn px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all font-medium" data-c="EPDM_INT" id="catEpdmInt">🌍 國際大廠 EPDM</button>
             <button onclick="setCat('REPRO')" class="cat-btn px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all font-medium" data-c="REPRO" id="catRepro">♻️ 彥泰環保再製膠</button>
             <button onclick="setCat('SYNTHETIC')" class="cat-btn px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all font-medium" data-c="SYNTHETIC" id="catSynthetic">🧪 合成橡膠 (BR/SBR/NBR)</button>
+          </div>
+        </div>
+
+        <!-- 🛠️ 進階篩選面板 (ENB範圍、門尼黏度、型態選擇) -->
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/70 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <!-- 1. 型態篩選 -->
+          <div>
+            <label class="block font-bold text-slate-600 mb-1" id="lblFormFilter">橡膠型態 (Form)</label>
+            <select id="filterForm" onchange="renderTable()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500">
+              <option value="ALL">全部型態 (All Forms)</option>
+              <option value="顆粒">顆粒 (Pellets)</option>
+              <option value="塊膠">塊膠 (Bale)</option>
+              <option value="粉體">粉體 (Powder)</option>
+              <option value="液態">液態 (Liquid)</option>
+            </select>
+          </div>
+
+          <!-- 2. 門尼黏度區間 -->
+          <div>
+            <label class="block font-bold text-slate-600 mb-1" id="lblMooneyFilter">門尼黏度篩選 (Mooney)</label>
+            <select id="filterMooney" onchange="renderTable()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500">
+              <option value="ALL">全部門尼範圍 (All)</option>
+              <option value="LOW">低門尼 (&lt; 35)</option>
+              <option value="MID">中門尼 (35 - 60)</option>
+              <option value="HIGH">高門尼 (&gt; 60)</option>
+            </select>
+          </div>
+
+          <!-- 3. ENB 第三單體區間 -->
+          <div>
+            <label class="block font-bold text-slate-600 mb-1" id="lblEnbFilter">ENB 第三單體篩選</label>
+            <select id="filterEnb" onchange="renderTable()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500">
+              <option value="ALL">全部 ENB 範圍 (All)</option>
+              <option value="LOW">低 ENB (&lt; 2%) - 良好過氧化物硫化</option>
+              <option value="MID">中 ENB (2% - 6%) - 通用型</option>
+              <option value="HIGH">高 ENB (&gt; 6%) - 高硫化速度</option>
+            </select>
+          </div>
+
+          <!-- 4. 重置進階條件 -->
+          <div class="flex items-end">
+            <button onclick="resetAdvancedFilters()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition-colors flex items-center justify-center space-x-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span>重置進階條件</span>
+            </button>
           </div>
         </div>
 
@@ -133,7 +178,8 @@
           <button onclick="setSubBrand('ARLANXEO')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="ARLANXEO">ARLANXEO</button>
           <button onclick="setSubBrand('MITSUI')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="MITSUI">Mitsui</button>
           <button onclick="setSubBrand('KUMHO_SK')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="KUMHO_SK">Kumho / SK</button>
-          <button onclick="setSubBrand('LION_LVE')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="LION_LVE">LION / LVE</button>
+          <button onclick="setSubBrand('LION')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="LION">LION</button>
+          <button onclick="setSubBrand('LVE')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="LVE">LVE</button>
           <button onclick="setSubBrand('IANTEAI')" class="sub-btn px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold" data-b="IANTEAI" id="subIanteai">⭐ 彥泰精煉專區</button>
         </div>
       </div>
@@ -246,8 +292,18 @@
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block font-bold mb-1">門尼黏度 (Mooney)</label>
-            <input type="text" id="upMooney" placeholder="ML(1+4) @125°C: 25" class="w-full px-3 py-2 border rounded-lg">
+            <label class="block font-bold mb-1">品牌次要分類</label>
+            <select id="upSubBrand" class="w-full px-3 py-2 border rounded-lg">
+              <option value="DOW">DOW</option>
+              <option value="EXXON">ExxonMobil</option>
+              <option value="ARLANXEO">ARLANXEO</option>
+              <option value="MITSUI">Mitsui</option>
+              <option value="KUMHO_SK">Kumho / SK</option>
+              <option value="LION">LION</option>
+              <option value="LVE">LVE</option>
+              <option value="IANTEAI">彥泰精煉 (IANTEAI)</option>
+              <option value="OTHER">其他系列</option>
+            </select>
           </div>
           <div>
             <label class="block font-bold mb-1">型態 (Form)</label>
@@ -314,7 +370,7 @@
     let isEditing = false;
     let selectedForCompare = [];
 
-    // --- 完整內建資料庫 (含 C2, C3, ENB, 門尼, 型態) ---
+    // --- 完整內建資料庫 (含 LION 與 LVE 獨立拆分) ---
     const DEFAULT_RUBBER_SYSTEM = [
       { id: 'dow-4725p', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 4725P', c2: '68 wt%', c3: '平衡', enb: '4.9 wt%', mooney: '25 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '高乙烯、中門尼，優異的耐天候與強度，應用於汽車密封條與建築防水膜。' },
       { id: 'dow-3720p', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 3720P', c2: '70 wt%', c3: '平衡', enb: '0.5 wt%', mooney: '20 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '極低ENB、高乙烯，優異的過氧化物硫化速度與耐熱老化表現。' },
@@ -334,15 +390,20 @@
       { id: 'mitsui-3070', category: 'EPDM_INT', subBrand: 'MITSUI', brand: 'Mitsui Chemicals (三井化學)', grade: 'Mitsui EPT 3070', c2: '58 wt%', c3: '平衡', enb: '5.1 wt%', mooney: '73 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '高門尼黏度，具備優異的物理機械強度。' },
       { id: 'sk-kep650', category: 'EPDM_INT', subBrand: 'KUMHO_SK', brand: 'SK geo centric (韓國SK)', grade: 'KEP-650', c2: '65 wt%', c3: '平衡', enb: '4.5 wt%', mooney: '60 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '高乙烯含量，擠出加工時形狀保持力極佳。' },
       { id: 'kumho-kes370', category: 'EPDM_INT', subBrand: 'KUMHO_SK', brand: 'Kumho Polychem (韓國錦湖)', grade: 'KEP-370', c2: '58 wt%', c3: '平衡', enb: '4.5 wt%', mooney: '45 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '綜合性能平衡之通用級別，廣泛用於各類工業橡膠配件。' },
-      { id: 'lion-epdm-1', category: 'EPDM_INT', subBrand: 'LION_LVE', brand: 'LION (萊昂化學)', grade: 'Lion EPDM L-10', c2: '62 wt%', c3: '平衡', enb: '特規', mooney: '55 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '日系高品質特種EPDM，針對耐化學品與高抗撕裂強度設計。' },
-      { id: 'lve-epdm-sp', category: 'EPDM_INT', subBrand: 'LION_LVE', brand: 'LVE (聯盟特規)', grade: 'LVE-EPDM 540', c2: '64 wt%', c3: '平衡', enb: '5.0 wt%', mooney: '48 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '高效能合成 EPDM，具備優異的混煉均勻性與表面光澤度。' },
+      { id: 'lion-epdm-1', category: 'EPDM_INT', subBrand: 'LION', brand: 'LION (萊昂化學)', grade: 'Lion EPDM L-10', c2: '62 wt%', c3: '平衡', enb: '特規', mooney: '55 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '日系高品質特種EPDM，針對耐化學品與高抗撕裂強度設計。' },
+      { id: 'lve-epdm-sp', category: 'EPDM_INT', subBrand: 'LVE', brand: 'LVE (特種彈性體)', grade: 'LVE-EPDM 540', c2: '64 wt%', c3: '平衡', enb: '5.0 wt%', mooney: '48 (ML 1+4, 125°C)', form: '塊膠 (Bale)', descZh: '高效能合成 EPDM，具備優異的混煉均勻性與表面光澤度。' },
       { id: 'repro-epdm-3760', category: 'REPRO', subBrand: 'IANTEAI', brand: '⭐ 彥泰精煉 (Ianteai Recycled)', grade: 'EPDM 高白精煉再製膠 3760', c2: '再生共混', c3: '共混', enb: '優化', mooney: '訂製化控制', form: '顆粒 / 塊膠', descZh: '專為環保共混設計，氣味低、分散性佳，可替代部分原生EPDM大幅降低原料成本。' },
       { id: 'repro-epdm-black', category: 'REPRO', subBrand: 'IANTEAI', brand: '⭐ 彥泰精煉 (Ianteai Recycled)', grade: 'EPDM 黑色重載再生膠', c2: '再生共混', c3: '共混', enb: '重載', mooney: '高門尼', form: '塊膠 (Bale)', descZh: '適用於管帶、橡膠地磚、緩衝墊等高填充製品，性價比極高。' },
       { id: 'br-cis1220', category: 'SYNTHETIC', subBrand: 'OTHER', brand: '順丁橡膠 (High-cis BR)', grade: 'BR-1220 / CB24', c2: '丁二烯 98%', c3: '-', enb: '-', mooney: '44 (ML 1+4, 100°C)', form: '塊膠 (Bale)', descZh: '極佳的彈性、耐磨耗與低溫性能，常用於輪胎胎面與鞋材。' },
       { id: 'nbr-n230s', category: 'SYNTHETIC', subBrand: 'OTHER', brand: '丁腈橡膠 (NBR N230S)', grade: 'NIPOL 1042 / N230S', c2: '丙烯腈 ACN 33%', c3: '丁二烯', enb: '-', mooney: '48 (ML 1+4, 100°C)', form: '塊膠 (Bale)', descZh: '中高丙烯腈(ACN)含量，兼具優異的耐油性與機械強度。' }
     ];
 
-    const ADMIN_EMAILS = ['marswu@example.com', 'ianteai.com@gmail.com', 'boss@ianteai.com'];
+    const ADMIN_EMAILS = [
+      'marswu@example.com', 
+      'ianteai.com@gmail.com', 
+      'boss@ianteai.com',
+      'leona.ianteai@gmail.com'  // 助理管理員信箱
+    ];
 
     const I18N = {
       zh: {
@@ -352,11 +413,12 @@
         txtLogoutBtn: '登出系統',
         txtAdminTitle: '總管理員控制台',
         txtAdminBtn: '新增橡膠產品資料',
-        searchPh: '快速搜索：輸入品牌 (DOW, Exxon, 彥泰再製)、牌號、乙烯或型態...',
+        searchPh: '快速搜索：輸入品牌、牌號、乙烯...',
         catAll: '全部', catEpdmInt: '🌍 國際大廠 EPDM', catRepro: '♻️ 彥泰環保再製膠', catSynthetic: '🧪 合成橡膠 (BR/SBR/NBR)',
         lblBrandFilter: '品牌快速篩選：', subAll: '全部品牌', subIanteai: '⭐ 彥泰精煉專區',
+        lblFormFilter: '橡膠型態 (Form)', lblMooneyFilter: '門尼黏度篩選 (Mooney)', lblEnbFilter: 'ENB 第三單體篩選',
         thBrand: '品牌 / 供應商', thGrade: '牌號 (Grade)', thC2: '乙烯 (C2)', thC3: '丙烯 (C3)', thEnb: '第三單體 (ENB)', thMooney: '門尼黏度', thForm: '型態', thAction: '技術操作',
-        emptyData: '尚無相符的橡膠或牌號資料',
+        emptyData: '尚無符合條件的橡膠或牌號資料',
         modalAddTitle: '新增橡膠產品資料',
         modalEditTitle: '修改橡膠產品資料',
         btnDelete: '刪除', btnEdit: '修改', viewInfo: '查看詳情'
@@ -368,11 +430,12 @@
         txtLogoutBtn: 'Logout',
         txtAdminTitle: 'Admin Dashboard',
         txtAdminBtn: 'Add Rubber Product',
-        searchPh: 'Quick search: brand, grade, C2, form...',
+        searchPh: 'Quick search: brand, grade, C2...',
         catAll: 'All', catEpdmInt: '🌍 Global EPDM', catRepro: '♻️ Recycled', catSynthetic: '🧪 Synthetic Rubber',
         lblBrandFilter: 'Brand Filter:', subAll: 'All Brands', subIanteai: '⭐ Ianteai Recycled',
+        lblFormFilter: 'Rubber Form', lblMooneyFilter: 'Mooney Viscosity', lblEnbFilter: 'ENB Content',
         thBrand: 'Brand / Supplier', thGrade: 'Grade', thC2: 'C2 (Ethylene)', thC3: 'C3 (Propylene)', thEnb: 'ENB', thMooney: 'Mooney', thForm: 'Form', thAction: 'Actions',
-        emptyData: 'No rubber records found.',
+        emptyData: 'No matching rubber records found.',
         modalAddTitle: 'Add Rubber Product',
         modalEditTitle: 'Edit Rubber Product',
         btnDelete: 'Delete', btnEdit: 'Edit', viewInfo: 'View Details'
@@ -395,6 +458,9 @@
         'lblBrandFilter': t.lblBrandFilter,
         'subAll': t.subAll,
         'subIanteai': t.subIanteai,
+        'lblFormFilter': t.lblFormFilter,
+        'lblMooneyFilter': t.lblMooneyFilter,
+        'lblEnbFilter': t.lblEnbFilter,
         'thBrand': t.thBrand,
         'thGrade': t.thGrade,
         'thC2': t.thC2,
@@ -578,7 +644,9 @@
       if (subBar) {
         if (cat === 'EPDM_INT') {
           subBar.classList.remove('hidden');
+          subBar.classList.add('flex');
         } else {
+          subBar.classList.remove('flex');
           subBar.classList.add('hidden');
           currentSubBrand = 'ALL';
         }
@@ -594,10 +662,27 @@
       renderTable();
     }
 
-    // --- Table Rendering & Realtime Search ---
+    function resetAdvancedFilters() {
+      const sf = document.getElementById('searchInput');
+      if (sf) sf.value = '';
+      const ff = document.getElementById('filterForm');
+      if (ff) ff.value = 'ALL';
+      const fm = document.getElementById('filterMooney');
+      if (fm) fm.value = 'ALL';
+      const fe = document.getElementById('filterEnb');
+      if (fe) fe.value = 'ALL';
+      renderTable();
+    }
+
+    // --- Table Rendering & Advanced Filtering ---
     function renderTable() {
       const searchInput = document.getElementById('searchInput');
       const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      
+      const formVal = document.getElementById('filterForm')?.value || 'ALL';
+      const mooneyVal = document.getElementById('filterMooney')?.value || 'ALL';
+      const enbVal = document.getElementById('filterEnb')?.value || 'ALL';
+
       const tbody = document.getElementById('tableBody');
       if (!tbody) return;
 
@@ -607,6 +692,31 @@
         if (currentCategory !== 'ALL' && p.category !== currentCategory) return false;
         if (currentCategory === 'EPDM_INT' && currentSubBrand !== 'ALL' && p.subBrand !== currentSubBrand) return false;
         
+        // 1. 型態篩選
+        if (formVal !== 'ALL') {
+          const fStr = (p.form || '').toLowerCase();
+          if (!fStr.includes(formVal.toLowerCase())) return false;
+        }
+
+        // 2. 門尼黏度區間篩選
+        if (mooneyVal !== 'ALL') {
+          const mText = (p.mooney || '').replace(/[^0-9.]/g, '');
+          const mNum = parseFloat(mText) || 0;
+          if (mooneyVal === 'LOW' && mNum >= 35) return false;
+          if (mooneyVal === 'MID' && (mNum < 35 || mNum > 60)) return false;
+          if (mooneyVal === 'HIGH' && mNum <= 60) return false;
+        }
+
+        // 3. ENB 區間篩選
+        if (enbVal !== 'ALL') {
+          const eText = (p.enb || '').replace(/[^0-9.]/g, '');
+          const eNum = parseFloat(eText) || 0;
+          if (enbVal === 'LOW' && (eNum >= 2 && eNum !== 0)) return false; // 0.5 屬於低
+          if (enbVal === 'MID' && (eNum < 2 || eNum > 6)) return false;
+          if (enbVal === 'HIGH' && eNum <= 6) return false;
+        }
+
+        // 4. 關鍵字搜索
         if (q) {
           const matchBrand = (p.brand || '').toLowerCase().includes(q);
           const matchGrade = (p.grade || '').toLowerCase().includes(q);
