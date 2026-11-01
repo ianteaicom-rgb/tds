@@ -11,7 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   
   <script>
     tailwind.config = {
@@ -92,15 +91,14 @@
         <span id="txtAdminTitle">總管理員控制台</span>
       </div>
       <button onclick="openAdminModal()" class="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold shadow hover:bg-red-700 transition-colors flex items-center space-x-1.5">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-        <span id="txtAdminBtn">新增產品與上傳檔案</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        <span id="txtAdminBtn">新增產品與直接上傳 PDF</span>
       </button>
     </div>
   </section>
 
-  <!-- 3. MAIN CONTENT (Publicly Accessible) -->
+  <!-- 3. MAIN CONTENT -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full relative">
-    
     <div id="mainContent" class="transition-opacity duration-500">
       
       <!-- Filters -->
@@ -145,7 +143,7 @@
       <div class="bg-slate-800 text-white flex justify-between items-center px-6 py-4 border-b border-slate-700">
         <h2 class="text-xl font-bold text-white flex items-center space-x-2">
           <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded uppercase tracking-wide">Admin</span>
-          <span id="modalAdminTitle">新增規格資料庫產品</span>
+          <span id="modalAdminTitle">新增規格資料庫產品 (免 Storage 方案)</span>
         </h2>
         <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white bg-slate-700 hover:bg-slate-600 p-1.5 rounded-full transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -158,11 +156,11 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpId">產品代碼 (ID, 不能重複)</label>
-              <input type="text" id="upId" placeholder="ex: epdm2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+              <input type="text" id="upId" placeholder="ex: epdm2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpCat">所屬分類</label>
-              <select id="upCat" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+              <select id="upCat" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
                 <option value="RUBBER">橡膠 RUBBER</option>
                 <option value="PLASTICS">塑膠 PLASTICS</option>
                 <option value="CHEMICAL">化工填料 CHEMICAL</option>
@@ -174,31 +172,32 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpZh">中文品名</label>
-              <input type="text" id="upNameZh" placeholder="三元乙丙橡膠" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+              <input type="text" id="upNameZh" placeholder="三元乙丙橡膠" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
             <div>
               <label class="block font-bold text-slate-600 mb-1" id="lblUpEn">英文品名</label>
-              <input type="text" id="upNameEn" placeholder="EPDM Rubber" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+              <input type="text" id="upNameEn" placeholder="EPDM Rubber" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
           </div>
 
           <div>
             <label class="block font-bold text-slate-600 mb-1" id="lblUpGr">代表牌號 (Grade)</label>
-            <input type="text" id="upGrade" placeholder="512E / 4725P" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+            <input type="text" id="upGrade" placeholder="512E / 4725P" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
           </div>
 
+          <!-- Direct PDF File Inputs -->
           <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mt-4 space-y-4">
             <h4 class="font-bold text-blue-800 text-xs uppercase flex items-center" id="txtFileUpTitle">
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-              上傳實體文件 (PDF)
+              選取 PDF 檔案 (直接加密存入資料庫)
             </h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="bg-white p-3 rounded-lg border border-blue-200">
-                <label class="block text-xs font-bold text-slate-500 mb-1">TDS 規格表</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1">TDS 規格表 (PDF)</label>
                 <input type="file" id="fileTds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700">
               </div>
               <div class="bg-white p-3 rounded-lg border border-blue-200">
-                <label class="block text-xs font-bold text-slate-500 mb-1">SDS 安全表</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1">SDS 安全表 (PDF)</label>
                 <input type="file" id="fileSds" accept="application/pdf" class="text-xs text-slate-500 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-emerald-50 file:text-emerald-700">
               </div>
             </div>
@@ -206,7 +205,7 @@
 
           <button onclick="submitUpload()" id="btnSubmitUpload" class="w-full py-3 mt-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-lg flex justify-center items-center space-x-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            <span id="txtBtnSubmit">確認新增產品與檔案</span>
+            <span id="txtBtnSubmit">確認新增產品與寫入 PDF</span>
           </button>
 
         </div>
@@ -237,7 +236,6 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     let currentLang = 'zh';
     let currentUser = null;
@@ -245,10 +243,8 @@
     let currentCategory = 'ALL';
     let PRODUCTS = [];
 
-    // --- 管理員信箱名單 ---
     const ADMIN_EMAILS = ['marswu@example.com', 'ianteai.com@gmail.com', 'boss@ianteai.com'];
 
-    // --- 語系設定 ---
     const I18N = {
       zh: {
         langBtn: 'EN',
@@ -256,15 +252,15 @@
         txtLoginBtn: '管理員登入',
         txtLogoutBtn: '登出系統',
         txtAdminTitle: '總管理員控制台',
-        txtAdminBtn: '新增產品與上傳檔案',
+        txtAdminBtn: '新增產品與直接上傳 PDF',
         searchPh: '搜尋產品名或牌號...',
         catAll: '全部', catRubber: '橡膠', catPlastics: '塑膠', catChem: '化工',
         thCat: '分類', thName: '品名 (中/英)', thGrade: '牌號', thAction: '技術資料與安全手冊下載',
         emptyData: '尚無資料，等待管理員新增產品',
-        modalAdminTitle: '新增規格資料庫產品',
+        modalAdminTitle: '新增規格資料庫產品 (免 Storage 方案)',
         lblUpId: '產品代碼 (ID, 不能重複)', lblUpCat: '所屬分類', lblUpZh: '中文品名', lblUpEn: '英文品名', lblUpGr: '代表牌號 (Grade)',
-        txtFileUpTitle: '上傳實體文件 (PDF)',
-        txtBtnSubmit: '確認新增產品與檔案',
+        txtFileUpTitle: '選取 PDF 檔案 (直接加密存入資料庫)',
+        txtBtnSubmit: '確認新增產品與寫入 PDF',
         btnDelete: '刪除'
       },
       en: {
@@ -273,15 +269,15 @@
         txtLoginBtn: 'Admin Login',
         txtLogoutBtn: 'Logout',
         txtAdminTitle: 'Admin Dashboard',
-        txtAdminBtn: 'Add Product & Upload',
+        txtAdminBtn: 'Add Product & Upload PDF',
         searchPh: 'Search product or grade...',
         catAll: 'All', catRubber: 'Rubber', catPlastics: 'Plastics', catChem: 'Chemical',
         thCat: 'Category', thName: 'Name', thGrade: 'Grade', thAction: 'TDS & SDS Download',
         emptyData: 'No records found. Waiting for admin upload.',
-        modalAdminTitle: 'Add New Product',
+        modalAdminTitle: 'Add New Product (No Storage Needed)',
         lblUpId: 'Product ID (Unique)', lblUpCat: 'Category', lblUpZh: 'Name (ZH)', lblUpEn: 'Name (EN)', lblUpGr: 'Grade',
-        txtFileUpTitle: 'Upload PDF Files',
-        txtBtnSubmit: 'Confirm Upload',
+        txtFileUpTitle: 'Select PDF Files (Stored in DB directly)',
+        txtBtnSubmit: 'Confirm & Save PDF to DB',
         btnDelete: 'Delete'
       }
     };
@@ -322,8 +318,7 @@
       applyLanguage();
     }
 
-    // --- Firebase Auth (管理員登入) ---
-    // 改用 signInWithPopup，因為已移除一般會員機制，管理員通常在 PC 測試，popup 較直覺
+    // --- Firebase Auth ---
     function loginWithGooglePopup() {
       const provider = new firebase.auth.GoogleAuthProvider();
       const btn = document.getElementById('btnLogin');
@@ -336,13 +331,7 @@
         console.error("登入失敗", error);
         btn.classList.remove('hidden');
         loading.classList.add('hidden');
-        
-        // 捕捉未授權網域的錯誤
-        if(error.code === 'auth/unauthorized-domain') {
-          alert('登入失敗：請至 Firebase 後台將此網址加入「授權網域」中。');
-        } else {
-          showToast('登入取消或發生錯誤', '❌');
-        }
+        showToast('登入取消或發生錯誤', '❌');
       });
     }
 
@@ -360,8 +349,6 @@
 
       if (user) {
         currentUser = user;
-        
-        // 檢查是否為名單內的管理員
         if (ADMIN_EMAILS.includes(user.email)) {
           isAdmin = true;
           document.getElementById('userName').innerText = user.displayName || user.email.split('@')[0];
@@ -370,22 +357,18 @@
           btnLogin.classList.add('hidden');
           userProfile.classList.remove('hidden');
           adminPanel.classList.remove('hidden');
-          showToast(currentLang === 'zh' ? '管理員登入成功' : 'Admin Login Success', '✅');
         } else {
-          // 不是管理員，強制登出並提示
           auth.signOut();
           isAdmin = false;
-          alert(currentLang === 'zh' ? '拒絕存取：您的信箱不在管理員名單內。' : 'Access Denied: Not an admin email.');
+          alert(currentLang === 'zh' ? '拒絕存取：您的信箱不在管理員名單內。' : 'Access Denied.');
         }
       } else {
         currentUser = null;
         isAdmin = false;
-        
         btnLogin.classList.remove('hidden');
         userProfile.classList.add('hidden');
         adminPanel.classList.add('hidden');
       }
-      
       renderTable();
     });
 
@@ -405,26 +388,36 @@
     loadProductsFromDB();
     applyLanguage();
 
-    // --- Download & Actions ---
-    function handleDownload(e, fileUrl) {
+    // --- PDF Download (From Base64 in Firestore) ---
+    function handleDownloadBase64(e, base64Data, filename) {
       e.preventDefault();
-      if(!fileUrl || fileUrl === '#') {
+      if(!base64Data) {
         showToast(currentLang === 'zh' ? '該檔案尚未上傳' : 'File not uploaded yet', '⚠️');
         return;
       }
-      window.open(fileUrl, '_blank');
+      
+      // Convert Base64 to Blob & Trigger Download
+      const byteCharacters = atob(base64Data.split(',')[1]);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], {type: 'application/pdf'});
+      
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename || 'document.pdf';
+      link.click();
     }
 
     function handleDelete(id) {
       if(!isAdmin) return;
-      const confirmMsg = currentLang === 'zh' ? '確認刪除此產品資料？\n(注意：已上傳的 PDF 檔案不會自動從雲端硬碟刪除)' : 'Confirm delete?';
+      const confirmMsg = currentLang === 'zh' ? '確認刪除此產品資料？' : 'Confirm delete?';
       if(!confirm(confirmMsg)) return;
       
       db.collection('products').doc(id).delete().then(() => {
         showToast(currentLang === 'zh' ? '產品已刪除' : 'Deleted', '🗑️');
-      }).catch(err => {
-        console.error("刪除失敗", err);
-        showToast('刪除失敗，請檢查權限', '❌');
       });
     }
 
@@ -464,10 +457,10 @@
         const adminDel = isAdmin ? `<button onclick="handleDelete('${p.id}')" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100 ml-2 border border-red-200 transition-colors">${t.btnDelete}</button>` : '';
         const nameDisp = currentLang === 'zh' ? `${p.nameZh} <span class="text-xs text-slate-500 block">${p.nameEn}</span>` : `${p.nameEn} <span class="text-xs text-slate-500 block">${p.nameZh}</span>`;
 
-        const tdsUrl = p.tdsUrl || '#';
-        const sdsUrl = p.sdsUrl || '#';
-        const tdsStyle = p.tdsUrl ? 'bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100 cursor-pointer' : 'bg-slate-100 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed';
-        const sdsStyle = p.sdsUrl ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer' : 'bg-slate-100 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed';
+        const hasTds = !!p.tdsBase64;
+        const hasSds = !!p.sdsBase64;
+        const tdsStyle = hasTds ? 'bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100 cursor-pointer' : 'bg-slate-100 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed';
+        const sdsStyle = hasSds ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer' : 'bg-slate-100 text-slate-400 border-slate-200 opacity-50 cursor-not-allowed';
 
         return `
           <tr class="hover:bg-brand-50/50 transition-colors border-b border-slate-50">
@@ -478,8 +471,8 @@
             <td class="py-4 px-4 font-mono text-sm text-slate-600">${p.grade}</td>
             <td class="py-4 px-4 text-center">
               <div class="flex justify-center items-center space-x-2">
-                <a href="${tdsUrl}" onclick="handleDownload(event, '${tdsUrl}')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center ${tdsStyle}"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> TDS</a>
-                <a href="${sdsUrl}" onclick="handleDownload(event, '${sdsUrl}')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center ${sdsStyle}"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> SDS</a>
+                <a href="#" onclick="handleDownload(event, '${p.tdsBase64}', '${p.id}-TDS.pdf')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center ${tdsStyle}"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> TDS</a>
+                <a href="#" onclick="handleDownload(event, '${p.sdsBase64}', '${p.id}-SDS.pdf')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center ${sdsStyle}"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> SDS</a>
                 ${adminDel}
               </div>
             </td>
@@ -488,7 +481,7 @@
       }).join('');
     }
 
-    // --- Admin Upload ---
+    // --- Admin Upload (Convert PDF to Base64 and save in Firestore directly) ---
     function openAdminModal() {
       if(!isAdmin) return;
       document.getElementById('adminModal').classList.remove('hidden');
@@ -498,6 +491,16 @@
     function closeAdminModal() {
       document.getElementById('adminModal').classList.add('hidden');
       document.body.style.overflow = '';
+    }
+
+    // Helper to convert File to Base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
     }
 
     async function submitUpload() {
@@ -516,31 +519,28 @@
       }
 
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = currentLang === 'zh' ? '檔案上傳與資料庫寫入中...' : 'Uploading...';
+      btnSubmit.innerHTML = currentLang === 'zh' ? '正在將 PDF 轉碼並寫入資料庫...' : 'Processing PDF...';
       btnSubmit.classList.add('opacity-70');
 
-      let tdsDownloadUrl = null;
-      let sdsDownloadUrl = null;
+      let tdsBase64 = null;
+      let sdsBase64 = null;
 
       try {
         if (fileTds) {
-          const tdsRef = storage.ref(`docs/${id}-tds.pdf`);
-          await tdsRef.put(fileTds);
-          tdsDownloadUrl = await tdsRef.getDownloadURL();
+          tdsBase64 = await fileToBase64(fileTds);
         }
         if (fileSds) {
-          const sdsRef = storage.ref(`docs/${id}-sds.pdf`);
-          await sdsRef.put(fileSds);
-          sdsDownloadUrl = await sdsRef.getDownloadURL();
+          sdsBase64 = await fileToBase64(fileSds);
         }
 
+        // Directly store everything in Firestore Document (No Storage needed!)
         await db.collection('products').doc(id).set({
           category: document.getElementById('upCat').value,
           nameZh: nameZh,
           nameEn: document.getElementById('upNameEn').value || nameZh,
           grade: document.getElementById('upGrade').value,
-          tdsUrl: tdsDownloadUrl,
-          sdsUrl: sdsDownloadUrl,
+          tdsBase64: tdsBase64,
+          sdsBase64: sdsBase64,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -557,7 +557,7 @@
         
       } catch (error) {
         console.error("Upload error", error);
-        alert(currentLang === 'zh' ? '上傳失敗，請確認 Firestore 與 Storage 的安全性規則是否允許寫入。' : 'Upload failed. Check Firebase Rules.');
+        alert(currentLang === 'zh' ? '上傳失敗：檔案可能過大（Firestore 單一文件上限為 1MB）。建議 PDF 保持在 500KB 以下。' : 'Upload failed: File might be too large (>1MB limit per document).');
       } finally {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg><span>${I18N[currentLang].txtBtnSubmit}</span>`;
