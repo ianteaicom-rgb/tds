@@ -12,6 +12,11 @@
   <meta name="apple-mobile-web-app-title" content="IANTEAI Catalog">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase (v9 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -51,14 +56,19 @@
     .tag-chip {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    .level-badge {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #000;
+      text-shadow: 0px 1px 1px rgba(255,255,255,0.5);
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-600 selection:text-white pb-16 md:pb-6">
 
-  <!-- ==================== 1. BRAND HEADER ==================== -->
+  <!-- ==================== 1. BRAND HEADER & AUTH ==================== -->
   <header class="glass-nav text-white sticky top-0 z-40 border-b border-brand-800 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16 sm:h-20">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-0 sm:h-20 gap-2">
         
         <!-- Left: Brand Logo & Title -->
         <div class="flex items-center space-x-3 sm:space-x-4">
@@ -94,17 +104,39 @@
           </div>
         </div>
 
-        <!-- Right: Actions (Language, PWA Guide, Help) -->
-        <div class="flex items-center space-x-2 sm:space-x-3">
-          <!-- PWA Install Guide Button -->
-          <button onclick="openPwaModal()" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 text-xs font-medium border border-sky-400/30 transition-all">
-            <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            <span class="hidden sm:inline" id="btnPwaText">手機App安裝</span>
-            <span class="sm:hidden">App</span>
-          </button>
+        <!-- Right: Auth, Score & Actions -->
+        <div class="flex items-center space-x-2 sm:space-x-3 text-sm">
+          
+          <!-- User Profile / Login -->
+          <div id="authContainer" class="flex items-center bg-brand-900/50 rounded-lg p-1.5 border border-brand-700">
+            <!-- Loading State -->
+            <div id="authLoading" class="px-2 text-xs text-brand-300 animate-pulse">Loading...</div>
+            
+            <!-- Logged Out State -->
+            <button id="btnLogin" onclick="loginWithGoogle()" class="hidden flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white text-slate-800 font-semibold hover:bg-slate-100 transition-colors text-xs">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              <span id="txtLogin">Google 登入</span>
+            </button>
+
+            <!-- Logged In State -->
+            <div id="userProfile" class="hidden flex items-center space-x-2.5 px-2">
+              <img id="userAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-full border border-brand-500">
+              <div class="flex flex-col">
+                <div class="flex items-center space-x-1.5">
+                  <span id="userName" class="font-bold text-[13px] truncate max-w-[90px]">User</span>
+                  <span id="userLevelBadge" class="level-badge text-[10px] px-1.5 py-0.5 rounded font-bold tracking-wide">LV.1</span>
+                  <span id="adminBadge" class="hidden bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold tracking-wide">管理員</span>
+                </div>
+                <div class="flex items-center space-x-2 text-[11px] text-sky-200">
+                  <span id="userScoreDisplay">積分: 0</span>
+                  <button onclick="logout()" class="hover:text-white underline" id="txtLogout">登出</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Language Toggle Button -->
-          <button onclick="toggleLanguage()" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all">
+          <button onclick="toggleLanguage()" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all ml-2">
             <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
             <span id="langDisplay">EN</span>
           </button>
@@ -114,52 +146,59 @@
     </div>
   </header>
 
-  <!-- ==================== 2. HERO METRIC STRIP ==================== -->
-  <section class="bg-gradient-to-r from-brand-800 via-brand-700 to-slate-800 text-white py-4 px-4 sm:px-8 border-b border-brand-900 shadow-inner">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
-      <div class="flex items-center space-x-2 text-slate-200">
-        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span id="heroStatusText">全品項已收錄 14 大核心類別，支援中英文 TDS / SDS 與實體照下載</span>
+  <!-- ==================== 2. ADMIN PANEL (Only visible to Admins) ==================== -->
+  <section id="adminPanel" class="hidden bg-red-50 border-b border-red-200 py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <div class="flex items-center space-x-2 text-red-800 font-bold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span id="txtAdminTitle">管理員控制台 (Admin Panel)</span>
       </div>
-      <div class="flex items-center space-x-4 sm:space-x-6 text-xs text-sky-100 font-mono">
-        <div><span class="text-sky-300 font-bold text-base" id="statRubberCount">5</span> <span id="labelRubberStat">橡膠體系</span></div>
-        <div class="w-px h-4 bg-white/20"></div>
-        <div><span class="text-amber-300 font-bold text-base" id="statPlasticCount">3</span> <span id="labelPlasticStat">塑膠體系</span></div>
-        <div class="w-px h-4 bg-white/20"></div>
-        <div><span class="text-emerald-300 font-bold text-base" id="statChemCount">4</span> <span id="labelChemStat">化工填料</span></div>
-        <div class="w-px h-4 bg-white/20"></div>
-        <div><span class="text-purple-300 font-bold text-base" id="statOtherCount">2</span> <span id="labelOtherStat">其他/客製</span></div>
+      <div class="flex space-x-2">
+        <button onclick="openUploadModal()" class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold shadow-sm hover:bg-red-700 transition-colors flex items-center space-x-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span id="txtAdminUpload">上傳新檔案 (+50分)</span>
+        </button>
       </div>
     </div>
   </section>
 
-  <!-- ==================== 3. SEARCH & CONTROLS ==================== -->
+  <!-- ==================== 3. LEVEL RULES STRIP ==================== -->
+  <section class="bg-gradient-to-r from-brand-800 via-brand-700 to-slate-800 text-white py-2.5 px-4 sm:px-8 shadow-inner border-b border-brand-900">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center space-x-4 overflow-x-auto whitespace-nowrap pb-1 sm:pb-0 hide-scrollbar">
+        <span class="font-bold text-amber-300" id="txtScoreRules">積分規則：</span>
+        <span class="flex items-center space-x-1 text-slate-200">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span id="txtScoreRuleDl">下載一次 = +10 分</span>
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="flex items-center space-x-1 text-slate-200">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span id="txtScoreRuleUp">管理員上傳 = +50 分</span>
+        </span>
+      </div>
+      <div class="flex items-center space-x-3 font-mono text-[11px] text-sky-200">
+        <span>LV.1: 0</span>
+        <span>LV.2: 100</span>
+        <span>LV.3: 500</span>
+        <span>LV.4: 1000</span>
+        <span class="text-amber-300 font-bold">LV.5 (Max): 2000+</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 4. MAIN CONTENT ==================== -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
     
-    <!-- Control Bar Card -->
+    <!-- Controls (Search, View Mode, Filters) -->
     <div class="bg-white rounded-2xl p-4 sm:p-5 custom-shadow border border-slate-200/80 mb-6">
-      
-      <!-- Top Row: Search Input + View Mode Switch -->
       <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-        
-        <!-- Search Input -->
         <div class="relative flex-1">
           <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
-          <input 
-            type="text" 
-            id="searchInput" 
-            oninput="handleSearch(this.value)"
-            placeholder="搜尋產品名、牌號 (如: 512E, 4725P, 1502, EVA, 滑石粉)..." 
-            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-600 focus:bg-white transition-all placeholder:text-slate-400"
-          >
-          <button id="clearSearchBtn" onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 hidden">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-          </button>
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="搜尋產品名、牌號 (如: 512E, 4725P, 1502, EVA, 滑石粉)..." class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-600 focus:bg-white transition-all placeholder:text-slate-400">
         </div>
-
-        <!-- View Switch Buttons -->
         <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl self-end sm:self-auto border border-slate-200">
           <button id="btnViewCards" onclick="setViewMode('cards')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all bg-white text-brand-700 shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
@@ -170,790 +209,430 @@
             <span id="txtTableView">總表條列</span>
           </button>
         </div>
-
       </div>
-
-      <!-- Category Filter Pills -->
       <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1" id="filterLabel">分類篩選：</span>
-        
-        <button onclick="setCategory('ALL')" data-category="ALL" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-700 text-white shadow-sm border border-brand-800 transition-all">
-          <span id="catAllText">全部產品</span> (<span id="countAll">14</span>)
-        </button>
-        <button onclick="setCategory('RUBBER')" data-category="RUBBER" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all">
-          <span id="catRubberText">橡膠體系 Rubber</span> (<span id="countRubber">5</span>)
-        </button>
-        <button onclick="setCategory('PLASTICS')" data-category="PLASTICS" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all">
-          <span id="catPlasticsText">塑膠原料 Plastics</span> (<span id="countPlastics">3</span>)
-        </button>
-        <button onclick="setCategory('CHEMICAL')" data-category="CHEMICAL" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all">
-          <span id="catChemText">化工填料 Chemical</span> (<span id="countChemical">4</span>)
-        </button>
-        <button onclick="setCategory('OTHERS')" data-category="OTHERS" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all">
-          <span id="catOthersText">其他/客製 Others</span> (<span id="countOthers">2</span>)
-        </button>
-
-        <!-- Quick Tags -->
-        <div class="hidden lg:flex items-center space-x-1.5 ml-auto text-xs text-slate-400">
-          <span>熱門牌號:</span>
-          <button onclick="quickSearch('512E')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-600 transition-colors">512E</button>
-          <button onclick="quickSearch('4725P')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-600 transition-colors">4725P</button>
-          <button onclick="quickSearch('SSBR')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-600 transition-colors">SSBR</button>
-          <button onclick="quickSearch('EVA')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-600 transition-colors">EVA</button>
-          <button onclick="quickSearch('CaCO3')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-600 transition-colors">碳酸鈣</button>
-        </div>
+        <button onclick="setCategory('ALL')" data-category="ALL" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-700 text-white shadow-sm border border-brand-800 transition-all"><span id="catAllText">全部</span></button>
+        <button onclick="setCategory('RUBBER')" data-category="RUBBER" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all"><span id="catRubberText">橡膠 Rubber</span></button>
+        <button onclick="setCategory('PLASTICS')" data-category="PLASTICS" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all"><span id="catPlasticsText">塑膠 Plastics</span></button>
+        <button onclick="setCategory('CHEMICAL')" data-category="CHEMICAL" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all"><span id="catChemText">化工填料 Chemical</span></button>
+        <button onclick="setCategory('OTHERS')" data-category="OTHERS" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all"><span id="catOthersText">其他 Others</span></button>
       </div>
-
     </div>
 
-    <!-- Active Filters & Result Count -->
-    <div class="flex items-center justify-between text-xs text-slate-500 mb-4 px-1">
-      <div>
-        <span id="resultCountLabel">顯示中產品：</span>
-        <strong id="activeCount" class="text-brand-700 font-bold text-sm">14</strong>
-        <span id="totalCountSuffix">/ 14 項</span>
-      </div>
-      <div id="filterIndicator" class="text-brand-600 font-medium"></div>
+    <!-- Require Login Overlay Message -->
+    <div id="loginRequiredMsg" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+      <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      <h3 class="mt-3 text-sm font-bold text-slate-700" id="txtReqLoginTitle">請先登入以瀏覽資料庫</h3>
+      <p class="mt-1 text-xs text-slate-400" id="txtReqLoginDesc">您需要使用 Google 帳號登入才能下載 TDS/SDS 文件，每次下載可累積等級積分。</p>
+      <button onclick="loginWithGoogle()" class="mt-4 px-4 py-2 bg-brand-600 text-white text-xs font-semibold rounded-lg hover:bg-brand-700 transition-colors shadow-md" id="btnReqLogin">
+        立即登入 (Login)
+      </button>
     </div>
 
-    <!-- ==================== 4. CARDS VIEW CONTAINER ==================== -->
-    <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- Injected by JavaScript -->
+    <!-- Cards Container -->
+    <div id="cardsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Injected via JS -->
     </div>
 
-    <!-- ==================== 5. TABLE VIEW CONTAINER ==================== -->
+    <!-- Table Container -->
     <div id="tableContainer" class="hidden bg-white rounded-2xl custom-shadow border border-slate-200 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-slate-700 border-collapse">
           <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
             <tr>
               <th class="py-3 px-3 text-center w-12">#</th>
-              <th class="py-3 px-3 w-24" id="thCat">分類</th>
-              <th class="py-3 px-4 w-52" id="thName">品名 (中 / 英文)</th>
-              <th class="py-3 px-4 w-44" id="thGrade">代表牌號 / 規格</th>
-              <th class="py-3 px-4 w-28" id="thForm">外觀型態</th>
-              <th class="py-3 px-4" id="thApp">核心特性與終端應用</th>
-              <th class="py-3 px-3 text-center w-40" id="thActions">技術資料下載</th>
+              <th class="py-3 px-4 w-40" id="thName">品名 (中 / 英文)</th>
+              <th class="py-3 px-4 w-32" id="thGrade">牌號</th>
+              <th class="py-3 px-3 text-center w-48" id="thActions">檔案操作</th>
             </tr>
           </thead>
           <tbody id="tableBody" class="divide-y divide-slate-100">
-            <!-- Injected by JavaScript -->
+            <!-- Injected via JS -->
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
-      <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      <h3 class="mt-3 text-sm font-bold text-slate-700" id="emptyTitle">無相符產品</h3>
-      <p class="mt-1 text-xs text-slate-400" id="emptyDesc">請嘗試更換搜尋關鍵字或切換分類標籤</p>
-      <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-brand-700 text-white text-xs font-semibold rounded-lg hover:bg-brand-800 transition-colors" id="btnResetFilters">重設篩選條件</button>
-    </div>
-
   </main>
 
-  <!-- ==================== 6. MODALS ==================== -->
-
-  <!-- Modal: Mobile PWA / Add to Home Screen Modal -->
-  <div id="pwaModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <!-- ==================== 5. UPLOAD MODAL (ADMIN ONLY) ==================== -->
+  <div id="uploadModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden p-6 text-slate-800">
-      <div class="text-center">
-        <div class="w-14 h-14 bg-brand-50 border border-brand-100 rounded-2xl mx-auto flex items-center justify-center mb-3">
-          <svg class="w-8 h-8 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-        </div>
-        <h3 class="text-lg font-bold text-brand-700">加入手機主畫面 (PWA 模式)</h3>
-        <p class="text-xs text-slate-500 mt-1">無需下載安裝檔，即可像原生 App 般在手機一鍵開啟總表！</p>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-red-700 flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span id="txtModalUploadTitle">上傳產品資料</span>
+        </h3>
+        <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
 
-      <div class="mt-5 space-y-3 text-xs text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200">
-        <div class="flex items-start space-x-2.5">
-          <span class="flex-shrink-0 w-5 h-5 bg-brand-700 text-white rounded-full flex items-center justify-center font-bold text-[10px]">1</span>
+      <div class="space-y-3 text-sm">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1" id="lblUpId">產品 ID (英文代碼，如 epdm)</label>
+          <input type="text" id="upId" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1" id="lblUpCat">分類 (Category)</label>
+          <select id="upCat" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+            <option value="RUBBER">RUBBER (橡膠)</option>
+            <option value="PLASTICS">PLASTICS (塑膠)</option>
+            <option value="CHEMICAL">CHEMICAL (化工)</option>
+            <option value="OTHERS">OTHERS (其他)</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
           <div>
-            <strong class="text-slate-800">iPhone / iPad (Safari 瀏覽器)：</strong>
-            <p class="mt-0.5">點擊底部選單的「分享」圖示 ➔ 往下滑動點選<strong>「加入主畫面 (Add to Home Screen)」</strong>即可。</p>
+            <label class="block text-xs font-bold text-slate-500 mb-1" id="lblUpNameZh">中文品名</label>
+            <input type="text" id="upNameZh" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1" id="lblUpNameEn">英文品名</label>
+            <input type="text" id="upNameEn" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
           </div>
         </div>
-        <div class="flex items-start space-x-2.5">
-          <span class="flex-shrink-0 w-5 h-5 bg-brand-700 text-white rounded-full flex items-center justify-center font-bold text-[10px]">2</span>
-          <div>
-            <strong class="text-slate-800">Android 安卓手機 (Chrome 瀏覽器)：</strong>
-            <p class="mt-0.5">點擊右上角「三個點選單」 ➔ 點選<strong>「安裝應用程式」或「加到主畫面」</strong>。</p>
-          </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1" id="lblUpGrade">牌號 (Grade)</label>
+          <input type="text" id="upGrade" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
         </div>
-      </div>
+        
+        <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-800 mt-2">
+          <strong class="block mb-1">注意：此介面為模擬資料庫操作</strong>
+          因為 GitHub Pages 是靜態網頁，我們在此建立紀錄。實體檔案請仍透過 GitHub `docs/` 資料夾上傳（命名規則為 `ID-tds.pdf`）。完成此操作您將獲得 50 分上傳積分！
+        </div>
 
-      <button onclick="closeModal('pwaModal')" class="mt-5 w-full py-2.5 rounded-xl bg-brand-700 text-white font-semibold text-xs hover:bg-brand-800 transition-colors">
-        我知道了 (Close)
-      </button>
+        <button onclick="submitUpload()" class="w-full py-2 mt-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-md transition-colors" id="btnSubmitUpload">
+          確認新增並領取 +50 積分
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Toast Message Box -->
+  <!-- Toast Notification -->
   <div id="toastBox" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
     <div class="bg-slate-900/95 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2.5 border border-slate-700">
-      <span id="toastIcon">📋</span>
-      <span id="toastMessage" class="font-medium">規格摘要已複製到剪貼簿！</span>
+      <span id="toastIcon" class="text-lg">✅</span>
+      <span id="toastMessage" class="font-medium">操作成功！</span>
     </div>
   </div>
 
-  <!-- ==================== 7. FOOTER ==================== -->
-  <footer class="mt-auto border-t border-slate-200 bg-white text-slate-500 text-xs py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="flex items-center space-x-2">
-        <span class="font-bold text-brand-700">彥泰企業股份有限公司 IANTEAI ENTERPRISE CO., LTD.</span>
-        <span>© 2026 All Rights Reserved.</span>
-      </div>
-      <div class="flex items-center space-x-4 text-slate-400">
-        <span>一廠: EPDM產線</span>
-        <span>•</span>
-        <span>二廠: SBR / BR / NBR產線</span>
-        <span>•</span>
-        <button onclick="openPwaModal()" class="text-brand-600 hover:underline">PWA 手機模式</button>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ==================== 8. CORE APPLICATION LOGIC ==================== -->
+  <!-- ==================== 6. FIREBASE & APP LOGIC ==================== -->
   <script>
-    // --- Master Product Catalog Data ---
-    const PRODUCTS = [
-      {
-        id: 'epdm',
-        category: 'RUBBER',
-        catLabelZh: '橡膠體系',
-        catLabelEn: 'Rubber',
-        nameZh: '三元乙丙橡膠',
-        nameEn: 'EPDM Rubber',
-        cas: '25038-36-2',
-        gradeZh: '住友 512E / Dow 4725P, 3760P, 4570',
-        gradeEn: 'Sumitomo 512E / Dow 4725P, 3760P, 4570',
-        formZh: '25kg 膠塊 (Bale) / 顆粒 (Pellet)',
-        formEn: '25kg Bale / Pellet',
-        standard: 'ASTM D-1646 / D-3900',
-        appZh: '耐候、耐臭氧老化、蒸氣膠管、汽車密封條、建築防水卷材、鞋底發泡。',
-        appEn: 'Weather/ozone resistance, automotive seals, steam hoses, waterproofing.',
-        pkgZh: '25kg PE膜膠塊 / 鐵箱 (1.0~1.2 MT)',
-        pkgEn: '25kg PE film Bale / Steel Box (1.0~1.2 MT)',
-        specs: [
-          { item: '門尼黏度 Mooney Viscosity ML(1+4)@125℃', std: 'ASTM D-1646', val: '25 ~ 70 MU (512E: 64 MU)' },
-          { item: '乙烯含量 Ethylene Content (C2%)', std: 'ASTM D-3900', val: '50.0% ~ 70.0% (典型: 68%)' },
-          { item: '第三單體 ENB 含量 (ENB %)', std: 'ASTM D-6047', val: '2.2% ~ 5.0% (高硫化交聯)' },
-          { item: '揮發份 Volatile Matter', std: 'ASTM D-5668', val: '≤ 0.50 %' },
-          { item: '總灰分 Total Ash Content', std: 'ASTM D-5667', val: '≤ 0.15 %' }
-        ],
-        svgType: 'rubber_bale'
-      },
-      {
-        id: 'ssbr',
-        category: 'RUBBER',
-        catLabelZh: '橡膠體系',
-        catLabelEn: 'Rubber',
-        nameZh: '溶聚丁苯橡膠',
-        nameEn: 'SSBR (Solution SBR)',
-        cas: '9003-55-8',
-        gradeZh: 'SSBR Repro / 典型 25% 苯乙烯',
-        gradeEn: 'SSBR Repro / 25% Bound Styrene',
-        formZh: '生膠塊 (Raw Bale)',
-        formEn: 'Raw Bale',
-        standard: 'ASTM D-1646 / D-5774',
-        appZh: '高抓地抗濕滑、超低滾動阻力；綠色節能輪胎胎面、高級運動鞋大底。',
-        appEn: 'High wet-grip, low rolling resistance; eco-tires, premium sports soles.',
-        pkgZh: '35kg 塑膠套袋 / 原廠隨貨鐵箱',
-        pkgEn: '35kg PE Bag / Steel Crate',
-        specs: [
-          { item: '結合苯乙烯含量 Bound Styrene', std: 'ASTM D-5774', val: '25.0 ± 1.5 %' },
-          { item: '乙烯基含量 Vinyl Content', std: 'FTIR', val: '55.0 ~ 65.0 %' },
-          { item: '門尼黏度 ML(1+4)@100℃', std: 'ASTM D-1646', val: '55 ~ 65 MU' },
-          { item: '玻璃轉化溫度 Tg', std: 'DSC', val: '-25 ℃ ~ -20 ℃' },
-          { item: '充油量 Oil Extended', std: 'ISO 1407', val: '0 phr (非充油型)' }
-        ],
-        svgType: 'rubber_bale'
-      },
-      {
-        id: 'esbr',
-        category: 'RUBBER',
-        catLabelZh: '橡膠體系',
-        catLabelEn: 'Rubber',
-        nameZh: '乳聚丁苯橡膠',
-        nameEn: 'ESBR (Emulsion SBR)',
-        cas: '9003-55-8',
-        gradeZh: '1502 (非充油) / 1712 (高充油)',
-        gradeEn: 'Grade 1502 (Non-oil) / 1712 (Oil-ext)',
-        formZh: '淺黃/黑褐色膠塊 (Bale)',
-        formEn: 'Bale (Light amber / Dark)',
-        standard: 'ASTM D-1416 / D-1646',
-        appZh: '加工性與著色性極佳；輸送帶、一般輪胎胎體、工業防震墊、機械滾輪。',
-        appEn: 'Conveyor belts, tire casing, anti-vibration pads, rubber rollers.',
-        pkgZh: '35kg/塊，專用鐵箱或木棧板',
-        pkgEn: '35kg Bale, Steel Box or Pallet',
-        specs: [
-          { item: '結合苯乙烯含量 Bound Styrene', std: 'ASTM D-1416', val: '23.5 ± 1.0 %' },
-          { item: '門尼黏度 ML(1+4)@100℃', std: 'ASTM D-1646', val: '45 ~ 55 MU (1502)' },
-          { item: '揮發分 Volatile Matter', std: 'ASTM D-5668', val: '≤ 0.75 %' },
-          { item: '拉伸強度 Tensile Strength', std: 'ASTM D-412', val: '≥ 23.5 MPa' }
-        ],
-        svgType: 'rubber_bale'
-      },
-      {
-        id: 'nbr',
-        category: 'RUBBER',
-        catLabelZh: '橡膠體系',
-        catLabelEn: 'Rubber',
-        nameZh: '丁腈橡膠',
-        nameEn: 'NBR (Nitrile Butadiene Rubber)',
-        cas: '9003-18-3',
-        gradeZh: '28% / 34% / 40% ACN (低/中/高腈)',
-        gradeEn: '28%, 34%, 40% ACN (Low/Med/High)',
-        formZh: '膠塊 (Bale) / 碎膠片 (Flake)',
-        formEn: 'Bale / Crumb',
-        standard: 'ASTM D-3568 / D-1646',
-        appZh: '極佳耐油耐磨、低氣體透過率；耐油高壓膠管、O型密封環、油封油閥墊片。',
-        appEn: 'Extreme oil resistance; fuel hoses, O-rings, industrial gaskets.',
-        pkgZh: '25kg / 35kg 內襯防潮包裝袋',
-        pkgEn: '25kg / 35kg Moisture-proof Bag',
-        specs: [
-          { item: '丙烯腈含量 (Bound ACN %)', std: 'ASTM D-3568', val: '28.0% ~ 40.0% (依牌號)' },
-          { item: '門尼黏度 ML(1+4)@100℃', std: 'ASTM D-1646', val: '45 ~ 65 MU' },
-          { item: '耐油體積膨脹率 (No.3 Oil)', std: 'ASTM D-471', val: '< 5 % (高腈牌號)' },
-          { item: '抗張強度 Tensile Strength', std: 'ASTM D-412', val: '≥ 20.0 MPa' }
-        ],
-        svgType: 'rubber_bale'
-      },
-      {
-        id: 'br',
-        category: 'RUBBER',
-        catLabelZh: '橡膠體系',
-        catLabelEn: 'Rubber',
-        nameZh: '順丁橡膠 (聚丁二烯)',
-        nameEn: 'BR (High-Cis Polybutadiene)',
-        cas: '9003-17-2',
-        gradeZh: 'H-BR / Nd-BR 系列 (釹系高順式)',
-        gradeEn: 'H-BR / Nd-BR (High-Cis Neodymium)',
-        formZh: '原膠塊 (Bale) / 裁切膠塊',
-        formEn: 'Bale / Pre-cut Blocks',
-        standard: 'ASTM D-1646 / ISO 247',
-        appZh: '超高彈性回縮、極低生熱、耐低溫屈撓；輪胎側壁、高爾夫球芯、高彈鞋底。',
-        appEn: 'High elasticity, low heat build-up; tire sidewalls, golf balls, soles.',
-        pkgZh: '30~35kg 塑膠袋裝 / 鋼箱隨貨循環',
-        pkgEn: '30~35kg Bale / Steel Crate',
-        specs: [
-          { item: '順式結構含量 Cis-1,4 Content', std: 'NMR', val: '≥ 96.5 % (釹系 ≥ 98%)' },
-          { item: '門尼黏度 ML(1+4)@100℃', std: 'ASTM D-1646', val: '43 ~ 52 MU' },
-          { item: '回彈率 Rebound Resilience', std: 'DIN 53512', val: '≥ 65 %' },
-          { item: '熱失重 Volatiles', std: 'ISO 248', val: '≤ 0.40 %' }
-        ],
-        svgType: 'rubber_bale'
-      },
-      {
-        id: 'eva',
-        category: 'PLASTICS',
-        catLabelZh: '塑膠原料',
-        catLabelEn: 'Plastics',
-        nameZh: '乙烯-乙酸乙烯共聚物',
-        nameEn: 'EVA (Ethylene Vinyl Acetate)',
-        cas: '24937-78-8',
-        gradeZh: 'VA 14% ~ 28% (發泡級 / 射出級)',
-        gradeEn: 'VA 14% ~ 28% (Foaming / Injection)',
-        formZh: '半透明白色圓形顆粒 (Pellet)',
-        formEn: 'Translucent White Pellets',
-        standard: 'ASTM D-1238 / D-792',
-        appZh: '高柔軟性、衝擊吸收、優異交聯發泡倍率；運動鞋中底、防震包裝片材、熱熔膠。',
-        appEn: 'High flexibility, shock absorption; shoe midsoles, foaming sheets.',
-        pkgZh: '25kg 專用防潮編織袋',
-        pkgEn: '25kg PE / Paper Bag',
-        specs: [
-          { item: '乙酸乙烯酯含量 (VA Content)', std: 'FTIR', val: '14.0 % ~ 28.0 %' },
-          { item: '熔體流動速率 (MFR @ 190℃/2.16kg)', std: 'ASTM D-1238', val: '1.5 ~ 6.0 g/10min' },
-          { item: '密度 Density', std: 'ASTM D-792', val: '0.930 ~ 0.950 g/cm³' },
-          { item: '邵氏硬度 Shore Hardness', std: 'ASTM D-2240', val: '78A ~ 90A' }
-        ],
-        svgType: 'plastic_pellet'
-      },
-      {
-        id: 'ldpe',
-        category: 'PLASTICS',
-        catLabelZh: '塑膠原料',
-        catLabelEn: 'Plastics',
-        nameZh: '低密度聚乙烯',
-        nameEn: 'LDPE (Low-Density Polyethylene)',
-        cas: '9002-88-4',
-        gradeZh: '吹膜級 (MI: 0.3 ~ 2.0) / 押出級',
-        gradeEn: 'Film Grade (MI: 0.3 ~ 2.0) / Extrusion',
-        formZh: '半透明微乳白顆粒 (Pellets)',
-        formEn: 'Translucent Pellets',
-        standard: 'ASTM D-1238 / D-1505',
-        appZh: '延展韌性佳、抗撕裂、防潮透明；農用保護膜、伸縮纏繞包裝膜、重包裝袋。',
-        appEn: 'Toughness, puncture resistance; stretch films, agricultural covers.',
-        pkgZh: '25kg PE重包裝袋',
-        pkgEn: '25kg Heavy-duty PE Bag',
-        specs: [
-          { item: '熔融指數 Melt Index (190℃/2.16kg)', std: 'ASTM D-1238', val: '0.3 ~ 2.0 g/10min' },
-          { item: '密度 Density', std: 'ASTM D-1505', val: '0.918 ~ 0.925 g/cm³' },
-          { item: '抗張強度 Tensile at Break', std: 'ASTM D-638', val: 'MD: ≥ 16 MPa / TD: ≥ 14 MPa' },
-          { item: '斷裂伸長率 Elongation', std: 'ASTM D-638', val: '≥ 500 %' }
-        ],
-        svgType: 'plastic_pellet'
-      },
-      {
-        id: 'recycled_pe',
-        category: 'PLASTICS',
-        catLabelZh: '塑膠原料',
-        catLabelEn: 'Plastics',
-        nameZh: '再生聚乙烯顆粒',
-        nameEn: 'Recycled PE (Repro Pellets)',
-        cas: '9002-88-4',
-        gradeZh: 'HDPE / LDPE 潔淨造粒 (吹塑/押出)',
-        gradeEn: 'HDPE / LDPE Clean Repro Pellets',
-        formZh: '黑色 / 灰黑 / 雜色顆粒',
-        formEn: 'Black / Dark Gray Pellets',
-        standard: 'ISO 1133 / RoHS Compliant',
-        appZh: '高性價比、流動融指穩定、大幅降低碳足跡；塑膠棧板、吹塑桶、工程排水管。',
-        appEn: 'Cost-saving, stable MFR; plastic pallets, blow-molded containers, pipes.',
-        pkgZh: '25kg 袋裝 / 1,000kg 太空噸包',
-        pkgEn: '25kg Bags / 1,000kg Jumbo Bag',
-        specs: [
-          { item: '熔融指數 (MFI @ 190℃/2.16kg)', std: 'ISO 1133', val: '0.5 ~ 1.8 g/10min' },
-          { item: '密度 Density', std: 'ISO 1183', val: '0.922 ~ 0.945 g/cm³' },
-          { item: '過濾篩網精度 Filtration', std: '彥泰廠標', val: '100 目雙層不鏽鋼過濾' },
-          { item: '水分含量 Moisture Content', std: 'Karl Fischer', val: '≤ 0.15 %' }
-        ],
-        svgType: 'plastic_pellet'
-      },
-      {
-        id: 'caco3',
-        category: 'CHEMICAL',
-        catLabelZh: '化工填料',
-        catLabelEn: 'Chemical',
-        nameZh: '重質 / 沉澱碳酸鈣',
-        nameEn: 'Calcium Carbonate (CaCO3)',
-        cas: '471-34-1',
-        gradeZh: '800目 / 1250目 / 2500目 (活性/非活性)',
-        gradeEn: '800 / 1250 / 2500 Mesh (Active/Coated)',
-        formZh: '超細微純白乾燥粉末 (Powder)',
-        formEn: 'Ultra-fine White Powder',
-        standard: 'HG/T 2567 / ISO 787',
-        appZh: '提升製品剛性、耐熱熱變形尺寸安定、有效降低橡塑成本；填充補強。',
-        appEn: 'Improves rigidity, heat deflection, cost-down filler for rubber & plastics.',
-        pkgZh: '25kg 多層防潮紙袋',
-        pkgEn: '25kg Multi-wall Paper Bag',
-        specs: [
-          { item: '碳酸鈣純度 CaCO3 Content', std: 'Titration', val: '≥ 98.0 %' },
-          { item: '白度 Whiteness (R457)', std: 'ISO 2470', val: '≥ 93.5 %' },
-          { item: '平均粒徑 D50', std: 'Laser (Malvern)', val: '1.5 ~ 8.0 μm (依目數)' },
-          { item: '吸油值 Oil Absorption (DOP)', std: 'ISO 787-5', val: '18 ~ 26 g/100g' }
-        ],
-        svgType: 'chemical_powder'
-      },
-      {
-        id: 'talc',
-        category: 'CHEMICAL',
-        catLabelZh: '化工填料',
-        catLabelEn: 'Chemical',
-        nameZh: '超細滑石粉',
-        nameEn: 'Talc Powder',
-        cas: '14807-96-6',
-        gradeZh: '1250目 / 2000目 / 3000目 (無石棉認證)',
-        gradeEn: '1250, 2000, 3000 Mesh (Asbestos-free)',
-        formZh: '極細膩白色/灰白滑感粉末',
-        formEn: 'Soft Slick White Powder',
-        standard: 'ISO 3262-10 / XRD Tested',
-        appZh: '片狀結晶層狀阻隔、耐高溫阻燃、絕緣補強；汽車保險桿改性、橡膠防粘脫模。',
-        appEn: 'Platy reinforcement, heat barrier; automotive bumpers, anti-tack agent.',
-        pkgZh: '25kg 閥口袋 (防揚塵排氣封裝)',
-        pkgEn: '25kg Valve Bag (Anti-dust)',
-        specs: [
-          { item: '氧化鎂 (MgO) 含量', std: 'XRF', val: '≥ 30.5 %' },
-          { item: '二氧化矽 (SiO2) 含量', std: 'XRF', val: '≥ 60.0 %' },
-          { item: '石棉檢測 Asbestos Content', std: 'XRD / PLM', val: '未檢出 (ND / Free)' },
-          { item: '白度 Whiteness', std: 'GB/T 15342', val: '≥ 92.0 %' }
-        ],
-        svgType: 'chemical_powder'
-      },
-      {
-        id: 'kaolin',
-        category: 'CHEMICAL',
-        catLabelZh: '化工填料',
-        catLabelEn: 'Chemical',
-        nameZh: '水洗 / 鍛燒高嶺土',
-        nameEn: 'Kaolin (Calcined & Washed)',
-        cas: '1332-58-7',
-        gradeZh: '325目 ~ 1250目 (電線電纜級)',
-        gradeEn: '325 ~ 1250 Mesh (Cable Grade)',
-        formZh: '超細微米級粉末 (Powder)',
-        formEn: 'Micronized Fine Powder',
-        standard: 'ASTM D-281 / GB/T 14563',
-        appZh: '大幅提高體積絕緣電阻、降低介電損耗；EPDM高壓電纜護套、密封膠條阻絕。',
-        appEn: 'Enhances electrical resistivity; EPDM wire & cables, profiles.',
-        pkgZh: '25kg 紙塑複合防潮袋',
-        pkgEn: '25kg Laminated Paper Bag',
-        specs: [
-          { item: '氧化鋁 (Al2O3) 含量', std: 'Chemical', val: '≥ 44.0 %' },
-          { item: '體積電阻率 Volume Resistivity', std: 'IEC 60093', val: '≥ 1.0 × 10¹³ Ω·cm' },
-          { item: '水分含量 Moisture (Calcined)', std: 'ISO 787-2', val: '≤ 0.50 %' },
-          { item: '白度 Whiteness', std: 'R457', val: '≥ 91.0 %' }
-        ],
-        svgType: 'chemical_powder'
-      },
-      {
-        id: 'oba',
-        category: 'CHEMICAL',
-        catLabelZh: '化工填料',
-        catLabelEn: 'Chemical',
-        nameZh: '螢光增白劑 / 增白母粒',
-        nameEn: 'Optical Brightener (OB-1 / KSN)',
-        cas: '1533-45-5',
-        gradeZh: 'OB-1 / KSN / 白色濃縮母粒',
-        gradeEn: 'OB-1 / KSN / White Masterbatch',
-        formZh: '亮黃綠結晶粉末 / 白色母粒',
-        formEn: 'Bright Yellowish Crystal / Pellets',
-        standard: 'HPLC ≥ 99.0% / Spectro',
-        appZh: '消除再生料暗沉偏黃、增強塑料與發泡材白度與鮮豔度；添加量極微 (0.02%)。',
-        appEn: 'Eliminates yellowing in repros, elevates whiteness; low dosage.',
-        pkgZh: '25kg 紙箱 (內襯遮光鋁箔袋)',
-        pkgEn: '25kg Carton (Foil lined)',
-        specs: [
-          { item: '主成分純度 (Purity)', std: 'HPLC', val: '≥ 99.0 %' },
-          { item: '熔點 Melting Point', std: 'Capillary', val: '357 ℃ ~ 360 ℃ (耐極端高溫)' },
-          { item: '揮發份 Volatiles', std: 'Gravimetric', val: '≤ 0.30 %' },
-          { item: '建議添加比例 Recommended Dosing', std: '彥泰實驗室', val: '0.01% ~ 0.05% (100~500 ppm)' }
-        ],
-        svgType: 'chemical_powder'
-      },
-      {
-        id: 'tpr_tpe',
-        category: 'OTHERS',
-        catLabelZh: '其他類別',
-        catLabelEn: 'Others',
-        nameZh: '熱塑性彈性體',
-        nameEn: 'TPR / TPE Pellets',
-        cas: '66070-58-4',
-        gradeZh: 'Shore 30A ~ 90A (注塑 / 押出級)',
-        gradeEn: 'Shore 30A ~ 90A (Injection/Extrusion)',
-        formZh: '透明 / 本色高彈性圓粒',
-        formEn: 'Transparent / Natural Granules',
-        standard: 'ASTM D-2240 / D-412',
-        appZh: '免硫化直接成型、觸感親膚抗疲勞、可 100% 回收；手工具握把、防震包膠、鞋底。',
-        appEn: 'No vulcanization required; tool handles, footwear, soft overmolding.',
-        pkgZh: '25kg 牛皮紙複合袋',
-        pkgEn: '25kg Kraft Paper Bag',
-        specs: [
-          { item: '邵氏硬度 Shore A Hardness', std: 'ASTM D-2240', val: '30A ~ 90A (可客製)' },
-          { item: '抗拉伸強度 Tensile Strength', std: 'ASTM D-412', val: '≥ 8.5 MPa' },
-          { item: '比重 Specific Gravity', std: 'ASTM D-792', val: '0.90 ~ 1.15 g/cm³' },
-          { item: '加工溫度 Processing Temp', std: '彥泰試驗', val: '160 ℃ ~ 200 ℃' }
-        ],
-        svgType: 'plastic_pellet'
-      },
-      {
-        id: 'custom_reclaim',
-        category: 'OTHERS',
-        catLabelZh: '其他類別',
-        catLabelEn: 'Others',
-        nameZh: '客製化再生複合膠塊',
-        nameEn: 'Custom Reclaimed Rubber',
-        cas: 'Compound',
-        gradeZh: '依客訂門尼黏度 ML / 硬度調配',
-        gradeEn: 'Custom Tailored ML & Hardness',
-        formZh: '預切膠塊 (10~25kg) / 條狀',
-        formEn: 'Pre-cut Bales / Strips',
-        standard: '彥泰工廠內控標準 (COA隨貨)',
-        appZh: '多料源深度脫水脫氣、均質精煉混煉，有效縮短終端密煉機加工週期與降本。',
-        appEn: 'Homogenized, pre-degassed; shortens Banbury mixing cycles & cuts costs.',
-        pkgZh: '依客訂防黏紙隔離包裝 / 鋼箱循環',
-        pkgEn: 'Anti-tack Paper / Steel Crate',
-        specs: [
-          { item: '門尼黏度 ML(1+4)@100℃', std: 'ASTM D-1646', val: '40 ~ 75 MU (依協議)' },
-          { item: '生膠硬度 Raw Hardness', std: 'ASTM D-2240', val: '45 ~ 70 Shore A' },
-          { item: '水分揮發物 Moisture Loss', std: '烘箱 105℃', val: '≤ 0.80 %' },
-          { item: '批次均勻度 Batch Uniformity', std: '彥泰質檢', val: 'ΔML ≤ ± 3 MU' }
-        ],
-        svgType: 'rubber_bale'
-      }
-    ];
+    // ----------------------------------------------------
+    // ⚠️ PLEASE REPLACE THESE WITH YOUR ACTUAL FIREBASE CONFIG
+    // ----------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    
+    // Initialize Firebase (Only if config is set, otherwise mock for demo)
+    let app, auth, db;
+    let isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+    
+    if(isFirebaseConfigured) {
+      app = firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+    }
 
     // --- State Management ---
-    let currentLang = 'zh'; // 'zh' or 'en'
+    let currentLang = 'zh';
     let currentCategory = 'ALL';
     let currentSearchTerm = '';
-    let currentViewMode = 'cards'; // 'cards' or 'table'
+    let currentViewMode = 'cards';
+    
+    let currentUser = null;
+    let userScore = 0;
+    let isAdmin = false;
+
+    // --- Define Admins (Emails allowed to upload/delete) ---
+    const ADMIN_EMAILS = [
+      'marswu@example.com', // Replace with actual admin emails
+      'boss@ianteai.com'
+    ];
+
+    // --- Master Product Catalog Data (Base Seed Data) ---
+    // If connected to Firestore, this could be fetched from DB.
+    let PRODUCTS = [
+      { id: 'epdm', category: 'RUBBER', nameZh: '三元乙丙橡膠', nameEn: 'EPDM Rubber', gradeZh: '512E / 4725P', gradeEn: '512E / 4725P' },
+      { id: 'ssbr', category: 'RUBBER', nameZh: '溶聚丁苯橡膠', nameEn: 'SSBR (Solution SBR)', gradeZh: 'SSBR Repro', gradeEn: 'SSBR Repro' },
+      { id: 'eva', category: 'PLASTICS', nameZh: '乙烯-乙酸乙烯共聚物', nameEn: 'EVA', gradeZh: 'VA 14% ~ 28%', gradeEn: 'VA 14% ~ 28%' },
+      { id: 'recycled_pe', category: 'PLASTICS', nameZh: '再生聚乙烯顆粒', nameEn: 'Recycled PE', gradeZh: 'HDPE / LDPE Repro', gradeEn: 'HDPE / LDPE Repro' },
+      { id: 'caco3', category: 'CHEMICAL', nameZh: '重質碳酸鈣', nameEn: 'Calcium Carbonate', gradeZh: '800~2500 Mesh', gradeEn: '800~2500 Mesh' },
+      { id: 'talc', category: 'CHEMICAL', nameZh: '超細滑石粉', nameEn: 'Talc Powder', gradeZh: '1250~3000 Mesh', gradeEn: '1250~3000 Mesh' },
+    ];
 
     // --- UI Strings Dictionary ---
     const I18N = {
       zh: {
         langBtn: 'EN',
-        subtitle: '產品規格與技術手冊下載中心 ｜ Master Catalog & TDS/SDS Center',
-        pwaText: '手機App安裝',
-        heroStatus: '全品項已收錄 14 大核心類別，支援中英文 TDS / SDS 與實體照下載',
-        rubberStat: '橡膠體系',
-        plasticStat: '塑膠體系',
-        chemStat: '化工填料',
-        otherStat: '其他/客製',
-        searchPlaceholder: '搜尋產品名、牌號 (如: 512E, 4725P, 1502, EVA, 滑石粉)...',
+        subtitle: '產品規格與技術手冊下載中心',
+        login: 'Google 登入',
+        logout: '登出',
+        reqLoginTitle: '請先登入以瀏覽資料庫',
+        reqLoginDesc: '您需要使用 Google 帳號登入才能下載 TDS/SDS 文件，每次下載可累積等級積分。',
+        btnReqLogin: '立即登入 (Login)',
+        adminTitle: '管理員控制台',
+        adminUpload: '上傳新檔案 (+50分)',
+        scoreRules: '積分規則：',
+        ruleDl: '下載一次 = +10 分',
+        ruleUp: '管理員上傳 = +50 分',
+        searchPl: '搜尋產品名、牌號...',
         cardView: '卡片檢視',
         tableView: '總表條列',
         filterLabel: '分類篩選：',
-        catAll: '全部產品',
-        catRubber: '橡膠體系 Rubber',
-        catPlastics: '塑膠原料 Plastics',
-        catChem: '化工填料 Chemical',
-        catOthers: '其他/客製 Others',
-        displayCount: '顯示中產品：',
-        totalCountSuffix: '項',
-        thCat: '分類',
-        thName: '品名 (中 / 英文)',
-        thGrade: '代表牌號 / 規格',
-        thForm: '外觀型態',
-        thApp: '核心特性與終端應用',
-        thActions: '技術資料下載',
-        btnTds: '📄 TDS 規格',
-        btnSds: '🛡️ SDS 安全',
-        btnPhoto: '📷 實拍圖',
-        btnCopy: '📋 複製規格',
-        emptyTitle: '無相符產品',
-        emptyDesc: '請嘗試更換搜尋關鍵字或切換分類標籤',
-        btnReset: '重設篩選條件',
-        toastCopied: '產品規格已成功複製到剪貼簿！可直接貼至 LINE 或 Email。'
+        catAll: '全部', catRubber: '橡膠 Rubber', catPlastics: '塑膠 Plastics', catChem: '化工填料 Chemical', catOthers: '其他 Others',
+        thName: '品名 (中/英)', thGrade: '牌號', thActions: '檔案操作 (下載+10分)',
+        btnTds: '📄 TDS', btnSds: '🛡️ SDS', btnDel: '🗑️ 刪除',
+        modalUpTitle: '上傳產品資料', lblUpId: '產品 ID', lblUpCat: '分類', lblUpNameZh: '中文品名', lblUpNameEn: '英文品名', lblUpGrade: '牌號',
+        btnSubmitUp: '確認新增並領取 +50 積分',
+        toastScoreDl: '成功下載檔案！積分 +10',
+        toastScoreUp: '成功新增資料！積分 +50',
+        toastDel: '已刪除該筆資料'
       },
       en: {
         langBtn: '繁中',
-        subtitle: 'Product Catalog, TDS / SDS & Batch Inspection Center',
-        pwaText: 'Install Web App',
-        heroStatus: '14 Core product lines recorded. Bilingual TDS, SDS & HD photos ready.',
-        rubberStat: 'Rubber',
-        plasticStat: 'Plastics',
-        chemStat: 'Chemicals',
-        otherStat: 'Others',
-        searchPlaceholder: 'Search name, grade (e.g., 512E, 4725P, 1502, EVA, Talc)...',
+        subtitle: 'Master Catalog & TDS/SDS Center',
+        login: 'Google Login',
+        logout: 'Logout',
+        reqLoginTitle: 'Login Required',
+        reqLoginDesc: 'Please login with your Google account to view and download TDS/SDS documents. Earn XP points per download.',
+        btnReqLogin: 'Login Now',
+        adminTitle: 'Admin Panel',
+        adminUpload: 'Upload File (+50 XP)',
+        scoreRules: 'Scoring Rules:',
+        ruleDl: 'Download = +10 XP',
+        ruleUp: 'Admin Upload = +50 XP',
+        searchPl: 'Search products...',
         cardView: 'Cards',
         tableView: 'Table',
         filterLabel: 'Category:',
-        catAll: 'All Products',
-        catRubber: 'Rubber',
-        catPlastics: 'Plastics',
-        catChem: 'Chemicals',
-        catOthers: 'Others',
-        displayCount: 'Showing products: ',
-        totalCountSuffix: ' items',
-        thCat: 'Category',
-        thName: 'Product Name',
-        thGrade: 'Grade / Model',
-        thForm: 'Physical Form',
-        thApp: 'Key Properties & Applications',
-        thActions: 'Downloads',
-        btnTds: '📄 TDS Spec',
-        btnSds: '🛡️ SDS Safety',
-        btnPhoto: '📷 Photo',
-        btnCopy: '📋 Copy Spec',
-        emptyTitle: 'No Matching Products',
-        emptyDesc: 'Try adjusting your search query or switching categories.',
-        btnReset: 'Reset Filters',
-        toastCopied: 'Product specifications copied to clipboard! Ready to paste into LINE or Email.'
+        catAll: 'All', catRubber: 'Rubber', catPlastics: 'Plastics', catChem: 'Chemicals', catOthers: 'Others',
+        thName: 'Product Name', thGrade: 'Grade', thActions: 'Actions (Download +10 XP)',
+        btnTds: '📄 TDS', btnSds: '🛡️ SDS', btnDel: '🗑️ Delete',
+        modalUpTitle: 'Upload Product Data', lblUpId: 'Product ID', lblUpCat: 'Category', lblUpNameZh: 'Name (ZH)', lblUpNameEn: 'Name (EN)', lblUpGrade: 'Grade',
+        btnSubmitUp: 'Confirm & Claim +50 XP',
+        toastScoreDl: 'Download triggered! +10 XP',
+        toastScoreUp: 'Data added! +50 XP',
+        toastDel: 'Record deleted.'
       }
     };
 
-    // --- Helper: Generate SVG Artworks for Real Photos ---
-    function generateProductSvg(type, name) {
-      if (type === 'rubber_bale') {
-        return `
-          <svg viewBox="0 0 400 240" class="w-full h-full object-cover select-none">
-            <defs>
-              <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
-              <linearGradient id="baleGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f8fafc"/><stop offset="50%" stop-color="#e2e8f0"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient>
-              <linearGradient id="cageGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#2563eb"/></linearGradient>
-            </defs>
-            <rect width="400" height="240" fill="url(#bgGrad)"/>
-            <!-- Floor Shadow -->
-            <ellipse cx="200" cy="205" rx="140" ry="18" fill="#000000" opacity="0.45"/>
-            <!-- Steel Container / Cage Outline -->
-            <rect x="70" y="45" width="260" height="150" rx="8" fill="none" stroke="url(#cageGrad)" stroke-width="3" stroke-dasharray="10 5" opacity="0.6"/>
-            <!-- 25kg Rubber Bale -->
-            <polygon points="120,95 240,65 310,105 190,140" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
-            <polygon points="120,95 190,140 190,185 120,140" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-            <polygon points="190,140 310,105 310,150 190,185" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
-            <!-- Protective PE Film sheen -->
-            <path d="M130 100 Q 200 130 290 115" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.75"/>
-            <!-- QR / Batch Seal Tag -->
-            <rect x="210" y="125" width="45" height="30" rx="3" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
-            <rect x="215" y="130" width="12" height="12" fill="#0f172a"/>
-            <line x1="232" y1="133" x2="250" y2="133" stroke="#0f172a" stroke-width="2"/>
-            <line x1="232" y1="140" x2="246" y2="140" stroke="#0f172a" stroke-width="1.5"/>
-            <!-- Badge overlay -->
-            <rect x="18" y="15" width="130" height="24" rx="12" fill="#2563eb" fill-opacity="0.9"/>
-            <text x="83" y="31" fill="#ffffff" font-size="10" font-weight="bold" font-family="sans-serif" text-anchor="middle">IANTEAI QC PASSED</text>
-            <text x="200" y="225" fill="#94a3b8" font-size="11" font-family="monospace" text-anchor="middle">IANTEAI BATCH INSPECTION SAMPLE</text>
-          </svg>
-        `;
-      } else if (type === 'plastic_pellet') {
-        return `
-          <svg viewBox="0 0 400 240" class="w-full h-full object-cover select-none">
-            <defs>
-              <linearGradient id="bgPellet" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#090d16"/></linearGradient>
-              <radialGradient id="pelletGrad"><stop offset="0%" stop-color="#ffffff"/><stop offset="80%" stop-color="#cbd5e1"/><stop offset="100%" stop-color="#94a3b8"/></radialGradient>
-            </defs>
-            <rect width="400" height="240" fill="url(#bgPellet)"/>
-            <!-- 25kg Bag Shape -->
-            <rect x="100" y="40" width="200" height="155" rx="16" fill="#334155" stroke="#475569" stroke-width="2"/>
-            <path d="M120 40 L280 40 L270 195 L130 195 Z" fill="#1e293b" opacity="0.5"/>
-            <!-- Circular Viewport showing Pellets -->
-            <circle cx="200" cy="115" r="48" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
-            <!-- Pellets inside -->
-            <circle cx="185" cy="100" r="9" fill="url(#pelletGrad)"/>
-            <circle cx="210" cy="98" r="9" fill="url(#pelletGrad)"/>
-            <circle cx="198" cy="118" r="9" fill="url(#pelletGrad)"/>
-            <circle cx="178" cy="122" r="8" fill="url(#pelletGrad)"/>
-            <circle cx="222" cy="118" r="8.5" fill="url(#pelletGrad)"/>
-            <circle cx="195" cy="135" r="7.5" fill="url(#pelletGrad)"/>
-            <circle cx="212" cy="132" r="7.5" fill="url(#pelletGrad)"/>
-            <!-- Bag Label -->
-            <rect x="125" y="168" width="150" height="18" rx="4" fill="#2563eb"/>
-            <text x="200" y="181" fill="#ffffff" font-size="9" font-weight="bold" font-family="sans-serif" text-anchor="middle">NET WEIGHT: 25 KG PE BAG</text>
-            <text x="200" y="225" fill="#94a3b8" font-size="11" font-family="monospace" text-anchor="middle">OPTICAL GRADE PURITY 99.8%</text>
-          </svg>
-        `;
-      } else {
-        // Chemical Powder
-        return `
-          <svg viewBox="0 0 400 240" class="w-full h-full object-cover select-none">
-            <defs>
-              <linearGradient id="bgChem" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#134e4a"/><stop offset="100%" stop-color="#042f2e"/></linearGradient>
-            </defs>
-            <rect width="400" height="240" fill="url(#bgChem)"/>
-            <!-- Multi-ply Paper Valve Bag -->
-            <polygon points="120,50 280,50 295,190 105,190" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
-            <polygon points="120,50 145,190 105,190" fill="#e2e8f0"/>
-            <!-- Valve Bag top flap -->
-            <rect x="230" y="55" width="45" height="25" rx="3" fill="#10b981" opacity="0.85"/>
-            <text x="252" y="71" fill="#ffffff" font-size="8" font-weight="bold" text-anchor="middle">VALVE</text>
-            <!-- Certification Badges -->
-            <circle cx="200" cy="115" r="32" fill="#14b8a6" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
-            <text x="200" y="112" fill="#0f766e" font-size="9" font-weight="bold" font-family="sans-serif" text-anchor="middle">ASBESTOS FREE</text>
-            <text x="200" y="125" fill="#0f766e" font-size="8" font-family="sans-serif" text-anchor="middle">RoHS REACH</text>
-            <!-- Powder specs -->
-            <rect x="135" y="155" width="130" height="18" rx="4" fill="#0f766e"/>
-            <text x="200" y="167" fill="#ffffff" font-size="9" font-weight="bold" font-family="sans-serif" text-anchor="middle">SUPER FINE 1250~3000 MESH</text>
-            <text x="200" y="222" fill="#a7f3d0" font-size="11" font-family="monospace" text-anchor="middle">DUST-PROOF PACKAGING</text>
-          </svg>
-        `;
+    // --- Authentication & Score Logic ---
+    function getLevel(score) {
+      if (score >= 2000) return { lv: 5, label: 'LV.5' };
+      if (score >= 1000) return { lv: 4, label: 'LV.4' };
+      if (score >= 500) return { lv: 3, label: 'LV.3' };
+      if (score >= 100) return { lv: 2, label: 'LV.2' };
+      return { lv: 1, label: 'LV.1' };
+    }
+
+    function updateScoreDisplay() {
+      if (!currentUser) return;
+      document.getElementById('userScoreDisplay').innerText = `積分: ${userScore}`;
+      const level = getLevel(userScore);
+      document.getElementById('userLevelBadge').innerText = level.label;
+      
+      // Update Firestore if configured
+      if (isFirebaseConfigured && currentUser.uid) {
+        db.collection('users').doc(currentUser.uid).set({
+          score: userScore,
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
       }
     }
 
+    function addScore(points) {
+      if (!currentUser) return;
+      userScore += points;
+      updateScoreDisplay();
+      
+      const msg = currentLang === 'zh' 
+        ? `操作成功！積分 +${points} (目前: ${userScore})`
+        : `Success! +${points} XP (Total: ${userScore})`;
+      showToast(msg, '💎');
+    }
+
+    function loginWithGoogle() {
+      if (isFirebaseConfigured) {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(error => {
+          console.error("Login failed", error);
+          showToast('登入失敗 / Login Failed', '❌');
+        });
+      } else {
+        // Mock Login for Demo
+        handleAuthStateChange({
+          uid: 'mock_uid_123',
+          displayName: 'Mars (Demo User)',
+          photoURL: 'https://ui-avatars.com/api/?name=Mars&background=1F497D&color=fff',
+          email: 'marswu@example.com' // Set to mock admin email
+        });
+      }
+    }
+
+    function logout() {
+      if (isFirebaseConfigured) {
+        auth.signOut();
+      } else {
+        // Mock Logout
+        handleAuthStateChange(null);
+      }
+    }
+
+    function handleAuthStateChange(user) {
+      const authLoading = document.getElementById('authLoading');
+      const btnLogin = document.getElementById('btnLogin');
+      const userProfile = document.getElementById('userProfile');
+      const loginReqMsg = document.getElementById('loginRequiredMsg');
+      const cardsCont = document.getElementById('cardsContainer');
+      const tableCont = document.getElementById('tableContainer');
+      const adminPanel = document.getElementById('adminPanel');
+
+      authLoading.classList.add('hidden');
+
+      if (user) {
+        currentUser = user;
+        isAdmin = ADMIN_EMAILS.includes(user.email);
+        
+        document.getElementById('userName').innerText = user.displayName || 'User';
+        document.getElementById('userAvatar').src = user.photoURL || 'https://via.placeholder.com/150';
+        
+        if (isAdmin) {
+          document.getElementById('adminBadge').classList.remove('hidden');
+          adminPanel.classList.remove('hidden');
+        } else {
+          document.getElementById('adminBadge').classList.add('hidden');
+          adminPanel.classList.add('hidden');
+        }
+
+        btnLogin.classList.add('hidden');
+        userProfile.classList.remove('hidden');
+        loginReqMsg.classList.add('hidden');
+        
+        // Fetch score from DB if real
+        if (isFirebaseConfigured) {
+          db.collection('users').doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+              userScore = doc.data().score || 0;
+            } else {
+              userScore = 0;
+            }
+            updateScoreDisplay();
+          });
+        } else {
+          userScore = 150; // Mock initial score
+          updateScoreDisplay();
+        }
+
+        // Show content based on view mode
+        setViewMode(currentViewMode);
+
+      } else {
+        currentUser = null;
+        isAdmin = false;
+        userScore = 0;
+        
+        btnLogin.classList.remove('hidden');
+        userProfile.classList.add('hidden');
+        adminPanel.classList.add('hidden');
+        
+        // Hide content, show login requirement
+        cardsCont.classList.add('hidden');
+        tableCont.classList.add('hidden');
+        loginReqMsg.classList.remove('hidden');
+      }
+    }
+
+    // Set up real Firebase Auth Listener if configured
+    if (isFirebaseConfigured) {
+      auth.onAuthStateChanged(handleAuthStateChange);
+    } else {
+      // Init mock state (Logged out by default)
+      setTimeout(() => handleAuthStateChange(null), 500);
+    }
+
+
     // --- Core Rendering Functions ---
     function renderApp() {
-      renderCards();
-      renderTable();
-      updateMetrics();
+      if(currentUser) {
+        renderCards();
+        renderTable();
+      }
       updateStaticTexts();
     }
 
     function getFilteredProducts() {
       return PRODUCTS.filter(p => {
-        // Category Filter
         const matchCategory = (currentCategory === 'ALL' || p.category === currentCategory);
         if (!matchCategory) return false;
-
-        // Search Filter
         if (!currentSearchTerm) return true;
         const q = currentSearchTerm.toLowerCase().trim();
         return (
           p.nameZh.toLowerCase().includes(q) ||
           p.nameEn.toLowerCase().includes(q) ||
           p.gradeZh.toLowerCase().includes(q) ||
-          p.gradeEn.toLowerCase().includes(q) ||
-          p.appZh.toLowerCase().includes(q) ||
-          p.appEn.toLowerCase().includes(q) ||
-          p.formZh.toLowerCase().includes(q)
+          p.gradeEn.toLowerCase().includes(q)
         );
       });
+    }
+
+    // Intercept Download Clicks to Add Score
+    function trackDownload(e, type, url) {
+      e.preventDefault();
+      addScore(10); // +10 Points for download
+      
+      // Simulate small delay then open file
+      setTimeout(() => {
+        window.open(url, '_blank');
+      }, 300);
     }
 
     function renderCards() {
       const container = document.getElementById('cardsContainer');
       const filtered = getFilteredProducts();
-      const emptyState = document.getElementById('emptyState');
-
-      if (filtered.length === 0) {
-        container.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-      }
-      emptyState.classList.add('hidden');
-
       const isZh = currentLang === 'zh';
       const t = I18N[currentLang];
 
-      container.innerHTML = filtered.map(p => {
-        const catBadgeColor = p.category === 'RUBBER' ? 'bg-sky-100 text-sky-800 border-sky-200' :
-                             p.category === 'PLASTICS' ? 'bg-amber-100 text-amber-800 border-amber-200' :
-                             p.category === 'CHEMICAL' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
-                             'bg-purple-100 text-purple-800 border-purple-200';
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">無相符產品 (No matches)</div>`;
+        return;
+      }
 
+      container.innerHTML = filtered.map(p => {
         const nameTitle = isZh ? p.nameZh : p.nameEn;
-        const nameSub = isZh ? p.nameEn : p.nameZh;
         const gradeText = isZh ? p.gradeZh : p.gradeEn;
-        const appDesc = isZh ? p.appZh : p.appEn;
-        const formDesc = isZh ? p.formZh : p.formEn;
-        const catName = isZh ? p.catLabelZh : p.catLabelEn;
+        
+        // Admin Delete Button
+        const delBtn = isAdmin ? `
+          <button onclick="deleteProduct('${p.id}')" class="absolute top-2 right-2 px-2 py-1 bg-red-600/90 text-white text-[10px] rounded hover:bg-red-700 backdrop-blur">
+            ${t.btnDel}
+          </button>
+        ` : '';
 
         return `
-          <div class="bg-white rounded-2xl custom-shadow border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-            
-            <!-- Top Card Media Header -->
-            <a href="docs/${p.id}-photo.jpg" target="_blank" class="relative aspect-[16/9] w-full bg-slate-900 overflow-hidden cursor-pointer block group/img">
-              ${generateProductSvg(p.svgType, p.nameEn)}
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end justify-between p-3.5">
-                <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wide uppercase border ${catBadgeColor} backdrop-blur-md bg-white/10">
-                  ${catName}
-                </span>
-                <span class="text-[11px] text-white/90 bg-black/50 px-2 py-0.5 rounded-md flex items-center space-x-1 backdrop-blur-sm group-hover/img:bg-brand-600 transition-colors">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                  <span>${t.btnPhoto}</span>
-                </span>
-              </div>
-            </a>
-
-            <!-- Content Area -->
-            <div class="p-4 sm:p-5 flex-1 flex flex-col">
-              <div class="flex items-start justify-between gap-2">
-                <div>
-                  <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-brand-700 transition-colors leading-snug">
-                    ${nameTitle}
-                  </h3>
-                  <p class="text-xs text-slate-400 font-medium tracking-wide mt-0.5">${nameSub}</p>
-                </div>
-                <button onclick="copyProductSpec('${p.id}')" title="${t.btnCopy}" class="text-slate-400 hover:text-brand-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all flex-shrink-0">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                </button>
-              </div>
-
-              <!-- Grade & Form Strip -->
-              <div class="mt-3.5 space-y-1.5 text-xs">
-                <div class="flex items-center text-slate-600">
-                  <span class="text-slate-400 w-16 flex-shrink-0 font-medium">牌號規格:</span>
-                  <strong class="font-mono text-slate-800 truncate">${gradeText}</strong>
-                </div>
-                <div class="flex items-center text-slate-600">
-                  <span class="text-slate-400 w-16 flex-shrink-0 font-medium">形態包裝:</span>
-                  <span class="text-slate-700 truncate">${formDesc}</span>
-                </div>
-              </div>
-
-              <!-- Application summary -->
-              <p class="mt-3 text-xs text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex-1">
-                ${appDesc}
-              </p>
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative">
+            ${delBtn}
+            <div class="p-5">
+              <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${p.category}</span>
+              <h3 class="text-lg font-bold text-slate-800 mt-2">${nameTitle}</h3>
+              <p class="text-xs text-slate-500 mt-1 font-mono">${gradeText}</p>
             </div>
-
-            <!-- Download Action Buttons Footer -->
-            <div class="px-4 pb-4 pt-1 bg-white border-t border-slate-100 grid grid-cols-2 gap-2">
-              <a href="docs/${p.id}-tds.pdf" target="_blank" class="w-full py-2 px-3 rounded-xl bg-brand-700 text-white font-semibold text-xs hover:bg-brand-800 transition-colors flex items-center justify-center space-x-1.5 shadow-sm active:scale-[0.98] text-center">
-                <span>${t.btnTds}</span>
+            <div class="px-4 pb-4 grid grid-cols-2 gap-2">
+              <a href="docs/${p.id}-tds.pdf" onclick="trackDownload(event, 'TDS', this.href)" class="py-2 text-center rounded-lg bg-slate-100 text-brand-700 font-bold text-xs hover:bg-brand-50 border border-slate-200 transition-colors">
+                ${t.btnTds}
               </a>
-              <a href="docs/${p.id}-sds.pdf" target="_blank" class="w-full py-2 px-3 rounded-xl bg-eco-600 text-white font-semibold text-xs hover:bg-eco-700 transition-colors flex items-center justify-center space-x-1.5 shadow-sm active:scale-[0.98] text-center">
-                <span>${t.btnSds}</span>
+              <a href="docs/${p.id}-sds.pdf" onclick="trackDownload(event, 'SDS', this.href)" class="py-2 text-center rounded-lg bg-slate-100 text-eco-700 font-bold text-xs hover:bg-emerald-50 border border-slate-200 transition-colors">
+                ${t.btnSds}
               </a>
             </div>
-
           </div>
         `;
       }).join('');
@@ -966,44 +645,32 @@
       const t = I18N[currentLang];
 
       tbody.innerHTML = filtered.map((p, idx) => {
-        const catBadgeColor = p.category === 'RUBBER' ? 'bg-sky-100 text-sky-800' :
-                             p.category === 'PLASTICS' ? 'bg-amber-100 text-amber-800' :
-                             p.category === 'CHEMICAL' ? 'bg-emerald-100 text-emerald-800' :
-                             'bg-purple-100 text-purple-800';
-
         const nameTitle = isZh ? p.nameZh : p.nameEn;
-        const nameSub = isZh ? p.nameEn : p.nameZh;
         const gradeText = isZh ? p.gradeZh : p.gradeEn;
-        const appDesc = isZh ? p.appZh : p.appEn;
-        const formDesc = isZh ? p.formZh : p.formEn;
-        const catName = isZh ? p.catLabelZh : p.catLabelEn;
+        
+        const delBtn = isAdmin ? `
+          <button onclick="deleteProduct('${p.id}')" class="px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100 font-semibold text-[11px] border border-red-200">
+            ${t.btnDel}
+          </button>
+        ` : '';
 
         return `
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="py-3 px-3 text-center text-slate-400 font-mono font-medium">${String(idx + 1).padStart(2, '0')}</td>
-            <td class="py-3 px-3">
-              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${catBadgeColor}">
-                ${catName}
-              </span>
-            </td>
+          <tr class="hover:bg-slate-50">
+            <td class="py-3 px-3 text-center text-slate-400 font-mono text-xs">${idx + 1}</td>
             <td class="py-3 px-4">
-              <strong class="font-bold text-slate-800 block">${nameTitle}</strong>
-              <span class="text-[11px] text-slate-400 font-normal">${nameSub}</span>
+              <strong class="text-slate-800 block text-sm">${nameTitle}</strong>
+              <span class="text-[10px] text-slate-400">${p.category}</span>
             </td>
-            <td class="py-3 px-4 font-mono text-slate-700 font-medium">${gradeText}</td>
-            <td class="py-3 px-4 text-slate-600">${formDesc}</td>
-            <td class="py-3 px-4 text-slate-600 max-w-xs truncate" title="${appDesc}">${appDesc}</td>
+            <td class="py-3 px-4 font-mono text-slate-700 text-xs">${gradeText}</td>
             <td class="py-3 px-3 text-center">
               <div class="flex items-center justify-center space-x-1.5">
-                <a href="docs/${p.id}-tds.pdf" target="_blank" title="${t.btnTds}" class="px-2 py-1 rounded bg-brand-50 text-brand-700 hover:bg-brand-100 font-semibold text-[11px] border border-brand-200 transition-colors block text-center">
+                <a href="docs/${p.id}-tds.pdf" onclick="trackDownload(event, 'TDS', this.href)" class="px-2 py-1 rounded bg-slate-100 text-brand-700 hover:bg-brand-50 font-semibold text-[11px] border border-slate-200">
                   TDS
                 </a>
-                <a href="docs/${p.id}-sds.pdf" target="_blank" title="${t.btnSds}" class="px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-[11px] border border-emerald-200 transition-colors block text-center">
+                <a href="docs/${p.id}-sds.pdf" onclick="trackDownload(event, 'SDS', this.href)" class="px-2 py-1 rounded bg-slate-100 text-eco-700 hover:bg-emerald-50 font-semibold text-[11px] border border-slate-200">
                   SDS
                 </a>
-                <a href="docs/${p.id}-photo.jpg" target="_blank" title="${t.btnPhoto}" class="px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-[11px] border border-slate-300 transition-colors block text-center">
-                  📷
-                </a>
+                ${delBtn}
               </div>
             </td>
           </tr>
@@ -1011,35 +678,71 @@
       }).join('');
     }
 
-    function updateMetrics() {
-      const filtered = getFilteredProducts();
-      document.getElementById('activeCount').innerText = filtered.length;
-      document.getElementById('countAll').innerText = PRODUCTS.length;
-      document.getElementById('countRubber').innerText = PRODUCTS.filter(p => p.category === 'RUBBER').length;
-      document.getElementById('countPlastics').innerText = PRODUCTS.filter(p => p.category === 'PLASTICS').length;
-      document.getElementById('countChemical').innerText = PRODUCTS.filter(p => p.category === 'CHEMICAL').length;
-      document.getElementById('countOthers').innerText = PRODUCTS.filter(p => p.category === 'OTHERS').length;
-
-      // Filter active state label
-      const indicator = document.getElementById('filterIndicator');
-      if (currentSearchTerm || currentCategory !== 'ALL') {
-        indicator.innerText = `[${currentCategory !== 'ALL' ? currentCategory : ''} ${currentSearchTerm ? '"' + currentSearchTerm + '"' : ''}]`;
-      } else {
-        indicator.innerText = '';
-      }
+    // --- Admin Actions ---
+    function openUploadModal() {
+      if(!isAdmin) return;
+      document.getElementById('uploadModal').classList.remove('hidden');
+    }
+    
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.add('hidden');
+      document.getElementById('upId').value = '';
+      document.getElementById('upNameZh').value = '';
+      document.getElementById('upNameEn').value = '';
+      document.getElementById('upGrade').value = '';
     }
 
+    function submitUpload() {
+      const id = document.getElementById('upId').value.trim();
+      const cat = document.getElementById('upCat').value;
+      const nZh = document.getElementById('upNameZh').value.trim();
+      const nEn = document.getElementById('upNameEn').value.trim();
+      const grade = document.getElementById('upGrade').value.trim();
+
+      if(!id || !nZh) {
+        alert("ID and Name are required.");
+        return;
+      }
+
+      const newProd = {
+        id: id, category: cat, nameZh: nZh, nameEn: nEn || nZh, gradeZh: grade, gradeEn: grade
+      };
+
+      PRODUCTS.unshift(newProd); // Add to front of array
+      
+      closeUploadModal();
+      renderApp();
+      
+      // Admin Upload gets +50 Points
+      addScore(50);
+    }
+
+    function deleteProduct(id) {
+      if(!isAdmin) return;
+      if(!confirm("確定要刪除這筆產品資料嗎？ Are you sure you want to delete this?")) return;
+      
+      PRODUCTS = PRODUCTS.filter(p => p.id !== id);
+      renderApp();
+      showToast(I18N[currentLang].toastDel, '🗑️');
+    }
+
+
+    // --- General UI Interactions ---
     function updateStaticTexts() {
       const t = I18N[currentLang];
       document.getElementById('langDisplay').innerText = t.langBtn;
       document.getElementById('headerSubtitle').innerText = t.subtitle;
-      document.getElementById('btnPwaText').innerText = t.pwaText;
-      document.getElementById('heroStatusText').innerText = t.heroStatus;
-      document.getElementById('labelRubberStat').innerText = t.rubberStat;
-      document.getElementById('labelPlasticStat').innerText = t.plasticStat;
-      document.getElementById('labelChemStat').innerText = t.chemStat;
-      document.getElementById('labelOtherStat').innerText = t.otherStat;
-      document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+      document.getElementById('txtLogin').innerText = t.login;
+      document.getElementById('txtLogout').innerText = t.logout;
+      document.getElementById('txtReqLoginTitle').innerText = t.reqLoginTitle;
+      document.getElementById('txtReqLoginDesc').innerText = t.reqLoginDesc;
+      document.getElementById('btnReqLogin').innerText = t.btnReqLogin;
+      document.getElementById('txtAdminTitle').innerText = t.adminTitle;
+      document.getElementById('txtAdminUpload').innerText = t.adminUpload;
+      document.getElementById('txtScoreRules').innerText = t.scoreRules;
+      document.getElementById('txtScoreRuleDl').innerText = t.ruleDl;
+      document.getElementById('txtScoreRuleUp').innerText = t.ruleUp;
+      document.getElementById('searchInput').placeholder = t.searchPl;
       document.getElementById('txtCardView').innerText = t.cardView;
       document.getElementById('txtTableView').innerText = t.tableView;
       document.getElementById('filterLabel').innerText = t.filterLabel;
@@ -1048,23 +751,20 @@
       document.getElementById('catPlasticsText').innerText = t.catPlastics;
       document.getElementById('catChemText').innerText = t.catChem;
       document.getElementById('catOthersText').innerText = t.catOthers;
-      document.getElementById('resultCountLabel').innerText = t.displayCount;
-      document.getElementById('totalCountSuffix').innerText = `/ ${PRODUCTS.length} ${t.totalCountSuffix}`;
-      document.getElementById('thCat').innerText = t.thCat;
       document.getElementById('thName').innerText = t.thName;
       document.getElementById('thGrade').innerText = t.thGrade;
-      document.getElementById('thForm').innerText = t.thForm;
-      document.getElementById('thApp').innerText = t.thApp;
       document.getElementById('thActions').innerText = t.thActions;
-      document.getElementById('emptyTitle').innerText = t.emptyTitle;
-      document.getElementById('emptyDesc').innerText = t.emptyDesc;
-      document.getElementById('btnResetFilters').innerText = t.btnReset;
+      document.getElementById('txtModalUploadTitle').innerText = t.modalUpTitle;
+      document.getElementById('lblUpId').innerText = t.lblUpId;
+      document.getElementById('lblUpCat').innerText = t.lblUpCat;
+      document.getElementById('lblUpNameZh').innerText = t.lblUpNameZh;
+      document.getElementById('lblUpNameEn').innerText = t.lblUpNameEn;
+      document.getElementById('lblUpGrade').innerText = t.lblUpGrade;
+      document.getElementById('btnSubmitUpload').innerText = t.btnSubmitUp;
     }
 
-    // --- Filter & Search Handlers ---
     function setCategory(cat) {
       currentCategory = cat;
-      // Update pill classes
       document.querySelectorAll('.cat-pill').forEach(btn => {
         const match = btn.getAttribute('data-category') === cat;
         if (match) {
@@ -1073,46 +773,19 @@
           btn.className = "cat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all";
         }
       });
-      renderCards();
-      renderTable();
-      updateMetrics();
+      renderApp();
     }
 
     function handleSearch(val) {
       currentSearchTerm = val;
-      const clearBtn = document.getElementById('clearSearchBtn');
-      if (val) {
-        clearBtn.classList.remove('hidden');
-      } else {
-        clearBtn.classList.add('hidden');
-      }
-      renderCards();
-      renderTable();
-      updateMetrics();
-    }
-
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      currentSearchTerm = '';
-      document.getElementById('clearSearchBtn').classList.add('hidden');
-      renderCards();
-      renderTable();
-      updateMetrics();
-    }
-
-    function quickSearch(tag) {
-      document.getElementById('searchInput').value = tag;
-      handleSearch(tag);
-    }
-
-    function resetFilters() {
-      currentCategory = 'ALL';
-      clearSearch();
-      setCategory('ALL');
+      renderApp();
     }
 
     function setViewMode(mode) {
       currentViewMode = mode;
+      
+      if(!currentUser) return; // Don't show if not logged in
+
       const cards = document.getElementById('cardsContainer');
       const table = document.getElementById('tableContainer');
       const btnCards = document.getElementById('btnViewCards');
@@ -1134,63 +807,12 @@
     function toggleLanguage() {
       currentLang = currentLang === 'zh' ? 'en' : 'zh';
       renderApp();
-      showToast(currentLang === 'zh' ? '已切換為繁體中文介面' : 'Switched to English interface');
     }
 
-    // --- Modal Handlers ---
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-
-    function openPwaModal() {
-      openModal('pwaModal');
-    }
-
-    // --- Clipboard Actions ---
-    function copyProductSpec(prodId) {
-      const p = PRODUCTS.find(x => x.id === prodId);
-      if (!p) return;
-      const isZh = currentLang === 'zh';
-
-      const text = `【彥泰企業 IANTEAI 產品規格報價專用】
-產品品名：${p.nameZh} / ${p.nameEn}
-規格牌號：${p.gradeZh}
-外觀包裝：${p.formZh} ｜ ${p.pkgZh}
-檢驗標準：${p.standard}
-核心特性：${p.appZh}
-技術聯絡：彥泰企業 (IANTEAI) 業務技術部`;
-
-      copyToClipboardText(text);
-    }
-
-    function copyToClipboardText(text) {
-      // Fallback for iFrame clipboard restriction
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.top = "-9999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        showToast(I18N[currentLang].toastCopied);
-      } catch (err) {
-        showToast('無法複製至剪貼簿，請手動複製');
-      }
-      document.body.removeChild(textArea);
-    }
-
-    function showToast(msg) {
+    function showToast(msg, icon = '✅') {
       const toast = document.getElementById('toastBox');
-      const text = document.getElementById('toastMessage');
-      text.innerText = msg;
+      document.getElementById('toastMessage').innerText = msg;
+      document.getElementById('toastIcon').innerText = icon;
       toast.classList.remove('translate-y-24', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
       setTimeout(() => {
@@ -1198,11 +820,9 @@
         toast.classList.add('translate-y-24', 'opacity-0');
       }, 3000);
     }
-
-    // --- Init on Window Load ---
-    window.onload = function() {
-      renderApp();
-    };
+    
+    // Init rendering strings
+    updateStaticTexts();
   </script>
 </body>
 </html>
