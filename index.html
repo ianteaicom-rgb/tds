@@ -255,192 +255,7 @@
 
   <!-- ==================== 6. MODALS ==================== -->
 
-  <!-- Modal 1: TDS (Technical Data Sheet) -->
-  <div id="tdsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden transform transition-all my-auto">
-      
-      <!-- Modal Header -->
-      <div class="bg-brand-700 text-white px-5 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-          <span class="p-1.5 bg-white/10 rounded-lg">
-            <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          </span>
-          <div>
-            <h3 id="tdsModalTitle" class="text-base font-bold">產品技術資料規格表 (TDS)</h3>
-            <p id="tdsModalSub" class="text-xs text-sky-200">Technical Data Sheet Specification</p>
-          </div>
-        </div>
-        <button onclick="closeModal('tdsModal')" class="text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <!-- Modal Body Content -->
-      <div class="p-5 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-        <!-- Product Badge Card -->
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <span id="tdsCategoryTag" class="px-2 py-0.5 rounded text-xs font-semibold bg-brand-100 text-brand-700">橡膠體系</span>
-            <h4 id="tdsProdName" class="text-lg font-bold text-slate-800 mt-1">三元乙丙橡膠 EPDM</h4>
-            <p id="tdsGradeLabel" class="text-xs font-mono text-slate-500">代表牌號: 住友 512E / Dow 4725P</p>
-          </div>
-          <div class="text-right">
-            <span class="text-xs text-slate-400">標準代碼</span>
-            <div id="tdsStandardCode" class="text-xs font-mono font-bold text-slate-700">ASTM D-1646 / D-3900</div>
-          </div>
-        </div>
-
-        <!-- Spec Property Table -->
-        <div>
-          <h5 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2" id="tdsSpecTitle">物理及化學特性指標 (Typical Physical Properties)</h5>
-          <div class="border border-slate-200 rounded-xl overflow-hidden">
-            <table class="w-full text-xs text-left">
-              <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-                <tr>
-                  <th class="py-2.5 px-3">檢測項目 Test Item</th>
-                  <th class="py-2.5 px-3">測試標準 Standard</th>
-                  <th class="py-2.5 px-3 text-right">規格數值 Typical Value</th>
-                </tr>
-              </thead>
-              <tbody id="tdsSpecBody" class="divide-y divide-slate-100">
-                <!-- Injected by JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Application & Processing Guide -->
-        <div class="bg-sky-50/60 p-3.5 rounded-xl border border-sky-100 text-xs text-slate-700 space-y-1">
-          <div class="font-bold text-brand-700 flex items-center space-x-1">
-            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span id="tdsAppTitle">加工推薦與應用領域：</span>
-          </div>
-          <p id="tdsAppDesc" class="leading-relaxed pl-5">優良耐臭氧、耐高溫與耐候性。廣泛適用於汽車擋風密封膠條、蒸氣膠管、建築防水捲材及鞋材減震配方。</p>
-        </div>
-      </div>
-
-      <!-- Modal Footer (Action Buttons) -->
-      <div class="bg-slate-100 px-5 py-3.5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-        <button onclick="copyCurrentSpecs()" class="px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center space-x-1.5 transition-all">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-          <span id="btnCopyModalSpec">複製本規格摘要</span>
-        </button>
-
-        <div class="flex items-center space-x-2">
-          <button onclick="simulatePdfDownload('TDS', 'ZH')" class="px-3.5 py-2 rounded-xl bg-brand-700 text-white text-xs font-semibold hover:bg-brand-800 flex items-center space-x-1.5 transition-all shadow-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            <span>下載中文 TDS (PDF)</span>
-          </button>
-          <button onclick="simulatePdfDownload('TDS', 'EN')" class="px-3.5 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 flex items-center space-x-1.5 transition-all shadow-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            <span>Download EN TDS</span>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Modal 2: SDS / MSDS (Safety Data Sheet) -->
-  <div id="sdsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full border border-slate-200 overflow-hidden transform transition-all my-auto">
-      
-      <div class="bg-eco-700 text-white px-5 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-          <span class="p-1.5 bg-white/10 rounded-lg">
-            <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          </span>
-          <div>
-            <h3 class="text-base font-bold" id="sdsModalTitle">化學品安全技術說明書 (SDS / MSDS)</h3>
-            <p class="text-xs text-emerald-200">Safety Data Sheet Summary & Compliance</p>
-          </div>
-        </div>
-        <button onclick="closeModal('sdsModal')" class="text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="p-5 sm:p-6 space-y-4 text-xs text-slate-700 max-h-[75vh] overflow-y-auto">
-        <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-          <div>
-            <span class="font-bold text-eco-700 text-sm" id="sdsProdName">三元乙丙橡膠 EPDM</span>
-            <p class="text-slate-500 font-mono mt-0.5" id="sdsCasNumber">CAS No: 25038-36-2</p>
-          </div>
-          <span class="px-2.5 py-1 bg-white rounded-lg border border-emerald-200 text-emerald-800 font-semibold">GHS 標準認證</span>
-        </div>
-
-        <div class="space-y-3">
-          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <strong class="text-slate-800 block mb-1">1. 化學品危害性分類 (Hazard Classification):</strong>
-            <p id="sdsHazardDesc" class="text-slate-600">依據 GHS 標準，本品在一般常溫常態下非危險化學品。高溫密煉熔融時需保持良好抽風排氣，防止熱裂解煙氣累積。</p>
-          </div>
-
-          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <strong class="text-slate-800 block mb-1">2. 急救措施指引 (First-Aid Measures):</strong>
-            <p id="sdsFirstAid" class="text-slate-600">吸入：若吸入加工煙塵移至空氣清新處。皮膚接觸：常溫無虞；若接觸高溫熔膠，立即以大量冷水沖洗並送醫處理。</p>
-          </div>
-
-          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <strong class="text-slate-800 block mb-1">3. 安全儲存與操作處置 (Handling & Storage):</strong>
-            <p id="sdsStorage" class="text-slate-600">儲存於陰涼通風乾燥之庫房，遠離火源及熱源，避免日光直接照射。堆疊高度建議不超過兩層鐵箱或兩板以策安全。</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-slate-100 px-5 py-3.5 border-t border-slate-200 flex items-center justify-end space-x-2">
-        <button onclick="simulatePdfDownload('SDS', 'ZH')" class="px-3.5 py-2 rounded-xl bg-eco-700 text-white text-xs font-semibold hover:bg-eco-600 flex items-center space-x-1.5 transition-all shadow-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span>下載中文 SDS (PDF)</span>
-        </button>
-        <button onclick="simulatePdfDownload('SDS', 'EN')" class="px-3.5 py-2 rounded-xl bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800 flex items-center space-x-1.5 transition-all shadow-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span>Download EN SDS</span>
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Modal 3: High-Definition Inspection Photo Lightbox -->
-  <div id="photoModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-    <div class="bg-slate-900 rounded-3xl shadow-2xl max-w-3xl w-full border border-slate-800 overflow-hidden transform transition-all my-auto text-white">
-      
-      <div class="p-4 sm:p-5 flex items-center justify-between border-b border-slate-800">
-        <div>
-          <span class="text-xs text-sky-400 font-mono" id="photoCategoryBadge">RUBBER DIVISION</span>
-          <h3 id="photoModalTitle" class="text-base sm:text-lg font-bold text-white">批次實拍照檢視</h3>
-        </div>
-        <button onclick="closeModal('photoModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <!-- Image Canvas Display -->
-      <div class="p-4 sm:p-6 flex flex-col items-center justify-center bg-slate-950">
-        <div id="photoSvgContainer" class="w-full max-w-md aspect-video rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/50 flex items-center justify-center shadow-inner">
-          <!-- Dynamic High Res SVG Artwork Injected here -->
-        </div>
-        <p id="photoCaption" class="text-xs text-slate-400 mt-3 text-center max-w-lg">
-          標準出貨型態：25kg PE膠膜密封封裝，原廠鍍鋅鋼箱/木箱包裝，標籤具備生產批號與檢驗二維碼。
-        </p>
-      </div>
-
-      <!-- Packaging Metadata Strip -->
-      <div class="p-4 bg-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center space-x-3 text-slate-300">
-          <span>📦 <strong class="text-white" id="photoPackagingText">25kg / 袋</strong></span>
-          <span>🚚 <strong class="text-white" id="photoContainerText">標準櫃量: 20~24 MT</strong></span>
-        </div>
-        <button onclick="triggerPhotoDownload()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold transition-all flex items-center space-x-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span id="btnSavePhoto">儲存高解析度實拍圖</span>
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Modal 4: Mobile PWA / Add to Home Screen Modal -->
+  <!-- Modal: Mobile PWA / Add to Home Screen Modal -->
   <div id="pwaModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden p-6 text-slate-800">
       <div class="text-center">
@@ -862,7 +677,6 @@
     let currentCategory = 'ALL';
     let currentSearchTerm = '';
     let currentViewMode = 'cards'; // 'cards' or 'table'
-    let currentActiveProduct = PRODUCTS[0];
 
     // --- UI Strings Dictionary ---
     const I18N = {
@@ -899,8 +713,7 @@
         emptyTitle: '無相符產品',
         emptyDesc: '請嘗試更換搜尋關鍵字或切換分類標籤',
         btnReset: '重設篩選條件',
-        toastCopied: '產品規格已成功複製到剪貼簿！可直接貼至 LINE 或 Email。',
-        toastDownload: '已觸發下載技術手冊'
+        toastCopied: '產品規格已成功複製到剪貼簿！可直接貼至 LINE 或 Email。'
       },
       en: {
         langBtn: '繁中',
@@ -935,8 +748,7 @@
         emptyTitle: 'No Matching Products',
         emptyDesc: 'Try adjusting your search query or switching categories.',
         btnReset: 'Reset Filters',
-        toastCopied: 'Product specifications copied to clipboard! Ready to paste into LINE or Email.',
-        toastDownload: 'Download triggered for'
+        toastCopied: 'Product specifications copied to clipboard! Ready to paste into LINE or Email.'
       }
     };
 
@@ -1087,18 +899,18 @@
           <div class="bg-white rounded-2xl custom-shadow border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
             
             <!-- Top Card Media Header -->
-            <div class="relative aspect-[16/9] w-full bg-slate-900 overflow-hidden cursor-pointer" onclick="openPhotoModal('${p.id}')">
+            <a href="docs/${p.id}-photo.jpg" target="_blank" class="relative aspect-[16/9] w-full bg-slate-900 overflow-hidden cursor-pointer block group/img">
               ${generateProductSvg(p.svgType, p.nameEn)}
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end justify-between p-3.5">
-                <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wide uppercase border ${catBadgeColor} backdrop-blur-md">
+                <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wide uppercase border ${catBadgeColor} backdrop-blur-md bg-white/10">
                   ${catName}
                 </span>
-                <span class="text-[11px] text-white/90 bg-black/50 px-2 py-0.5 rounded-md flex items-center space-x-1 backdrop-blur-sm group-hover:bg-brand-600 transition-colors">
+                <span class="text-[11px] text-white/90 bg-black/50 px-2 py-0.5 rounded-md flex items-center space-x-1 backdrop-blur-sm group-hover/img:bg-brand-600 transition-colors">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                   <span>${t.btnPhoto}</span>
                 </span>
               </div>
-            </div>
+            </a>
 
             <!-- Content Area -->
             <div class="p-4 sm:p-5 flex-1 flex flex-col">
@@ -1134,12 +946,12 @@
 
             <!-- Download Action Buttons Footer -->
             <div class="px-4 pb-4 pt-1 bg-white border-t border-slate-100 grid grid-cols-2 gap-2">
-              <button onclick="openTdsModal('${p.id}')" class="w-full py-2 px-3 rounded-xl bg-brand-700 text-white font-semibold text-xs hover:bg-brand-800 transition-colors flex items-center justify-center space-x-1.5 shadow-sm active:scale-[0.98]">
+              <a href="docs/${p.id}-tds.pdf" target="_blank" class="w-full py-2 px-3 rounded-xl bg-brand-700 text-white font-semibold text-xs hover:bg-brand-800 transition-colors flex items-center justify-center space-x-1.5 shadow-sm active:scale-[0.98] text-center">
                 <span>${t.btnTds}</span>
-              </button>
-              <button onclick="openSdsModal('${p.id}')" class="w-full py-2 px-3 rounded-xl bg-eco-600 text-white font-semibold text-xs hover:bg-eco-700 transition-colors flex items-center justify-center space-x-1.5 shadow-sm active:scale-[0.98]">
+              </a>
+              <a href="docs/${p.id}-sds.pdf" target="_blank" class="w-full py-2 px-3 rounded-xl bg-eco-600 text-white font-semibold text-xs hover:bg-eco-700 transition-colors flex items-center justify-center space-x-1.5 shadow-sm active:scale-[0.98] text-center">
                 <span>${t.btnSds}</span>
-              </button>
+              </a>
             </div>
 
           </div>
@@ -1183,15 +995,15 @@
             <td class="py-3 px-4 text-slate-600 max-w-xs truncate" title="${appDesc}">${appDesc}</td>
             <td class="py-3 px-3 text-center">
               <div class="flex items-center justify-center space-x-1.5">
-                <button onclick="openTdsModal('${p.id}')" title="${t.btnTds}" class="px-2 py-1 rounded bg-brand-50 text-brand-700 hover:bg-brand-100 font-semibold text-[11px] border border-brand-200 transition-colors">
+                <a href="docs/${p.id}-tds.pdf" target="_blank" title="${t.btnTds}" class="px-2 py-1 rounded bg-brand-50 text-brand-700 hover:bg-brand-100 font-semibold text-[11px] border border-brand-200 transition-colors block text-center">
                   TDS
-                </button>
-                <button onclick="openSdsModal('${p.id}')" title="${t.btnSds}" class="px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-[11px] border border-emerald-200 transition-colors">
+                </a>
+                <a href="docs/${p.id}-sds.pdf" target="_blank" title="${t.btnSds}" class="px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-[11px] border border-emerald-200 transition-colors block text-center">
                   SDS
-                </button>
-                <button onclick="openPhotoModal('${p.id}')" title="${t.btnPhoto}" class="px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-[11px] border border-slate-300 transition-colors">
+                </a>
+                <a href="docs/${p.id}-photo.jpg" target="_blank" title="${t.btnPhoto}" class="px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-[11px] border border-slate-300 transition-colors block text-center">
                   📷
-                </button>
+                </a>
               </div>
             </td>
           </tr>
@@ -1336,59 +1148,11 @@
       document.body.style.overflow = '';
     }
 
-    function openTdsModal(prodId) {
-      const p = PRODUCTS.find(x => x.id === prodId) || PRODUCTS[0];
-      currentActiveProduct = p;
-      const isZh = currentLang === 'zh';
-
-      document.getElementById('tdsProdName').innerText = isZh ? `${p.nameZh} (${p.nameEn})` : `${p.nameEn} (${p.nameZh})`;
-      document.getElementById('tdsGradeLabel').innerText = isZh ? `代表牌號: ${p.gradeZh}` : `Grade: ${p.gradeEn}`;
-      document.getElementById('tdsCategoryTag').innerText = isZh ? p.catLabelZh : p.catLabelEn;
-      document.getElementById('tdsStandardCode').innerText = p.standard;
-      document.getElementById('tdsAppDesc').innerText = isZh ? p.appZh : p.appEn;
-
-      // Populate spec rows
-      const specBody = document.getElementById('tdsSpecBody');
-      specBody.innerHTML = p.specs.map(s => `
-        <tr class="hover:bg-slate-50">
-          <td class="py-2 px-3 font-medium text-slate-800">${s.item}</td>
-          <td class="py-2 px-3 font-mono text-slate-500">${s.std}</td>
-          <td class="py-2 px-3 text-right font-mono font-bold text-brand-700">${s.val}</td>
-        </tr>
-      `).join('');
-
-      openModal('tdsModal');
-    }
-
-    function openSdsModal(prodId) {
-      const p = PRODUCTS.find(x => x.id === prodId) || PRODUCTS[0];
-      currentActiveProduct = p;
-      const isZh = currentLang === 'zh';
-
-      document.getElementById('sdsProdName').innerText = isZh ? `${p.nameZh} ${p.nameEn}` : `${p.nameEn}`;
-      document.getElementById('sdsCasNumber').innerText = `CAS Registry Number: ${p.cas}`;
-      openModal('sdsModal');
-    }
-
-    function openPhotoModal(prodId) {
-      const p = PRODUCTS.find(x => x.id === prodId) || PRODUCTS[0];
-      currentActiveProduct = p;
-      const isZh = currentLang === 'zh';
-
-      document.getElementById('photoCategoryBadge').innerText = `${p.category} DIVISION`;
-      document.getElementById('photoModalTitle').innerText = isZh ? `${p.nameZh} - 批次檢驗實拍照` : `${p.nameEn} - Batch Inspection Photo`;
-      document.getElementById('photoSvgContainer').innerHTML = generateProductSvg(p.svgType, p.nameEn);
-      document.getElementById('photoPackagingText').innerText = isZh ? p.pkgZh : p.pkgEn;
-      document.getElementById('photoContainerText').innerText = isZh ? '標準櫃裝: 20~24 MT' : 'Std Container: 20~24 MT';
-
-      openModal('photoModal');
-    }
-
     function openPwaModal() {
       openModal('pwaModal');
     }
 
-    // --- Clipboard & PDF Actions ---
+    // --- Clipboard Actions ---
     function copyProductSpec(prodId) {
       const p = PRODUCTS.find(x => x.id === prodId);
       if (!p) return;
@@ -1403,12 +1167,6 @@
 技術聯絡：彥泰企業 (IANTEAI) 業務技術部`;
 
       copyToClipboardText(text);
-    }
-
-    function copyCurrentSpecs() {
-      if (currentActiveProduct) {
-        copyProductSpec(currentActiveProduct.id);
-      }
     }
 
     function copyToClipboardText(text) {
@@ -1427,53 +1185,6 @@
         showToast('無法複製至剪貼簿，請手動複製');
       }
       document.body.removeChild(textArea);
-    }
-
-    function simulatePdfDownload(type, lang) {
-      const p = currentActiveProduct;
-      const fileName = `${type}_${p.nameEn.replace(/[^a-zA-Z0-9]/g, '_')}_${lang}.pdf`;
-      showToast(`${I18N[currentLang].toastDownload}: ${fileName}`);
-
-      // Create a simulated downloadable PDF payload
-      const content = `IANTEAI ENTERPRISE CO., LTD.
-==============================================
-TECHNICAL DOCUMENT: ${type} (${lang})
-PRODUCT: ${p.nameZh} / ${p.nameEn}
-GRADE: ${p.gradeEn}
-CAS NUMBER: ${p.cas}
-TEST STANDARD: ${p.standard}
-==============================================
-SPECIFICATIONS:
-${p.specs.map(s => `* ${s.item}: ${s.val} [${s.std}]`).join('\n')}
-==============================================
-PACKAGING: ${p.pkgEn}
-STATUS: CERTIFIED FOR SHIPMENT`;
-
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function triggerPhotoDownload() {
-      const p = currentActiveProduct;
-      const fileName = `PHOTO_${p.nameEn.replace(/[^a-zA-Z0-9]/g, '_')}_INSPECTION.svg`;
-      const svgContent = generateProductSvg(p.svgType, p.nameEn);
-      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast(`已下載實拍矢量圖: ${fileName}`);
     }
 
     function showToast(msg) {
