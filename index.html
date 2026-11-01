@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>彥泰企業 IANTEAI - 國際 EPDM 與橡膠技術資料庫</title>
+  <title>彥泰企業 IANTEAI - 彥泰企業橡膠技術資料庫</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -34,7 +34,7 @@
     .custom-shadow { box-shadow: 0 4px 20px -2px rgba(15, 36, 62, 0.08), 0 2px 6px -1px rgba(15, 36, 62, 0.04); }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased pb-16 md:pb-6">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased pb-24 md:pb-12">
 
   <!-- 1. HEADER & AUTH -->
   <header class="glass-nav text-white sticky top-0 z-40 border-b border-brand-800 shadow-md">
@@ -48,7 +48,7 @@
         <div>
           <h1 class="text-base sm:text-xl font-bold tracking-tight text-white flex items-center space-x-2">
             <span>彥泰企業 IANTEAI</span>
-            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hidden md:inline">全系統橡膠與 EPDM 專家資料庫</span>
+            <span id="brandTag" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hidden md:inline">全系統橡膠與 EPDM 專家資料庫</span>
           </h1>
         </div>
       </div>
@@ -95,7 +95,7 @@
       </div>
       <button onclick="openModalForAdd()" class="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold shadow hover:bg-red-700 transition-colors flex items-center space-x-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-        <span id="txtAdminBtn">新增橡膠或再製膠資料</span>
+        <span id="txtAdminBtn">新增橡膠產品資料</span>
       </button>
     </div>
   </section>
@@ -112,7 +112,7 @@
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </span>
-            <input type="text" id="searchInput" oninput="renderTable()" placeholder="快速搜索：輸入品牌 (DOW, Exxon, 彥泰再製)、牌號 (4725P, 3760) 或膠種 (NBR, BR)..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
+            <input type="text" id="searchInput" oninput="renderTable()" placeholder="快速搜索：輸入品牌 (DOW, Exxon)、牌號 (4725P, 4570) 或膠種..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
           </div>
           
           <!-- 膠種大分類快速按鈕 -->
@@ -126,24 +126,25 @@
 
         <!-- 子品牌快速篩選標籤列 -->
         <div id="subFilterBar" class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-100 text-xs">
-          <span class="text-slate-400 self-center mr-1 font-semibold">品牌快速篩選：</span>
-          <button onclick="setSubBrand('ALL')" class="sub-btn px-2.5 py-1 rounded-md bg-brand-600 text-white font-bold" data-b="ALL">全部品牌</button>
+          <span class="text-slate-400 self-center mr-1 font-semibold" id="lblBrandFilter">品牌快速篩選：</span>
+          <button onclick="setSubBrand('ALL')" class="sub-btn px-2.5 py-1 rounded-md bg-brand-600 text-white font-bold" data-b="ALL" id="subAll">全部品牌</button>
           <button onclick="setSubBrand('DOW')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="DOW">DOW</button>
           <button onclick="setSubBrand('EXXON')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="EXXON">ExxonMobil</button>
           <button onclick="setSubBrand('ARLANXEO')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="ARLANXEO">ARLANXEO</button>
           <button onclick="setSubBrand('MITSUI')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="MITSUI">Mitsui</button>
           <button onclick="setSubBrand('KUMHO_SK')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="KUMHO_SK">Kumho / SK</button>
           <button onclick="setSubBrand('LION_LVE')" class="sub-btn px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-b="LION_LVE">LION / LVE</button>
-          <button onclick="setSubBrand('IANTEAI')" class="sub-btn px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold" data-b="IANTEAI">⭐ 彥泰精煉專區</button>
+          <button onclick="setSubBrand('IANTEAI')" class="sub-btn px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold" data-b="IANTEAI" id="subIanteai">⭐ 彥泰精煉專區</button>
         </div>
       </div>
 
-      <!-- Data Table -->
+      <!-- Data Table with Checkbox for Comparison -->
       <div class="bg-white rounded-2xl custom-shadow border border-slate-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm text-slate-700">
             <thead class="bg-slate-100 font-bold border-b border-slate-200 text-slate-600">
               <tr>
+                <th class="py-3.5 px-3 text-center w-12" title="勾選進行牌號並排對比">比對</th>
                 <th class="py-3.5 px-4" id="thCategory">系列分類</th>
                 <th class="py-3.5 px-4" id="thBrand">品牌 / 供應商</th>
                 <th class="py-3.5 px-4" id="thGrade">牌號 (Grade)</th>
@@ -161,7 +162,41 @@
     </div>
   </main>
 
-  <!-- ==================== 4. ADMIN MODAL (ADD & EDIT) ==================== -->
+  <!-- ⚖️ 懸浮比對操作列 (當勾選牌號時浮現) -->
+  <div id="compareBar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-slate-900/95 text-white px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700 hidden items-center space-x-4 backdrop-blur-md transition-all">
+    <div class="flex items-center space-x-2">
+      <span class="text-xl">⚖️</span>
+      <span class="text-sm font-bold" id="compareCounter">已選擇 0 個牌號進行比對</span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button onclick="openComparisonModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all shadow">
+        🔍 開始數據並排對比
+      </button>
+      <button onclick="clearComparison()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-xl transition-all">
+        清除
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 4. 數據並排對比 Modal ==================== -->
+  <div id="comparisonModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-6">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all">
+      <div class="bg-slate-800 text-white flex justify-between items-center px-6 py-4 border-b border-slate-700">
+        <h3 class="text-lg font-bold flex items-center space-x-2">
+          <span>⚖️</span>
+          <span>EPDM 牌號智慧並排對比 (Spec Comparison)</span>
+        </h3>
+        <button onclick="closeComparisonModal()" class="text-slate-400 hover:text-white bg-slate-700 p-2 rounded-full transition-colors">✕</button>
+      </div>
+      <div class="p-6 overflow-x-auto flex-1 bg-slate-50">
+        <table class="w-full text-left text-sm border-collapse bg-white rounded-2xl shadow-sm overflow-hidden" id="compareTable">
+          <!-- Dynamically Injected Comparison Matrix -->
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 5. ADMIN MODAL (ADD & EDIT) ==================== -->
   <div id="adminModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all">
       <div class="bg-slate-800 text-white flex justify-between items-center px-6 py-4 border-b border-slate-700">
@@ -199,7 +234,7 @@
             <input type="text" id="upMooney" placeholder="ML(1+4): 25 或 高白精煉" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500">
           </div>
           <div>
-            <label class="block font-bold mb-1">次要分類標籤 (用於子品牌過濾)</label>
+            <label class="block font-bold mb-1">次要品牌標籤</label>
             <select id="upSubBrand" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500">
               <option value="DOW">DOW</option>
               <option value="EXXON">ExxonMobil</option>
@@ -229,7 +264,7 @@
     </div>
   </div>
 
-  <!-- ==================== 5. FIREBASE & APP LOGIC ==================== -->
+  <!-- ==================== 6. FIREBASE & APP LOGIC ==================== -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBpO_mIskiWSp_iueCV44GEB1bK0QZD-cA",
@@ -252,50 +287,36 @@
     let currentSubBrand = 'ALL';
     let PRODUCTS = [];
     let isEditing = false;
+    let selectedForCompare = []; // 儲存勾選比對的產品 ID
 
-    // --- 完整內建資料庫：國際大廠 EPDM + 彥泰環保再製膠 + 合成橡膠 (BR/SBR/NBR) ---
+    // --- 完整內建資料庫 ---
     const DEFAULT_RUBBER_SYSTEM = [
-      // 1. DOW (Nordel / Nordel IP)
       { id: 'dow-4725p', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 4725P', mooney: '25 (ML 1+4, 125°C)', descZh: '高乙烯、中門尼，優異的耐天候與強度，廣泛應用於汽車密封條與建築防水膜。' },
       { id: 'dow-3720p', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 3720P', mooney: '20 (ML 1+4, 125°C)', descZh: '極低ENB、高乙烯，優異的過氧化物硫化速度與耐熱老化表現。' },
       { id: 'dow-3745p', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 3745P', mooney: '45 (ML 1+4, 125°C)', descZh: '通用型低ENB級別，兼具良好的機械強度與擠出加工性。' },
-      { id: 'dow-4770r', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 4770R', descZh: '超高門尼充油或高分子量級別，適用於高填充、低成本橡膠擠出製品。' },
+      { id: 'dow-4770r', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 4770R', mooney: '70 (ML 1+4, 125°C)', descZh: '超高門尼充油或高分子量級別，適用於高填充、低成本橡膠擠出製品。' },
       { id: 'dow-ip5565', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel IP)', grade: 'Nordel IP 5565', mooney: '65 (ML 1+4, 125°C)', descZh: '先進茂金屬催化，極佳的色澤穩定性與低溫柔軟度。' },
       { id: 'dow-ip3640', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel IP)', grade: 'Nordel IP 3640', mooney: '40 (ML 1+4, 125°C)', descZh: '中低門尼、低結晶度，適合用於熱塑性彈性體(TPE)改性及共混。' },
-
-      // 2. ExxonMobil (Vistalon)
       { id: 'xom-v7500', category: 'EPDM_INT', subBrand: 'EXXON', brand: 'ExxonMobil (埃克森美孚)', grade: 'Vistalon 7500', mooney: '50 (ML 1+4, 125°C)', descZh: '高分子量、高二烯烴含量，具備極佳的混煉與硫化速度，適用於汽車膠管。' },
       { id: 'xom-v8600', category: 'EPDM_INT', subBrand: 'EXXON', brand: 'ExxonMobil (埃克森美孚)', grade: 'Vistalon 8600', mooney: '75 (ML 1+4, 125°C)', descZh: '高門尼、超高ENB，可承載大量油品與碳黑填充，擠出收縮率低。' },
       { id: 'xom-v2504', category: 'EPDM_INT', subBrand: 'EXXON', brand: 'ExxonMobil (埃克森美孚)', grade: 'Vistalon 2504', mooney: '25 (ML 1+4, 125°C)', descZh: '低門尼黏度，加工流動性極佳，常用於塑膠改性與接著劑。' },
       { id: 'xom-v7061', category: 'EPDM_INT', subBrand: 'EXXON', brand: 'ExxonMobil (埃克森美孚)', grade: 'Vistalon 7061', mooney: '60 (ML 1+4, 125°C)', descZh: '高乙烯與高ENB平衡，耐天候與高機械強度兼備。' },
-
-      // 3. ARLANXEO (Keltan)
       { id: 'lan-k5203', category: 'EPDM_INT', subBrand: 'ARLANXEO', brand: 'ARLANXEO (朗盛/阿朗新科)', grade: 'Keltan 5203', mooney: '43 (ML 1+4, 125°C)', descZh: '中等乙烯含量，無定形結構為主，耐寒性與彈性表現優異。' },
       { id: 'lan-k7450', category: 'EPDM_INT', subBrand: 'ARLANXEO', brand: 'ARLANXEO (朗盛/阿朗新科)', grade: 'Keltan 7450', mooney: '80 (ML 1+4, 125°C)', descZh: '高門尼級別，具備極高的高溫抗垂流性，適合複雜異型擠出。' },
       { id: 'lan-k9650', category: 'EPDM_INT', subBrand: 'ARLANXEO', brand: 'ARLANXEO (朗盛/阿朗新科)', grade: 'Keltan 9650c', mooney: '75 (充油膠)', descZh: '油填充高分子量 EPDM，柔軟且耐天候表現頂級。' },
-
-      // 4. Mitsui Chemicals (EPT)
       { id: 'mitsui-3045', category: 'EPDM_INT', subBrand: 'MITSUI', brand: 'Mitsui Chemicals (三井化學)', grade: 'Mitsui EPT 3045', mooney: '57 (ML 1+4, 125°C)', descZh: '低結晶度，柔軟度佳，耐低溫衝擊表現優異。' },
       { id: 'mitsui-4045', category: 'EPDM_INT', subBrand: 'MITSUI', brand: 'Mitsui Chemicals (三井化學)', grade: 'Mitsui EPT 4045', mooney: '45 (ML 1+4, 125°C)', descZh: '標準通用型高ENB級別，硫化速度快、交聯密度高。' },
       { id: 'mitsui-3070', category: 'EPDM_INT', subBrand: 'MITSUI', brand: 'Mitsui Chemicals (三井化學)', grade: 'Mitsui EPT 3070', mooney: '73 (ML 1+4, 125°C)', descZh: '高門尼黏度，具備優異的物理機械強度。' },
-
-      // 5. Kumho / SK
       { id: 'sk-kep650', category: 'EPDM_INT', subBrand: 'KUMHO_SK', brand: 'SK geo centric (韓國SK)', grade: 'KEP-650', mooney: '60 (ML 1+4, 125°C)', descZh: '高乙烯含量，擠出加工時形狀保持力極佳。' },
       { id: 'kumho-kes370', category: 'EPDM_INT', subBrand: 'KUMHO_SK', brand: 'Kumho Polychem (韓國錦湖)', grade: 'KEP-370', mooney: '45 (ML 1+4, 125°C)', descZh: '綜合性能平衡之通用級別，廣泛用於各類工業橡膠配件。' },
-
-      // 6. LION / LVE
       { id: 'lion-epdm-1', category: 'EPDM_INT', subBrand: 'LION_LVE', brand: 'LION (萊昂化學)', grade: 'Lion EPDM L-10', mooney: '55 (ML 1+4, 125°C)', descZh: '日系高品質特種EPDM，針對耐化學品與高抗撕裂強度設計。' },
       { id: 'lve-epdm-sp', category: 'EPDM_INT', subBrand: 'LION_LVE', brand: 'LVE (聯盟特規)', grade: 'LVE-EPDM 540', mooney: '48 (ML 1+4, 125°C)', descZh: '高效能合成 EPDM，具備優異的混煉均勻性與表面光澤度。' },
-
-      // 7. 彥泰精煉環保再製膠系列 (REPRO)
       { id: 'repro-epdm-3760', category: 'REPRO', subBrand: 'IANTEAI', brand: '⭐ 彥泰精煉 (Ianteai Recycled)', grade: 'EPDM 高白精煉再製膠 3760', mooney: '訂製化控制', descZh: '專為環保共混設計，氣味低、分散性佳，可替代部分原生EPDM大幅降低原料成本。' },
       { id: 'repro-epdm-black', category: 'REPRO', subBrand: 'IANTEAI', brand: '⭐ 彥泰精煉 (Ianteai Recycled)', grade: 'EPDM 黑色重載再生膠', mooney: '高門尼重載', descZh: '適用於管帶、橡膠地磚、緩衝墊等高填充製品，性價比極高。' },
       { id: 'repro-nbr-recy', category: 'REPRO', subBrand: 'IANTEAI', brand: '⭐ 彥泰精煉 (Ianteai Recycled)', grade: 'NBR 耐油再製膠', mooney: '中高門尼', descZh: '保有一定耐油與耐磨性，適用於油封底料、工業用管帶。' },
-
-      // 8. 合成橡膠 (BR / SBR / NBR)
       { id: 'br-cis1220', category: 'SYNTHETIC', subBrand: 'OTHER', brand: '合成橡膠 (JSR / Zeon / 齊魯)', grade: '順丁橡膠 (High-cis BR)', mooney: '44 (ML 1+4, 100°C)', descZh: '極佳的彈性、耐磨耗與低溫性能，常用於輪胎胎面與鞋材。' },
-      { id: 'esbr-1502', category: 'SYNTHETIC', subBrand: 'OTHER', brand: '合成橡膠 (Esso / 台橡)', grade: '乳聚丁苯橡膠 (ESBR 1502)', mooney: '52 (ML 1+4, 100°C)', descZh: '非污染型乳聚丁苯橡膠，具備優異的抗張強度與通用加工性。' },
-      { id: 'nbr-n230s', category: 'SYNTHETIC', subBrand: 'OTHER', brand: '合成橡膠 (NANTEX 南帝)', grade: '丁腈橡膠 (NBR N230S / 1042)', mooney: '48 (ML 1+4, 100°C)', descZh: '中高丙烯腈(ACN)含量，兼具優異的耐油性與機械強度。' }
+      { id: 'esbr-1502', category: 'SYNTHETIC', subBrand: 'OTHER', brand: '乳聚丁苯橡膠 (ESBR 1502)', mooney: '52 (ML 1+4, 100°C)', descZh: '非污染型乳聚丁苯橡膠，具備優異的抗張強度與通用加工性。' },
+      { id: 'nbr-n230s', category: 'SYNTHETIC', subBrand: 'OTHER', brand: '丁腈橡膠 (NBR N230S / 1042)', mooney: '48 (ML 1+4, 100°C)', descZh: '中高丙烯腈(ACN)含量，兼具優異的耐油性與機械強度。' }
     ];
 
     const ADMIN_EMAILS = ['marswu@example.com', 'ianteai.com@gmail.com', 'boss@ianteai.com'];
@@ -308,8 +329,9 @@
         txtLogoutBtn: '登出系統',
         txtAdminTitle: '總管理員控制台',
         txtAdminBtn: '新增橡膠產品資料',
-        searchPh: '快速搜索：輸入品牌 (DOW, Exxon, 彥泰再製)、牌號 (4725P, 3760) 或膠種 (NBR, BR)...',
+        searchPh: '快速搜索：輸入品牌 (DOW, Exxon, 彥泰再製)、牌號 (4725P, 3760) 或膠種...',
         catAll: '全部', catEpdmInt: '🌍 國際大廠 EPDM', catRepro: '♻️ 彥泰環保再製膠', catSynthetic: '🧪 合成橡膠 (BR/SBR/NBR)',
+        lblBrandFilter: '品牌快速篩選：', subAll: '全部品牌', subIanteai: '⭐ 彥泰精煉專區',
         thCategory: '系列分類', thBrand: '品牌 / 供應商', thGrade: '牌號 (Grade)', thMooney: '門尼黏度 / 特性', thApp: '核心應用與說明', thAction: '技術操作',
         emptyData: '尚無相符的橡膠或牌號資料',
         modalAddTitle: '新增橡膠產品資料',
@@ -325,6 +347,7 @@
         txtAdminBtn: 'Add Rubber Product',
         searchPh: 'Quick search: brand, grade, EPDM, NBR, Repro...',
         catAll: 'All', catEpdmInt: '🌍 Global EPDM', catRepro: '♻️ Recycled', catSynthetic: '🧪 Synthetic Rubber',
+        lblBrandFilter: 'Brand Filter:', subAll: 'All Brands', subIanteai: '⭐ Ianteai Recycled',
         thCategory: 'Category', thBrand: 'Brand / Supplier', thGrade: 'Grade', thMooney: 'Mooney / Spec', thApp: 'Description', thAction: 'Actions',
         emptyData: 'No rubber records found.',
         modalAddTitle: 'Add Rubber Product',
@@ -335,25 +358,35 @@
 
     function applyLanguage() {
       const t = I18N[currentLang];
-      document.getElementById('langDisplay').innerText = t.langBtn;
-      document.getElementById('brandTag').innerText = t.brandTag;
-      document.getElementById('txtLoginBtn').innerText = t.txtLoginBtn;
-      document.getElementById('txtLogoutBtn').innerText = t.txtLogoutBtn;
-      document.getElementById('txtAdminTitle').innerText = t.txtAdminTitle;
-      document.getElementById('txtAdminBtn').innerText = t.txtAdminBtn;
-      
-      document.getElementById('searchInput').placeholder = t.searchPh;
-      document.getElementById('catAll').innerText = t.catAll;
-      document.getElementById('catEpdmInt').innerText = t.catEpdmInt;
-      document.getElementById('catRepro').innerText = t.catRepro;
-      document.getElementById('catSynthetic').innerText = t.catSynthetic;
+      const elMap = {
+        'langDisplay': t.langBtn,
+        'brandTag': t.brandTag,
+        'txtLoginBtn': t.txtLoginBtn,
+        'txtLogoutBtn': t.txtLogoutBtn,
+        'txtAdminTitle': t.txtAdminTitle,
+        'txtAdminBtn': t.txtAdminBtn,
+        'catAll': t.catAll,
+        'catEpdmInt': t.catEpdmInt,
+        'catRepro': t.catRepro,
+        'catSynthetic': t.catSynthetic,
+        'lblBrandFilter': t.lblBrandFilter,
+        'subAll': t.subAll,
+        'subIanteai': t.subIanteai,
+        'thCategory': t.thCategory,
+        'thBrand': t.thBrand,
+        'thGrade': t.thGrade,
+        'thMooney': t.thMooney,
+        'thApp': t.thApp,
+        'thAction': t.thAction
+      };
 
-      document.getElementById('thCategory').innerText = t.thCategory;
-      document.getElementById('thBrand').innerText = t.thBrand;
-      document.getElementById('thGrade').innerText = t.thGrade;
-      document.getElementById('thMooney').innerText = t.thMooney;
-      document.getElementById('thApp').innerText = t.thApp;
-      document.getElementById('thAction').innerText = t.thAction;
+      for (const [id, val] of Object.entries(elMap)) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+      }
+
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.placeholder = t.searchPh;
 
       renderTable();
     }
@@ -373,10 +406,17 @@
 
     auth.onAuthStateChanged(user => {
       isAdmin = user && ADMIN_EMAILS.includes(user.email);
-      document.getElementById('btnLogin').classList.toggle('hidden', !!user);
-      document.getElementById('userProfile').classList.toggle('hidden', !user);
-      document.getElementById('adminPanel').classList.toggle('hidden', !isAdmin);
-      if (user) document.getElementById('userName').innerText = user.displayName || 'Admin';
+      const btnLogin = document.getElementById('btnLogin');
+      if (btnLogin) btnLogin.classList.toggle('hidden', !!user);
+
+      const userProfile = document.getElementById('userProfile');
+      if (userProfile) userProfile.classList.toggle('hidden', !user);
+
+      const adminPanel = document.getElementById('adminPanel');
+      if (adminPanel) adminPanel.classList.toggle('hidden', !isAdmin);
+
+      const userName = document.getElementById('userName');
+      if (user && userName) userName.innerText = user.displayName || 'Admin';
       renderTable();
     });
 
@@ -414,6 +454,86 @@
       }
     }
 
+    // --- Comparison Logic ---
+    function toggleCompare(id) {
+      const idx = selectedForCompare.indexOf(id);
+      if (idx > -1) {
+        selectedForCompare.splice(idx, 1);
+      } else {
+        if (selectedForCompare.length >= 4) {
+          alert('最多同時比對 4 個牌號！');
+          document.getElementById(`chk_${id}`).checked = false;
+          return;
+        }
+        selectedForCompare.push(id);
+      }
+      updateCompareBar();
+    }
+
+    function updateCompareBar() {
+      const bar = document.getElementById('compareBar');
+      const counter = document.getElementById('compareCounter');
+      if (selectedForCompare.length > 0) {
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+        counter.innerText = `已選擇 ${selectedForCompare.length} 個牌號進行比對 (最多4個)`;
+      } else {
+        bar.classList.remove('flex');
+        bar.classList.add('hidden');
+      }
+    }
+
+    function clearComparison() {
+      selectedForCompare = [];
+      document.querySelectorAll('.compare-chk').forEach(chk => chk.checked = false);
+      updateCompareBar();
+    }
+
+    function openComparisonModal() {
+      if (selectedForCompare.length < 2) {
+        alert('請至少勾選 2 個牌號進行數據並排對比！');
+        return;
+      }
+
+      const table = document.getElementById('compareTable');
+      const items = PRODUCTS.filter(p => selectedForCompare.includes(p.id));
+
+      let html = `
+        <thead>
+          <tr class="bg-slate-100 border-b border-slate-200 text-slate-700">
+            <th class="py-3.5 px-4 font-bold w-36">比較項目</th>
+            ${items.map(i => `<th class="py-3.5 px-4 font-extrabold text-brand-900">${i.grade} <span class="block text-xs font-normal text-slate-500">${i.brand}</span></th>`).join('')}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr>
+            <td class="py-3 px-4 font-bold bg-slate-50 text-slate-600">系列分類</td>
+            ${items.map(i => `<td class="py-3 px-4 font-semibold text-slate-700">${i.category}</td>`).join('')}
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold bg-slate-50 text-slate-600">供應商 / 品牌</td>
+            ${items.map(i => `<td class="py-3 px-4 text-slate-700">${i.brand}</td>`).join('')}
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold bg-slate-50 text-slate-600">門尼黏度 / 特性</td>
+            ${items.map(i => `<td class="py-3 px-4 font-mono font-bold text-brand-700">${i.mooney || '-'}</td>`).join('')}
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold bg-slate-50 text-slate-600">核心應用與說明</td>
+            ${items.map(i => `<td class="py-3 px-4 text-xs text-slate-600 leading-relaxed">${i.descZh || '-'}</td>`).join('')}
+          </tr>
+        </tbody>
+      `;
+      table.innerHTML = html;
+      document.getElementById('comparisonModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeComparisonModal() {
+      document.getElementById('comparisonModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
     // --- Filters ---
     function setCat(cat) {
       currentCategory = cat;
@@ -421,13 +541,14 @@
         btn.className = (btn.dataset.c === cat) ? "cat-btn px-3.5 py-2 rounded-xl bg-brand-700 text-white font-bold shadow-sm transition-all" : "cat-btn px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all font-medium";
       });
       
-      // 控制子品牌列的顯示
       const subBar = document.getElementById('subFilterBar');
-      if (cat === 'EPDM_INT') {
-        subBar.classList.remove('hidden');
-      } else {
-        subBar.classList.add('hidden');
-        currentSubBrand = 'ALL';
+      if (subBar) {
+        if (cat === 'EPDM_INT') {
+          subBar.classList.remove('hidden');
+        } else {
+          subBar.classList.add('hidden');
+          currentSubBrand = 'ALL';
+        }
       }
       renderTable();
     }
@@ -442,15 +563,17 @@
 
     // --- Table Rendering & Realtime Search ---
     function renderTable() {
-      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const searchInput = document.getElementById('searchInput');
+      const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
       const tbody = document.getElementById('tableBody');
+      if (!tbody) return;
+
       const t = I18N[currentLang];
       
       const filtered = PRODUCTS.filter(p => {
         if (currentCategory !== 'ALL' && p.category !== currentCategory) return false;
         if (currentCategory === 'EPDM_INT' && currentSubBrand !== 'ALL' && p.subBrand !== currentSubBrand) return false;
         
-        // 智慧即時搜索：同時比對品牌、牌號、代碼、分類及物性說明
         if (q) {
           const matchBrand = (p.brand || '').toLowerCase().includes(q);
           const matchGrade = (p.grade || '').toLowerCase().includes(q);
@@ -463,7 +586,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-400 font-medium">${t.emptyData}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-slate-400 font-medium">${t.emptyData}</td></tr>`;
         return;
       }
 
@@ -477,6 +600,7 @@
           badgeHtml = '<span class="px-2.5 py-1 rounded text-xs font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">🧪 合成橡膠</span>';
         }
 
+        const isChecked = selectedForCompare.includes(p.id) ? 'checked' : '';
         const adminBtns = isAdmin ? `
           <button onclick="openModalForEdit('${p.id}', '${p.category}', '${p.subBrand || 'OTHER'}', '${(p.brand || '').replace(/'/g, "\\'")}', '${(p.grade || '').replace(/'/g, "\\'")}', '${(p.mooney || '').replace(/'/g, "\\'")}', '${(p.descZh || '').replace(/'/g, "\\'")}')" class="px-2 py-1 bg-amber-50 text-amber-600 rounded text-xs hover:bg-amber-100 border border-amber-200 font-bold">${t.btnEdit}</button>
           <button onclick="handleDelete('${p.id}')" class="px-2 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100 border border-red-200 font-bold">${t.btnDelete}</button>
@@ -484,6 +608,9 @@
 
         return `
           <tr class="hover:bg-brand-50/50 transition-colors border-b border-slate-50">
+            <td class="py-4 px-3 text-center">
+              <input type="checkbox" id="chk_${p.id}" class="compare-chk w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500 cursor-pointer" onclick="toggleCompare('${p.id}')" ${isChecked}>
+            </td>
             <td class="py-4 px-4">${badgeHtml}</td>
             <td class="py-4 px-4 font-bold text-slate-700">${p.brand}</td>
             <td class="py-4 px-4 font-mono text-sm text-brand-900 font-extrabold">${p.grade}</td>
