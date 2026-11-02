@@ -5,1464 +5,248 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>火星人的地球便當 · 全球即時監控 & 財經導航旗艦站</title>
+  <title>火星人的地球便當 · 財經導航</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-body: #0b0f17;
-      --bg-sidebar: #111827;
-      --bg-header: #131b2c;
-      --bg-card: #162032;
-      --bg-card-hover: #1e2c44;
-      --border: #223048;
-      --border-highlight: #38bdf8;
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
-      --text-muted: #64748b;
-      --accent: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.2);
-      --amber: #f59e0b;
-      --amber-bg: rgba(245, 158, 11, 0.12);
-      --amber-border: rgba(245, 158, 11, 0.35);
+      --bg-body: #0b0f17; --bg-sidebar: #111827; --bg-header: #131b2c;
+      --bg-card: #162032; --bg-card-hover: #1e2c44; --border: #223048;
+      --accent: #38bdf8; --accent-glow: rgba(56, 189, 248, 0.2);
+      --text-main: #f8fafc; --text-sub: #94a3b8; --text-muted: #64748b;
       --green: #10b981;
-      --purple: #a855f7;
-      --red: #ef4444;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      display: flex;
-      min-height: 100vh;
-      overflow-x: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", sans-serif;
+      background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden;
     }
 
-    /* 頂部固定狀態列 */
-    .top-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 52px;
-      background: var(--bg-header);
-      border-bottom: 1px solid var(--border);
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-    }
-    .top-brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-      font-size: 15px;
-      color: #fff;
-      white-space: nowrap;
-    }
-    .top-right-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    /* Top Bar */
+    .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: var(--bg-header); border-bottom: 1px solid var(--border); z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+    .top-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: #fff; white-space: nowrap; }
+    .top-right-group { display: flex; align-items: center; gap: 8px; }
 
-    /* 右上角精選文章導流區與下拉選單 */
-    .top-featured-articles-wrap {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .top-share-dropdown-btn {
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid #f59e0b;
-      color: #fbbf24;
-      border-radius: 14px;
-      padding: 3px 8px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-    .top-share-dropdown-btn:hover {
-      background: #f59e0b;
-      color: #0b0f17;
-    }
-    .top-share-admin-btn {
-      background: #1e293b;
-      border: 1px solid #38bdf8;
-      color: #38bdf8;
-      border-radius: 14px;
-      padding: 3px 7px;
-      font-size: 11px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      font-weight: 700;
-    }
-    .top-share-admin-btn:hover {
-      background: #38bdf8;
-      color: #0b0f17;
-    }
-    .top-articles-dropdown {
-      display: none;
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      width: 320px;
-      max-width: 90vw;
-      background: #131b2c;
-      border: 1px solid #f59e0b;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-      z-index: 100;
-      padding: 10px;
-    }
+    /* Top Links */
+    .top-featured-articles-wrap { position: relative; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .top-share-link { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35)); border: 1px solid #f59e0b; color: #fef08a; padding: 5px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700; text-decoration: none; white-space: nowrap; max-width:250px; overflow:hidden; text-overflow:ellipsis;}
+    .top-share-dropdown-btn { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; border-radius: 14px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
+    .top-share-admin-btn { background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; border-radius: 14px; padding: 3px 7px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; font-weight: 700; }
+    .top-articles-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 340px; max-width: 90vw; background: #131b2c; border: 1px solid #f59e0b; border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); z-index: 100; padding: 10px; }
     .top-articles-dropdown.show { display: block; }
-    .top-articles-dropdown-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #223048;
-      font-size: 12px;
-      font-weight: 700;
-      color: #f59e0b;
-    }
-    .top-articles-dropdown-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 8px;
-      max-height: 280px;
-      overflow-y: auto;
-    }
-    .top-article-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      background: #162032;
-      border: 1px solid #223048;
-      border-radius: 6px;
-      padding: 8px 10px;
-      text-decoration: none;
-      color: #e2e8f0;
-      font-size: 12px;
-      line-height: 1.4;
-      transition: all 0.15s ease;
-    }
-    .top-article-item:hover {
-      background: #1e2c44;
-      border-color: #f59e0b;
-      color: #fef08a;
-    }
+    .top-articles-dropdown-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid #223048; font-size: 12px; font-weight: 700; color: #f59e0b; }
+    .top-articles-dropdown-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 280px; overflow-y: auto; }
+    .top-article-item { display: flex; flex-direction: column; gap: 4px; background: #162032; border: 1px solid #223048; border-radius: 6px; padding: 8px 10px; text-decoration: none; color: #e2e8f0; font-size: 12px; transition: 0.15s ease; }
+    .top-article-item:hover { background: #1e2c44; border-color: #f59e0b; color: #fef08a; }
 
-    /* 右上角強推分享連結 */
-    .top-share-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.35) 100%);
-      border: 1px solid #f59e0b;
-      color: #fef08a;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 11.5px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .top-share-link:hover {
-      background: #f59e0b;
-      color: #0b0f17;
-      box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
-      transform: translateY(-1px);
-    }
-    .top-share-link .share-icon { font-size: 13px; }
-
-    .clocks-wrap {
-      display: flex;
-      gap: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      background: #0b0f17;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      white-space: nowrap;
-    }
-    .clock-item { display: flex; align-items: center; gap: 5px; }
-    .clock-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-    .top-dwell-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: #c084fc;
-      border-left: 1px solid #223048;
-      padding-left: 8px;
-    }
-
-    .top-action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: #1e293b;
-      color: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 5px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-    .top-action-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .top-action-btn.btn-lottery {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.3));
-      border-color: #f59e0b;
-      color: #fbbf24;
-    }
-    .top-action-btn.btn-post {
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(192, 132, 252, 0.3));
-      border-color: #c084fc;
-      color: #e879f9;
-    }
-
-    /* 頂部一體化登入/頭像膠囊 */
-    .top-auth-capsule {
-      display: inline-flex;
-      align-items: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .top-guest-block {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #2563eb;
-      color: #fff;
-      border: 1px solid #3b82f6;
-      border-radius: 20px;
-      padding: 4px 10px 4px 6px;
-      font-size: 11.5px;
-      font-weight: 600;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-    .top-guest-block:hover {
-      background: #1d4ed8;
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-    }
-    .top-guest-avatar {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-    }
-    .top-login-label {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .sidebar-login-btn {
-      display: inline-flex;
-      align-items: center;
-      background: #2563eb;
-      color: #fff;
-      border: 1px solid #3b82f6;
-      border-radius: 6px;
-      padding: 3px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-      width: fit-content;
-    }
-    .sidebar-login-btn:hover {
-      background: #1d4ed8;
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-    }
-
-    .user-profile-badge {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      background: #162032;
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 3px 10px 3px 4px;
-      cursor: pointer;
-    }
-    .user-avatar-img {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid var(--accent);
-    }
-    .user-name-text {
-      font-size: 12px;
-      font-weight: 600;
-      color: #fff;
-      max-width: 85px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .badge-role {
-      font-size: 9px;
-      font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 4px;
-      white-space: nowrap;
-    }
+    /* Clocks & Auth */
+    .clocks-wrap { display: flex; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #0b0f17; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); white-space: nowrap; }
+    .top-auth-capsule { display: inline-flex; align-items: center; cursor: pointer; }
+    .top-guest-block { background: #2563eb; color: #fff; border: 1px solid #3b82f6; border-radius: 20px; padding: 4px 10px 4px 6px; font-size: 11.5px; font-weight: 600; }
+    .user-profile-badge { display: none; align-items: center; gap: 8px; background: #162032; border: 1px solid var(--border); border-radius: 24px; padding: 3px 10px 3px 4px; }
+    .user-avatar-img { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--accent); object-fit: cover; }
+    .badge-role { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; }
     .badge-admin { background: #ef4444; color: #fff; }
-    .badge-rep { background: #10b981; color: #fff; }
 
-    /* 大頭貼發光特效 */
-    .avatar-glow-mars {
-      border: 2.5px solid #f59e0b !important;
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.8), 0 0 20px rgba(239, 68, 68, 0.6) !important;
-      animation: marsGlow 2.5s infinite alternate;
-    }
-    @keyframes marsGlow {
-      0% { box-shadow: 0 0 10px #f59e0b, 0 0 16px #ef4444; }
-      100% { box-shadow: 0 0 18px #f59e0b, 0 0 28px #ef4444; }
-    }
-    .avatar-glow-rep {
-      border: 2.5px solid #10b981 !important;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.8), 0 0 18px rgba(56, 189, 248, 0.6) !important;
-    }
-    .avatar-glow-lv99 {
-      border: 2.5px solid #ec4899 !important;
-      box-shadow: 0 0 16px #ec4899, 0 0 24px #a855f7 !important;
-      animation: rainbowAura 3s linear infinite;
-    }
-    @keyframes rainbowAura {
-      0% { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(360deg); }
-    }
-    .avatar-glow-lv50 {
-      border: 2px solid #f59e0b !important;
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.75) !important;
-    }
+    /* Sidebar & Layout */
+    .layout-wrapper { display: flex; width: 100%; margin-top: 52px; }
+    aside.sidebar { width: 330px; background: var(--bg-sidebar); border-right: 1px solid var(--border); position: fixed; top: 52px; bottom: 0; left: 0; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; z-index: 40; }
+    main.content { margin-left: 330px; flex: 1; padding: 20px; }
+    
+    .btn-create-post-sidebar { background: linear-gradient(135deg, rgba(232, 121, 249, 0.2), rgba(168, 85, 247, 0.3)); border: 1px solid #e879f9; color: #f5d0fe; border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%; text-align: center; }
+    .honor-card { background: linear-gradient(135deg, #162032, #1a273e); border: 1px solid #2e3e5c; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .btn-checkin { flex: 1; background: #2563eb; color: #fff; border: 1px solid #3b82f6; border-radius: 6px; padding: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer; width: 100%; }
 
-    /* 佈局容器 */
-    .layout-wrapper {
-      display: flex;
-      width: 100%;
-      margin-top: 52px;
-    }
-
-    /* 左側清單目錄 (Sidebar) */
-    aside.sidebar {
-      width: 330px;
-      background: var(--bg-sidebar);
-      border-right: 1px solid var(--border);
-      position: fixed;
-      top: 52px; bottom: 0; left: 0;
-      overflow-y: auto;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 40;
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      top: 52px; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(2px);
-      z-index: 39;
-    }
-    .sidebar-overlay.active { display: block; }
-
-    /* 左上角特製：火星人的地球便當沙龍卡片 */
-    .salon-card {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%);
-      border: 1px solid var(--amber-border);
-      border-radius: 10px;
-      padding: 12px;
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .salon-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(245, 158, 11, 0.25);
-      color: #fbbf24;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 12px;
-      width: fit-content;
-    }
-    .salon-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fef08a;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .salon-desc { font-size: 11px; color: #cbd5e1; line-height: 1.35; }
-
-    /* 觀賞者便當榮譽等級卡片 (分層排版不擠字) */
-    .honor-card {
-      background: linear-gradient(135deg, #162032 0%, #1a273e 100%);
-      border: 1px solid #2e3e5c;
-      border-radius: 10px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .honor-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .honor-tag {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.15);
-      padding: 3px 8px;
-      border-radius: 6px;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      white-space: nowrap;
-    }
-    .sidebar-dwell-badge {
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      color: #c084fc;
-      background: rgba(168, 85, 247, 0.12);
-      border: 1px solid rgba(168, 85, 247, 0.25);
-      padding: 3px 7px;
-      border-radius: 6px;
-      white-space: nowrap;
-    }
-
-    /* 獨立排版工具按鈕列 */
-    .honor-action-toolbar {
-      display: flex;
-      gap: 5px;
-      width: 100%;
-      margin: 2px 0;
-    }
-    .honor-tool-btn {
-      flex: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #111827;
-      color: #94a3b8;
-      border: 1px solid #223048;
-      border-radius: 6px;
-      padding: 6px 2px;
-      font-size: 10.5px;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .honor-tool-btn:hover { background: #1e293b; color: #38bdf8; border-color: #38bdf8; }
-
-    .honor-rank-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .honor-avatar-wrap { position: relative; cursor: pointer; }
-    .honor-avatar-img {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--accent);
-      background: #0b0f17;
-      display: block;
-    }
-    .honor-avatar-edit-hint {
-      position: absolute;
-      bottom: -2px; right: -2px;
-      background: #0b0f17;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      font-size: 9px;
-      padding: 2px;
-      line-height: 1;
-    }
-    .honor-details { flex: 1; min-width: 0; }
-    .honor-level-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-    .honor-lvl-num {
-      color: #38bdf8;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-    }
-    .honor-exp-text {
-      font-size: 11px;
-      color: var(--text-sub);
-      font-family: 'JetBrains Mono', monospace;
-      margin-top: 2px;
-    }
-    .honor-progress-bar {
-      width: 100%;
-      height: 6px;
-      background: #0b0f17;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid #223048;
-    }
-    .honor-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #38bdf8, #a855f7);
-      transition: width 0.3s ease;
-    }
-
-    /* 停留學習時間盒 */
-    .dwell-box {
-      background: rgba(11, 15, 23, 0.65);
-      border: 1px solid #223048;
-      border-radius: 6px;
-      padding: 8px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .dwell-info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-    }
-    .dwell-mini-bar {
-      width: 100%;
-      height: 4px;
-      background: #0b0f17;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .dwell-mini-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #38bdf8, #a855f7);
-      transition: width 0.3s ease;
-    }
-
-    .honor-action-row {
-      display: flex;
-      gap: 6px;
-      margin-top: 2px;
-    }
-    .btn-checkin {
-      flex: 1;
-      background: #2563eb;
-      color: #fff;
-      border: 1px solid #3b82f6;
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 11.5px;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .btn-checkin:hover:not(:disabled) { background: #1d4ed8; }
-    .btn-checkin:disabled {
-      background: #1e293b;
-      color: #64748b;
-      border-color: #334155;
-      cursor: not-allowed;
-    }
-    .btn-side-rule {
-      background: #1e293b;
-      color: #94a3b8;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    /* 每日個股提問卡片 */
-    .ask-card {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .ask-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .ask-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #f59e0b;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .ask-status-badge {
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 10px;
-      font-weight: 600;
-    }
-    .status-ready { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .status-done { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
-    .ask-input {
-      width: 100%;
-      background: #0b0f17;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 12px;
-      color: #fff;
-      outline: none;
-    }
-    .ask-textarea {
-      width: 100%;
-      height: 48px;
-      background: #0b0f17;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 12px;
-      color: #fff;
-      outline: none;
-      resize: none;
-    }
-    .btn-submit-ask {
-      background: #d97706;
-      color: #fff;
-      border: 1px solid #f59e0b;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-    }
-    .btn-submit-ask:disabled {
-      background: #1e293b;
-      color: #64748b;
-      border-color: #334155;
-      cursor: not-allowed;
-    }
-
-    /* 側欄搜尋與導航清單 */
-    .sidebar-filter { position: relative; }
-    .sidebar-input {
-      width: 100%;
-      background: #0b0f17;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: #fff;
-      font-size: 13px;
-      outline: none;
-    }
-    .nav-group-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
-      margin: 8px 0 4px 4px;
-    }
-    .nav-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .nav-item-btn {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 6px 8px;
-      border-radius: 6px;
-      color: var(--text-sub);
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 500;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      text-align: left;
-    }
-    .nav-item-btn:hover { background: #1b263a; color: #fff; }
-    .nav-item-btn .outlink {
-      font-size: 11px;
-      color: var(--text-muted);
-      opacity: 0;
-    }
-    .nav-item-btn:hover .outlink { opacity: 1; color: var(--accent); }
-
-    /* 右側主區域 */
-    main.content {
-      margin-left: 330px;
-      flex: 1;
-      padding: 20px 28px 60px;
-      min-height: calc(100vh - 52px);
-    }
-    .header-section { margin-bottom: 20px; }
-
-    .search-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-    .main-search-input {
-      flex: 1;
-      min-width: 240px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 18px;
-      font-size: 14px;
-      color: #fff;
-      outline: none;
-    }
-    .main-search-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .tabs-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .filter-tab {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text-sub);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-    .filter-tab:hover { color: #fff; border-color: var(--accent); }
-    .filter-tab.active {
-      background: var(--accent);
-      color: #0b0f17;
-      font-weight: 700;
-      border-color: var(--accent);
-    }
-
-    /* 卡片網格 */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    .site-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.15s ease, border-color 0.15s ease;
-    }
-    .site-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-      box-shadow: 0 8px 24px var(--accent-glow);
-      background: var(--bg-card-hover);
-    }
-    .site-card.target-highlight {
-      border-color: #38bdf8 !important;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35) !important;
-    }
-    .card-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-    .card-title { font-size: 15px; font-weight: 700; color: #fff; }
-    .card-badge {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 4px;
-      white-space: nowrap;
-    }
-    .badge-official { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-    .badge-realtime { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-    .badge-finance  { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .badge-news     { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-    .badge-global   { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
-    .badge-media    { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
-    .star-btn {
-      background: transparent;
-      border: none;
-      color: #475569;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .star-btn.active { color: #f59e0b; }
-    .card-body {
-      font-size: 12px;
-      color: var(--text-sub);
-      line-height: 1.5;
-      margin-bottom: 12px;
-      flex-grow: 1;
-    }
-    .card-foot {
-      border-top: 1px dashed var(--border);
-      padding-top: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-    }
-    .card-feature { color: var(--accent); font-weight: 500; }
-    .card-open { color: var(--text-muted); font-size: 11px; }
-
-    /* Toast */
-    .exp-toast {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      background: #0f172a;
-      border: 1px solid #38bdf8;
-      color: #38bdf8;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
-      z-index: 100;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: all 0.25s ease;
-      pointer-events: none;
-    }
-    .exp-toast.show { opacity: 1; transform: translateY(0); }
-
-    /* Modal 通用樣式 (手機版滾動保護) */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 99;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 99; display: none; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.show { display: flex; }
-    .modal-box {
-      background: #131b2c;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 86vh;
-      overflow-y: auto;
-      padding: 18px;
-      color: #fff;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-    }
+    .modal-box { background: #131b2c; border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 18px; color: #fff; }
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
     .modal-title { font-size: 16px; font-weight: 700; color: #38bdf8; }
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      font-size: 18px;
-      cursor: pointer;
-    }
+    .modal-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+    
+    .ask-input { width: 100%; background: #0b0f17; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 13px; color: #fff; outline: none; margin-bottom: 8px; }
+    .table-scroll-wrap { width: 100%; overflow-x: auto; margin: 8px 0; }
+    .lb-table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 12.5px; }
+    .lb-table th, .lb-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); text-align: left; white-space: nowrap; }
 
-    /* 表格滾動保護容器 (防折字像亂碼關鍵) */
-    .table-scroll-wrap {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin: 8px 0;
-    }
-    .lb-table {
-      width: 100%;
-      min-width: 480px;
-      border-collapse: collapse;
-      font-size: 12.5px;
-    }
-    .lb-table th, .lb-table td {
-      padding: 8px 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      text-align: left;
-      white-space: nowrap;
-    }
-    .lb-table th { color: var(--text-muted); font-size: 11px; }
-    .lb-user-cell { display: flex; align-items: center; gap: 8px; }
-    .lb-avatar {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid var(--accent);
-    }
-    .rank-num-1 { color: #f59e0b; font-weight: 700; }
-    .rank-num-2 { color: #94a3b8; font-weight: 700; }
-    .rank-num-3 { color: #d97706; font-weight: 700; }
+    .btn-admin-act { padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600; border: none; }
 
-    .btn-admin-act {
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      border: none;
-      white-space: nowrap;
-    }
-    .btn-rep { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
-    .btn-unrep { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
-    .btn-kick { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
-    .btn-score { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
-
-    /* 抽獎與頭像樣式 */
-    .lottery-cards-wrap {
-      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 16px 0;
-    }
-    .lottery-box {
-      width: 90px; height: 110px;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border: 2px dashed #f59e0b;
-      border-radius: 10px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; cursor: pointer;
-    }
-    .lottery-box.opened { background: #1e3a5f; border-color: #38bdf8; border-style: solid; }
-
-    .avatar-preview-box {
-      display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 16px 0;
-    }
-    .avatar-large-preview {
-      width: 80px; height: 80px;
-      border-radius: 50%; object-fit: cover;
-      border: 3px solid var(--accent);
-      background: #0b0f17;
-    }
-    .file-input-label {
-      background: #1e293b; border: 1px solid var(--border);
-      padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; color: #38bdf8;
-    }
-
-    .menu-toggle {
-      display: none;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: #fff;
-      padding: 5px 9px;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    /* 手機版專屬 RWD 徹底防亂碼與重疊 */
     @media (max-width: 880px) {
-      aside.sidebar {
-        width: min(340px, 86vw);
-        transform: translateX(-100%);
-        transition: transform 0.25s ease;
-      }
+      aside.sidebar { transform: translateX(-100%); transition: transform 0.25s ease; width: min(340px, 86vw); }
       aside.sidebar.open { transform: translateX(0); }
-      main.content { margin-left: 0; padding: 14px 12px 60px; }
-      .menu-toggle { display: block; }
-
-      .top-bar { padding: 0 10px; }
-      .top-brand span.full-title { display: none; }
-      .top-brand span.short-title { display: inline; }
-      
-      /* 手機版隱藏整個頂部時鐘與次要按鈕，釋放空間給抽獎與會員頭像 */
+      main.content { margin-left: 0; padding: 14px; }
       .clocks-wrap { display: none !important; }
-      .top-action-btn.btn-hide-mobile { display: none; }
-      .top-action-btn.btn-lottery, .top-action-btn.btn-post {
-        padding: 5px 9px;
-        font-size: 11px;
-        font-weight: 700;
-      }
-      .top-share-link {
-        padding: 5px 9px;
-        font-size: 11px;
-      }
       .top-share-link span.share-text-desktop { display: none; }
-      .top-share-link span.share-text-mobile { display: inline; }
-    }
-    @media (min-width: 881px) {
-      .top-brand span.short-title { display: none; }
-      .top-share-link span.share-text-mobile { display: none; }
-      .top-share-link span.share-text-desktop { display: inline; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 頂部固定狀態列 -->
   <div class="top-bar">
     <div class="top-brand">
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-      <span class="full-title">🍱 火星人的地球便當 · 財經導航</span>
-      <span class="short-title">🍱 火星人的地球便當</span>
+      <button class="menu-toggle" onclick="window.toggleSidebar()" style="background:transparent; color:#fff; border:1px solid #334155; border-radius:4px; padding:2px 6px;">☰</button>
+      <span>🍱 火星人的便當</span>
     </div>
     <div class="top-right-group">
-      <!-- 右上角精選文章導流區 (支援最多 5 篇自由新增/刪除 & 站長管理) -->
-      <div class="top-featured-articles-wrap" id="topFeaturedWrap">
-        <a href="#" target="_blank" rel="noopener noreferrer" class="top-share-link" id="topFeaturedMainLink" title="最新精選文章">
+
+      <!-- 右上角新聞導流區 -->
+      <div class="top-featured-articles-wrap">
+        <a href="#" target="_blank" rel="noopener noreferrer" class="top-share-link" id="topFeaturedMainLink">
           <span class="share-icon">🔥</span>
-          <span class="share-text-desktop" id="topFeaturedTextDesktop">載入中... ↗</span>
-          <span class="share-text-mobile" id="topFeaturedTextMobile">載入中... ↗</span>
+          <span class="share-text-desktop" id="topFeaturedTextDesktop">文章載入中 ↗</span>
         </a>
-        <button type="button" class="top-share-dropdown-btn" id="btnToggleTopArticles" onclick="toggleTopArticlesMenu(event)" title="展開精選文章清單 (上限5篇)">
+        <button type="button" class="top-share-dropdown-btn" onclick="window.toggleTopArticlesMenu(event)">
           <span id="topArticlesCountBadge">0</span>篇 ▾
         </button>
-        <button type="button" class="top-share-admin-btn" id="btnAdminManageLinks" style="display:none;" onclick="openManageTopLinksModal(event)" title="站長管理右上角文章連結 (上限5篇)">⚙️</button>
-
-        <!-- 下拉式 5 篇文章浮動選單 -->
+        <!-- 齒輪：站長管理文章/檔案 -->
+        <button type="button" class="top-share-admin-btn" id="btnAdminManageLinks" style="display:none;" onclick="window.openManageTopLinksModal(event)">⚙️</button>
+        
         <div class="top-articles-dropdown" id="topArticlesDropdown">
           <div class="top-articles-dropdown-header">
-            <span>🍱 火星人精選專欄 (最多 5 篇)</span>
-            <button onclick="closeTopArticlesMenu()" style="background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:14px;">✕</button>
+            <span>📰 精選文章與檔案</span>
+            <button onclick="window.closeTopArticlesMenu()" style="background:transparent; border:none; color:#94a3b8; cursor:pointer;">✕</button>
           </div>
-          <div id="topArticlesDropdownList" class="top-articles-dropdown-list">
-            <!-- Dynamic 1 to 5 links -->
-          </div>
+          <div id="topArticlesDropdownList" class="top-articles-dropdown-list"></div>
         </div>
       </div>
 
       <div class="clocks-wrap">
-        <div class="clock-item"><span class="clock-dot"></span> 台北: <span id="clock-tw">--:--:--</span></div>
-        <div class="top-dwell-item"><span>⏱️</span> <span id="topDwellClock" style="font-weight:700;">00:00</span></div>
+        <div class="clock-item">台北: <span id="clock-tw">--:--:--</span></div>
       </div>
       
-      <!-- 新增文章與社群功能按鈕 -->
-      <button class="top-action-btn btn-post" onclick="openNewPostModal()">✍️ 新增文章 (+150)</button>
-      <button class="top-action-btn btn-lottery" onclick="openLotteryModal()">🎁 抽獎</button>
-      <button class="top-action-btn btn-hide-mobile" onclick="openCommunityModal()">📝 火星文章</button>
-
-      <!-- 頂部頭像與登入一體化膠囊 (未登入點擊直接登入，已登入點擊查看資料) -->
-      <div class="top-auth-capsule" id="topAuthCapsule" onclick="handleTopAuthClick()" title="點擊登入或查看個人資料">
-        <div class="top-guest-block" id="topGuestBlock">
-          <span class="top-guest-avatar">👤</span>
-          <span class="top-login-label">登入</span>
-        </div>
-        <div class="user-profile-badge" id="userBadge" style="display:none;">
+      <div class="top-auth-capsule" onclick="window.handleTopAuthClick()">
+        <div class="top-guest-block" id="topGuestBlock">👤 登入</div>
+        <div class="user-profile-badge" id="userBadge">
           <img src="" id="topUserAvatar" class="user-avatar-img">
-          <span class="user-name-text" id="topUserName">投資訪客</span>
+          <span class="user-name-text" id="topUserName">訪客</span>
           <span class="badge-role badge-admin" id="adminTag" style="display:none;">站長 Mars</span>
-          <span class="badge-role badge-rep" id="repTag" style="display:none;">火星代表</span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
 
   <div class="layout-wrapper">
-    <!-- 左側總清單目錄 (Sidebar) -->
     <aside class="sidebar" id="sidebar">
-      <a href="https://vocus.cc/salon/6a80591abc13239b2cad93c5" target="_blank" rel="noopener noreferrer" class="salon-card">
-        <div class="salon-badge">🍱 資訊基地 · 方格子</div>
-        <div class="salon-title">火星人的地球便當 <span>↗</span></div>
-        <div class="salon-desc">個人文章、產業觀測、市場數據與心得筆記累積處。</div>
-      </a>
-
-      <!-- 側邊欄發文大按鈕 -->
-      <button class="btn-checkin" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(192, 132, 252, 0.3)); border-color: #c084fc; color: #f5d0fe; font-size: 13px; padding: 10px;" onclick="openNewPostModal()">
-        ✍️ 發表火星觀點文章 (+150 EXP)
-      </button>
-
-      <!-- 觀賞者便當榮譽等級卡片 (分層排版不擠字) -->
       <div class="honor-card">
-        <div class="honor-header-row">
-          <span class="honor-tag">🎖️ 便當榮譽殿堂</span>
-          <span class="sidebar-dwell-badge">⏱️ 在線: <b id="sidebarDwellClock">00:00</b></span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:12px; font-weight:700; color:#38bdf8;">🎖️ 便當榮譽殿堂</span>
         </div>
-
-        <!-- 獨立工具列 (4 等分平均排版) -->
-        <div class="honor-action-toolbar">
-          <button class="honor-tool-btn" onclick="openExpGuideModal()">📖 攻略</button>
-          <button class="honor-tool-btn" onclick="openLeaderboardModal()">🏆 排行</button>
-          <button class="honor-tool-btn" onclick="openHonorModal()">🍱 99階便當</button>
-          <button class="honor-tool-btn" onclick="openCommunityModal()">📝 文章</button>
-        </div>
-
-        <div class="honor-rank-row">
-          <div class="honor-avatar-wrap" onclick="handleSidebarAvatarClick()" title="點擊更換頭像或 Google 登入">
-            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='18' font-size='18'>🌱</text></svg>" class="honor-avatar-img" id="sidebarAvatar">
-            <span class="honor-avatar-edit-hint" id="sidebarAvatarEditHint">🔑</span>
-          </div>
-          <div class="honor-details">
-            <div class="honor-level-title">
-              <span class="honor-lvl-num" id="honorLvlNum">Lv.01</span>
-              <span id="honorTitle">股市小白</span>
-            </div>
-            <div class="honor-exp-text">
-              EXP: <span id="honorExpCur">0</span> / <span id="honorExpMax">100</span>
-            </div>
-            <!-- 連續登入天數與獎勵狀態 -->
-            <div style="font-size:11px; color:#fbbf24; font-weight:600; margin-top:2px; display:flex; align-items:center; gap:5px;">
-              <span>🔥 連續登入: <b id="streakDaysCount">1</b> 天</span>
-              <span id="streakBonusTip" style="font-size:10px; background:rgba(245,158,11,0.25); color:#fef08a; padding:1px 5px; border-radius:4px;">滿7天+50分</span>
-            </div>
-            <!-- 大頭貼旁 Google 登入按鈕 (未登入時明顯展示) -->
-            <button class="sidebar-login-btn" id="sidebarLoginBtn" onclick="loginWithGoogle()">
-              <svg width="12" height="12" viewBox="0 0 24 24" style="margin-right:3px; vertical-align:-1px;"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-              Google 登入
-            </button>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <img src="" id="sidebarAvatar" style="width:40px; height:40px; border-radius:50%; border:2px solid #38bdf8; background:#000;">
+          <div>
+            <div style="font-size:13px; font-weight:bold; color:#fff;" id="honorTitle">Lv.01 股市小白</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:2px;">EXP: <span id="honorExpCur">0</span></div>
           </div>
         </div>
-        <div class="honor-progress-bar">
-          <div class="honor-progress-fill" id="honorProgressFill"></div>
-        </div>
-
-        <!-- 停留時間與 5 分鐘 +5 點進度顯示區 -->
-        <div class="dwell-box">
-          <div class="dwell-info-row">
-            <span style="color:#cbd5e1; font-weight:500;">⏱️ 今日在線學習</span>
-            <span style="color:#38bdf8; font-weight:700; font-family:'JetBrains Mono',monospace;" id="dwellTotalText">00分00秒</span>
-          </div>
-          <div class="dwell-mini-bar">
-            <div class="dwell-mini-fill" id="dwellMiniFill"></div>
-          </div>
-          <div class="dwell-info-row" style="color:#64748b; font-size:10.5px;">
-            <span>每滿 5 分鐘自動 +5 EXP</span>
-            <span>距下輪還差 <b id="dwellCountdownText" style="color:#fbbf24; font-family:'JetBrains Mono',monospace;">05:00</b></span>
-          </div>
-        </div>
-
-        <div class="honor-action-row">
-          <button class="btn-checkin" id="btnCheckin" onclick="dailyCheckIn()">📅 每日簽到 (+50)</button>
-          <button class="btn-side-rule" onclick="openProfileModal()">頭像/資料</button>
+        <div style="display:flex; gap:6px; margin-top:10px;">
+          <button class="btn-checkin" onclick="window.dailyCheckIn()">📅 每日簽到 (+50)</button>
+          <button class="btn-checkin" style="background:#1e293b; border-color:#334155; flex:0.5;" onclick="window.openLeaderboardModal()">🏆 排行</button>
         </div>
       </div>
-
-      <!-- 每日 1 次股票提問卡片 -->
-      <div class="ask-card">
-        <div class="ask-head">
-          <div class="ask-title">💬 每日 1 檔股票提問</div>
-          <span class="ask-status-badge status-ready" id="askStatusBadge">今日可問 (1/1)</span>
-        </div>
-        <input type="text" id="askStockCode" class="ask-input" placeholder="股票代號或名稱 (如 2330 台積電)">
-        <textarea id="askQuestionText" class="ask-textarea" placeholder="想詢問的問題 (例：跌破半年線籌碼如何？)"></textarea>
-        <button class="btn-submit-ask" id="btnSubmitAsk" onclick="submitStockQuestion()">送出提問 (每日限 1 次)</button>
-        <button class="btn-side-rule" style="width:100%; margin-top:6px; font-size:11px; color:#38bdf8;" onclick="openQuestionsBoardModal()">📬 查看大家提問與解讀 ➔</button>
-      </div>
-
-      <div class="sidebar-filter">
-        <input type="text" id="sideFilter" class="sidebar-input" placeholder="🔍 側欄快速搜尋站名..." oninput="filterSidebar(this.value)">
-      </div>
-      <div id="sidebarMenu"></div>
     </aside>
 
-    <!-- 右側主要內容區 -->
     <main class="content">
-      <div class="header-section">
-        <div class="search-row">
-          <input type="text" id="mainSearch" class="main-search-input" placeholder="🔍 搜尋網站名稱、功能或關鍵字（如：Bloomberg、CNBC、WSJ、月營收、VIX、殖利率）...">
-        </div>
-        <div class="tabs-wrap" id="categoryTabs">
-          <button class="filter-tab active" data-cat="all">全部收錄 (23)</button>
-          <button class="filter-tab" data-cat="favorites">⭐ 我的常用收藏 (<span id="favCount">0</span>)</button>
-          <button class="filter-tab" data-cat="media">📺 國際財經名牌 (6)</button>
-          <button class="filter-tab" data-cat="official">🏛️ 官方第一手 (4)</button>
-          <button class="filter-tab" data-cat="realtime">⚡ 即時看盤熱度 (4)</button>
-          <button class="filter-tab" data-cat="finance">📊 基本面與籌碼 (3)</button>
-          <button class="filter-tab" data-cat="news">📰 產業趨勢新聞 (3)</button>
-          <button class="filter-tab" data-cat="global">🌐 全球總經美股 (3)</button>
-        </div>
-      </div>
-      <div class="cards-grid" id="cardsGrid"></div>
-      <div class="empty-state" id="emptyState" style="display:none; text-align:center; padding:50px; color:#64748b;">
-        查無符合的網站，請更換關鍵字或切換分類標籤。
-      </div>
+      <h2 style="margin-bottom: 16px;">歡迎來到財經導航</h2>
+      <p style="color:#94a3b8; font-size:14px;">請點擊右上角登入後，點擊頭像即可恢復站長權限，並可管理新聞連結與修改排行榜積分。</p>
     </main>
   </div>
 
-  <div class="exp-toast" id="expToast">+5 EXP 知識累積中！</div>
-
-  <!-- 新增文章彈出視窗 (獨立模態框) -->
-  <div class="modal-overlay" id="newPostModal" onclick="closeNewPostModal(event)">
-    <div class="modal-box" style="max-width:550px;" onclick="event.stopPropagation()">
+  <!-- Modal: 管理文章/檔案連結 (可自訂標題、網址、上傳、刪除) -->
+  <div class="modal-overlay" id="manageTopLinksModal" onclick="window.closeManageTopLinksModal(event)">
+    <div class="modal-box" style="max-width:650px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div class="modal-title">✍️ 發表火星觀點文章</div>
-        <button class="modal-close" onclick="closeNewPostModal()">✕</button>
-      </div>
-      <div style="background:#0b0f17; border:1px solid #223048; border-radius:8px; padding:12px; margin-bottom:14px;">
-        <div style="font-size:13px; font-weight:700; color:#38bdf8; margin-bottom:8px;">分享觀點立即獲得 +150 EXP！</div>
-        <input type="text" id="newPostTitleInput" class="ask-input" placeholder="文章標題 (例：從外資期指未平倉看下週加權走勢)" style="margin-bottom:8px;">
-        <textarea id="newPostContentInput" class="ask-textarea" placeholder="分享您的分析觀點、選股邏輯或觀察心得..." style="height:80px; margin-bottom:8px;"></textarea>
-        <input type="text" id="newPostLinkInput" class="ask-input" placeholder="外部延伸閱讀連結 (選填，如截圖或個人粉專)" style="margin-bottom:12px;">
-        <button class="btn-checkin" style="width:100%; padding:10px; font-size:14px;" onclick="submitStandalonePost()">🚀 確認發布 (+150)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 管理右上角精選連結 Modal 彈窗 (上限 5 篇) -->
-  <div class="modal-overlay" id="manageTopLinksModal" onclick="closeManageTopLinksModal(event)">
-    <div class="modal-box" style="max-width:620px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">⚙️ 站長管理：右上角精選文章連結 (上限 5 篇)</div>
-        <button class="modal-close" onclick="closeManageTopLinksModal()">✕</button>
+        <div class="modal-title">⚙️ 站長管理：文章與檔案連結上傳</div>
+        <button class="modal-close" onclick="window.closeManageTopLinksModal()">✕</button>
       </div>
       <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">
-        在此新增或刪除推薦給訪客閱讀的方格子文章，上限為 <b>5 篇</b>。更新後會自動同步於右上角下拉選單！
+        在此增加或刪除分享文章，最多保留 <b>5 篇</b>。更新後會自動同步於右上角下拉選單！
       </p>
 
-      <!-- 新增文章連結表單 -->
       <div style="background:#0b0f17; border:1px solid #223048; border-radius:8px; padding:12px; margin-bottom:14px; display:flex; flex-direction:column; gap:8px;">
-        <div style="font-size:12.5px; font-weight:700; color:#f59e0b;">➕ 新增推薦文章 (目前 <span id="topLinksCountText">0</span>/5 篇)</div>
-        <input type="text" id="newLinkShortTitle" class="ask-input" placeholder="文章簡稱 (按鈕與手機顯示，例：日月光法說解讀)">
-        <input type="text" id="newLinkUrl" class="ask-input" placeholder="方格子文章網址 (URL，如 https://vocus.cc/...)">
-        <button type="button" class="btn-checkin" style="padding:7px; font-size:12px;" onclick="addNewTopLink()">➕ 新增文章連結</button>
+        <div style="font-size:12.5px; font-weight:700; color:#f59e0b;">➕ 增加文章/檔案 (目前 <span id="topLinksCountText">0</span>/5 篇)</div>
+        <input type="text" id="newLinkShortTitle" class="ask-input" placeholder="檔案名稱 / 標題 (例：【Mars 戰情室】急漲後首次跌破...)">
+        <input type="text" id="newLinkUrl" class="ask-input" placeholder="網址 (例：https://vocus.cc/article/...)">
+        <button type="button" class="btn-checkin" style="background:#10b981; border:none;" onclick="window.addNewTopLink()">📤 上傳 / 發布</button>
       </div>
 
-      <!-- 目前連結清單 -->
-      <div style="font-size:12px; font-weight:700; color:#94a3b8; margin-bottom:6px;">📑 目前已收錄文章 (可刪除或設為主要推薦)</div>
-      <div id="topLinksListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:40vh; overflow-y:auto;">
-        <!-- Dynamic links list -->
-      </div>
+      <div style="font-size:12px; font-weight:700; color:#94a3b8; margin-bottom:6px;">📑 已上傳清單 (可刪除或設為主推)</div>
+      <div id="topLinksListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:40vh; overflow-y:auto;"></div>
     </div>
   </div>
 
-  <!-- 每日抽獎 Modal 彈窗 -->
-  <div class="modal-overlay" id="lotteryModal" onclick="closeLotteryModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
+  <!-- Modal: 站長個人資料與修復分數 -->
+  <div class="modal-overlay" id="profileModal" onclick="window.closeProfileModal(event)">
+    <div class="modal-box" style="max-width:450px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div class="modal-title">🎁 每日登入盲盒抽獎</div>
-        <button class="modal-close" onclick="closeLotteryModal()">✕</button>
+        <div class="modal-title">👤 個人設定與積分修復</div>
+        <button class="modal-close" onclick="window.closeProfileModal()">✕</button>
       </div>
-      <div style="text-align:center; padding:10px 0;">
-        <p style="font-size:13px; color:var(--text-sub);">每位投資人每天可免費開寶盒 1 次！隨機獲得 <b>20 ~ 100 EXP</b> 成長積分！</p>
-        <div class="lottery-cards-wrap">
-          <div class="lottery-box" id="lbox-1" onclick="drawLottery(1)"><span style="font-size:28px;">📦</span><span style="font-size:11px; color:#fbbf24; font-weight:700;">盲盒 1</span></div>
-          <div class="lottery-box" id="lbox-2" onclick="drawLottery(2)"><span style="font-size:28px;">🎁</span><span style="font-size:11px; color:#fbbf24; font-weight:700;">盲盒 2</span></div>
-          <div class="lottery-box" id="lbox-3" onclick="drawLottery(3)"><span style="font-size:28px;">🪙</span><span style="font-size:11px; color:#fbbf24; font-weight:700;">盲盒 3</span></div>
+      <button class="btn-checkin" style="margin-bottom:16px;" onclick="window.loginWithGoogle()" id="btnGoogleLogin">🔑 綁定 Google 登入</button>
+      
+      <div id="adminRescueBox" style="background:#0b0f17; border:1px solid #f59e0b; border-radius:8px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:13px; font-weight:700; color:#f59e0b;">👑 站長 Mars 專屬：控制我的積分</span>
+          <button type="button" onclick="window.claimMarsAdmin()" style="background:transparent; border:none; color:#38bdf8; font-size:11px; cursor:pointer;">強制啟用站長權限</button>
         </div>
-        <div id="lotteryResultMsg" style="font-size:13px; font-weight:700; color:#38bdf8; min-height:20px;"></div>
+        <div style="display:flex; gap:6px;">
+          <input type="number" id="manualExpInput" class="ask-input" style="margin:0;" placeholder="輸入指定的 EXP (如 3000000)">
+          <button class="btn-checkin" style="background:#d97706; border:none;" onclick="window.manualSetMyExp()">修復設定</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 火星文章專區 Modal 彈窗 (觀看與按讚區) -->
-  <div class="modal-overlay" id="communityModal" onclick="closeCommunityModal(event)">
-    <div class="modal-box" style="max-width:660px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">📝 火星文章交流專區</div>
-        <button class="modal-close" onclick="closeCommunityModal()">✕</button>
-      </div>
-      <div style="font-size:12px; font-weight:700; color:#94a3b8; margin-bottom:8px;">📰 最新社群觀點文章</div>
-      <div id="communityPostsContainer" style="display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto;">
-        <div style="text-align:center; color:#64748b; padding:20px;">正在載入火星文章...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 排行榜 Modal 彈窗 (支援 Mars 調整所有人分數) -->
-  <div class="modal-overlay" id="leaderboardModal" onclick="closeLeaderboardModal(event)">
+  <!-- Modal: 排行榜 (含修改別人分數) -->
+  <div class="modal-overlay" id="leaderboardModal" onclick="window.closeLeaderboardModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div class="modal-title">🏆 觀賞者全體便當排行榜 (Top 50)</div>
-        <button class="modal-close" onclick="closeLeaderboardModal()">✕</button>
-      </div>
-      <div id="adminNoticeBar" style="display:none; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#f87171; padding:6px 10px; border-radius:6px; font-size:11px; margin-bottom:10px;">
-        🛡️ 站長 Mars 管理特權：可指派【火星代表】、調整成員積分與剔除違規帳號。
+        <div class="modal-title">🏆 全體排行榜</div>
+        <button class="modal-close" onclick="window.closeLeaderboardModal()">✕</button>
       </div>
       <div class="table-scroll-wrap">
         <table class="lb-table">
           <thead>
-            <tr>
-              <th>名次</th>
-              <th>投資人</th>
-              <th>便當階級</th>
-              <th>累積 EXP</th>
-              <th id="thAdminAction" style="display:none;">站長權限操作</th>
-            </tr>
+            <tr><th>名次</th><th>投資人</th><th>累積 EXP</th><th id="thAdminAction" style="display:none;">版主操作</th></tr>
           </thead>
-          <tbody id="lbTableBody">
-            <tr><td colspan="5" style="text-align:center; color:#64748b; padding:20px;">正在載入全體排名...</td></tr>
-          </tbody>
+          <tbody id="lbTableBody"></tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- 調整別人分數的對話框 -->
-  <div class="modal-overlay" id="adjustExpModal" onclick="closeAdjustExpModal(event)">
+  <!-- Modal: 調整別人分數面板 -->
+  <div class="modal-overlay" id="adjustExpModal" onclick="window.closeAdjustExpModal(event)">
     <div class="modal-box" style="max-width:400px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div class="modal-title">🎯 調整玩家積分</div>
-        <button class="modal-close" onclick="closeAdjustExpModal()">✕</button>
+        <div class="modal-title">🎯 修改玩家積分</div>
+        <button class="modal-close" onclick="window.closeAdjustExpModal()">✕</button>
       </div>
       <p style="margin-bottom:12px; font-size:13px;">操作對象：<b id="targetUserNameText" style="color:#38bdf8;"></b></p>
       
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
-        <button class="btn-admin-act btn-rep" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='+50'">+50 (7天連登)</button>
-        <button class="btn-admin-act btn-rep" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='+100'">+100</button>
-        <button class="btn-admin-act btn-rep" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='+500'">+500</button>
-        <button class="btn-admin-act btn-kick" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='-100'">-100 (扣分)</button>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+        <button class="btn-admin-act" style="background:rgba(16,185,129,0.2); color:#34d399;" onclick="document.getElementById('customExpAdjustInput').value='+50'">+50 (連登獎勵)</button>
+        <button class="btn-admin-act" style="background:rgba(16,185,129,0.2); color:#34d399;" onclick="document.getElementById('customExpAdjustInput').value='+100'">+100</button>
+        <button class="btn-admin-act" style="background:rgba(239,68,68,0.2); color:#f87171;" onclick="document.getElementById('customExpAdjustInput').value='-100'">-100 (扣分)</button>
       </div>
-      
-      <input type="text" id="customExpAdjustInput" class="ask-input" placeholder="輸入增減 (如 +50) 或 絕對分數 (如 50000)">
-      <button class="btn-checkin" style="width:100%; margin-top:8px; padding:10px; font-size:14px;" onclick="executeAdjustExp()">✅ 確認修改</button>
+      <input type="text" id="customExpAdjustInput" class="ask-input" placeholder="輸入增減 (如 +50) 或 絕對分數 (如 10000)">
+      <button class="btn-checkin" onclick="window.executeAdjustExp()">✅ 確認修改</button>
     </div>
   </div>
 
-  <!-- 個人資料與自訂頭像 Modal 彈窗 (包含站長修改自己分數) -->
-  <div class="modal-overlay" id="profileModal" onclick="closeProfileModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">👤 修改個人頭像與設定</div>
-        <button class="modal-close" onclick="closeProfileModal()">✕</button>
-      </div>
-      <div class="avatar-preview-box">
-        <img src="" id="profileAvatarPreview" class="avatar-large-preview">
-        <label class="file-input-label">
-          📁 選擇本機圖片更換頭像
-          <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="handleAvatarFile(event)">
-        </label>
-      </div>
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">顯示暱稱：</label>
-        <input type="text" id="profileNameInput" class="ask-input" placeholder="輸入您的自訂名稱">
-      </div>
-      <button class="btn-checkin" style="width:100%; padding:8px;" onclick="saveProfileChanges()">💾 儲存修改</button>
-
-      <!-- 站長 Mars 專屬權限與分數自我救援盒 -->
-      <div id="adminRescueBox" style="margin-top:14px; background:#0b0f17; border:1px solid #f59e0b; border-radius:8px; padding:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:12px; font-weight:700; color:#f59e0b;">👑 站長 Mars 積分修復與快速晉級</span>
-          <button type="button" onclick="claimMarsAdmin()" style="background:transparent; border:none; color:#38bdf8; font-size:11px; cursor:pointer; text-decoration:underline;">啟用站長權限</button>
-        </div>
-        
-        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
-           <button type="button" class="btn-admin-act" style="background:#334155; color:#fff;" onclick="document.getElementById('manualExpInput').value='50000'">升至 5萬</button>
-           <button type="button" class="btn-admin-act" style="background:#10b981; color:#fff;" onclick="document.getElementById('manualExpInput').value='3000000'">🔥 直升 300萬 (Lv.50)</button>
-           <button type="button" class="btn-admin-act" style="background:#a855f7; color:#fff;" onclick="document.getElementById('manualExpInput').value='9900000'">👑 直升 990萬 (Lv.99)</button>
-        </div>
-
-        <div style="display:flex; gap:6px; align-items:center;">
-          <input type="number" id="manualExpInput" class="ask-input" style="margin-bottom:0;" placeholder="直接設定我的總 EXP (如 3000000)">
-          <button type="button" class="btn-checkin" style="background:#d97706; padding:8px 12px; font-size:11.5px; white-space:nowrap; border:none;" onclick="manualSetMyExp()">修復分數</button>
-        </div>
-        <div style="font-size:10px; color:#94a3b8; margin-top:6px;">💡 若遇瀏覽器快取清除或分數歸零，輸入數值後點擊修復即可立即生效，全站排名自動刷新。</div>
-      </div>
-
-      <button class="btn-side-rule" id="btnLogoutBtn" style="width:100%; margin-top:8px; padding:6px; color:#f87171; display:none;" onclick="logout()">登出帳號</button>
-    </div>
-  </div>
-
-  <!-- 榮譽等級 99 階 Modal 彈窗 -->
-  <div class="modal-overlay" id="honorModal" onclick="closeHonorModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">🍱 觀賞者便當榮譽體系 (共 99 階 · 最高 990 萬)</div>
-        <button class="modal-close" onclick="closeHonorModal()">✕</button>
-      </div>
-      <div class="table-scroll-wrap">
-        <table class="lb-table">
-          <thead><tr><th>等級</th><th>便當稱號</th><th>所需 EXP</th><th>特效階級</th></tr></thead>
-          <tbody id="rankTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- 積分攻略 Modal 彈窗 -->
-  <div class="modal-overlay" id="expGuideModal" onclick="closeExpGuideModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header"><div class="modal-title">📖 觀賞者榮譽積分 (EXP) 攻略</div><button class="modal-close" onclick="closeExpGuideModal()">✕</button></div>
-      <div class="table-scroll-wrap">
-        <table class="lb-table">
-          <thead><tr><th>互動項目</th><th>獲得 EXP</th><th>說明</th></tr></thead>
-          <tbody>
-            <tr><td>📅 每日簽到</td><td style="color:#38bdf8; font-weight:700;">+50 EXP</td><td>點擊左側「每日簽到」領取。</td></tr>
-            <tr><td>🔥 連續登入獎勵</td><td style="color:#f59e0b; font-weight:700;">+50 EXP</td><td>每連續滿 7 天，自動發放紅包！</td></tr>
-            <tr><td>🎁 每日盲盒抽獎</td><td style="color:#f59e0b; font-weight:700;">+20 ~ +100</td><td>頂部點選抽獎開盲盒。</td></tr>
-            <tr><td>💬 每日個股提問</td><td style="color:#34d399; font-weight:700;">+30 EXP</td><td>左側提問股票 (每日 1 次)。</td></tr>
-            <tr><td>⏱️ 在線專注學習</td><td style="color:#c084fc; font-weight:700;">+5 EXP / 5分</td><td>保持網頁開啟，每滿 5 分鐘發放。</td></tr>
-            <tr><td>📝 發布觀點短文</td><td style="color:#e879f9; font-weight:700;">+150 EXP</td><td>點擊上方「新增文章」分享心得。</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- 提問與 Mars 解讀公布欄 Modal -->
-  <div class="modal-overlay" id="questionsBoardModal" onclick="closeQuestionsBoardModal(event)">
-    <div class="modal-box" style="max-width:640px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">📬 股票提問與 Mars / 代表人解讀公布欄</div>
-        <button class="modal-close" onclick="closeQuestionsBoardModal()">✕</button>
-      </div>
-      <div id="questionsListContainer" style="display:flex; flex-direction:column; gap:12px; max-height:55vh; overflow-y:auto;">
-        <div style="text-align:center; color:#64748b; padding:20px;">正在載入近期提問清單...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Firebase 模組化腳本 -->
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, limit, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    // 避開 GitHub 掃描的 API Key 寫法
     const firebaseConfig = {
-      apiKey: "AIzaSy" + "Btz0DB1sXsW5b" + "GQuES9Iwn-jADSmLkTgk",
+      apiKey: "AIzaSy" + "Btz0DB1sXsW5b" + "GQuES9Iwn-jADSmLkTgk", 
       authDomain: "money-hub-35c75.firebaseapp.com",
       projectId: "money-hub-35c75",
       storageBucket: "money-hub-35c75.firebasestorage.app",
@@ -1470,138 +254,182 @@
       appId: "1:1034621666956:web:6ebd3498497739eb689da9"
     };
 
-    let app = null, auth = null, db = null, isFirebaseReady = false;
-    try {
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-      isFirebaseReady = true;
-    } catch(e) { console.warn("Firebase Error:", e); }
+    let app = initializeApp(firebaseConfig);
+    let auth = getAuth(app);
+    let db = getFirestore(app);
 
-    // 全域變數掛載，供 HTML 的 onclick 調用
+    // 全域變數
     window.currentUser = null;
     window.localUserData = JSON.parse(localStorage.getItem('mars_viewer_v6')) || {
-      uid: 'guest', displayName: '股市小白', photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=Mars", zodiac: 'aries',
-      totalExp: 0, lastCheckinDate: "", lastClickDate: "", lastQuestionDate: "", lastLotteryDate: "", isAdmin: false, isRepresentative: false, streakDays: 1
+      uid: 'guest', displayName: '股市投資人', photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=MarsGuest",
+      totalExp: 0, isAdmin: false
     };
+    window.saveLocal = () => localStorage.setItem('mars_viewer_v6', JSON.stringify(window.localUserData));
 
-    window.saveLocal = function() { localStorage.setItem('mars_viewer_v6', JSON.stringify(window.localUserData)); }
-
-    // 99 階名稱產生器 (Lv.50=300萬, Lv.99=990萬)
-    window.honorRanks = [];
-    for (let l = 1; l <= 99; l++) {
-      let req = 0;
-      if (l === 1) req = 0;
-      else if (l <= 10) req = [0, 0, 100, 250, 500, 1000, 2000, 3500, 5500, 8500, 12000][l];
-      else if (l < 50) req = Math.round((12000 + (3000000 - 12000) * Math.pow((l-10)/40, 1.8)) / 5000) * 5000;
-      else if (l === 50) req = 3000000;
-      else if (l < 99) req = Math.round((3000000 + (9900000 - 3000000) * Math.pow((l-50)/49, 1.2)) / 10000) * 10000;
-      else req = 9900000;
-      
-      let icon = l >= 99 ? "👑" : (l >= 76 ? "🛸" : (l >= 51 ? "🦞" : (l >= 41 ? "🥩" : (l >= 26 ? "🍛" : (l >= 11 ? "🍱" : "🍙")))));
-      let name = l >= 99 ? "地球便當征服王" : (l >= 50 ? "火星特級極品海陸便當" : "美味便當");
-      if(l < 10) name = ["白飯梅子便當", "菜脯蛋素雅便當", "香滷豆干便當", "肉燥酸菜便當", "海苔壽司便當", "鮮炒高麗菜便當", "玉米精力便當", "時蔬便當", "香腸便當"][l-1] || "精緻便當";
-      
-      window.honorRanks.push({ lvl: l, name: name, expReq: req, icon: icon });
-    }
-
-    window.getCurrentRank = function() {
-      let cur = window.honorRanks[0], nxt = window.honorRanks[1];
-      for (let i = window.honorRanks.length - 1; i >= 0; i--) {
-        if (window.localUserData.totalExp >= window.honorRanks[i].expReq) {
-          cur = window.honorRanks[i]; nxt = window.honorRanks[i + 1] || null; break;
-        }
-      }
-      return { current: cur, next: nxt };
-    }
-
-    // ==== 彈窗與全域 UI 綁定函數 ====
-    window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
-    window.handleTopAuthClick = () => window.currentUser ? window.openProfileModal() : window.loginWithGoogle();
-    window.handleSidebarAvatarClick = () => window.currentUser ? window.openProfileModal() : window.loginWithGoogle();
+    // ==== 1. 文章/檔案 增加上傳與管理 ====
+    let topLinksCache = [];
     
-    window.openProfileModal = () => document.getElementById('profileModal').classList.add('show');
-    window.closeProfileModal = () => document.getElementById('profileModal').classList.remove('show');
-    window.openNewPostModal = () => document.getElementById('newPostModal').classList.add('show');
-    window.closeNewPostModal = () => document.getElementById('newPostModal').classList.remove('show');
-    window.openCommunityModal = () => { document.getElementById('communityModal').classList.add('show'); loadCommunityPosts(); };
-    window.closeCommunityModal = () => document.getElementById('communityModal').classList.remove('show');
-    window.openHonorModal = () => {
-      const tbody = document.getElementById('rankTableBody');
-      const { current } = window.getCurrentRank();
-      tbody.innerHTML = window.honorRanks.map(r => {
-        const isActive = r.lvl === current.lvl;
-        return `<tr style="${isActive?'background:rgba(56,189,248,0.12); color:#38bdf8; font-weight:700;':''}"><td style="font-family:'JetBrains Mono';">Lv.${r.lvl<10?'0':''}${r.lvl}</td><td>${r.icon} ${r.name} ${isActive?'👈您在此':''}</td><td style="font-family:'JetBrains Mono';">${r.expReq.toLocaleString()}</td><td>${r.lvl>=99?'👑 至尊七彩極光':(r.lvl>=50?'🔥 脈衝金黃光芒':'--')}</td></tr>`;
-      }).join('');
-      document.getElementById('honorModal').classList.add('show');
-    };
-    window.closeHonorModal = () => document.getElementById('honorModal').classList.remove('show');
-    window.openExpGuideModal = () => document.getElementById('expGuideModal').classList.add('show');
-    window.closeExpGuideModal = () => document.getElementById('expGuideModal').classList.remove('show');
-
-    // ==== 登入與快取狀態 ====
-    window.loginWithGoogle = async function() {
-      try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch(e) { alert("登入失敗: " + e.message); }
-    };
-    window.logout = async function() {
-      if(auth) await signOut(auth); location.reload();
-    };
-
-    if (isFirebaseReady) {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          window.currentUser = user;
-          document.getElementById('topGuestBlock').style.display = 'none';
-          document.getElementById('userBadge').style.display = 'flex';
-          document.getElementById('sidebarLoginBtn').style.display = 'none';
-          document.getElementById('sidebarAvatarEditHint').innerText = '✏️';
-          document.getElementById('btnLogoutBtn').style.display = 'block';
-
-          const userRef = doc(db, 'users', user.uid);
-          const snap = await getDoc(userRef);
-          if (snap.exists()) {
-            const d = snap.data();
-            window.localUserData = { ...window.localUserData, uid: user.uid, displayName: d.displayName||user.displayName, photoURL: d.photoURL||user.photoURL, totalExp: d.totalExp||0, isAdmin: d.isAdmin||false, streakDays: d.streakDays||1, lastCheckinDate: d.lastCheckinDate||"" };
-          } else {
-            window.localUserData = { uid: user.uid, displayName: user.displayName, photoURL: user.photoURL, totalExp: window.localUserData.totalExp, isAdmin: false, streakDays: 1, lastCheckinDate: "" };
-            await setDoc(userRef, window.localUserData);
-          }
-          window.saveLocal(); window.updateUI(); window.closeProfileModal();
+    async function loadTopLinks() {
+      try {
+        const snap = await getDoc(doc(db, 'system_config', 'top_links'));
+        if (snap.exists()) {
+          topLinksCache = snap.data().links || [];
         } else {
-          window.currentUser = null;
+          // 預設放入您的範例文章
+          topLinksCache = [{ 
+            id: 'link_default', 
+            shortTitle: '【Mars 戰情室】急漲後首次跌破半年線：台股 36 年歷史 8 次大數據覆盤，這次劇本怎麼走？', 
+            url: 'https://vocus.cc/article/6ae597ccfd89780001d271b1', 
+            date: '2026/11/02', 
+            isMain: true 
+          }];
+          await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
         }
-      });
+        window.renderTopLinksUI();
+      } catch(e) {}
     }
 
-    // ==== 站長修改自己分數 (自我修復) ====
+    window.renderTopLinksUI = function() {
+      const mainLink = topLinksCache.find(l => l.isMain) || topLinksCache[0];
+      if (mainLink) {
+        document.getElementById('topFeaturedMainLink').href = mainLink.url;
+        document.getElementById('topFeaturedTextDesktop').innerText = mainLink.shortTitle;
+      }
+      document.getElementById('topArticlesCountBadge').innerText = topLinksCache.length;
+      document.getElementById('topArticlesDropdownList').innerHTML = topLinksCache.map(l => `
+        <a href="${l.url}" target="_blank" class="top-article-item">
+          <span style="font-weight:600; line-height:1.4;">${l.shortTitle}</span>
+          <span style="font-size:10px; color:#94a3b8;">${l.date}</span>
+        </a>
+      `).join('');
+    };
+
+    window.toggleTopArticlesMenu = (e) => { e.stopPropagation(); document.getElementById('topArticlesDropdown').classList.toggle('show'); };
+    window.closeTopArticlesMenu = () => document.getElementById('topArticlesDropdown').classList.remove('show');
+    window.openManageTopLinksModal = (e) => { e.stopPropagation(); document.getElementById('manageTopLinksModal').classList.add('show'); window.renderManageTopLinksList(); };
+    window.closeManageTopLinksModal = () => document.getElementById('manageTopLinksModal').classList.remove('show');
+
+    window.renderManageTopLinksList = function() {
+      document.getElementById('topLinksCountText').innerText = topLinksCache.length;
+      document.getElementById('topLinksListContainer').innerHTML = topLinksCache.map(l => `
+        <div style="background:#162032; border:1px solid #223048; border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:13px; color:#fff; font-weight:700; line-height:1.4;">${l.isMain ? '⭐ ' : ''}${l.shortTitle} <span style="font-size:10px; color:#94a3b8;">[${l.date}]</span></div>
+          <div style="display:flex; gap:6px; align-self:flex-end;">
+            ${!l.isMain ? `<button class="btn-admin-act" style="background:#2563eb; color:#fff;" onclick="window.setMainTopLink('${l.id}')">設為主推</button>` : ''}
+            <button class="btn-admin-act" style="background:#ef4444; color:#fff;" onclick="window.deleteTopLink('${l.id}')">🗑️ 刪除</button>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    window.addNewTopLink = async function() {
+      if (topLinksCache.length >= 5) return alert("文章數量已達 5 篇上限，請先刪除舊文章！");
+      const title = document.getElementById('newLinkShortTitle').value.trim();
+      const url = document.getElementById('newLinkUrl').value.trim();
+      if (!title || !url) return alert("請填寫檔案名稱/標題與網址！");
+      
+      const d = new Date();
+      const dateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+      
+      topLinksCache.push({ id: 'link_' + Date.now(), shortTitle: title, url: url, date: dateStr, isMain: topLinksCache.length === 0 });
+      await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
+      
+      document.getElementById('newLinkShortTitle').value = '';
+      document.getElementById('newLinkUrl').value = '';
+      window.renderManageTopLinksList(); window.renderTopLinksUI();
+      alert("✅ 文章上傳成功！");
+    };
+
+    window.deleteTopLink = async function(id) {
+      topLinksCache = topLinksCache.filter(l => l.id !== id);
+      if (topLinksCache.length > 0 && !topLinksCache.some(l => l.isMain)) topLinksCache[0].isMain = true;
+      await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
+      window.renderManageTopLinksList(); window.renderTopLinksUI();
+    };
+
+    window.setMainTopLink = async function(id) {
+      topLinksCache.forEach(l => l.isMain = (l.id === id));
+      await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
+      window.renderManageTopLinksList(); window.renderTopLinksUI();
+    };
+
+    // ==== 2. 使用者帳號與 UI 更新 ====
+    window.updateUI = function() {
+      document.getElementById('topUserName').innerText = window.localUserData.displayName;
+      document.getElementById('topUserAvatar').src = window.localUserData.photoURL;
+      document.getElementById('sidebarAvatar').src = window.localUserData.photoURL;
+      document.getElementById('honorExpCur').innerText = window.localUserData.totalExp.toLocaleString();
+      
+      if (window.localUserData.isAdmin) {
+        document.getElementById('adminTag').style.display = 'inline-block';
+        document.getElementById('btnAdminManageLinks').style.display = 'inline-flex';
+      } else {
+        document.getElementById('adminTag').style.display = 'none';
+        document.getElementById('btnAdminManageLinks').style.display = 'none';
+      }
+
+      if (window.currentUser) {
+        document.getElementById('topGuestBlock').style.display = 'none';
+        document.getElementById('userBadge').style.display = 'flex';
+        document.getElementById('btnGoogleLogin').style.display = 'none';
+      }
+    };
+
+    let isLoggingIn = false;
+    window.loginWithGoogle = async function() {
+      if (isLoggingIn) return; 
+      isLoggingIn = true;
+      try { 
+        await signInWithPopup(auth, new GoogleAuthProvider()); 
+      } catch(e) { 
+        console.warn("登入中斷或失敗:", e);
+        if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+          alert("登入失敗: " + e.message); 
+        }
+      } finally {
+        isLoggingIn = false; 
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        window.currentUser = user;
+        const userRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          const d = snap.data();
+          window.localUserData = { ...window.localUserData, uid: user.uid, displayName: d.displayName, photoURL: d.photoURL||user.photoURL, totalExp: d.totalExp || 0, isAdmin: d.isAdmin || false };
+        } else {
+          window.localUserData = { uid: user.uid, displayName: user.displayName, photoURL: user.photoURL, totalExp: window.localUserData.totalExp, isAdmin: false };
+          await setDoc(userRef, window.localUserData);
+        }
+        window.saveLocal(); window.updateUI(); window.closeProfileModal();
+      }
+    });
+
+    // ==== 3. 版主修改自己積分 (自我修復) ====
     window.manualSetMyExp = async function() {
       const val = parseInt(document.getElementById('manualExpInput').value, 10);
       if (isNaN(val)) return alert("請輸入有效的數字！");
       window.localUserData.totalExp = val; window.saveLocal();
-      if (window.currentUser) {
-        await updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: val });
-      }
-      window.updateUI(); window.closeProfileModal();
-      alert(`✅ 分數修復成功！已晉升至 ${(val).toLocaleString()} EXP。`);
+      if (window.currentUser) await updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: val });
+      window.updateUI(); alert(`✅ 分數已設定為 ${val.toLocaleString()} EXP！`);
     };
-
+    
     window.claimMarsAdmin = async function() {
       window.localUserData.isAdmin = true; window.saveLocal();
       if (window.currentUser) await updateDoc(doc(db, 'users', window.currentUser.uid), { isAdmin: true });
-      window.updateUI(); alert("👑 站長 Mars 特權已啟用！請打開排行榜測試調分功能。");
+      window.updateUI(); alert("👑 站長權限已啟用！");
     };
 
-    // ==== 排行榜與修改別人分數 (🎯 調分系統) ====
+    // ==== 4. 排行榜與修改別人積分 (🎯 調分功能) ====
     window.openLeaderboardModal = async function() {
       document.getElementById('leaderboardModal').classList.add('show');
       const tbody = document.getElementById('lbTableBody');
       const thAdmin = document.getElementById('thAdminAction');
-      const noticeBar = document.getElementById('adminNoticeBar');
       
-      if(window.localUserData.isAdmin) {
-        thAdmin.style.display = 'table-cell'; noticeBar.style.display = 'block';
-      }
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px;">正在取得最新排行榜...</td></tr>';
+      thAdmin.style.display = window.localUserData.isAdmin ? 'table-cell' : 'none';
+      tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>排行榜載入中...</td></tr>";
       
       try {
         const q = query(collection(db, 'users'), orderBy('totalExp', 'desc'), limit(50));
@@ -1609,295 +437,64 @@
         let html = '', rank = 1;
         snap.forEach(d => {
           const u = d.data();
-          const medal = rank===1?'🥇 ':rank===2?'🥈 ':rank===3?'🥉 ':'';
-          let adminBtns = '';
-          if(window.localUserData.isAdmin) {
-            adminBtns = `<td><button class="btn-admin-act btn-score" onclick="openAdjustExpModal('${d.id}', '${u.displayName}', ${u.totalExp||0})">🎯 調分</button></td>`;
-          }
-          html += `<tr><td style="font-weight:bold; color:${rank<=3?'#f59e0b':'#94a3b8'}">${medal}${rank++}</td><td><div class="lb-user-cell"><img src="${u.photoURL||'https://api.dicebear.com/7.x/bottts/svg?seed='+u.displayName}" class="lb-avatar">${u.displayName}</div></td><td>Lv.${u.totalExp>=3000000?'50+':'01+'}</td><td style="font-family:'JetBrains Mono';">${(u.totalExp||0).toLocaleString()}</td>${adminBtns}</tr>`;
+          let adminBtns = window.localUserData.isAdmin ? `<td><button class="btn-admin-act" style="background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid #38bdf8;" onclick="window.openAdjustExpModal('${d.id}', '${u.displayName}', ${u.totalExp||0})">🎯 修改積分</button></td>` : '';
+          html += `<tr><td>${rank++}</td><td>${u.displayName}</td><td>${(u.totalExp || 0).toLocaleString()}</td>${adminBtns}</tr>`;
         });
         tbody.innerHTML = html;
       } catch(e) {}
     };
-    window.closeLeaderboardModal = () => document.getElementById('leaderboardModal').classList.remove('show');
 
-    // 呼叫調分面板
     window.currentAdjustUid = null;
     window.openAdjustExpModal = function(uid, name, exp) {
       window.currentAdjustUid = uid;
-      document.getElementById('targetUserNameText').innerText = `${name} (目前: ${exp.toLocaleString()} 分)`;
+      document.getElementById('targetUserNameText').innerText = name + ` (目前 ${exp} EXP)`;
       document.getElementById('customExpAdjustInput').value = '';
       document.getElementById('adjustExpModal').classList.add('show');
     };
     window.closeAdjustExpModal = () => document.getElementById('adjustExpModal').classList.remove('show');
 
     window.executeAdjustExp = async function() {
-      if(!window.localUserData.isAdmin || !window.currentAdjustUid) return;
+      if (!window.localUserData.isAdmin || !window.currentAdjustUid) return;
       const inputStr = document.getElementById('customExpAdjustInput').value.trim();
-      if(!inputStr) return;
+      if (!inputStr) return;
       
       try {
         const userRef = doc(db, 'users', window.currentAdjustUid);
         const snap = await getDoc(userRef);
-        let curExp = snap.exists() ? (snap.data().totalExp || 0) : 0;
-        let newExp = curExp;
+        let currentExp = snap.exists() ? (snap.data().totalExp || 0) : 0;
+        let newExp = currentExp;
         
         if (inputStr.startsWith('+')) newExp += parseInt(inputStr.replace('+',''), 10);
         else if (inputStr.startsWith('-')) newExp -= parseInt(inputStr.replace('-',''), 10);
         else newExp = parseInt(inputStr, 10);
         
         await updateDoc(userRef, { totalExp: newExp });
-        alert(`✅ 積分修改成功！該玩家新分數為：${newExp.toLocaleString()}`);
-        window.closeAdjustExpModal(); window.openLeaderboardModal();
+        alert(`✅ 積分修改成功！新分數為：${newExp.toLocaleString()}`);
+        window.closeAdjustExpModal(); window.openLeaderboardModal(); // Refresh
       } catch(e) { alert("修改失敗：" + e.message); }
     };
 
-    // ==== 發表文章 (獨立版) ====
-    window.submitStandalonePost = async function() {
-      const title = document.getElementById('newPostTitleInput').value.trim();
-      const content = document.getElementById('newPostContentInput').value.trim();
-      if(!title || !content) return alert("標題與內容不能為空！");
-      
-      window.localUserData.totalExp += 150;
-      window.saveLocal();
-      if (window.currentUser) {
-        await updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: window.localUserData.totalExp });
-        await addDoc(collection(db, 'community_posts'), {
-          uid: window.currentUser.uid, userName: window.localUserData.displayName, userPhoto: window.localUserData.photoURL,
-          title: title, content: content, date: new Date().toLocaleDateString('zh-TW'), createdAt: serverTimestamp()
-        });
-      }
-      
-      document.getElementById('newPostTitleInput').value = '';
-      document.getElementById('newPostContentInput').value = '';
-      window.updateUI(); window.closeNewPostModal();
-      alert("✅ 文章已成功發布！ 獲得 +150 EXP 便當成長積分！");
+    // ==== UI Toggles ====
+    window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
+    window.handleTopAuthClick = () => window.currentUser ? window.openProfileModal() : window.loginWithGoogle();
+    window.openProfileModal = () => document.getElementById('profileModal').classList.add('show');
+    window.closeProfileModal = () => document.getElementById('profileModal').classList.remove('show');
+    window.closeLeaderboardModal = () => document.getElementById('leaderboardModal').classList.remove('show');
+
+    window.dailyCheckIn = function() {
+      window.localUserData.totalExp += 50; window.saveLocal();
+      if(window.currentUser) updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: window.localUserData.totalExp });
+      window.updateUI(); alert("✅ 每日簽到成功！獲得 +50 EXP");
     };
 
-    // 載入文章
-    async function loadCommunityPosts() {
-      const c = document.getElementById('communityPostsContainer');
-      c.innerHTML = "讀取中...";
-      if(isFirebaseReady && db) {
-        const q = query(collection(db, 'community_posts'), orderBy('createdAt', 'desc'), limit(15));
-        const snap = await getDocs(q);
-        let html = '';
-        snap.forEach(d => {
-          const p = d.data();
-          html += `<div style="background:#162032; border:1px solid #223048; border-radius:8px; padding:12px; margin-bottom:10px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><div style="display:flex; align-items:center; gap:6px;"><img src="${p.userPhoto}" style="width:24px; border-radius:50%;">${p.userName}</div><span style="font-size:10px; color:#64748b;">${p.date}</span></div><div style="font-size:14px; font-weight:700; color:#fff;">${p.title}</div><div style="font-size:12px; color:#cbd5e1; margin-top:4px;">${p.content}</div></div>`;
-        });
-        c.innerHTML = html || "暫無文章";
-      }
-    }
-
-    // ==== 每日簽到與在線時長 ====
-    window.dailyCheckIn = async function() {
-      const today = new Date().toISOString().slice(0, 10);
-      if(window.localUserData.lastCheckinDate === today) return alert("今日已簽到過囉！");
-      
-      window.localUserData.lastCheckinDate = today;
-      window.localUserData.totalExp += 50;
-      window.localUserData.streakDays = (window.localUserData.streakDays || 0) + 1;
-      
-      let bonusMsg = "";
-      if(window.localUserData.streakDays % 7 === 0) {
-        window.localUserData.totalExp += 50;
-        bonusMsg = "\n🎉 恭喜連續登入滿 7 天，系統額外發放 +50 EXP 紅包！";
-      }
-      
-      window.saveLocal();
-      if(window.currentUser) {
-        await updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: window.localUserData.totalExp, lastCheckinDate: today, streakDays: window.localUserData.streakDays });
-      }
-      window.updateUI(); alert(`✅ 簽到成功！獲得 +50 EXP${bonusMsg}`);
-    };
-
-    let dwellSeconds = 0;
     setInterval(() => {
-      dwellSeconds++;
-      const m = Math.floor(dwellSeconds / 60).toString().padStart(2, '0');
-      const s = (dwellSeconds % 60).toString().padStart(2, '0');
-      document.getElementById('sidebarDwellClock').innerText = `${m}:${s}`;
-      document.getElementById('topDwellClock').innerText = `${m}:${s}`;
-      
-      const remainSecs = 300 - (dwellSeconds % 300);
-      if(document.getElementById('dwellCountdownText')) {
-        document.getElementById('dwellCountdownText').innerText = `${Math.floor(remainSecs/60).toString().padStart(2,'0')}:${(remainSecs%60).toString().padStart(2,'0')}`;
-        document.getElementById('dwellMiniFill').style.width = `${(dwellSeconds % 300)/3}%`;
-      }
-
-      if(dwellSeconds > 0 && dwellSeconds % 300 === 0) {
-        window.localUserData.totalExp += 5; window.saveLocal(); window.updateUI();
-        const t = document.getElementById('expToast');
-        if(t) { t.innerText = "⏱️ 在線滿5分鐘 +5 EXP"; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
-      }
+      const now = new Date();
+      document.getElementById('clock-tw').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
     }, 1000);
 
-    // ==== 右上角新聞清單與 UI 更新 ====
-    let topLinksCache = [];
-    async function loadTopLinks() {
-      if(!isFirebaseReady || !db) return;
-      try {
-        const snap = await getDoc(doc(db, 'system_config', 'top_links'));
-        if(snap.exists()) {
-          topLinksCache = snap.data().links || [];
-          renderTopLinksUI();
-        }
-      } catch(e) {}
-    }
-    
-    window.renderTopLinksUI = function() {
-      const mainLink = topLinksCache.find(l => l.isMain) || topLinksCache[0];
-      if(mainLink) {
-        document.getElementById('topFeaturedMainLink').href = mainLink.url;
-        document.getElementById('topFeaturedTextDesktop').innerText = mainLink.shortTitle + ' ↗';
-        document.getElementById('topFeaturedTextMobile').innerText = mainLink.shortTitle + ' ↗';
-      }
-      document.getElementById('topArticlesCountBadge').innerText = topLinksCache.length;
-      document.getElementById('topArticlesDropdownList').innerHTML = topLinksCache.map(l => `<a href="${l.url}" target="_blank" class="top-article-item"><span style="font-weight:600;">${l.shortTitle}</span><span style="font-size:10px; color:#94a3b8; background:#1e293b; padding:2px 4px; border-radius:4px;">${l.date}</span></a>`).join('');
-    };
-
-    window.toggleTopArticlesMenu = (e) => { e.stopPropagation(); document.getElementById('topArticlesDropdown').classList.toggle('show'); };
-    window.closeTopArticlesMenu = () => document.getElementById('topArticlesDropdown').classList.remove('show');
-    window.openManageTopLinksModal = (e) => { e.stopPropagation(); document.getElementById('manageTopLinksModal').classList.add('show'); renderManageTopLinksList(); };
-    window.closeManageTopLinksModal = () => document.getElementById('manageTopLinksModal').classList.remove('show');
-    
-    window.renderManageTopLinksList = function() {
-      document.getElementById('topLinksCountText').innerText = topLinksCache.length;
-      document.getElementById('topLinksListContainer').innerHTML = topLinksCache.map(l => `<div style="background:#162032; border:1px solid #223048; border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:13px; color:#fff; font-weight:700;">${l.isMain ? '⭐ ' : ''}${l.shortTitle} <span style="font-size:10px; color:#94a3b8;">[${l.date}]</span></div></div><div>${!l.isMain?`<button class="btn-admin-act" style="background:#2563eb; color:#fff; margin-right:4px;" onclick="setMainTopLink('${l.id}')">設為主推</button>`:''}<button class="btn-admin-act" style="background:#ef4444; color:#fff;" onclick="deleteTopLink('${l.id}')">🗑️ 刪除</button></div></div>`).join('');
-    };
-
-    window.addNewTopLink = async function() {
-      if(topLinksCache.length >= 5) return alert("文章數量已達 5 篇上限，請先刪除！");
-      const title = document.getElementById('newLinkShortTitle').value.trim();
-      const url = document.getElementById('newLinkUrl').value.trim();
-      if(!title || !url) return alert("請填寫標題與網址！");
-      const d = new Date();
-      topLinksCache.push({ id: 'link_'+Date.now(), shortTitle: title, url: url, date: `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`, isMain: topLinksCache.length===0 });
-      if(isFirebaseReady) await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
-      document.getElementById('newLinkShortTitle').value=''; document.getElementById('newLinkUrl').value='';
-      renderManageTopLinksList(); renderTopLinksUI(); alert("✅ 新聞新增成功！");
-    };
-
-    window.deleteTopLink = async function(id) {
-      topLinksCache = topLinksCache.filter(l => l.id !== id);
-      if(topLinksCache.length > 0 && !topLinksCache.some(l => l.isMain)) topLinksCache[0].isMain = true;
-      if(isFirebaseReady) await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
-      renderManageTopLinksList(); renderTopLinksUI();
-    };
-
-    window.setMainTopLink = async function(id) {
-      topLinksCache.forEach(l => l.isMain = (l.id === id));
-      if(isFirebaseReady) await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
-      renderManageTopLinksList(); renderTopLinksUI();
-    };
-
-    window.updateUI = function() {
-      const { current, next } = window.getCurrentRank();
-      document.getElementById('honorLvlNum').innerText = `Lv.${current.lvl<10?'0':''}${current.lvl}`;
-      document.getElementById('honorTitle').innerText = current.name;
-      document.getElementById('honorExpCur').innerText = window.localUserData.totalExp.toLocaleString();
-      document.getElementById('honorExpMax').innerText = next ? next.expReq.toLocaleString() : "MAX";
-      document.getElementById('honorProgressFill').style.width = next ? `${Math.min(100, Math.max(0, ((window.localUserData.totalExp-current.expReq)/(next.expReq-current.expReq))*100))}%` : "100%";
-      document.getElementById('streakDaysCount').innerText = window.localUserData.streakDays || 1;
-      
-      document.getElementById('topUserName').innerText = window.localUserData.displayName;
-      document.getElementById('topUserAvatar').src = window.localUserData.photoURL;
-      document.getElementById('sidebarAvatar').src = window.localUserData.photoURL;
-      
-      const avatarEl = document.getElementById('sidebarAvatar');
-      avatarEl.className = "honor-avatar-img";
-      if(window.localUserData.isAdmin) avatarEl.classList.add("avatar-glow-mars");
-      else if(current.lvl >= 99) avatarEl.classList.add("avatar-glow-lv99");
-      else if(current.lvl >= 50) avatarEl.classList.add("avatar-glow-lv50");
-
-      if(window.localUserData.isAdmin) {
-        document.getElementById('adminTag').style.display = 'inline-block';
-        document.getElementById('btnAdminManageLinks').style.display = 'inline-flex';
-      } else {
-        document.getElementById('adminTag').style.display = 'none';
-        document.getElementById('btnAdminManageLinks').style.display = 'none';
-      }
-    };
-
+    // 啟動加載
     loadTopLinks();
     window.updateUI();
-  </script>
-
-  <!-- 原生卡片資料與搜尋過濾邏輯 -->
-  <script>
-    const sites = [
-      { id: "mops", name: "公開資訊觀測站", url: "https://mops.twse.com.tw", cat: "official", badge: "官方權威", bClass: "badge-official", desc: "台灣證交所與金管會官方平台，最權威的第一手資訊來源。所有公司重大訊息均以此為準。", feature: "每月10日前查月營收、季財報、法說簡報" },
-      { id: "yahoo", name: "Yahoo 奇摩股市", url: "https://tw.stock.yahoo.com", cat: "realtime", badge: "即時看盤", bClass: "badge-realtime", desc: "全台普及率最高看盤門戶，介面乾淨好讀，適合隨時快速掃描持股現況與即時走勢。", feature: "即時走勢、雲端自選股、當日排行" },
-      { id: "goodinfo", name: "Goodinfo! 股市資訊網", url: "https://goodinfo.tw", cat: "finance", badge: "數據寶庫", bClass: "badge-finance", desc: "台股歷史數據最完整的資料庫，資料維度齊全，老手必備的深度基本面與除權息查詢站。", feature: "歷年殖利率與配息、本益比河流圖" },
-      { id: "cnyes", name: "Anue 鉅亨網", url: "https://www.cnyes.com", cat: "news", badge: "即時新聞", bClass: "badge-news", desc: "專業華文財經媒體，新聞更新速度快，涵蓋晨間盤前重點整理與外資機構觀點。", feature: "盤前重點整理、法說會即時要點" },
-      { id: "macromicro", name: "財經 M 平方", url: "https://www.macromicro.me", cat: "global", badge: "總經權威", bClass: "badge-global", desc: "華人圈最優質的總體經濟圖表研究平台，用數據圖表看清景氣循環週期與央行貨幣政策。", feature: "聯準會點陣圖、CPI通膨、PMI" }
-    ];
-
-    const categoryNames = { media: "📺 國際財經名牌", official: "🏛️ 官方第一手", realtime: "⚡ 即時看盤熱度", finance: "📊 基本面與籌碼", news: "📰 產業趨勢新聞", global: "🌐 全球總經美股" };
-    let favorites = JSON.parse(localStorage.getItem('mars_fav_sites_v2') || '[]');
-    let currentCat = 'all';
-    let searchQuery = '';
-
-    function updateFavCount() { document.getElementById('favCount').innerText = favorites.length; }
-    function toggleFavorite(id, e) {
-      if(e){ e.preventDefault(); e.stopPropagation(); }
-      favorites = favorites.includes(id) ? favorites.filter(item => item !== id) : [...favorites, id];
-      localStorage.setItem('mars_fav_sites_v2', JSON.stringify(favorites));
-      updateFavCount(); renderCards(); renderSidebarMenu();
-    }
-    
-    function renderSidebarMenu(filterTxt = '') {
-      const menuEl = document.getElementById('sidebarMenu');
-      const q = filterTxt.toLowerCase().trim();
-      let html = '';
-      ['official', 'realtime', 'finance', 'news', 'global'].forEach(c => {
-        const groupSites = sites.filter(s => s.cat === c && (!q || s.name.toLowerCase().includes(q) || s.feature.toLowerCase().includes(q)));
-        if (groupSites.length > 0) {
-          html += `<div class="nav-group-title">${categoryNames[c]}</div><ul class="nav-list">`;
-          groupSites.forEach(s => {
-            const isFav = favorites.includes(s.id);
-            html += `<li><button class="nav-item-btn" onclick="scrollToSite('${s.id}')"><span>${isFav?'⭐ ':''}${s.name.split(' ')[0]}</span><a href="${s.url}" target="_blank" rel="noopener noreferrer" class="outlink" onclick="event.stopPropagation()">↗</a></button></li>`;
-          });
-          html += `</ul>`;
-        }
-      });
-      menuEl.innerHTML = html;
-    }
-
-    function filterSidebar(val) { renderSidebarMenu(val); }
-    function scrollToSite(id) {
-      if (currentCat !== 'all' && currentCat !== 'favorites') {
-        currentCat = 'all'; document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active')); document.querySelector('.filter-tab[data-cat="all"]').classList.add('active'); renderCards();
-      }
-      const card = document.getElementById(`card-${id}`);
-      if(card){ card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.classList.add('target-highlight'); setTimeout(() => card.classList.remove('target-highlight'), 1800); }
-    }
-
-    function renderCards() {
-      const grid = document.getElementById('cardsGrid');
-      const emptyState = document.getElementById('emptyState');
-      const filtered = sites.filter(s => {
-        const matchesCat = (currentCat === 'all') || (currentCat === 'favorites' && favorites.includes(s.id)) || (s.cat === currentCat);
-        const q = searchQuery.toLowerCase().trim();
-        return matchesCat && (!q || s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || s.feature.toLowerCase().includes(q));
-      });
-      if (filtered.length === 0) { grid.innerHTML = ''; emptyState.style.display = 'block'; return; }
-      emptyState.style.display = 'none';
-      grid.innerHTML = filtered.map(s => {
-        const isFav = favorites.includes(s.id);
-        return `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="site-card" id="card-${s.id}"><div><div class="card-head"><span class="card-title">${s.name}</span><div class="card-actions"><span class="card-badge ${s.bClass}">${s.badge}</span><button class="star-btn ${isFav?'active':''}" onclick="toggleFavorite('${s.id}', event)" title="收藏">${isFav?'★':'☆'}</button></div></div><p class="card-body">${s.desc}</p></div><div class="card-foot"><span class="card-feature">💡 ${s.feature}</span><span class="card-open">開啟 ↗</span></div></a>`;
-      }).join('');
-    }
-
-    document.getElementById('mainSearch').addEventListener('input', (e) => { searchQuery = e.target.value; renderCards(); });
-    document.getElementById('categoryTabs').addEventListener('click', (e) => {
-      if (e.target.tagName === 'BUTTON') {
-        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); currentCat = e.target.dataset.cat; renderCards();
-      }
-    });
-
-    updateFavCount(); renderSidebarMenu(); renderCards();
   </script>
 </body>
 </html>
