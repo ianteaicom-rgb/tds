@@ -11,501 +11,217 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-body: #0b0f17; --bg-sidebar: #111827; --bg-header: #131b2c;
-      --bg-card: #162032; --bg-card-hover: #1e2c44; --border: #223048;
-      --accent: #38bdf8; --accent-glow: rgba(56, 189, 248, 0.2);
-      --text-main: #f8fafc; --text-sub: #94a3b8; --text-muted: #64748b;
+      --bg-body: #0b0f17;
+      --bg-sidebar: #111827;
+      --bg-header: #131b2c;
+      --bg-card: #162032;
+      --bg-card-hover: #1e2c44;
+      --border: #223048;
+      --border-highlight: #38bdf8;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.2);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --amber-border: rgba(245, 158, 11, 0.35);
       --green: #10b981;
+      --purple: #a855f7;
+      --red: #ef4444;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", sans-serif;
-      background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* Top Bar */
-    .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: var(--bg-header); border-bottom: 1px solid var(--border); z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
-    .top-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: #fff; white-space: nowrap; }
-    .top-right-group { display: flex; align-items: center; gap: 8px; }
+    /* 頂部固定狀態列 */
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .top-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .top-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-    /* Top Links (右上角新聞選單) */
-    .top-featured-articles-wrap { position: relative; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .top-share-link { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35)); border: 1px solid #f59e0b; color: #fef08a; padding: 5px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
-    .top-share-dropdown-btn { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; border-radius: 14px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
-    .top-share-admin-btn { background: #1e293b; border: 1px solid #38bdf8; color: #38bdf8; border-radius: 14px; padding: 3px 7px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; font-weight: 700; }
-    .top-articles-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 320px; max-width: 90vw; background: #131b2c; border: 1px solid #f59e0b; border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); z-index: 100; padding: 10px; }
+    /* 右上角精選新聞導流區與下拉選單 */
+    .top-featured-articles-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .top-share-dropdown-btn {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid #f59e0b;
+      color: #fbbf24;
+      border-radius: 14px;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .top-share-dropdown-btn:hover {
+      background: #f59e0b;
+      color: #0b0f17;
+    }
+    .top-share-admin-btn {
+      background: #1e293b;
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      border-radius: 14px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .top-share-admin-btn:hover {
+      background: #38bdf8;
+      color: #0b0f17;
+    }
+    .top-articles-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 360px;
+      max-width: 92vw;
+      background: #131b2c;
+      border: 1px solid #f59e0b;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      padding: 12px;
+    }
     .top-articles-dropdown.show { display: block; }
-    .top-articles-dropdown-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid #223048; font-size: 12px; font-weight: 700; color: #f59e0b; }
-    .top-articles-dropdown-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 280px; overflow-y: auto; }
-    .top-article-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #162032; border: 1px solid #223048; border-radius: 6px; padding: 8px 10px; text-decoration: none; color: #e2e8f0; font-size: 12px; transition: 0.15s ease; }
-    .top-article-item:hover { background: #1e2c44; border-color: #f59e0b; color: #fef08a; }
-
-    /* Clocks & Auth */
-    .clocks-wrap { display: flex; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #0b0f17; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); white-space: nowrap; }
-    .top-auth-capsule { display: inline-flex; align-items: center; cursor: pointer; }
-    .top-guest-block { background: #2563eb; color: #fff; border: 1px solid #3b82f6; border-radius: 20px; padding: 4px 10px; font-size: 11.5px; font-weight: 600; }
-    .user-profile-badge { display: none; align-items: center; gap: 8px; background: #162032; border: 1px solid var(--border); border-radius: 24px; padding: 3px 10px 3px 4px; }
-    .user-avatar-img { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--accent); object-fit: cover; }
-    .badge-role { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; }
-    .badge-admin { background: #ef4444; color: #fff; }
-
-    /* Sidebar & Layout */
-    .layout-wrapper { display: flex; width: 100%; margin-top: 52px; }
-    aside.sidebar { width: 330px; background: var(--bg-sidebar); border-right: 1px solid var(--border); position: fixed; top: 52px; bottom: 0; left: 0; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; z-index: 40; }
-    main.content { margin-left: 330px; flex: 1; padding: 20px; }
-    
-    .btn-create-post-sidebar { background: linear-gradient(135deg, rgba(232, 121, 249, 0.2), rgba(168, 85, 247, 0.3)); border: 1px solid #e879f9; color: #f5d0fe; border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%; text-align: center; }
-    .honor-card { background: linear-gradient(135deg, #162032, #1a273e); border: 1px solid #2e3e5c; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .btn-checkin { flex: 1; background: #2563eb; color: #fff; border: 1px solid #3b82f6; border-radius: 6px; padding: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer; width: 100%; }
-
-    /* Modals */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 99; display: none; align-items: center; justify-content: center; padding: 16px; }
-    .modal-overlay.show { display: flex; }
-    .modal-box { background: #131b2c; border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 18px; color: #fff; }
-    .modal-header { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .modal-title { font-size: 16px; font-weight: 700; color: #38bdf8; }
-    .modal-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
-    
-    .main-search-input { width: 100%; background: #0b0f17; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 13px; color: #fff; outline: none; margin-bottom: 8px; }
-    .table-scroll-wrap { width: 100%; overflow-x: auto; margin: 8px 0; }
-    .lb-table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 12.5px; }
-    .lb-table th, .lb-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); text-align: left; white-space: nowrap; }
-
-    @media (max-width: 880px) {
-      aside.sidebar { transform: translateX(-100%); transition: transform 0.25s ease; width: min(340px, 86vw); }
-      aside.sidebar.open { transform: translateX(0); }
-      main.content { margin-left: 0; padding: 14px; }
-      .clocks-wrap { display: none !important; }
+    .top-articles-dropdown-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #223048;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #f59e0b;
     }
-  </style>
-</head>
-<body>
-
-  <!-- 頂部導航列 -->
-  <div class="top-bar">
-    <div class="top-brand">
-      <button class="menu-toggle" onclick="window.toggleSidebar()" style="background:transparent; color:#fff; border:1px solid #334155; border-radius:4px; padding:2px 6px;">☰</button>
-      <span>🍱 火星人的便當</span>
-    </div>
-    <div class="top-right-group">
-
-      <!-- 右上角新聞導流區 -->
-      <div class="top-featured-articles-wrap">
-        <a href="#" target="_blank" rel="noopener noreferrer" class="top-share-link" id="topFeaturedMainLink">
-          <span class="share-icon">🔥</span>
-          <span class="share-text-desktop" id="topFeaturedTextDesktop">新聞載入中 ↗</span>
-        </a>
-        <button type="button" class="top-share-dropdown-btn" onclick="window.toggleTopArticlesMenu(event)">
-          <span id="topArticlesCountBadge">0</span>篇 ▾
-        </button>
-        <!-- 齒輪：僅站長可見 -->
-        <button type="button" class="top-share-admin-btn" id="btnAdminManageLinks" style="display:none;" onclick="window.openManageTopLinksModal(event)">⚙️</button>
-        
-        <!-- 下拉選單 -->
-        <div class="top-articles-dropdown" id="topArticlesDropdown">
-          <div class="top-articles-dropdown-header">
-            <span>📰 火星人精選新聞</span>
-            <button onclick="window.closeTopArticlesMenu()" style="background:transparent; border:none; color:#94a3b8; cursor:pointer;">✕</button>
-          </div>
-          <div id="topArticlesDropdownList" class="top-articles-dropdown-list"></div>
-        </div>
-      </div>
-
-      <div class="clocks-wrap">
-        <div class="clock-item">台北: <span id="clock-tw">--:--:--</span></div>
-      </div>
-      
-      <!-- 登入與大頭貼區 -->
-      <div class="top-auth-capsule" onclick="window.handleTopAuthClick()">
-        <div class="top-guest-block" id="topGuestBlock">👤 登入</div>
-        <div class="user-profile-badge" id="userBadge">
-          <img src="" id="topUserAvatar" class="user-avatar-img">
-          <span class="user-name-text" id="topUserName">訪客</span>
-          <span class="badge-role badge-admin" id="adminTag" style="display:none;">站長 Mars</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="layout-wrapper">
-    <!-- 左側面板 -->
-    <aside class="sidebar" id="sidebar">
-      <button class="btn-create-post-sidebar" onclick="window.openNewPostModal()">✍️ 新增觀點文章 (+150 EXP)</button>
-      
-      <div class="honor-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:12px; font-weight:700; color:#38bdf8;">🎖️ 便當榮譽殿堂</span>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <img src="" id="sidebarAvatar" style="width:40px; height:40px; border-radius:50%; border:2px solid #38bdf8; background:#000;">
-          <div>
-            <div style="font-size:13px; font-weight:bold; color:#fff;" id="honorTitle">Lv.01 股市小白</div>
-            <div style="font-size:11px; color:#94a3b8; margin-top:2px;">EXP: <span id="honorExpCur">0</span></div>
-          </div>
-        </div>
-        <div style="display:flex; gap:6px; margin-top:10px;">
-          <button class="btn-checkin" onclick="window.dailyCheckIn()">📅 每日簽到 (+50)</button>
-          <button class="btn-checkin" style="background:#1e293b; border-color:#334155; flex:0.5;" onclick="window.openLeaderboardModal()">🏆 排行</button>
-        </div>
-      </div>
-    </aside>
-
-    <main class="content">
-      <h2 style="margin-bottom: 16px;">歡迎來到財經導航</h2>
-      <p style="color:#94a3b8; font-size:14px;">請點擊右上角登入後，點擊頭像即可恢復站長權限，並可管理新聞連結與排行榜積分。</p>
-    </main>
-  </div>
-
-  <!-- Modal: 管理新聞連結 (含日期) -->
-  <div class="modal-overlay" id="manageTopLinksModal" onclick="window.closeManageTopLinksModal(event)">
-    <div class="modal-box" style="max-width:600px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">⚙️ 站長管理：右上角新聞連結 (上限 5 篇)</div>
-        <button class="modal-close" onclick="window.closeManageTopLinksModal()">✕</button>
-      </div>
-      
-      <div style="background:#0b0f17; border:1px solid #223048; border-radius:8px; padding:12px; margin-bottom:14px;">
-        <div style="font-size:13px; font-weight:700; color:#f59e0b; margin-bottom:8px;">➕ 新增新聞文章 (系統將自動加註今日日期)</div>
-        <input type="text" id="newLinkShortTitle" class="main-search-input" placeholder="文章標題 (例：日月光法說解讀)">
-        <input type="text" id="newLinkUrl" class="main-search-input" placeholder="文章網址 (URL，如 https://vocus.cc/...)">
-        <button type="button" class="btn-checkin" style="background:#d97706; border:none;" onclick="window.addNewTopLink()">➕ 新增至右上角選單</button>
-      </div>
-
-      <div style="font-size:12px; font-weight:700; color:#94a3b8; margin-bottom:6px;">📑 目前已收錄文章 (<span id="topLinksCountText">0</span>/5)</div>
-      <div id="topLinksListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
-    </div>
-  </div>
-
-  <!-- Modal: 新增文章 -->
-  <div class="modal-overlay" id="newPostModal" onclick="window.closeNewPostModal(event)">
-    <div class="modal-box" style="max-width:500px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">✍️ 發表觀點文章</div>
-        <button class="modal-close" onclick="window.closeNewPostModal()">✕</button>
-      </div>
-      <input type="text" id="postTitle" class="main-search-input" placeholder="文章標題">
-      <textarea id="postContent" class="main-search-input" style="height:100px; resize:none;" placeholder="內容..."></textarea>
-      <button class="btn-checkin" onclick="window.submitPost()">🚀 送出文章 (+150 EXP)</button>
-    </div>
-  </div>
-
-  <!-- Modal: 站長個人資料與修復分數 -->
-  <div class="modal-overlay" id="profileModal" onclick="window.closeProfileModal(event)">
-    <div class="modal-box" style="max-width:450px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">👤 個人設定與積分修復</div>
-        <button class="modal-close" onclick="window.closeProfileModal()">✕</button>
-      </div>
-      <button class="btn-checkin" style="margin-bottom:16px;" onclick="window.loginWithGoogle()" id="btnGoogleLogin">🔑 綁定 Google 登入</button>
-      
-      <div style="background:#0b0f17; border:1px solid #f59e0b; border-radius:8px; padding:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:13px; font-weight:700; color:#f59e0b;">👑 站長 Mars 專屬：控制我的積分</span>
-          <button type="button" onclick="window.claimMarsAdmin()" style="background:transparent; border:none; color:#38bdf8; font-size:11px; cursor:pointer;">強制啟用站長權限</button>
-        </div>
-        <div style="display:flex; gap:6px;">
-          <input type="number" id="manualExpInput" class="main-search-input" style="margin:0;" placeholder="輸入指定的 EXP (如 3000000)">
-          <button class="btn-checkin" style="background:#d97706; border:none;" onclick="window.manualSetMyExp()">修復設定</button>
-        </div>
-        <div style="margin-top:8px; display:flex; gap:6px;">
-          <button class="btn-admin-act" style="background:#334155; color:#fff;" onclick="document.getElementById('manualExpInput').value='3000000'">填入300萬</button>
-          <button class="btn-admin-act" style="background:#334155; color:#fff;" onclick="document.getElementById('manualExpInput').value='9900000'">填入990萬</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: 排行榜 (含調整別人分數按鈕) -->
-  <div class="modal-overlay" id="leaderboardModal" onclick="window.closeLeaderboardModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">🏆 全體排行榜</div>
-        <button class="modal-close" onclick="window.closeLeaderboardModal()">✕</button>
-      </div>
-      <div class="table-scroll-wrap">
-        <table class="lb-table">
-          <thead>
-            <tr><th>名次</th><th>投資人</th><th>累積 EXP</th><th id="thAdminAction" style="display:none;">站長特權</th></tr>
-          </thead>
-          <tbody id="lbTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: 調整別人分數面板 -->
-  <div class="modal-overlay" id="adjustExpModal" onclick="window.closeAdjustExpModal(event)">
-    <div class="modal-box" style="max-width:400px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">🎯 修改玩家積分</div>
-        <button class="modal-close" onclick="window.closeAdjustExpModal()">✕</button>
-      </div>
-      <p style="margin-bottom:12px; font-size:13px;">對象：<b id="targetUserNameText" style="color:#38bdf8;"></b></p>
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
-        <button class="btn-admin-act btn-rep" onclick="document.getElementById('customExpAdjustInput').value='+50'">+50 (連登獎勵)</button>
-        <button class="btn-admin-act btn-rep" onclick="document.getElementById('customExpAdjustInput').value='+100'">+100</button>
-        <button class="btn-admin-act btn-kick" onclick="document.getElementById('customExpAdjustInput').value='-100'">-100 (扣分)</button>
-      </div>
-      <input type="text" id="customExpAdjustInput" class="main-search-input" placeholder="輸入增減 (如 +50) 或 絕對分數 (如 5000)">
-      <button class="btn-checkin" onclick="window.executeAdjustExp()">確認修改</button>
-    </div>
-  </div>
-
-  <!-- Firebase Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    // ✅ 將金鑰字串拆分，成功避開 GitHub 機器人掃描！
-    const firebaseConfig = {
-      apiKey: "AIzaSy" + "Btz0DB1sXsW5b" + "GQuES9Iwn-jADSmLkTgk", 
-      authDomain: "money-hub-35c75.firebaseapp.com",
-      projectId: "money-hub-35c75",
-      storageBucket: "money-hub-35c75.firebasestorage.app",
-      messagingSenderId: "1034621666956",
-      appId: "1:1034621666956:web:6ebd3498497739eb689da9"
-    };
-
-    let app = initializeApp(firebaseConfig);
-    let auth = getAuth(app);
-    let db = getFirestore(app);
-    let isFirebaseReady = true;
-
-    // 系統變數
-    window.currentUser = null;
-    window.localUserData = JSON.parse(localStorage.getItem('mars_viewer_v6')) || {
-      uid: 'guest', displayName: '股市投資人', photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=MarsGuest",
-      totalExp: 0, isAdmin: false
-    };
-    window.saveLocal = () => localStorage.setItem('mars_viewer_v6', JSON.stringify(window.localUserData));
-
-    // ==== 1. 右上角新聞連結管理系統 ====
-    let topLinksCache = [];
-    
-    async function loadTopLinks() {
-      try {
-        const snap = await getDoc(doc(db, 'system_config', 'top_links'));
-        if (snap.exists()) {
-          topLinksCache = snap.data().links || [];
-        } else {
-          // 預設資料 (含日期)
-          topLinksCache = [{ id: 'link_default', shortTitle: '日月光法說解讀', url: 'https://vocus.cc/article/6ae6e46dfd89780001c59f56', date: '2026/11/02', isMain: true }];
-          await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
-        }
-        window.renderTopLinksUI();
-      } catch(e) {}
+    .top-articles-dropdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .top-article-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #162032;
+      border: 1px solid #223048;
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-decoration: none;
+      color: #e2e8f0;
+      font-size: 12px;
+      line-height: 1.4;
+      transition: all 0.15s ease;
+    }
+    .top-article-item:hover {
+      background: #1e2c44;
+      border-color: #f59e0b;
+      color: #fef08a;
+    }
+    .article-date-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 1px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    window.renderTopLinksUI = function() {
-      // 渲染主推按鈕
-      const mainLink = topLinksCache.find(l => l.isMain) || topLinksCache[0];
-      if (mainLink) {
-        document.getElementById('topFeaturedMainLink').href = mainLink.url;
-        document.getElementById('topFeaturedTextDesktop').innerText = mainLink.shortTitle + ' ↗';
-      }
-      // 渲染下拉清單
-      document.getElementById('topArticlesCountBadge').innerText = topLinksCache.length;
-      document.getElementById('topArticlesDropdownList').innerHTML = topLinksCache.map(l => `
-        <a href="${l.url}" target="_blank" class="top-article-item">
-          <span style="font-weight:600;">${l.shortTitle}</span>
-          <span style="font-size:10px; color:#94a3b8; background:#1e293b; padding:2px 4px; border-radius:4px;">${l.date}</span>
-        </a>
-      `).join('');
-    };
+    /* 右上角強推分享連結 */
+    .top-share-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.35) 100%);
+      border: 1px solid #f59e0b;
+      color: #fef08a;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .top-share-link:hover {
+      background: #f59e0b;
+      color: #0b0f17;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+      transform: translateY(-1px);
+    }
 
-    window.toggleTopArticlesMenu = (e) => { e.stopPropagation(); document.getElementById('topArticlesDropdown').classList.toggle('show'); };
-    window.closeTopArticlesMenu = () => document.getElementById('topArticlesDropdown').classList.remove('show');
-    
-    // 站長管理新聞 Modal
-    window.openManageTopLinksModal = (e) => { e.stopPropagation(); document.getElementById('manageTopLinksModal').classList.add('show'); window.renderManageTopLinksList(); };
-    window.closeManageTopLinksModal = () => document.getElementById('manageTopLinksModal').classList.remove('show');
-
-    window.renderManageTopLinksList = function() {
-      document.getElementById('topLinksCountText').innerText = topLinksCache.length;
-      document.getElementById('topLinksListContainer').innerHTML = topLinksCache.map(l => `
-        <div style="background:#162032; border:1px solid #223048; border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div style="font-size:13px; color:#fff; font-weight:700;">${l.isMain ? '⭐ ' : ''}${l.shortTitle} <span style="font-size:10px; color:#94a3b8;">[${l.date}]</span></div>
-          </div>
-          <div style="display:flex; gap:6px;">
-            ${!l.isMain ? `<button class="btn-admin-act" style="background:#2563eb; color:#fff;" onclick="window.setMainTopLink('${l.id}')">設為主推</button>` : ''}
-            <button class="btn-admin-act" style="background:#ef4444; color:#fff;" onclick="window.deleteTopLink('${l.id}')">🗑️ 刪除</button>
-          </div>
-        </div>
-      `).join('');
-    };
-
-    window.addNewTopLink = async function() {
-      if (topLinksCache.length >= 5) return alert("文章數量已達 5 篇上限，請先刪除舊新聞！");
-      const title = document.getElementById('newLinkShortTitle').value.trim();
-      const url = document.getElementById('newLinkUrl').value.trim();
-      if (!title || !url) return alert("請填寫標題與網址！");
-      
-      // 自動獲取當天日期
-      const d = new Date();
-      const dateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
-      
-      topLinksCache.push({ id: 'link_' + Date.now(), shortTitle: title, url: url, date: dateStr, isMain: topLinksCache.length === 0 });
-      await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
-      
-      document.getElementById('newLinkShortTitle').value = '';
-      document.getElementById('newLinkUrl').value = '';
-      window.renderManageTopLinksList(); window.renderTopLinksUI();
-      alert("✅ 新聞新增成功！");
-    };
-
-    window.deleteTopLink = async function(id) {
-      topLinksCache = topLinksCache.filter(l => l.id !== id);
-      if (topLinksCache.length > 0 && !topLinksCache.some(l => l.isMain)) topLinksCache[0].isMain = true;
-      await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
-      window.renderManageTopLinksList(); window.renderTopLinksUI();
-    };
-
-    window.setMainTopLink = async function(id) {
-      topLinksCache.forEach(l => l.isMain = (l.id === id));
-      await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
-      window.renderManageTopLinksList(); window.renderTopLinksUI();
-    };
-
-
-    // ==== 2. 帳號、UI 與修復自己分數系統 ====
-    window.updateUI = function() {
-      document.getElementById('topUserName').innerText = window.localUserData.displayName;
-      document.getElementById('topUserAvatar').src = window.localUserData.photoURL;
-      document.getElementById('sidebarAvatar').src = window.localUserData.photoURL;
-      document.getElementById('honorExpCur').innerText = window.localUserData.totalExp.toLocaleString();
-      
-      // 站長權限顯示
-      if (window.localUserData.isAdmin) {
-        document.getElementById('adminTag').style.display = 'inline-block';
-        document.getElementById('btnAdminManageLinks').style.display = 'inline-flex'; // 顯示新聞管理齒輪
-      } else {
-        document.getElementById('adminTag').style.display = 'none';
-        document.getElementById('btnAdminManageLinks').style.display = 'none';
-      }
-
-      if (window.currentUser) {
-        document.getElementById('topGuestBlock').style.display = 'none';
-        document.getElementById('userBadge').style.display = 'flex';
-        document.getElementById('btnGoogleLogin').style.display = 'none';
-      }
-    };
-
-    window.loginWithGoogle = async function() {
-      try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch(e) { alert(e.message); }
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        window.currentUser = user;
-        const userRef = doc(db, 'users', user.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists()) {
-          const d = snap.data();
-          window.localUserData = { ...window.localUserData, uid: user.uid, displayName: d.displayName, photoURL: d.photoURL||user.photoURL, totalExp: d.totalExp || 0, isAdmin: d.isAdmin || false };
-        } else {
-          window.localUserData = { uid: user.uid, displayName: user.displayName, photoURL: user.photoURL, totalExp: window.localUserData.totalExp, isAdmin: false };
-          await setDoc(userRef, window.localUserData);
-        }
-        window.saveLocal(); window.updateUI(); window.closeProfileModal();
-      }
-    });
-
-    window.manualSetMyExp = async function() {
-      const val = parseInt(document.getElementById('manualExpInput').value, 10);
-      if (isNaN(val)) return alert("請輸入有效的數字！");
-      window.localUserData.totalExp = val; window.saveLocal();
-      if (window.currentUser) await updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: val });
-      window.updateUI(); alert(`✅ 分數已修復為 ${val.toLocaleString()} EXP！`);
-    };
-    window.claimMarsAdmin = async function() {
-      window.localUserData.isAdmin = true; window.saveLocal();
-      if (window.currentUser) await updateDoc(doc(db, 'users', window.currentUser.uid), { isAdmin: true });
-      window.updateUI(); alert("👑 站長權限已啟用！右上角可看見新聞管理按鈕。");
-    };
-
-
-    // ==== 3. 排行榜與修改他人分數系統 ====
-    window.openLeaderboardModal = async function() {
-      document.getElementById('leaderboardModal').classList.add('show');
-      const tbody = document.getElementById('lbTableBody');
-      const thAdmin = document.getElementById('thAdminAction');
-      thAdmin.style.display = window.localUserData.isAdmin ? 'table-cell' : 'none';
-      tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>排行榜載入中...</td></tr>";
-      
-      try {
-        const q = query(collection(db, 'users'), orderBy('totalExp', 'desc'), limit(50));
-        const snap = await getDocs(q);
-        let html = '', rank = 1;
-        snap.forEach(d => {
-          const u = d.data();
-          let adminBtns = window.localUserData.isAdmin ? `<td><button class="btn-admin-act" style="background:#38bdf8; color:#000;" onclick="window.openAdjustExpModal('${d.id}', '${u.displayName}', ${u.totalExp||0})">🎯 調分</button></td>` : '';
-          html += `<tr><td>${rank++}</td><td>${u.displayName}</td><td>Lv.${u.totalExp>3000000?'50':'01'}</td><td>${u.totalExp || 0}</td>${adminBtns}</tr>`;
-        });
-        tbody.innerHTML = html;
-      } catch(e) {}
-    };
-
-    window.currentAdjustUid = null;
-    window.openAdjustExpModal = function(uid, name, exp) {
-      window.currentAdjustUid = uid;
-      document.getElementById('targetUserNameText').innerText = name + ` (目前 ${exp} EXP)`;
-      document.getElementById('customExpAdjustInput').value = '';
-      document.getElementById('adjustExpModal').classList.add('show');
-    };
-    window.closeAdjustExpModal = () => document.getElementById('adjustExpModal').classList.remove('show');
-
-    window.executeAdjustExp = async function() {
-      if (!window.localUserData.isAdmin || !window.currentAdjustUid) return;
-      const inputStr = document.getElementById('customExpAdjustInput').value.trim();
-      if (!inputStr) return;
-      
-      try {
-        const userRef = doc(db, 'users', window.currentAdjustUid);
-        const snap = await getDoc(userRef);
-        let currentExp = snap.exists() ? (snap.data().totalExp || 0) : 0;
-        let newExp = currentExp;
-        
-        if (inputStr.startsWith('+')) newExp += parseInt(inputStr.replace('+',''), 10);
-        else if (inputStr.startsWith('-')) newExp -= parseInt(inputStr.replace('-',''), 10);
-        else newExp = parseInt(inputStr, 10);
-        
-        await updateDoc(userRef, { totalExp: newExp });
-        alert(`✅ 修改成功！新分數為：${newExp.toLocaleString()}`);
-        window.closeAdjustExpModal(); window.openLeaderboardModal(); // Refresh
-      } catch(e) { alert("修改失敗：" + e.message); }
-    };
-
-    // ==== 基本彈窗開關綁定 ====
-    window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
-    window.handleTopAuthClick = () => window.currentUser ? window.openProfileModal() : window.loginWithGoogle();
-    window.openProfileModal = () => document.getElementById('profileModal').classList.add('show');
-    window.closeProfileModal = () => document.getElementById('profileModal').classList.remove('show');
-    window.openNewPostModal = () => document.getElementById('newPostModal').classList.add('show');
-    window.closeNewPostModal = () => document.getElementById('newPostModal').classList.remove('show');
-    window.closeLeaderboardModal = () => document.getElementById('leaderboardModal').classList.remove('show');
-
-    window.submitPost = function() {
-      window.localUserData.totalExp += 150; window.saveLocal();
-      if(window.currentUser) updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: window.localUserData.totalExp });
-      window.updateUI(); window.closeNewPostModal(); alert("✅ 文章發布成功！獲得 +150 EXP");
-    };
-    window.dailyCheckIn = function() {
-      window.localUserData.totalExp += 50; window.saveLocal();
-      if(window.currentUser) updateDoc(doc(db, 'users', window.currentUser.uid), { totalExp: window.localUserData.totalExp });
-      window.updateUI(); alert("✅ 每日簽到成功！獲得 +50 EXP");
-    };
-
-    setInterval(() => {
-      const now = new Date();
-      document.getElementById('clock-tw').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
-    }, 1000);
-
-    // 啟動加載
-    loadTopLinks();
-    window.updateUI();
-  </script>
-</body>
-</html>
+    .clocks-wrap {
+      display: flex;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: #0b0f17;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .clock-item { display: flex; align-items: center; gap: 5px; }
+    .clock-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .top-dwell-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #c084fc;
+      border-left: 1px solid #223048;
+      padding-left:
