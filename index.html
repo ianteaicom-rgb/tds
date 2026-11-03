@@ -1254,6 +1254,7 @@
       
       <button class="top-action-btn btn-lottery" onclick="window.openLotteryModal()">🎁 抽獎</button>
       <button class="top-action-btn btn-hide-mobile" onclick="window.openCommunityModal()">📝 新增文章</button>
+      <button class="top-action-btn" style="border-color:#10b981; color:#34d399;" onclick="window.downloadThisHtml()" title="直接下載此網頁的 index.html 檔案">💾 下載檔案</button>
 
       <!-- 頂部頭像與登入一體化膠囊 -->
       <div class="top-auth-capsule" id="topAuthCapsule" onclick="window.handleTopAuthClick()" title="點擊登入或查看個人資料">
@@ -1281,14 +1282,7 @@
         <div class="salon-desc">個人文章、產業觀測、市場數據與心得筆記累積處。</div>
       </a>
 
-      <!-- 方格子本週主打推薦文章卡片 (側欄常駐) -->
-      <a href="https://vocus.cc/article/6ae6e46dfd89780001c59f56" target="_blank" rel="noopener noreferrer" class="sidebar-feature-card">
-        <div class="sfc-badge">🔥 最新法說深度解讀</div>
-        <div class="sfc-title">【Mars 觀測日誌】日月光投控第三季法說會解讀：封測天花板如何變新地板？</div>
-        <div class="sfc-cta">前往方格子閱讀完整分析 ➔</div>
-      </a>
-
-      <!-- 觀賞者便當榮譽等級卡片 -->
+      <!-- 觀賞者便當榮譽等級卡片 (已移除左上角重複的新聞卡片，讓排版更清爽) -->
       <div class="honor-card">
         <div class="honor-header-row">
           <span class="honor-tag">🎖️ 便當榮譽殿堂</span>
@@ -1394,13 +1388,15 @@
     <!-- 右側主要內容區 -->
     <main class="content">
       <div class="header-section">
-        <!-- 頂部強推文章橫幅 (主內容區) -->
-        <div class="featured-banner-wrap">
-          <a href="https://vocus.cc/article/6ae6e46dfd89780001c59f56" target="_blank" rel="noopener noreferrer" class="featured-banner-link">
-            <span class="fb-tag">🔥 方格子最新觀測特報</span>
-            <span class="fb-text">【Mars 觀測日誌】日月光投控（3711）第三季法說會解讀：空間卡位戰開打，封測天花板如何變成新地板？</span>
-            <span class="fb-arrow">前往閱讀 ➔</span>
-          </a>
+        <!-- 頂部強推文章橫幅：升級為 5 條新聞特報清單 (與右上角管理同步) -->
+        <div class="featured-banner-wrap" style="background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, rgba(220, 38, 38, 0.14) 100%); border: 1px solid rgba(245, 158, 11, 0.45); border-radius: 12px; padding: 12px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+            <span class="fb-tag" style="font-size:12px; padding:4px 10px;">🔥 方格子最新觀測特報 (TOP 5)</span>
+            <button type="button" onclick="window.openManageTopLinksModal(event)" style="background:rgba(56,189,248,0.15); border:1px solid #38bdf8; color:#38bdf8; border-radius:6px; padding:3px 10px; font-size:11px; font-weight:700; cursor:pointer;">⚙️ 新增 / 上傳 / 刪除新聞</button>
+          </div>
+          <div id="mainBannerNewsList" style="display:flex; flex-direction:column; gap:6px;">
+            <!-- 動態渲染 1~5 條新聞 -->
+          </div>
         </div>
 
         <div class="search-row">
@@ -1500,154 +1496,154 @@
       <div class="modal-header">
         <div class="modal-title">🏆 觀賞者全體便當排行榜 (Top 50)</div>
         <button class="modal-close" onclick="window.closeLeaderboardModal()">✕</button>
-      </div>
-      <div class="table-scroll-wrap">
-        <table class="lb-table">
-          <thead>
-            <tr>
-              <th>名次</th>
-              <th>投資人</th>
-              <th>便當階級</th>
-              <th>累積 EXP</th>
-              <th id="thAdminAction" style="display:none;">版主操作</th>
-            </tr>
-          </thead>
-          <tbody id="lbTableBody">
-            <tr><td colspan="5" style="text-align:center; color:#64748b; padding:20px;">正在載入全體排名...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+    // ==== 1. 文章/檔案 增加上傳與管理 (支援 5 條新聞與日期標示) ====
+    const defaultFiveNews = [
+      { id: 'link_1', shortTitle: '【Mars 觀測日誌】日月光投控（3711）第三季法說會解讀：空間卡位戰開打，封測天花板如何變成新地板？', url: 'https://vocus.cc/article/6ae6e46dfd89780001c59f56?modal=likes', date: '2026/11/03', isMain: true },
+      { id: 'link_2', shortTitle: '【Mars 戰情室】急漲後首次跌破半年線：台股 36 年歷史 8 次大數據覆盤，這次劇本怎麼走？', url: 'https://vocus.cc/article/6ae597ccfd89780001d271b1', date: '2026/11/02', isMain: false }
+    ];
 
-  <!-- 調整別人分數面板 -->
-  <div class="modal-overlay" id="adjustExpModal" onclick="window.closeAdjustExpModal(event)">
-    <div class="modal-box" style="max-width:400px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">🎯 修改玩家積分</div>
-        <button class="modal-close" onclick="window.closeAdjustExpModal()">✕</button>
-      </div>
-      <p style="margin-bottom:12px; font-size:13px;">操作對象：<b id="targetUserNameText" style="color:#38bdf8;"></b></p>
+    let topLinksCache = JSON.parse(localStorage.getItem('mars_top_links_v2')) || defaultFiveNews;
+
+    async function loadTopLinks() {
+      window.renderTopLinksUI();
+      if(!isFirebaseReady || !db) return;
+      try {
+        const snap = await getDoc(doc(db, 'system_config', 'top_links'));
+        if (snap.exists() && snap.data().links && snap.data().links.length > 0) {
+          topLinksCache = snap.data().links;
+          localStorage.setItem('mars_top_links_v2', JSON.stringify(topLinksCache));
+        } else {
+          await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache });
+        }
+        window.renderTopLinksUI();
+      } catch(e) {
+        window.renderTopLinksUI();
+      }
+    }
+
+    async function saveTopLinksData() {
+      localStorage.setItem('mars_top_links_v2', JSON.stringify(topLinksCache));
+      window.renderTopLinksUI();
+      window.renderManageTopLinksList();
+      if(isFirebaseReady && db) {
+        try { await setDoc(doc(db, 'system_config', 'top_links'), { links: topLinksCache }); } catch(e) {}
+      }
+    }
+
+    window.renderTopLinksUI = function() {
+      const mainLink = topLinksCache.find(l => l.isMain) || topLinksCache[0];
+      if (mainLink) {
+        document.getElementById('topFeaturedMainLink').href = mainLink.url;
+        document.getElementById('topFeaturedTextDesktop').innerText = `${mainLink.shortTitle} [${mainLink.date}]`;
+        document.getElementById('topFeaturedTextMobile').innerText = `${mainLink.shortTitle}`;
+      } else {
+        document.getElementById('topFeaturedMainLink').href = "#";
+        document.getElementById('topFeaturedTextDesktop').innerText = "尚無新聞 (點擊 ⚙️ 新增)";
+        document.getElementById('topFeaturedTextMobile').innerText = "尚無新聞";
+      }
+      document.getElementById('topArticlesCountBadge').innerText = topLinksCache.length;
+
+      // 右上角下拉選單 (1~5 條)
+      document.getElementById('topArticlesDropdownList').innerHTML = topLinksCache.map((l, idx) => `
+        <a href="${l.url}" target="_blank" rel="noopener noreferrer" class="top-article-item">
+          <span style="font-weight:600; line-height:1.4; flex:1;">${idx + 1}. ${l.shortTitle}</span>
+          <span style="font-size:10px; color:#fbbf24; white-space:nowrap;">[${l.date}]</span>
+        </a>
+      `).join('');
+
+      // 主畫面頂部「🔥 方格子最新觀測特報」5 條新聞槽位渲染
+      const bannerListEl = document.getElementById('mainBannerNewsList');
+      if (bannerListEl) {
+        let slotsHtml = '';
+        for (let i = 0; i < 5; i++) {
+          const item = topLinksCache[i];
+          if (item) {
+            slotsHtml += `
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(11,15,23,0.55); border:1px solid rgba(245,158,11,0.28); border-radius:8px; padding:7px 12px;">
+                <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color:#fef08a; font-size:13px; font-weight:600; text-decoration:none; flex:1; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span style="color:#f59e0b; font-family:'JetBrains Mono',monospace; font-weight:800;">${i + 1}.</span>
+                  <span>${item.shortTitle}</span>
+                  <span style="font-size:11px; color:#38bdf8; font-family:'JetBrains Mono',monospace;">[${item.date}]</span>
+                </a>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="font-size:11.5px; color:#38bdf8; font-weight:700; text-decoration:none; white-space:nowrap;">前往閱讀 ➔</a>
+                  <button onclick="window.deleteTopLink('${item.id}')" style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; color:#f87171; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer;" title="刪除此條新聞">🗑️</button>
+                </div>
+              </div>
+            `;
+          } else {
+            slotsHtml += `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(11,15,23,0.3); border:1px dashed #334155; border-radius:8px; padding:6px 12px; color:#64748b; font-size:12px;">
+                <span><b style="color:#475569; font-family:'JetBrains Mono',monospace;">${i + 1}.</b> （空位待發布 — 點擊右上角 ⚙️ 即可新增檔案名稱與網址）</span>
+                <button onclick="window.openManageTopLinksModal(event)" style="background:transparent; border:1px solid #334155; color:#94a3b8; border-radius:4px; padding:2px 8px; font-size:10.5px; cursor:pointer;">➕ 上傳新聞</button>
+              </div>
+            `;
+          }
+        }
+        bannerListEl.innerHTML = slotsHtml;
+      }
+    };
+
+    window.toggleTopArticlesMenu = (e) => { if(e) e.stopPropagation(); document.getElementById('topArticlesDropdown').classList.toggle('show'); };
+    window.closeTopArticlesMenu = () => document.getElementById('topArticlesDropdown').classList.remove('show');
+    window.openManageTopLinksModal = (e) => { if(e) e.stopPropagation(); document.getElementById('manageTopLinksModal').classList.add('show'); window.renderManageTopLinksList(); };
+    window.closeManageTopLinksModal = () => document.getElementById('manageTopLinksModal').classList.remove('show');
+
+    window.renderManageTopLinksList = function() {
+      document.getElementById('topLinksCountText').innerText = topLinksCache.length;
+      document.getElementById('topLinksListContainer').innerHTML = topLinksCache.map((l, idx) => `
+        <div style="background:#162032; border:1px solid #223048; border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:13px; color:#fff; font-weight:700; line-height:1.4;">${idx + 1}. ${l.isMain ? '⭐ ' : ''}${l.shortTitle} <span style="font-size:11px; color:#fbbf24;">[${l.date}]</span></div>
+          <div style="font-size:11px; color:#38bdf8; word-break:break-all;">${l.url}</div>
+          <div style="display:flex; gap:6px; align-self:flex-end;">
+            ${!l.isMain ? `<button class="btn-admin-act" style="background:#2563eb; color:#fff;" onclick="window.setMainTopLink('${l.id}')">設為右上角首推</button>` : ''}
+            <button class="btn-admin-act" style="background:#ef4444; color:#fff;" onclick="window.deleteTopLink('${l.id}')">🗑️ 刪除</button>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    window.addNewTopLink = async function() {
+      if (topLinksCache.length >= 5) {
+        this.showToast("⚠️ 已達 5 篇上限，請先刪除舊新聞！");
+        return;
+      }
+      const title = document.getElementById('newLinkShortTitle').value.trim();
+      const url = document.getElementById('newLinkUrl').value.trim();
+      if (!title || !url) return;
       
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
-        <button class="btn-admin-act btn-rep" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='+50'">+50 (7天連登)</button>
-        <button class="btn-admin-act btn-rep" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='+100'">+100</button>
-        <button class="btn-admin-act btn-rep" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='+500'">+500</button>
-        <button class="btn-admin-act btn-kick" style="padding:6px 10px;" onclick="document.getElementById('customExpAdjustInput').value='-100'">-100 (扣分)</button>
-      </div>
+      const d = new Date();
+      const dateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+      topLinksCache.push({ id: 'link_' + Date.now(), shortTitle: title, url: url, date: dateStr, isMain: topLinksCache.length === 0 });
       
-      <input type="text" id="customExpAdjustInput" class="ask-input" style="margin-bottom:0;" placeholder="輸入增減 (如 +50) 或 絕對分數 (如 50000)">
-      <button class="btn-checkin" style="width:100%; margin-top:8px; padding:10px; font-size:14px;" onclick="window.executeAdjustExp()">✅ 確認修改</button>
-    </div>
-  </div>
+      document.getElementById('newLinkShortTitle').value = '';
+      document.getElementById('newLinkUrl').value = '';
+      await saveTopLinksData();
+    };
 
-  <!-- 個人資料與自訂頭像 Modal (包含站長修改自己分數) -->
-  <div class="modal-overlay" id="profileModal" onclick="window.closeProfileModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">👤 修改個人頭像與設定</div>
-        <button class="modal-close" onclick="window.closeProfileModal()">✕</button>
-      </div>
-      <div class="avatar-preview-box">
-        <img src="" id="profileAvatarPreview" class="avatar-large-preview">
-        <label class="file-input-label">
-          📁 選擇本機圖片更換頭像
-          <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="window.handleAvatarFile(event)">
-        </label>
-      </div>
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">顯示暱稱：</label>
-        <input type="text" id="profileNameInput" class="ask-input" placeholder="輸入您的自訂名稱">
-      </div>
-      <button class="btn-checkin" style="width:100%; padding:8px;" onclick="window.saveProfileChanges()">💾 儲存修改</button>
+    window.deleteTopLink = async function(id) {
+      topLinksCache = topLinksCache.filter(l => l.id !== id);
+      if (topLinksCache.length > 0 && !topLinksCache.some(l => l.isMain)) topLinksCache[0].isMain = true;
+      await saveTopLinksData();
+    };
 
-      <!-- 站長 Mars 專屬權限與分數自我救援盒 -->
-      <div id="adminRescueBox" style="margin-top:14px; background:#0b0f17; border:1px solid #f59e0b; border-radius:8px; padding:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:13px; font-weight:700; color:#f59e0b;">👑 站長 Mars 積分修復與快速晉級</span>
-          <button type="button" onclick="window.claimMarsAdmin()" style="background:transparent; border:none; color:#38bdf8; font-size:11px; cursor:pointer; text-decoration:underline;">強制啟用站長權限</button>
-        </div>
-        
-        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
-           <button type="button" class="btn-admin-act" style="background:#334155; color:#fff;" onclick="document.getElementById('manualExpInput').value='50000'">升至 5萬</button>
-           <button type="button" class="btn-admin-act" style="background:#10b981; color:#fff;" onclick="document.getElementById('manualExpInput').value='3000000'">🔥 直升 300萬 (Lv.50)</button>
-           <button type="button" class="btn-admin-act" style="background:#a855f7; color:#fff;" onclick="document.getElementById('manualExpInput').value='9900000'">👑 直升 990萬 (Lv.99)</button>
-        </div>
+    window.setMainTopLink = async function(id) {
+      topLinksCache.forEach(l => l.isMain = (l.id === id));
+      await saveTopLinksData();
+    };
 
-        <div style="display:flex; gap:6px; align-items:center;">
-          <input type="number" id="manualExpInput" class="ask-input" style="margin-bottom:0;" placeholder="直接設定我的總 EXP (如 3000000)">
-          <button type="button" class="btn-checkin" style="background:#d97706; padding:8px 12px; font-size:11.5px; white-space:nowrap; border:none;" onclick="window.manualSetMyExp()">修復分數</button>
-        </div>
-        <div style="font-size:10px; color:#94a3b8; margin-top:6px;">💡 若遇快取清除或分數歸零，輸入數值後點擊修復即可立即生效。</div>
-      </div>
-
-      <button class="btn-side-rule" id="btnLogoutBtn" style="width:100%; margin-top:8px; padding:6px; color:#f87171; display:none;" onclick="window.logout()">登出帳號</button>
-    </div>
-  </div>
-
-  <!-- 榮譽等級 99 階 Modal 彈窗 -->
-  <div class="modal-overlay" id="honorModal" onclick="window.closeHonorModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">🍱 觀賞者便當榮譽體系 (共 99 階 · 最高 990 萬)</div>
-        <button class="modal-close" onclick="window.closeHonorModal()">✕</button>
-      </div>
-      <div class="table-scroll-wrap">
-        <table class="lb-table">
-          <thead><tr><th>等級</th><th>便當稱號</th><th>所需 EXP</th><th>特效階級</th></tr></thead>
-          <tbody id="rankTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- 積分攻略 Modal 彈窗 -->
-  <div class="modal-overlay" id="expGuideModal" onclick="window.closeExpGuideModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header"><div class="modal-title">📖 觀賞者榮譽積分 (EXP) 攻略</div><button class="modal-close" onclick="window.closeExpGuideModal()">✕</button></div>
-      <div class="table-scroll-wrap">
-        <table class="lb-table">
-          <thead><tr><th>互動項目</th><th>獲得 EXP</th><th>說明</th></tr></thead>
-          <tbody>
-            <tr><td>📅 每日簽到</td><td style="color:#38bdf8; font-weight:700;">+50 EXP</td><td>點擊左側「每日簽到」領取。</td></tr>
-            <tr><td>🔥 連續登入獎勵</td><td style="color:#f59e0b; font-weight:700;">+50 EXP</td><td>每連續滿 7 天，自動發放紅包！</td></tr>
-            <tr><td>🎁 每日盲盒抽獎</td><td style="color:#f59e0b; font-weight:700;">+20 ~ +100</td><td>頂部點選抽獎開盲盒。</td></tr>
-            <tr><td>💬 每日個股提問</td><td style="color:#34d399; font-weight:700;">+30 EXP</td><td>左側提問股票 (每日 1 次)。</td></tr>
-            <tr><td>⏱️ 在線專注學習</td><td style="color:#c084fc; font-weight:700;">+5 EXP / 5分</td><td>保持網頁開啟，每滿 5 分鐘發放。</td></tr>
-            <tr><td>📝 發布觀點短文</td><td style="color:#e879f9; font-weight:700;">+150 EXP</td><td>點擊上方「新增文章」分享心得。</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- 提問與 Mars 解讀公布欄 Modal -->
-  <div class="modal-overlay" id="questionsBoardModal" onclick="window.closeQuestionsBoardModal(event)">
-    <div class="modal-box" style="max-width:640px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title">📬 股票提問與 Mars / 代表人解讀公布欄</div>
-        <button class="modal-close" onclick="window.closeQuestionsBoardModal()">✕</button>
-      </div>
-      <div id="questionsListContainer" style="display:flex; flex-direction:column; gap:12px; max-height:55vh; overflow-y:auto;">
-        <div style="text-align:center; color:#64748b; padding:20px;">正在載入近期提問清單...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Firebase 模組化腳本 -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, limit, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    // 避開 GitHub 自動掃描刪除金鑰，使用字串拼接
-    const firebaseConfig = {
-      apiKey: "AIzaSy" + "Btz0DB1sXsW5b" + "GQuES9Iwn-jADSmLkTgk",
-      authDomain: "money-hub-35c75.firebaseapp.com",
-      projectId: "money-hub-35c75",
-      storageBucket: "money-hub-35c75.firebasestorage.app",
-      messagingSenderId: "1034621666956",
-      appId: "1:1034621666956:web:6ebd3498497739eb689da9"
+    // 一鍵下載目前的完整 HTML 檔案
+    window.downloadThisHtml = function() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "index.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     };
 
     let app = null, auth = null, db = null, isFirebaseReady = false;
@@ -2073,12 +2069,11 @@
       else if(current.lvl >= 99) avatarEl.classList.add("avatar-glow-lv99");
       else if(current.lvl >= 50) avatarEl.classList.add("avatar-glow-lv50");
 
+      document.getElementById('btnAdminManageLinks').style.display = 'inline-flex';
       if(window.localUserData.isAdmin) {
         document.getElementById('adminTag').style.display = 'inline-block';
-        document.getElementById('btnAdminManageLinks').style.display = 'inline-flex';
       } else {
         document.getElementById('adminTag').style.display = 'none';
-        document.getElementById('btnAdminManageLinks').style.display = 'none';
       }
       window.changeZodiac(window.localUserData.zodiac || 'aries');
     };
