@@ -1278,6 +1278,7 @@
       <button class="menu-toggle" onclick="window.toggleSidebar()">☰</button>
       <span class="full-title">🍱 火星人的地球便當 · 財經導航</span>
       <span class="short-title">🍱 火星人的地球便當</span>
+      <span style="background:#10b981; color:#0b0f17; font-size:10px; font-weight:800; padding:1px 6px; border-radius:4px; margin-left:4px;">v5.0</span>
     </div>
     <div class="top-right-group">
       <!-- 右上角精選文章導流區 (支援最多 5 篇自由新增/刪除 & 站長管理) -->
@@ -1312,6 +1313,7 @@
       <button class="top-action-btn btn-lottery" onclick="window.openLotteryModal()">🎁 抽獎 (<span id="topLotteryCountBadge">1</span>)</button>
       <button class="top-action-btn" style="border-color:#38bdf8; color:#38bdf8;" onclick="window.openLeaderboardModal()">🎯 修改積分</button>
       <button class="top-action-btn btn-hide-mobile" onclick="window.openCommunityModal()">📝 新增文章</button>
+      <button class="top-action-btn" style="border-color:#a855f7; color:#e879f9;" onclick="window.copyFullHtmlCode()" title="一鍵複製完整 HTML 原始碼，可直接貼上 GitHub 編輯器">📋 複製程式碼</button>
       <button class="top-action-btn" style="border-color:#10b981; color:#34d399;" onclick="window.downloadThisHtml()" title="直接下載此網頁的 index.html 檔案">💾 下載檔案</button>
 
       <!-- 頂部頭像與登入一體化膠囊 -->
@@ -2197,7 +2199,25 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      window.showToast("💾 已開始下載 index.html！");
+      window.showToast("💾 已開始下載 index.html！（請確認檔名沒有 (1) 或 _3）");
+    };
+
+    // 一鍵複製完整 HTML 原始碼（供直接貼上 GitHub 小鉛筆編輯器）
+    window.copyFullHtmlCode = function() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const ta = document.createElement("textarea");
+      ta.value = htmlContent;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        window.showToast("✅ 已複製完整 HTML 程式碼！請至 GitHub 點選 index.html 的小鉛筆貼上覆蓋！");
+      } catch (e) {
+        window.showToast("⚠️ 複製失敗，請使用右側程式碼視窗右上角的複製按鈕。");
+      }
+      document.body.removeChild(ta);
     };
 
     // ==== 2. 站長修改自己積分與個人資料 ====
