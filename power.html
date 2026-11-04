@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPDM 生產配方與成本試算系統 - 彥泰改善計劃</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: '#2563EB',
+              darkBlue: '#1D4ED8',
+              slate: '#334155',
+              darkSlate: '#1E293B',
+              navy: '#0F172A',
+              cardBg: '#FFFFFF',
+              inputBg: '#F8FAFC'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Microsoft JhengHei', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 移除數字輸入框原生箭頭維持版面簡潔 */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    .card-shadow {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+    }
+    .result-shadow {
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.1), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-slate-100/80 text-slate-800 min-h-screen py-6 px-4 md:px-8">
+
+  <!-- 頂部標題與快捷功能 -->
+  <header class="max-w-7xl mx-auto mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 font-black text-xl">
+        Y
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900">EPDM 生產配方與成本試算系統</h1>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">v3.0 雙模自訂版</span>
+        </div>
+        <p class="text-xs text-slate-500 font-medium mt-0.5">彥泰改善計劃 ｜ 支援重量(KG)/比例(%)智能互轉・第5格自訂添加料・ENB物性品質監控</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <button onclick="resetDefaults()" class="px-3.5 py-2 text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-all shadow-sm">
+        恢復原廠預設
+      </button>
+      <button onclick="copySummaryReport()" class="px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+        複製試算摘要
+      </button>
+    </div>
+  </header>
+
+  <!-- 主工作區：左右雙欄佈局 (7 : 5) -->
+  <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <!-- 左側欄：輸入與設定 (7/12) -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- 卡片 1：原料基礎參數設定 (亮藍色實心標題條) -->
+      <section class="bg-white rounded-2xl overflow-hidden card-shadow border border-slate-200/80">
+        <div class="bg-blue-600 px-6 py-4 flex items-center justify-between text-white">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center text-xs font-bold">1</span>
+            <h2 class="font-bold text-base md:text-lg tracking-wide">原料基礎參數設定</h2>
+          </div>
+          <span class="text-xs bg-white/15 px-2.5 py-1 rounded-md text-blue-50 font-medium">含第5項自由自訂料</span>
+        </div>
+
+        <div class="p-5 md:p-6 space-y-4">
+          <div class="text-xs text-slate-500 bg-blue-50/70 p-3 rounded-xl border border-blue-100 flex items-center justify-between">
+            <span>💡 <strong>物理成本定律：</strong> 原料若含水分，真實乾膠成本 = 採購單價 ÷ (1 - 水分%)。除水耗能亦會降低機台淨產能。</span>
+          </div>
+
+          <!-- 原料清單網格 (共 5 項) -->
+          <div class="space-y-3" id="materialsContainer">
+            <!-- 由 JavaScript 動態生成 5 種原料參數列 -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 2：配方投料比例與模式設定 (深灰藍色實心標題條) -->
+      <section class="bg-white rounded-2xl overflow-hidden card-shadow border border-slate-200/80">
+        <div class="bg-slate-700 px-6 py-4 flex items-center justify-between text-white">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <h2 class="font-bold text-base md:text-lg tracking-wide">2. 配方投料比例與模式設定</h2>
+          </div>
+          <div id="ratioSumBadge" class="text-xs px-2.5 py-1 rounded-md font-bold transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+            合計 100.0% 合格
+          </div>
+        </div>
+
+        <div class="p-5 md:p-6 space-y-5">
+          
+          <!-- 投料模式切換按鈕開關 (重量 KG vs 比例 %) -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-100 rounded-xl border border-slate-200">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-700">投料輸入模式：</span>
+              <div class="inline-flex rounded-lg p-0.5 bg-white border border-slate-200 shadow-sm">
+                <button type="button" id="btnModeWeight" onclick="switchInputMode('weight')" class="px-3 py-1.5 text-xs font-bold rounded-md transition-all bg-blue-600 text-white shadow-sm">
+                  ⚖️ 依重量 (KG) 投料
+                </button>
+                <button type="button" id="btnModePercent" onclick="switchInputMode('percent')" class="px-3 py-1.5 text-xs font-bold rounded-md transition-all text-slate-600 hover:text-slate-900">
+                  📊 依比例 (%) 投料
+                </button>
+              </div>
+            </div>
+
+            <!-- 批次總重輸入 (依比例模式時可自訂總批重) -->
+            <div class="flex items-center gap-2" id="batchTotalWeightWrapper">
+              <label class="text-xs font-semibold text-slate-600">本批總投料重：</label>
+              <div class="relative w-28">
+                <input type="number" id="batchTotalWeightInput" value="1000" step="50" oninput="handleBatchTotalChange()" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-right text-xs font-bold text-slate-800 outline-none focus:border-blue-500">
+                <span class="absolute right-2 top-1.5 text-[10px] text-slate-400 font-bold">KG</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 快捷方案載入按鈕組 -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">快速載入四組經典方案：</label>
+              <span class="text-[11px] text-slate-400">點擊即時套用</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" onclick="loadScenario([60, 10, 3, 27, 0])" class="scenario-btn px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-700 hover:text-blue-700 text-center transition-all">
+                <span class="block font-bold">現行基準配方</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">60/10/3/27/0</span>
+              </button>
+              <button type="button" onclick="loadScenario([60, 20, 6, 14, 0])" class="scenario-btn px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-700 hover:text-blue-700 text-center transition-all">
+                <span class="block font-bold">方案一：清中東</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">60/20/6/14/0</span>
+              </button>
+              <button type="button" onclick="loadScenario([50, 20, 8, 22, 0])" class="scenario-btn px-3 py-2 text-xs font-semibold rounded-xl border-2 border-blue-500 bg-blue-50/70 text-blue-800 text-center transition-all shadow-sm">
+                <span class="block font-bold">方案二：平衡首選</span>
+                <span class="text-[10px] text-blue-600/80 block mt-0.5">50/20/8/22/0</span>
+              </button>
+              <button type="button" onclick="loadScenario([45, 25, 8, 22, 0])" class="scenario-btn px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-700 hover:text-blue-700 text-center transition-all">
+                <span class="block font-bold">方案三：極致降本</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">45/25/8/22/0</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 投料明細表格 (5 列) -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
+            <div class="grid grid-cols-12 bg-slate-100/90 text-slate-600 text-xs font-bold py-2.5 px-4 border-b border-slate-200 text-center">
+              <span class="col-span-4 text-left">原料品名</span>
+              <span class="col-span-3">投料重量 (KG)</span>
+              <span class="col-span-2">投料比 (%)</span>
+              <span class="col-span-3 text-right">乾燥後實質占比</span>
+            </div>
+            <div id="recipeInputsContainer" class="divide-y divide-slate-200/80 bg-white">
+              <!-- 由 JavaScript 動態生成 5 列 -->
+            </div>
+            <!-- 表格底部加總列 -->
+            <div class="grid grid-cols-12 bg-slate-50 py-2.5 px-4 text-xs font-bold text-slate-700 border-t border-slate-200">
+              <span class="col-span-4 text-left">合計總投料</span>
+              <span class="col-span-3 text-center text-blue-700" id="tableTotalWeight">1,000.0 KG</span>
+              <span class="col-span-2 text-center text-blue-700" id="tableTotalRatio">100.0%</span>
+              <span class="col-span-3 text-right text-emerald-700" id="tableTotalDryShare">乾膠 772 KG</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 3：匯率與加工包裝參數 -->
+      <section class="bg-white rounded-2xl overflow-hidden card-shadow border border-slate-200/80">
+        <div class="bg-slate-600 px-6 py-3.5 flex items-center justify-between text-white">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h2 class="font-bold text-sm md:text-base tracking-wide">3. 匯率與進口加工包裝設定</h2>
+          </div>
+          <span class="text-xs text-slate-300">台幣/美金自動換算</span>
+        </div>
+
+        <div class="p-5 md:p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">美金匯率 (USD/TWD)</label>
+            <div class="relative">
+              <input type="number" id="cfg_exchange_rate" value="32.5" step="0.1" class="w-full pl-3 pr-8 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none font-semibold text-slate-800 transition-all text-right" oninput="calculate()">
+              <span class="absolute right-3 top-2.5 text-xs text-slate-400">匯率</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">每噸加工費 (USD)</label>
+            <div class="relative">
+              <input type="number" id="cfg_process_fee_usd" value="270" step="10" class="w-full pl-3 pr-10 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none font-semibold text-slate-800 transition-all text-right" oninput="calculate()">
+              <span class="absolute right-3 top-2.5 text-xs text-slate-400">$/噸</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">每噸包材/棧板/雜支 (USD)</label>
+            <div class="relative">
+              <input type="number" id="cfg_packaging_fee_usd" value="45" step="5" class="w-full pl-3 pr-10 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none font-semibold text-slate-800 transition-all text-right" oninput="calculate()">
+              <span class="absolute right-3 top-2.5 text-xs text-slate-400">$/噸</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 右側欄：常駐「計算結果」面板 (5/12) -->
+    <div class="lg:col-span-5 sticky top-6 space-y-4">
+      <div class="bg-white rounded-2xl overflow-hidden result-shadow border border-slate-200/90">
+        
+        <!-- 計算結果深黑藍色大橫條 (完全匹配截圖樣式) -->
+        <div class="bg-slate-900 px-6 py-5 flex items-center justify-between text-white border-b border-slate-800">
+          <div>
+            <h2 class="text-xl font-black tracking-wide flex items-center gap-2">
+              計算結果
+            </h2>
+            <p class="text-[11px] text-slate-400 font-normal mt-0.5">即時加權演算法 ｜ 單位：每公噸乾膠成品</p>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-400/30">
+            <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+            即時連動中
+          </span>
+        </div>
+
+        <div class="p-6 space-y-5">
+          
+          <!-- 階段一：純乾膠原料成本 (匹配截圖排版) -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-extrabold text-slate-500 tracking-wide uppercase">階段一：純乾膠原料成本 (每噸)</span>
+              <div id="badgeSavings" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                - $129.2 (-9.3%)
+              </div>
+            </div>
+
+            <!-- 美金與台幣對照 -->
+            <div class="space-y-1.5">
+              <div class="flex items-baseline justify-between text-sm">
+                <span class="text-slate-500 font-medium">美金 (USD)</span>
+                <span class="font-bold text-slate-800 tracking-tight text-xl" id="res_dry_cost_usd">$1,261.66</span>
+              </div>
+              <div class="flex items-baseline justify-between pt-1 border-t border-slate-100">
+                <span class="text-slate-600 font-bold text-sm">台幣 (TWD)</span>
+                <div class="text-right">
+                  <span class="text-xs text-blue-600 font-bold mr-1">NT$</span>
+                  <span class="text-2xl md:text-3xl font-black text-blue-600 tracking-tight" id="res_dry_cost_twd">41,004</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-400 flex justify-between">
+              <span>現行基準純料成本：$1,390.90 USD</span>
+              <span id="res_saving_status" class="text-emerald-600 font-semibold">成本已優化</span>
+            </div>
+          </div>
+
+          <!-- 階段二：成品物性與硫化檢核 (第三單體 ENB 與氣味) -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-slate-500 tracking-wide uppercase">階段二：成品物性與硫化檢核</span>
+              <span id="enbQualityTag" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                品質優良 (ENB ≥ 4.2%)
+              </span>
+            </div>
+
+            <div class="flex items-baseline justify-between">
+              <div>
+                <span class="text-xs text-slate-400 block">成品第三單體 (ENB) 含量</span>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                  <span class="text-3xl font-black text-amber-500" id="res_enb_value">4.19</span>
+                  <span class="text-sm font-bold text-slate-500">%</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 block">LION廢料氣味殘留</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 mt-1 inline-block" id="res_odor_status">
+                  安全稀釋 (20%)
+                </span>
+              </div>
+            </div>
+
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
+              <div id="enbProgress" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 85%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+              <span>門檻 3.8%</span>
+              <span>合格 4.0%</span>
+              <span class="font-bold text-emerald-600">優良 4.2%+</span>
+              <span>原裝 4.9%</span>
+            </div>
+          </div>
+
+          <!-- 階段三：最終製造成本 (含加工與包裝，對應截圖右側醒目大字) -->
+          <div class="bg-blue-50/50 rounded-2xl p-5 border-2 border-blue-200/80 shadow-sm relative overflow-hidden">
+            <span class="text-xs font-black text-blue-700 tracking-wider uppercase block mb-2">階段三：最終製造成本 (含加工與包材)</span>
+
+            <div class="space-y-1.5">
+              <div class="flex items-baseline justify-between text-sm">
+                <span class="text-slate-600 font-medium">美金 (USD)</span>
+                <span class="font-bold text-slate-800 text-xl" id="res_final_cost_usd">$1,576.66</span>
+              </div>
+              
+              <div class="flex items-baseline justify-between pt-2 border-t border-blue-100">
+                <div class="flex flex-col">
+                  <span class="text-xs text-slate-500 font-bold">台幣 (TWD)</span>
+                  <span class="text-[10px] text-slate-400">總落地每噸成本</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm text-blue-600 font-bold mr-1">NT$</span>
+                  <span class="text-3xl md:text-4xl font-black text-blue-600 tracking-tight" id="res_final_cost_twd">51,241</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 生產效率與除水能耗指標 -->
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <span class="text-[11px] text-slate-400 block font-medium">綜合乾膠淨得率</span>
+              <div class="flex items-baseline gap-1 mt-1">
+                <span class="text-xl font-black text-slate-800" id="res_dry_yield">77.2</span>
+                <span class="text-xs font-semibold text-slate-500">%</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-0.5">每投入1噸產出乾膠量</span>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <span class="text-[11px] text-slate-400 block font-medium">每噸投料水分蒸發</span>
+              <div class="flex items-baseline gap-1 mt-1">
+                <span class="text-xl font-black text-rose-500" id="res_water_loss">228</span>
+                <span class="text-xs font-semibold text-slate-500">KG/噸</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-0.5">機台真空除水電費負擔</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 四方案微型即時對比表 -->
+      <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-200/80 text-xs">
+        <h4 class="font-bold text-slate-700 mb-2 flex items-center justify-between">
+          <span>📊 四方案成本與ENB速查對照</span>
+          <span class="text-[10px] text-slate-400 font-normal">基準：現行配方</span>
+        </h4>
+        <div class="space-y-1.5 text-[11px]">
+          <div class="flex items-center justify-between py-1 px-2 rounded bg-slate-50">
+            <span class="font-semibold text-slate-600">現行配方 (60/10/3/27/0)</span>
+            <span class="text-slate-500">$1,390.9 / ENB 4.48%</span>
+          </div>
+          <div class="flex items-center justify-between py-1 px-2 rounded hover:bg-slate-50">
+            <span class="font-semibold text-slate-700">方案一：清中東 (60/20/6/14/0)</span>
+            <span class="text-emerald-600 font-bold">$1,305.2 (-6.2%)</span>
+          </div>
+          <div class="flex items-center justify-between py-1 px-2 rounded bg-blue-50/70 border border-blue-200">
+            <span class="font-bold text-blue-800">方案二：平衡首選 (50/20/8/22/0)</span>
+            <span class="text-blue-700 font-bold">$1,261.7 (-9.3%) ★</span>
+          </div>
+          <div class="flex items-center justify-between py-1 px-2 rounded hover:bg-slate-50">
+            <span class="font-semibold text-slate-700">方案三：極致降本 (45/25/8/22/0)</span>
+            <span class="text-emerald-600 font-bold">$1,218.6 (-12.4%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 浮動提示元件 (Toast) -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none z-50">
+    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+    <span id="toastMsg">已成功複製摘要報告！</span>
+  </div>
+
+  <script>
+    // 原料清單 (含第 5 項自訂料)
+    const defaultMaterials = [
+      { id: 0, name: "中東廢料", cost: 1000, moisture: 40.0, enb: 4.5, weight: 500, ratio: 50.0, isCustom: false, note: "含水量高・有去庫存壓力" },
+      { id: 1, name: "LION 廢料", cost: 700, moisture: 10.0, enb: 4.5, weight: 200, ratio: 20.0, isCustom: false, note: "輕微氣味・需控制在 25% 內" },
+      { id: 2, name: "LION EPM", cost: 600, moisture: 10.0, enb: 0.0, weight: 80, ratio: 8.0, isCustom: false, note: "全廠最低價・無第三單體" },
+      { id: 3, name: "DOW 4725", cost: 1300, moisture: 0.0, enb: 4.9, weight: 220, ratio: 22.0, isCustom: false, note: "零水分骨架料・品質最穩" },
+      { id: 4, name: "自訂添加料", cost: 200, moisture: 0.0, enb: 0.0, weight: 0, ratio: 0.0, isCustom: true, note: "如：高嶺土、增白劑、再生膠" }
+    ];
+
+    const BASELINE_DRY_COST = 1390.90; // 現行配方乾膠美金基準
+    let inputMode = 'weight'; // 'weight' 或 'percent'
+    let currentMaterials = JSON.parse(JSON.stringify(defaultMaterials));
+
+    // 初始化介面
+    function initUI() {
+      renderMaterialCards();
+      renderRecipeInputs();
+      calculate();
+    }
+
+    // 渲染卡片 1：原料清單 (5列)
+    function renderMaterialCards() {
+      const container = document.getElementById("materialsContainer");
+      container.innerHTML = "";
+
+      currentMaterials.forEach((m, idx) => {
+        const card = document.createElement("div");
+        card.className = `p-3.5 rounded-xl border transition-all ${m.isCustom ? 'border-dashed border-blue-300 bg-blue-50/20' : 'border-slate-200 bg-white hover:border-blue-300'}`;
+        
+        // 顏色指示點
+        const dotColors = ['bg-amber-500', 'bg-orange-500', 'bg-emerald-500', 'bg-blue-600', 'bg-purple-500'];
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full ${dotColors[idx]}"></span>
+              ${m.isCustom ? 
+                `<div class="flex items-center gap-1">
+                  <input type="text" id="mat_name_${idx}" value="${m.name}" oninput="updateCustomMaterialName(${idx})" class="font-bold text-slate-800 text-sm bg-white border border-slate-300 rounded px-2 py-0.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                  <span class="text-[10px] text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded font-bold">可編輯名稱</span>
+                 </div>` : 
+                `<span class="font-bold text-slate-800 text-sm">${m.name}</span>`
+              }
+              <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">(${m.note})</span>
+            </div>
+            <div class="text-xs text-slate-500 flex items-center gap-1.5 self-end sm:self-auto">
+              <span>真實純膠成本：</span>
+              <strong id="card_real_cost_${idx}" class="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-100">$0.0</strong>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2.5 text-xs">
+            <div>
+              <span class="text-[11px] text-slate-500 block mb-1">採購單價 (USD/噸)</span>
+              <div class="relative">
+                <input type="number" id="mat_cost_${idx}" value="${m.cost}" step="10" oninput="updateMaterialParam(${idx})" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-right font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none">
+              </div>
+            </div>
+            <div>
+              <span class="text-[11px] text-slate-500 block mb-1">水分含量 (%)</span>
+              <div class="relative">
+                <input type="number" id="mat_moist_${idx}" value="${m.moisture}" step="0.5" oninput="updateMaterialParam(${idx})" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-right font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none">
+              </div>
+            </div>
+            <div>
+              <span class="text-[11px] text-slate-500 block mb-1">第三單體 ENB (%)</span>
+              <div class="relative">
+                <input type="number" id="mat_enb_${idx}" value="${m.enb}" step="0.1" oninput="updateMaterialParam(${idx})" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-right font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none">
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 渲染卡片 2：配比輸入表格 (5列)
+    function renderRecipeInputs() {
+      const container = document.getElementById("recipeInputsContainer");
+      container.innerHTML = "";
+
+      currentMaterials.forEach((m, idx) => {
+        const row = document.createElement("div");
+        row.className = "grid grid-cols-12 items-center py-2 px-4 text-xs hover:bg-slate-50 transition-colors";
+        
+        row.innerHTML = `
+          <div class="col-span-4 flex items-center gap-1.5">
+            <span class="font-bold text-slate-700" id="recipe_row_name_${idx}">${m.name}</span>
+            ${m.isCustom ? `<span class="text-[9px] bg-purple-50 text-purple-600 px-1 py-0.2 rounded border border-purple-200 font-medium">第5格</span>` : ''}
+          </div>
+          
+          <!-- 重量輸入 (KG) -->
+          <div class="col-span-3 flex justify-center">
+            <div class="relative w-full max-w-[110px]">
+              <input type="number" id="rec_weight_${idx}" value="${m.weight}" step="5" min="0" oninput="handleWeightInput(${idx})" 
+                class="w-full ${inputMode === 'weight' ? 'bg-white border-blue-400 font-bold text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500 font-medium'} border rounded-lg pr-7 pl-2 py-1.5 text-right text-xs outline-none focus:border-blue-500">
+              <span class="absolute right-2 top-2 text-[10px] text-slate-400 font-bold">KG</span>
+            </div>
+          </div>
+
+          <!-- 比例輸入 (%) -->
+          <div class="col-span-2 flex justify-center">
+            <div class="relative w-full max-w-[85px]">
+              <input type="number" id="rec_ratio_${idx}" value="${m.ratio.toFixed(1)}" step="0.5" min="0" max="100" oninput="handleRatioInput(${idx})" 
+                class="w-full ${inputMode === 'percent' ? 'bg-white border-blue-400 font-bold text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500 font-medium'} border rounded-lg pr-5 pl-1.5 py-1.5 text-right text-xs outline-none focus:border-blue-500">
+              <span class="absolute right-1.5 top-2 text-[10px] text-slate-400 font-bold">%</span>
+            </div>
+          </div>
+
+          <!-- 乾燥後實質純膠佔比 -->
+          <div class="col-span-3 text-right font-semibold text-slate-600" id="rec_dry_share_${idx}">
+            0.0%
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // 切換輸入模式：重量 (KG) vs 比例 (%)
+    function switchInputMode(mode) {
+      inputMode = mode;
+      const btnW = document.getElementById("btnModeWeight");
+      const btnP = document.getElementById("btnModePercent");
+
+      if (mode === 'weight') {
+        btnW.className = "px-3 py-1.5 text-xs font-bold rounded-md transition-all bg-blue-600 text-white shadow-sm";
+        btnP.className = "px-3 py-1.5 text-xs font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
+        showToast("已切換為：依重量 (KG) 投料模式");
+      } else {
+        btnP.className = "px-3 py-1.5 text-xs font-bold rounded-md transition-all bg-blue-600 text-white shadow-sm";
+        btnW.className = "px-3 py-1.5 text-xs font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
+        showToast("已切換為：依比例 (%) 投料模式");
+      }
+
+      renderRecipeInputs();
+      calculate();
+    }
+
+    // 處理第 5 格自訂料名稱修改
+    function updateCustomMaterialName(idx) {
+      const newName = document.getElementById(`mat_name_${idx}`).value || "自訂添加料";
+      currentMaterials[idx].name = newName;
+      const recipeNameEl = document.getElementById(`recipe_row_name_${idx}`);
+      if (recipeNameEl) recipeNameEl.innerText = newName;
+    }
+
+    // 處理原料卡片參數更新 (單價, 水分, ENB)
+    function updateMaterialParam(idx) {
+      const cost = parseFloat(document.getElementById(`mat_cost_${idx}`).value) || 0;
+      const moist = parseFloat(document.getElementById(`mat_moist_${idx}`).value) || 0;
+      const enb = parseFloat(document.getElementById(`mat_enb_${idx}`).value) || 0;
+
+      currentMaterials[idx].cost = cost;
+      currentMaterials[idx].moisture = moist;
+      currentMaterials[idx].enb = enb;
+
+      calculate();
+    }
+
+    // 當在【依重量模式】輸入 KG 時
+    function handleWeightInput(idx) {
+      const val = parseFloat(document.getElementById(`rec_weight_${idx}`).value) || 0;
+      currentMaterials[idx].weight = val;
+
+      // 自動加總總重量並反推各料比例
+      let totalW = currentMaterials.reduce((sum, m) => sum + m.weight, 0);
+      if (totalW > 0) {
+        currentMaterials.forEach((m, i) => {
+          m.ratio = (m.weight / totalW) * 100;
+          const ratioInput = document.getElementById(`rec_ratio_${i}`);
+          if (ratioInput) ratioInput.value = m.ratio.toFixed(1);
+        });
+      }
+      calculate();
+    }
+
+    // 當在【依比例模式】輸入 % 時
+    function handleRatioInput(idx) {
+      const val = parseFloat(document.getElementById(`rec_ratio_${idx}`).value) || 0;
+      currentMaterials[idx].ratio = val;
+
+      // 依當前設定的總批重換算 KG
+      const batchTotal = parseFloat(document.getElementById("batchTotalWeightInput").value) || 1000;
+      currentMaterials.forEach((m, i) => {
+        m.weight = (m.ratio / 100) * batchTotal;
+        const weightInput = document.getElementById(`rec_weight_${i}`);
+        if (weightInput) weightInput.value = m.weight.toFixed(1);
+      });
+      calculate();
+    }
+
+    // 當修改「本批總投料重 (KG)」時
+    function handleBatchTotalChange() {
+      const batchTotal = parseFloat(document.getElementById("batchTotalWeightInput").value) || 1000;
+      currentMaterials.forEach((m, i) => {
+        m.weight = (m.ratio / 100) * batchTotal;
+        const weightInput = document.getElementById(`rec_weight_${i}`);
+        if (weightInput) weightInput.value = m.weight.toFixed(1);
+      });
+      calculate();
+    }
+
+    // 載入 4 個經典方案 (中東, LION, EPM, DOW, 自訂)
+    function loadScenario(ratios) {
+      const batchTotal = parseFloat(document.getElementById("batchTotalWeightInput").value) || 1000;
+      ratios.forEach((r, idx) => {
+        currentMaterials[idx].ratio = r;
+        currentMaterials[idx].weight = (r / 100) * batchTotal;
+
+        const elRatio = document.getElementById(`rec_ratio_${idx}`);
+        if (elRatio) elRatio.value = r.toFixed(1);
+
+        const elWeight = document.getElementById(`rec_weight_${idx}`);
+        if (elWeight) elWeight.value = ((r / 100) * batchTotal).toFixed(1);
+      });
+      calculate();
+      showToast(`已載入配方方案：[${ratios.join(', ')}]`);
+    }
+
+    // 恢復所有預設值
+    function resetDefaults() {
+      currentMaterials = JSON.parse(JSON.stringify(defaultMaterials));
+      document.getElementById("cfg_exchange_rate").value = 32.5;
+      document.getElementById("cfg_process_fee_usd").value = 270;
+      document.getElementById("cfg_packaging_fee_usd").value = 45;
+      document.getElementById("batchTotalWeightInput").value = 1000;
+      inputMode = 'weight';
+      
+      const btnW = document.getElementById("btnModeWeight");
+      const btnP = document.getElementById("btnModePercent");
+      btnW.className = "px-3 py-1.5 text-xs font-bold rounded-md transition-all bg-blue-600 text-white shadow-sm";
+      btnP.className = "px-3 py-1.5 text-xs font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
+
+      renderMaterialCards();
+      renderRecipeInputs();
+      calculate();
+      showToast("已成功重置為原廠基準設定");
+    }
+
+    // 核心物理與成本運算
+    function calculate() {
+      const exchangeRate = parseFloat(document.getElementById("cfg_exchange_rate").value) || 32.5;
+      const processFeeUSD = parseFloat(document.getElementById("cfg_process_fee_usd").value) || 0;
+      const packagingFeeUSD = parseFloat(document.getElementById("cfg_packaging_fee_usd").value) || 0;
+
+      let totalWetWeight = 0;
+      let totalWetCost = 0;
+      let totalDryWeight = 0;
+      let totalRatio = 0;
+
+      // 第一輪：各原料純乾膠成本與各料實質乾重
+      currentMaterials.forEach((m, idx) => {
+        const dryYield = (100 - m.moisture) / 100;
+        const realDryCost = dryYield > 0 ? (m.cost / dryYield) : 0;
+
+        const cardRealCostEl = document.getElementById(`card_real_cost_${idx}`);
+        if (cardRealCostEl) {
+          cardRealCostEl.innerText = `$${realDryCost.toFixed(1)}`;
+        }
+
+        totalWetWeight += m.weight;
+        totalRatio += m.ratio;
+        totalWetCost += (m.weight / 1000) * m.cost; // USD
+
+        // 單料乾燥後實質產出淨重 (KG)
+        const dryWeight = m.weight * dryYield;
+        m._dryWeight = dryWeight;
+        totalDryWeight += dryWeight;
+      });
+
+      // 檢查比例總和
+      const ratioBadge = document.getElementById("ratioSumBadge");
+      const isRatioOk = Math.abs(totalRatio - 100) < 0.1;
+      ratioBadge.innerText = `合計 ${totalRatio.toFixed(1)}% ${isRatioOk ? '合格 ✓' : '未達 100%'}`;
+      if (isRatioOk) {
+        ratioBadge.className = "text-xs px-2.5 py-1 rounded-md font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+      } else {
+        ratioBadge.className = "text-xs px-2.5 py-1 rounded-md font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30";
+      }
+
+      // 第二輪：計算各料在乾膠中的實質佔比與加權第三單體 ENB
+      let finalEnb = 0;
+      currentMaterials.forEach((m, idx) => {
+        const dryShare = totalDryWeight > 0 ? (m._dryWeight / totalDryWeight) : 0;
+        const shareEl = document.getElementById(`rec_dry_share_${idx}`);
+        if (shareEl) {
+          shareEl.innerText = `${(dryShare * 100).toFixed(1)}%`;
+        }
+        finalEnb += dryShare * (m.enb / 100);
+      });
+
+      // 綜合乾膠淨得率與脫水量
+      const overallDryYield = totalWetWeight > 0 ? (totalDryWeight / totalWetWeight) : 0;
+      const finalDryRawCostUSD = totalDryWeight > 0 ? (totalWetCost / (totalDryWeight / 1000)) : 0;
+      const finalDryRawCostTWD = finalDryRawCostUSD * exchangeRate;
+
+      // 脫水量 (每噸投料損耗 KG)
+      const waterLossPerTon = Math.max(0, (1 - overallDryYield) * 1000);
+
+      // 階段三：最終製造成本 (純乾膠成本 + 加工費 + 包裝雜支)
+      const finalTotalManufacturingCostUSD = finalDryRawCostUSD + processFeeUSD + packagingFeeUSD;
+      const finalTotalManufacturingCostTWD = finalTotalManufacturingCostUSD * exchangeRate;
+
+      // 成本節省幅度 (相較基準 $1,390.90 USD)
+      const diffSavings = BASELINE_DRY_COST - finalDryRawCostUSD;
+      const savingPct = (diffSavings / BASELINE_DRY_COST) * 100;
+
+      // ===== 更新介面呈現 =====
+
+      // 投料表底部加總
+      document.getElementById("tableTotalWeight").innerText = `${totalWetWeight.toFixed(1)} KG`;
+      document.getElementById("tableTotalRatio").innerText = `${totalRatio.toFixed(1)}%`;
+      document.getElementById("tableTotalDryShare").innerText = `乾膠 ${totalDryWeight.toFixed(1)} KG`;
+
+      // 階段一：純乾膠原料成本 (USD / TWD)
+      document.getElementById("res_dry_cost_usd").innerText = `$${finalDryRawCostUSD.toFixed(2)}`;
+      document.getElementById("res_dry_cost_twd").innerText = Math.round(finalDryRawCostTWD).toLocaleString();
+
+      const badgeSavings = document.getElementById("badgeSavings");
+      const resSavingStatus = document.getElementById("res_saving_status");
+
+      if (Math.abs(diffSavings) < 1) {
+        badgeSavings.innerText = "現行基準配方";
+        badgeSavings.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700";
+        resSavingStatus.innerText = "基準線水平";
+        resSavingStatus.className = "text-slate-500 font-semibold";
+      } else if (diffSavings > 0) {
+        badgeSavings.innerText = `▼ 每噸省 $${diffSavings.toFixed(1)} (-${savingPct.toFixed(1)}%)`;
+        badgeSavings.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
+        resSavingStatus.innerText = `省下 ${savingPct.toFixed(1)}% 純膠成本`;
+        resSavingStatus.className = "text-emerald-600 font-semibold";
+      } else {
+        const extra = -diffSavings;
+        const extraPct = -savingPct;
+        badgeSavings.innerText = `▲ 每噸增 $${extra.toFixed(1)} (+${extraPct.toFixed(1)}%)`;
+        badgeSavings.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200";
+        resSavingStatus.innerText = `成本高於基準線`;
+        resSavingStatus.className = "text-rose-600 font-semibold";
+      }
+
+      // 階段二：第三單體 ENB 顯示與評估
+      const enbPercent = finalEnb * 100;
+      document.getElementById("res_enb_value").innerText = enbPercent.toFixed(2);
+
+      const enbTag = document.getElementById("enbQualityTag");
+      const enbProgress = document.getElementById("enbProgress");
+      
+      const progWidth = Math.min(100, Math.max(10, ((enbPercent - 3.5) / (5.0 - 3.5)) * 100));
+      enbProgress.style.width = `${progWidth}%`;
+
+      if (enbPercent >= 4.2) {
+        enbTag.innerText = "品質優良 (ENB ≥ 4.2%)";
+        enbTag.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
+        enbProgress.className = "bg-emerald-500 h-full rounded-full transition-all duration-300";
+      } else if (enbPercent >= 4.0) {
+        enbTag.innerText = "標準合格 (4.0% ~ 4.2%)";
+        enbTag.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200";
+        enbProgress.className = "bg-amber-500 h-full rounded-full transition-all duration-300";
+      } else {
+        enbTag.innerText = "⚠️ 偏低警告 (< 4.0% 硫化慢)";
+        enbTag.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200";
+        enbProgress.className = "bg-rose-500 h-full rounded-full transition-all duration-300";
+      }
+
+      // 氣味評估
+      const lionRatio = currentMaterials[1].ratio;
+      const odorStatusEl = document.getElementById("res_odor_status");
+      if (lionRatio <= 20) {
+        odorStatusEl.innerText = `安全稀釋 (${lionRatio.toFixed(1)}%)`;
+        odorStatusEl.className = "text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200";
+      } else if (lionRatio <= 25) {
+        odorStatusEl.innerText = `臨界邊界 (${lionRatio.toFixed(1)}%)`;
+        odorStatusEl.className = "text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200";
+      } else {
+        odorStatusEl.innerText = `⚠️ 氣味過高 (${lionRatio.toFixed(1)}%)`;
+        odorStatusEl.className = "text-xs font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200";
+      }
+
+      // 階段三：最終製造成本 (USD / TWD)
+      document.getElementById("res_final_cost_usd").innerText = `$${finalTotalManufacturingCostUSD.toFixed(2)}`;
+      document.getElementById("res_final_cost_twd").innerText = Math.round(finalTotalManufacturingCostTWD).toLocaleString();
+
+      // 生產效率指標
+      document.getElementById("res_dry_yield").innerText = (overallDryYield * 100).toFixed(1);
+      document.getElementById("res_water_loss").innerText = Math.round(waterLossPerTon);
+    }
+
+    // 複製試算報告至剪貼簿
+    function copySummaryReport() {
+      const dryCostUSD = document.getElementById("res_dry_cost_usd").innerText;
+      const dryCostTWD = document.getElementById("res_dry_cost_twd").innerText;
+      const enbVal = document.getElementById("res_enb_value").innerText;
+      const finalCostUSD = document.getElementById("res_final_cost_usd").innerText;
+      const finalCostTWD = document.getElementById("res_final_cost_twd").innerText;
+      const dryYield = document.getElementById("res_dry_yield").innerText;
+      const waterLoss = document.getElementById("res_water_loss").innerText;
+      
+      const feedDetail = currentMaterials.map(m => `${m.name}: ${m.weight.toFixed(0)}KG (${m.ratio.toFixed(1)}%)`).join(" | ");
+
+      const reportText = `【彥泰企業 - EPDM 生產配方試算摘要】\n` +
+        `• 投料配比：${feedDetail}\n` +
+        `• 階段一 純乾膠原料成本：${dryCostUSD} (NT$ ${dryCostTWD})\n` +
+        `• 階段二 成品第三單體 ENB：${enbVal}%\n` +
+        `• 綜合乾膠淨得率：${dryYield}%\n` +
+        `• 每噸投料脫水量：${waterLoss} KG\n` +
+        `• 階段三 最終製造成本(含加工)：${finalCostUSD} (NT$ ${finalCostTWD})\n` +
+        `（計算時間：${new Date().toLocaleString()}）`;
+
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = reportText;
+      tempTextArea.style.position = "fixed";
+      tempTextArea.style.opacity = "0";
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      try {
+        document.execCommand("copy");
+        showToast("已成功將試算摘要複製至剪貼簿！");
+      } catch (err) {
+        showToast("複製失敗，請手動複製");
+      }
+      document.body.removeChild(tempTextArea);
+    }
+
+    // 顯示 Toast 訊息
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toastMsg");
+      toastMsg.innerText = msg;
+      toast.classList.remove("translate-y-20", "opacity-0");
+      toast.classList.add("translate-y-0", "opacity-100");
+      setTimeout(() => {
+        toast.classList.remove("translate-y-0", "opacity-100");
+        toast.classList.add("translate-y-20", "opacity-0");
+      }, 2500);
+    }
+
+    // 啟動初始化
+    window.addEventListener("DOMContentLoaded", () => {
+      initUI();
+    });
+  </script>
+</body>
+</html>
