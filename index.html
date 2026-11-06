@@ -193,6 +193,19 @@
 
       <!-- Data Table with Checkbox for Comparison -->
       <div class="bg-white rounded-2xl custom-shadow border border-slate-200 overflow-hidden">
+        <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
+          <div class="flex items-center space-x-2">
+            <label class="font-bold text-slate-600" id="lblSortOrder">排序方式：</label>
+            <select id="sortOrderSelect" onchange="renderTable()" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 font-semibold text-slate-700">
+              <option value="brand_asc">品牌字母排序 (Brand A-Z)</option>
+              <option value="grade_asc">牌號排序 (Grade A-Z)</option>
+              <option value="newest">最新登錄優先 (Newest First)</option>
+            </select>
+          </div>
+          <div class="text-slate-500 font-medium" id="pageInfoText">
+            顯示第 1 頁，共 0 筆
+          </div>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm text-slate-700">
             <thead class="bg-slate-100 font-bold border-b border-slate-200 text-slate-600">
@@ -214,6 +227,16 @@
               <!-- JS Injected -->
             </tbody>
           </table>
+        </div>
+        <!-- Pagination Controls -->
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+          <button onclick="changePage(-1)" id="btnPrevPage" class="px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            上一頁 (Previous)
+          </button>
+          <span id="pageIndicator" class="font-bold text-slate-600">Page 1 / 1</span>
+          <button onclick="changePage(1)" id="btnNextPage" class="px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            下一頁 (Next)
+          </button>
         </div>
       </div>
     </div>
@@ -393,6 +416,10 @@
     let PRODUCTS = [];
     let isEditing = false;
     let selectedForCompare = [];
+    
+    // Pagination & Sorting state
+    let currentPage = 1;
+    const itemsPerPage = 40;
 
     const DEFAULT_RUBBER_SYSTEM = [
       { id: 'dow-4725p', category: 'EPDM_INT', subBrand: 'DOW', brand: 'DOW (陶氏 Nordel)', grade: 'Nordel 4725P', eth: '68 wt%', prop: '平衡', enb: '4.9 wt% (ENB)', oil: '0 phr (原生)', mooney: '25 @125°C', form: '塊膠 (Bale)', tds: '#', sds: '#', descZh: '高乙烯、中門尼，優異的耐天候與強度，應用於汽車密封條與建築防水膜。' },
@@ -431,6 +458,7 @@
         catAll: '全部', catEpdmInt: '🌍 國際大廠 EPDM', catRepro: '♻️ 彥泰環保再製膠', catSynthetic: '🧪 合成橡膠 (BR/SBR/NBR)',
         lblBrandFilter: '品牌快速篩選：', subAll: '全部品牌', subIanteai: '⭐ 彥泰精煉專區',
         lblFormFilter: '橡膠型態 (Form)', lblMooneyFilter: '門尼黏度篩選 (Mooney)', lblEnbFilter: 'ENB 第三單體篩選',
+        lblSortOrder: '排序方式：',
         thBrand: '品牌 / 供應商', thGrade: '牌號 (Grade)', thEth: '乙烯含量', thProp: '丙烯含量', thEnb: 'ENB / 第三單體', thOil: '含油率', thMooney: '門尼黏度', thForm: '型態', thDocs: 'TDS / SDS', thAction: '技術操作',
         emptyData: '尚無符合條件的橡膠或牌號資料',
         modalAddTitle: '新增橡膠產品資料',
@@ -449,6 +477,7 @@
         catAll: 'All', catEpdmInt: '🌍 Global EPDM', catRepro: '♻️ Recycled', catSynthetic: '🧪 Synthetic Rubber',
         lblBrandFilter: 'Brand Filter:', subAll: 'All Brands', subIanteai: '⭐ Ianteai Recycled',
         lblFormFilter: 'Rubber Form', lblMooneyFilter: 'Mooney Viscosity', lblEnbFilter: 'ENB Content',
+        lblSortOrder: 'Sort Order:',
         thBrand: 'Brand / Supplier', thGrade: 'Grade', thEth: 'Ethylene', thProp: 'Propylene', thEnb: 'ENB', thOil: 'Oil %', thMooney: 'Mooney', thForm: 'Form', thDocs: 'TDS / SDS', thAction: 'Actions',
         emptyData: 'No matching rubber records found.',
         modalAddTitle: 'Add Rubber Product',
@@ -467,6 +496,7 @@
         catAll: 'Tất cả', catEpdmInt: '🌍 EPDM Quốc tế', catRepro: '♻️ Cao su tái chế', catSynthetic: '🧪 Cao su tổng hợp',
         lblBrandFilter: 'Lọc thương hiệu:', subAll: 'Tất cả', subIanteai: '⭐ Khu vực Ianteai',
         lblFormFilter: 'Hình dạng', lblMooneyFilter: 'Độ nhớt Mooney', lblEnbFilter: 'Hàm lượng ENB',
+        lblSortOrder: 'Sắp xếp:',
         thBrand: 'Thương hiệu / Nhà cung cấp', thGrade: 'Mác (Grade)', thEth: 'Etylen', thProp: 'Propylen', thEnb: 'ENB', thOil: 'Dầu %', thMooney: 'Mooney', thForm: 'Dạng', thDocs: 'TDS / SDS', thAction: 'Thao tác',
         emptyData: 'Không tìm thấy dữ liệu phù hợp',
         modalAddTitle: 'Thêm sản phẩm cao su',
@@ -485,6 +515,7 @@
         catAll: 'Semua', catEpdmInt: '🌍 EPDM Global', catRepro: '♻️ Karet Daur Ulang', catSynthetic: '🧪 Karet Sintetis',
         lblBrandFilter: 'Filter Merek:', subAll: 'Semua Merek', subIanteai: '⭐ Zona Ianteai',
         lblFormFilter: 'Bentuk Karet', lblMooneyFilter: 'Viskositas Mooney', lblEnbFilter: 'Kadar ENB',
+        lblSortOrder: 'Urutkan:',
         thBrand: 'Merek / Pemasok', thGrade: 'Grade', thEth: 'Etilena', thProp: 'Propilena', thEnb: 'ENB', thOil: 'Oli %', thMooney: 'Mooney', thForm: 'Bentuk', thDocs: 'TDS / SDS', thAction: 'Aksi',
         emptyData: 'Tidak ada data karet yang cocok',
         modalAddTitle: 'Tambah Produk Karet',
@@ -512,6 +543,7 @@
         'lblFormFilter': t.lblFormFilter,
         'lblMooneyFilter': t.lblMooneyFilter,
         'lblEnbFilter': t.lblEnbFilter,
+        'lblSortOrder': t.lblSortOrder,
         'thBrand': t.thBrand,
         'thGrade': t.thGrade,
         'thEth': t.thEth,
@@ -614,6 +646,7 @@
     function setCat(cat) {
       currentCategory = cat;
       currentSubBrand = 'ALL';
+      currentPage = 1;
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.className = (btn.dataset.c === cat) ? "cat-btn px-3.5 py-2 rounded-xl bg-brand-700 text-white font-bold shadow-sm transition-all" : "cat-btn px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all font-medium";
       });
@@ -627,7 +660,7 @@
 
     function setSubBrand(sub) {
       currentSubBrand = sub;
-      // Also automatically switch category to EPDM_INT if a specific brand is selected and we are in ALL
+      currentPage = 1;
       if (sub !== 'ALL' && currentCategory === 'ALL') {
         currentCategory = 'EPDM_INT';
         document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -656,7 +689,14 @@
       if (fMooney) fMooney.value = 'ALL';
       if (fEnb) fEnb.value = 'ALL';
       if (sInput) sInput.value = '';
+      currentPage = 1;
       renderTable();
+    }
+
+    function changePage(direction) {
+      currentPage += direction;
+      renderTable();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // --- Comparison Logic ---
@@ -759,13 +799,14 @@
       const formVal = document.getElementById('filterForm')?.value || 'ALL';
       const mooneyVal = document.getElementById('filterMooney')?.value || 'ALL';
       const enbVal = document.getElementById('filterEnb')?.value || 'ALL';
+      const sortVal = document.getElementById('sortOrderSelect')?.value || 'brand_asc';
 
       const tbody = document.getElementById('tableBody');
       if (!tbody) return;
 
       const t = I18N[currentLang];
       
-      const filtered = PRODUCTS.filter(p => {
+      let filtered = PRODUCTS.filter(p => {
         if (currentCategory !== 'ALL' && p.category !== currentCategory) return false;
         if (currentSubBrand !== 'ALL' && p.subBrand !== currentSubBrand) return false;
         
@@ -803,12 +844,46 @@
         return true;
       });
 
-      if (filtered.length === 0) {
+      // Sorting
+      filtered.sort((a, b) => {
+        if (sortVal === 'brand_asc') {
+          return (a.brand || '').localeCompare(b.brand || '');
+        } else if (sortVal === 'grade_asc') {
+          return (a.grade || '').localeCompare(b.grade || '');
+        } else if (sortVal === 'newest') {
+          const timeA = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          const timeB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return timeB - timeA;
+        }
+        return 0;
+      });
+
+      // Pagination calculations
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginatedItems = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+      // Update UI elements for pagination info
+      const pageInfoText = document.getElementById('pageInfoText');
+      const pageIndicator = document.getElementById('pageIndicator');
+      const btnPrev = document.getElementById('btnPrevPage');
+      const btnNext = document.getElementById('btnNextPage');
+
+      if (pageInfoText) pageInfoText.innerText = `顯示第 ${startIndex + 1} - ${Math.min(startIndex + itemsPerPage, totalItems)} 筆，共 ${totalItems} 筆`;
+      if (pageIndicator) pageIndicator.innerText = `Page ${currentPage} / ${totalPages}`;
+      if (btnPrev) btnPrev.disabled = (currentPage <= 1);
+      if (btnNext) btnNext.disabled = (currentPage >= totalPages);
+
+      if (paginatedItems.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" class="text-center py-10 text-slate-400 font-medium">${t.emptyData}</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = filtered.map(p => {
+      tbody.innerHTML = paginatedItems.map(p => {
         const isChecked = selectedForCompare.includes(p.id) ? 'checked' : '';
         const adminBtns = isAdmin ? `
           <button onclick="openModalForEdit('${p.id}', '${p.category}', '${p.subBrand || 'OTHER'}', '${(p.brand || '').replace(/'/g, "\\'")}', '${(p.grade || '').replace(/'/g, "\\'")}', '${(p.eth || '').replace(/'/g, "\\'")}', '${(p.prop || '').replace(/'/g, "\\'")}', '${(p.enb || '').replace(/'/g, "\\'")}', '${(p.oil || '').replace(/'/g, "\\'")}', '${(p.mooney || '').replace(/'/g, "\\'")}', '${(p.form || '塊膠 (Bale)').replace(/'/g, "\\'")}', '${(p.tds || '').replace(/'/g, "\\'")}', '${(p.sds || '').replace(/'/g, "\\'")}', '${(p.descZh || '').replace(/'/g, "\\'")}')" class="px-2 py-1 bg-amber-50 text-amber-600 rounded text-xs hover:bg-amber-100 border border-amber-200 font-bold">${t.btnEdit}</button>
