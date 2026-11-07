@@ -51,7 +51,12 @@
       </div>
 
       <!-- Navigation / Cost Calculator Link & Auth -->
-      <div class="flex items-center space-x-3 text-sm">
+      <div class="flex items-center space-x-2 text-sm">
+        <a href="https://ianteaicom-rgb.github.io/tds/CIF" target="_blank" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all text-xs shadow-md" title="進口基礎設定與 CIF 成本計算">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+          <span id="txtCifLink">進口基礎設定</span>
+        </a>
+
         <a href="https://ianteaicom-rgb.github.io/tds/power" target="_blank" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold transition-all text-xs shadow-md" title="EPDM 生產配方、真實成本與業務銷售定價系統">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
           <span id="txtCalcLink">配方與成本定價系統</span>
@@ -449,6 +454,7 @@
       zh: {
         langBtn: 'EN',
         brandTag: '全系統橡膠與 EPDM 專家資料庫',
+        txtCifLink: '進口基礎設定',
         txtCalcLink: '配方與成本定價系統',
         txtLoginBtn: '管理員登入',
         txtLogoutBtn: '登出系統',
@@ -468,6 +474,7 @@
       en: {
         langBtn: '中文',
         brandTag: 'Rubber & EPDM Technical Database',
+        txtCifLink: 'CIF Setup',
         txtCalcLink: 'Formula & Cost Pricing',
         txtLoginBtn: 'Admin Login',
         txtLogoutBtn: 'Logout',
@@ -487,6 +494,7 @@
       vi: {
         langBtn: '中文',
         brandTag: 'Cơ sở dữ liệu kỹ thuật Cao su & EPDM',
+        txtCifLink: 'Cài đặt nhập khẩu',
         txtCalcLink: 'Hệ thống định giá & công thức',
         txtLoginBtn: 'Đăng nhập QTV',
         txtLogoutBtn: 'Đăng xuất',
@@ -506,6 +514,7 @@
       id: {
         langBtn: '中文',
         brandTag: 'Database Teknis Karet & EPDM',
+        txtCifLink: 'Pengaturan Impor',
         txtCalcLink: 'Sistem Harga & Formula',
         txtLoginBtn: 'Login Admin',
         txtLogoutBtn: 'Logout',
@@ -528,6 +537,7 @@
       const t = I18N[currentLang];
       const elMap = {
         'brandTag': t.brandTag,
+        'txtCifLink': t.txtCifLink,
         'txtCalcLink': t.txtCalcLink,
         'txtLoginBtn': t.txtLoginBtn,
         'txtLogoutBtn': t.txtLogoutBtn,
