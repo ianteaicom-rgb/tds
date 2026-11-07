@@ -18,7 +18,19 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex items-start justify-center p-4 lg:p-8">
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col items-center p-4 lg:p-8">
+
+    <!-- 頂部快速導覽列 -->
+    <div class="max-w-7xl w-full flex flex-wrap justify-end gap-3 mb-4">
+        <a href="https://ianteaicom-rgb.github.io/tds/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            TDS 查詢系統
+        </a>
+        <a href="https://ianteaicom-rgb.github.io/tds/power" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            TDS Power 工具
+        </a>
+    </div>
 
     <!-- 大容器：使用 Flexbox 強制左 2/3、右 1/3 佈局 -->
     <div class="max-w-7xl w-full flex flex-col md:flex-row gap-6 items-start">
@@ -51,7 +63,13 @@
 
                         <!-- 3. 美金匯率 -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">美金匯率</label>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-sm font-medium text-gray-700">美金匯率</label>
+                                <a href="https://www.cbc.gov.tw/" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:text-blue-800 underline flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    查詢央行匯率
+                                </a>
+                            </div>
                             <input type="number" id="exchange" value="32.5" step="0.01"
                                 class="block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
                                 placeholder="32.5">
