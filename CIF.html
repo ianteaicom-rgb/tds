@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 進口成本快速計算器</title>
+    <!-- 引入 Tailwind CSS 進行現代化排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隱藏預設數字輸入框的上下箭頭，讓畫面更簡潔 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex items-start justify-center p-4 lg:p-8">
+
+    <!-- 大容器：使用 Flexbox 強制左 2/3、右 1/3 佈局 -->
+    <div class="max-w-7xl w-full flex flex-col md:flex-row gap-6 items-start">
+        
+        <!-- ================= 左側：設定輸入區 (寬度 2/3) ================= -->
+        <div class="w-full md:w-2/3 space-y-6">
+            
+            <!-- 卡片 1: 進口基礎設定 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-blue-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        1. 進口基礎設定
+                    </h2>
+                </div>
+                <div class="p-6 space-y-5">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <!-- 1. 原料成本 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">原料成本 (美金)</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">$</span>
+                                </div>
+                                <input type="number" id="material" value="1400" step="0.01"
+                                    class="pl-8 block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
+                                    placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <!-- 3. 美金匯率 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">美金匯率</label>
+                            <input type="number" id="exchange" value="32.5" step="0.01"
+                                class="block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
+                                placeholder="32.5">
+                        </div>
+                    </div>
+
+                    <!-- 2. 拖車/內陸運費 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">拖車 / 內陸運費 (美金)</label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <select id="freight-select" class="block w-full sm:w-1/2 rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors">
+                                <option value="45">24噸 ($45)</option>
+                                <option value="47.5">22噸 ($47.5)</option>
+                                <option value="50">20噸 ($50)</option>
+                                <option value="custom">自訂 (自己填)</option>
+                            </select>
+                            
+                            <!-- 自訂運費輸入框 -->
+                            <div id="freight-custom-wrapper" class="relative hidden w-full sm:w-1/2">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">$</span>
+                                </div>
+                                <input type="number" id="freight-custom" value="0" step="0.01"
+                                    class="pl-8 block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
+                                    placeholder="輸入金額">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <!-- 4. 關稅 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">關稅</label>
+                            <div class="flex flex-col gap-2">
+                                <select id="tariff-select" class="block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors">
+                                    <option value="2">EPDM (2%)</option>
+                                    <option value="2.5">塑膠 (2.5%)</option>
+                                    <option value="3.5">橡膠 (3.5%)</option>
+                                    <option value="0">免關稅 (0%)</option>
+                                    <option value="custom">其他 (自己填)</option>
+                                </select>
+
+                                <!-- 自訂關稅輸入框 -->
+                                <div id="tariff-custom-wrapper" class="relative hidden w-full">
+                                    <input type="number" id="tariff-custom" value="0" step="0.1"
+                                        class="pr-8 block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
+                                        placeholder="輸入%">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. 信用狀 L/C -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">信用狀 L/C</label>
+                            <div class="relative">
+                                <input type="number" id="lc" value="1" step="0.1"
+                                    class="pr-8 block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
+                                    placeholder="1.0">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 卡片 2: 加工與包裝設定 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-700 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        🛠️ 2. 加工與包裝設定
+                    </h2>
+                </div>
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <!-- 6. 加工費 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">加工費 (美金)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">$</span>
+                            </div>
+                            <input type="number" id="processing-fee" value="270" step="0.01"
+                                class="pl-8 block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+                    <!-- 7. 水分損耗 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">水分損耗 (%)</label>
+                        <div class="relative">
+                            <input type="number" id="moisture-loss" value="15" step="0.1"
+                                class="pr-8 block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors"
+                                placeholder="15">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 8. 包裝選項 -->
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">包裝選項 (美金)</label>
+                        <select id="packaging-select" class="block w-full rounded-lg border-gray-300 bg-gray-50 border py-2.5 px-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors">
+                            <option value="0" selected>棧板 (+$0, 已含在加工費)</option>
+                            <option value="45">好運鐵箱 (+$45)</option>
+                            <option value="30">回收鐵箱 (+$30)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 右側：結果顯示區 (寬度 1/3 且 Sticky 固定) ================= -->
+        <div class="w-full md:w-1/3 sticky top-6">
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+                <div class="bg-gray-800 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white text-center">
+                        計算結果
+                    </h2>
+                </div>
+                
+                <div class="p-6 space-y-6 bg-gray-50">
+                    <!-- 1. 進口總成本 -->
+                    <div class="p-5 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-gray-300 transition-colors">
+                        <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">階段一：進口總成本</h4>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-500">美金 (USD)</span>
+                            <span class="text-lg font-semibold text-gray-700" id="usd-result">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                            <span class="text-sm font-medium text-gray-500">台幣 (TWD)</span>
+                            <span class="text-2xl font-bold text-gray-800" id="twd-result">NT$ 0</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. 加工後最終製作成本 -->
+                    <div class="p-5 bg-blue-50 rounded-xl shadow-md border border-blue-200">
+                        <h4 class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-3">階段二：最終製作成本</h4>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-blue-700">美金 (USD)</span>
+                            <span class="text-lg font-semibold text-blue-800" id="final-usd-result">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-blue-200">
+                            <span class="text-sm font-medium text-blue-700">台幣 (TWD)</span>
+                            <span class="text-3xl font-black text-blue-700" id="final-twd-result">NT$ 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM 元素選取
+        const inputs = document.querySelectorAll('input, select');
+        
+        const freightSelect = document.getElementById('freight-select');
+        const freightCustomWrapper = document.getElementById('freight-custom-wrapper');
+        const freightCustom = document.getElementById('freight-custom');
+
+        const tariffSelect = document.getElementById('tariff-select');
+        const tariffCustomWrapper = document.getElementById('tariff-custom-wrapper');
+        const tariffCustom = document.getElementById('tariff-custom');
+
+        const materialInput = document.getElementById('material');
+        const exchangeInput = document.getElementById('exchange');
+        const lcInput = document.getElementById('lc');
+        const processingFeeInput = document.getElementById('processing-fee');
+        const moistureLossInput = document.getElementById('moisture-loss');
+        const packagingSelect = document.getElementById('packaging-select');
+        const usdResult = document.getElementById('usd-result');
+        const twdResult = document.getElementById('twd-result');
+        const finalUsdResult = document.getElementById('final-usd-result');
+        const finalTwdResult = document.getElementById('final-twd-result');
+
+        // 顯示或隱藏自訂欄位邏輯
+        function toggleCustomInputs() {
+            // 處理運費下拉選單
+            if (freightSelect.value === 'custom') {
+                freightCustomWrapper.classList.remove('hidden');
+            } else {
+                freightCustomWrapper.classList.add('hidden');
+            }
+
+            // 處理關稅下拉選單
+            if (tariffSelect.value === 'custom') {
+                tariffCustomWrapper.classList.remove('hidden');
+            } else {
+                tariffCustomWrapper.classList.add('hidden');
+            }
+        }
+
+        // 計算邏輯
+        function calculate() {
+            // 1. 取得原料成本
+            const material = parseFloat(materialInput.value) || 0;
+
+            // 2. 取得運費 (判斷是否為自訂)
+            let freight = 0;
+            if (freightSelect.value === 'custom') {
+                freight = parseFloat(freightCustom.value) || 0;
+            } else {
+                freight = parseFloat(freightSelect.value) || 0;
+            }
+
+            // 3. 取得匯率
+            const exchange = parseFloat(exchangeInput.value) || 0;
+
+            // 4. 取得關稅 (判斷是否為自訂，並轉為小數)
+            let tariffPercent = 0;
+            if (tariffSelect.value === 'custom') {
+                tariffPercent = parseFloat(tariffCustom.value) || 0;
+            } else {
+                tariffPercent = parseFloat(tariffSelect.value) || 0;
+            }
+            const tariffRate = tariffPercent / 100;
+
+            // 5. 取得信用狀 (轉為小數)
+            const lcRate = (parseFloat(lcInput.value) || 0) / 100;
+
+            // 6. 套用公式計算
+            // 美金成本 = 原料成本 * (1 + 關稅% + 信用狀%) + 內陸運費
+            const totalUSD = (material * (1 + tariffRate + lcRate)) + freight;
+            
+            // 台幣成本 = 美金成本 * 匯率
+            const totalTWD = totalUSD * exchange;
+
+            // 取得加工費、水分損耗與包裝費
+            const processingFee = parseFloat(processingFeeInput.value) || 0;
+            const moistureLoss = parseFloat(moistureLossInput.value) || 0;
+            const packagingCost = parseFloat(packagingSelect.value) || 0;
+            
+            // 計算損耗率，並設定上限為 0.99 以避免除以 0 導致無限大
+            const moistureLossRate = Math.min(moistureLoss / 100, 0.99); 
+
+            // 最終製作成本 (美金) = (進口美金成本 + 加工費 + 包裝費) / (1 - 水分損耗%)
+            const finalUSD = (totalUSD + processingFee + packagingCost) / (1 - moistureLossRate);
+            
+            // 最終製作成本 (台幣) = 最終製作美金成本 * 匯率
+            const finalTWD = finalUSD * exchange;
+
+            // 7. 更新畫面顯示 (加上千分位與格式化)
+            usdResult.textContent = '$' + totalUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            twdResult.textContent = 'NT$ ' + Math.round(totalTWD).toLocaleString('en-US');
+            
+            finalUsdResult.textContent = '$' + finalUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            finalTwdResult.textContent = 'NT$ ' + Math.round(finalTWD).toLocaleString('en-US');
+        }
+
+        // 綁定事件監聽器
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                toggleCustomInputs();
+                calculate();
+            });
+            input.addEventListener('change', () => {
+                toggleCustomInputs();
+                calculate();
+            });
+        });
+
+        // 網頁載入時初始化執行一次
+        toggleCustomInputs();
+        calculate();
+    </script>
+</body>
+</html>
