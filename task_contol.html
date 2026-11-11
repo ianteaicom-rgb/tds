@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>彥泰企業 - 跨單位任務動態追蹤與結案系統</title>
+    <title>彥泰企業 - 目標日期導向與天數倒數追蹤系統</title>
     <style>
         :root {
             --primary: #1F497D;
@@ -15,60 +15,53 @@
             --danger: #E53E3E;
             --success: #38A169;
             --warning: #DD6B20;
-            --info: #3182CE;
+            --purple: #6B46C1;
         }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif; }
         body { background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; }
-        .container { max-width: 1350px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         
         /* 頁首設計 */
-        .header { background: linear-gradient(135deg, #1F497D 0%, #2B6CB0 100%); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 12px rgba(31,73,125,0.2); }
+        .header { background: linear-gradient(135deg, #1A365D 0%, #2B6CB0 100%); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 12px rgba(31,73,125,0.2); }
         .header h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
-        .header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.9; }
+        .header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.92; }
         .header-actions { display: flex; gap: 10px; align-items: center; }
 
+        /* 頂部統計指標卡 */
+        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .kpi-box { background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
+        .kpi-box.purple { border-left-color: var(--purple); background: #FAF5FF; }
+        .kpi-box.orange { border-left-color: var(--warning); background: #FFFAF0; }
+        .kpi-box.red { border-left-color: var(--danger); background: #FFF5F5; }
+        .kpi-box.green { border-left-color: var(--success); background: #F0FFF4; }
+        .kpi-info .title { font-size: 12px; font-weight: bold; color: #4A5568; margin-bottom: 4px; }
+        .kpi-info .sub { font-size: 11px; color: #718096; }
+        .kpi-num { font-size: 26px; font-weight: 800; color: #1A202C; }
+
         /* 導覽切換標籤 */
-        .view-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .view-tabs { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; border: 1px solid #CBD5E0; background: white; border-radius: 8px; font-weight: bold; font-size: 14px; color: #4A5568; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 2px 6px rgba(31,73,125,0.25); }
         .tab-btn:hover:not(.active) { background: #EDF2F7; }
 
         /* 控制與篩選面板 */
-        .control-panel { background: var(--card-bg); padding: 16px 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid var(--border); }
+        .control-panel { background: var(--card-bg); padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid var(--border); }
         .control-panel label { font-size: 13px; font-weight: bold; color: #4A5568; }
-        .control-panel input, .control-panel select { padding: 8px 12px; border: 1px solid #CBD5E0; border-radius: 6px; font-size: 13px; outline: none; }
-        .control-panel input:focus, .control-panel select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(43,108,176,0.15); }
+        .control-panel input, .control-panel select { padding: 8px 12px; border: 1px solid #CBD5E0; border-radius: 6px; font-size: 13px; outline: none; font-weight: 600; color: #2D3748; }
+        .control-panel select.highlight-sort { background: #EBF8FF; border-color: #90CDF4; color: #1A365D; }
         .btn-primary { padding: 9px 18px; background: #38A169; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background 0.2s; }
         .btn-primary:hover { background: #2F855A; }
         .btn-export { padding: 8px 14px; background: #4A5568; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-export:hover { background: #2D3748; }
 
-        /* 三欄看板視圖 */
-        .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
-        .column { border-radius: 12px; padding: 16px; min-height: 550px; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.06); }
-        .col-todo { background: #FFF5F5; }
-        .col-doing { background: #FEFCBF; }
-        .col-done { background: #F0FFF4; }
-        .column-header { font-weight: bold; font-size: 16px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
-        .task-list { display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        /* 倒數天數醒目徽章 */
+        .countdown-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; }
+        .cd-complex { background: #FAF5FF; color: #553C9A; border: 1px solid #D6BCFA; } /* 遠期大型複雜專案 (>=10天) */
+        .cd-medium { background: #EBF8FF; color: #2B6CB0; border: 1px solid #90CDF4; }  /* 中期推進 (4~9天) */
+        .cd-urgent { background: #FFFAF0; color: #C05621; border: 1px solid #FBD38D; }  /* 近期衝刺 (1~3天) */
+        .cd-today { background: #FFF5F5; color: #C53030; border: 1px solid #FEB2B2; }   /* 今日到期 / 逾期 */
+        .cd-done { background: #F0FFF4; color: #22543D; border: 1px solid #9AE6B4; }    /* 已完成 */
 
-        /* 任務卡片 */
-        .task-card { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.06); border-left: 5px solid var(--accent); position: relative; transition: transform 0.15s, box-shadow 0.15s; }
-        .task-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
-        .task-card.overdue { border-left-color: var(--danger); background: #FFFDFD; }
-        .task-title { font-weight: bold; font-size: 15px; margin: 6px 0; color: #1A202C; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-        .task-desc { font-size: 13px; color: #4A5568; margin-bottom: 10px; line-height: 1.5; white-space: pre-line; background: #F8FAFC; padding: 8px 10px; border-radius: 6px; border: 1px solid #EDF2F7; }
-        
-        /* 日期追蹤格線 */
-        .date-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: #EDF2F7; padding: 8px; border-radius: 6px; margin-bottom: 10px; font-size: 11px; text-align: center; }
-        .date-item { display: flex; flex-direction: column; }
-        .date-label { color: #718096; font-size: 10px; margin-bottom: 2px; }
-        .date-val { font-weight: bold; color: #2D3748; }
-        .date-val.alert { color: var(--danger); font-weight: 800; }
-        .date-val.completed { color: var(--success); }
-
-        .task-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #718096; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 6px; flex-wrap: wrap; gap: 6px; }
-        
         /* 8 大單位專屬標籤顏色 */
         .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
         .badge-現場 { background: #EBF8FF; color: #2B6CB0; border: 1px solid #BEE3F8; }
@@ -80,13 +73,50 @@
         .badge-廠務 { background: #EDF2F7; color: #2D3748; border: 1px solid #CBD5E0; }
         .badge-業務 { background: #FFF5F7; color: #97266D; border: 1px solid #FED7E2; }
 
+        /* 視圖 1：目標日期與天數倒數排程（預設主視圖） */
+        .timeline-section { margin-bottom: 24px; }
+        .timeline-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-radius: 10px; margin-bottom: 12px; font-weight: bold; font-size: 15px; }
+        .th-complex { background: #E9D8FD; color: #44337A; border-left: 6px solid #6B46C1; }
+        .th-medium { background: #BEE3F8; color: #2A4365; border-left: 6px solid #3182CE; }
+        .th-urgent { background: #FEEBC8; color: #7B341E; border-left: 6px solid #DD6B20; }
+        .th-overdue { background: #FED7D7; color: #742A2A; border-left: 6px solid #E53E3E; }
+
+        .timeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+
+        /* 任務卡片 */
+        .task-card { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.06); border-left: 5px solid var(--accent); position: relative; transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; justify-content: space-between; }
+        .task-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .task-card.complex-border { border-left-color: var(--purple); }
+        .task-card.urgent-border { border-left-color: var(--warning); }
+        .task-card.overdue-border { border-left-color: var(--danger); background: #FFFDFD; }
+        
+        .task-title { font-weight: bold; font-size: 15px; margin: 8px 0 6px 0; color: #1A202C; }
+        .task-desc { font-size: 13px; color: #4A5568; margin-bottom: 8px; line-height: 1.5; white-space: pre-line; background: #F8FAFC; padding: 8px 10px; border-radius: 6px; border: 1px solid #EDF2F7; }
+        .trouble-box { font-size: 12px; color: #553C9A; background: #FAF5FF; border: 1px dashed #B794F4; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; }
+
+        /* 日期追蹤格線 */
+        .date-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: #EDF2F7; padding: 8px; border-radius: 6px; margin-bottom: 10px; font-size: 11px; text-align: center; }
+        .date-item { display: flex; flex-direction: column; }
+        .date-label { color: #718096; font-size: 10px; margin-bottom: 2px; }
+        .date-val { font-weight: bold; color: #2D3748; }
+
+        .task-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #718096; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; flex-wrap: wrap; gap: 6px; }
         .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
         .action-btns button { padding: 4px 9px; font-size: 11px; border: 1px solid #CBD5E0; background: white; border-radius: 5px; cursor: pointer; font-weight: 600; transition: all 0.15s; }
         .action-btns button:hover { background: #EDF2F7; border-color: #A0AEC0; }
         .btn-edit { color: var(--accent) !important; }
         .btn-del { color: var(--danger) !important; }
 
-        /* 表格清單視圖（更新追蹤 & 已完成清單） */
+        /* 三欄看板視圖 */
+        .board { display: none; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+        .column { border-radius: 12px; padding: 16px; min-height: 520px; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.06); }
+        .col-todo { background: #FFF5F5; }
+        .col-doing { background: #FEFCBF; }
+        .col-done { background: #F0FFF4; }
+        .column-header { font-weight: bold; font-size: 16px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
+        .task-list { display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+
+        /* 表格清單視圖 */
         .table-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border); overflow-x: auto; display: none; }
         table.tracking-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
         table.tracking-table th { background: #EDF2F7; color: #2D3748; padding: 12px 10px; border-bottom: 2px solid #CBD5E0; white-space: nowrap; }
@@ -99,13 +129,13 @@
 
         /* Modal 新增與編輯表單 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 500px; max-width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 540px; max-width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 92vh; overflow-y: auto; }
         .modal-content h2 { margin-top: 0; font-size: 18px; color: var(--primary); border-bottom: 2px solid #EDF2F7; padding-bottom: 10px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #4A5568; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 9px 10px; border: 1px solid #CBD5E0; border-radius: 6px; font-size: 13px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; border-top: 1px solid #EDF2F7; padding-top: 15px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #4A5568; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #CBD5E0; border-radius: 6px; font-size: 13px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; border-top: 1px solid #EDF2F7; padding-top: 15px; }
     </style>
 </head>
 <body>
@@ -113,33 +143,71 @@
 <div class="container">
     <div class="header">
         <div>
-            <h1>彥泰企業 (IANTEAI) - 跨單位任務動態追蹤與結案系統</h1>
-            <p>整合：現場｜廠長｜機動組｜品保｜出貨(貨車/貨櫃)｜國貿｜廠務｜業務 — 完整記錄更新日期、追蹤日期與完成歸檔</p>
+            <h1>彥泰企業 (IANTEAI) - 目標日期導向與天數倒數排程系統</h1>
+            <p>今日基準日：<strong id="todayDisplay"></strong> ｜ 支援「倒數天數最多優先排列」：天數越多代表前置協調越複雜（如 11/30 大型任務），必須提早拆解防卡關！</p>
         </div>
         <div class="header-actions">
             <button class="btn-export" onclick="exportCSV()">📥 匯出 Excel (CSV) 報表</button>
-            <button class="btn-primary" onclick="openModal()">＋ 新增任務</button>
+            <button class="btn-primary" onclick="openModal()">＋ 新增目標任務</button>
+        </div>
+    </div>
+
+    <!-- 頂部倒數指標卡 -->
+    <div class="kpi-row">
+        <div class="kpi-box purple">
+            <div class="kpi-info">
+                <div class="title">🐘 遠期高難度/長天期任務 (≥10天)</div>
+                <div class="sub">如 11/30 目標：事情最複雜、需提早跨單位排程</div>
+            </div>
+            <div class="kpi-num" id="kpi-complex">0</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-info">
+                <div class="title">🚙 中期推進中任務 (4~9天)</div>
+                <div class="sub">按部就班跟進，留意跨部門交接</div>
+            </div>
+            <div class="kpi-num" id="kpi-medium">0</div>
+        </div>
+        <div class="kpi-box orange">
+            <div class="kpi-info">
+                <div class="title">⚡ 近期衝刺 / 臨界任務 (0~3天)</div>
+                <div class="sub">即將到期，現場與負責單位優先結案</div>
+            </div>
+            <div class="kpi-num" id="kpi-urgent">0</div>
+        </div>
+        <div class="kpi-box red">
+            <div class="kpi-info">
+                <div class="title">🚨 已逾目標日未結案 (<0天)</div>
+                <div class="sub">需立即排除障礙或重新調整目標日</div>
+            </div>
+            <div class="kpi-num" id="kpi-overdue">0</div>
         </div>
     </div>
 
     <!-- 視圖切換標籤 -->
     <div class="view-tabs">
-        <button class="tab-btn active" id="tab-board" onclick="switchView('board')">📋 三欄動態看板 (防中斷戰情室)</button>
-        <button class="tab-btn" id="tab-tracking" onclick="switchView('tracking')">🕒 更新與追蹤日期總表 (<span id="tab-count-all">0</span>)</button>
-        <button class="tab-btn" id="tab-completed" onclick="switchView('completed')">✅ 已完成結案清單 (<span id="tab-count-done">0</span>)</button>
+        <button class="tab-btn active" id="tab-timeline" onclick="switchView('timeline')">⏳ 目標日期與天數倒數排程 (主戰情室)</button>
+        <button class="tab-btn" id="tab-tracking" onclick="switchView('tracking')">📊 倒數天數與更新追蹤總表 (<span id="tab-count-all">0</span>)</button>
+        <button class="tab-btn" id="tab-board" onclick="switchView('board')">📋 三欄狀態看板 (待處理/進行中/完成)</button>
+        <button class="tab-btn" id="tab-completed" onclick="switchView('completed')">✅ 已完成結案歸檔 (<span id="tab-count-done">0</span>)</button>
     </div>
 
-    <!-- 篩選與搜尋列 -->
+    <!-- 篩選與排序控制列 -->
     <div class="control-panel">
         <div>
-            <label>🔍 關鍵字搜尋：</label>
-            <input type="text" id="searchInput" placeholder="搜尋任務名稱或執行重點..." onkeyup="renderAll()">
+            <label>⏱️ 倒數與日期排序模式：</label>
+            <select id="sortOrder" class="highlight-sort" onchange="renderAll()">
+                <option value="days_desc">🔥 依【剩餘天數：由多到少】排列 (如 11/30 最複雜大魔王置頂)</option>
+                <option value="days_asc">⚡ 依【剩餘天數：由少到多】排列 (近期急件與逾期置頂)</option>
+                <option value="update_desc">🔄 依【最後更新日】最新變動優先</option>
+                <option value="done_desc">🏁 依【實際完成日】最新結案優先</option>
+            </select>
         </div>
-        
+
         <div>
-            <label>🏢 責任單位篩選：</label>
+            <label>🏢 責任單位：</label>
             <select id="unitFilter" onchange="renderAll()">
-                <option value="ALL">全部單位 (All Units)</option>
+                <option value="ALL">全部單位 (All)</option>
                 <option value="現場">現場</option>
                 <option value="廠長">廠長</option>
                 <option value="機動組">機動組</option>
@@ -152,30 +220,47 @@
         </div>
 
         <div>
-            <label>📅 日期排序：</label>
-            <select id="sortOrder" onchange="renderAll()">
-                <option value="track_asc">依【追蹤日期】由近到遠 (優先處理)</option>
-                <option value="update_desc">依【更新日期】最新變動優先</option>
-                <option value="done_desc">依【完成日期】最新結案優先</option>
-            </select>
+            <label>🔍 搜尋：</label>
+            <input type="text" id="searchInput" placeholder="搜尋任務、難點或重點..." onkeyup="renderAll()">
         </div>
-
-        <span style="font-size: 12px; color: #718096; margin-left: auto;">
-            💡 每次變更狀態或編輯內容，系統會自動記錄當下<strong>「更新日期」</strong>；按完成時自動打上<strong>「完成日期」</strong>！
-        </span>
     </div>
 
-    <!-- 視圖 1：三欄看板 -->
+    <!-- 視圖 1：目標日期與天數倒數排程 (依天數難度分區) -->
+    <div id="view-timeline">
+        <div id="timeline-container"></div>
+    </div>
+
+    <!-- 視圖 2：倒數天數與更新追蹤總表 -->
+    <div class="table-container" id="view-tracking">
+        <h3 style="margin-top:0; color:var(--primary);">📊 全單位「目標倒數天數」、「複雜度分析」與「更新日期」追蹤總表</h3>
+        <table class="tracking-table">
+            <thead>
+                <tr>
+                    <th>⏳ 倒數天數與難度</th>
+                    <th>🎯 目標/追蹤日期</th>
+                    <th>狀態</th>
+                    <th>責任單位</th>
+                    <th>任務名稱</th>
+                    <th>執行重點與跟進進度</th>
+                    <th>🧩 為什麼需要這麼多天 (麻煩與卡關點)</th>
+                    <th>🔄 最後更新日</th>
+                    <th>🏁 完成日期</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="table-tracking-body"></tbody>
+        </table>
+    </div>
+
+    <!-- 視圖 3：三欄狀態看板 -->
     <div class="board" id="view-board">
-        <!-- 待辦/卡關區 -->
         <div class="column col-todo">
             <div class="column-header">
-                <span>🔴 待處理 / 中斷卡關</span>
+                <span>🔴 待處理 / 準備啟動</span>
                 <span id="count-todo" style="background:#E53E3E; color:white; padding:2px 10px; border-radius:12px; font-size:12px;">0</span>
             </div>
             <div class="task-list" id="list-todo"></div>
         </div>
-        <!-- 進行中 -->
         <div class="column col-doing">
             <div class="column-header">
                 <span>🟡 進行中 / 跨單位跟進</span>
@@ -183,7 +268,6 @@
             </div>
             <div class="task-list" id="list-doing"></div>
         </div>
-        <!-- 已完成 -->
         <div class="column col-done">
             <div class="column-header">
                 <span>🟢 已完成 / 結案歸檔</span>
@@ -193,31 +277,11 @@
         </div>
     </div>
 
-    <!-- 視圖 2：更新與追蹤日期總表 -->
-    <div class="table-container" id="view-tracking">
-        <h3 style="margin-top:0; color:var(--primary);">🕒 全單位任務「更新日期」與「追蹤日期」進度總表</h3>
-        <table class="tracking-table">
-            <thead>
-                <tr>
-                    <th>狀態</th>
-                    <th>責任單位</th>
-                    <th>任務名稱</th>
-                    <th>執行重點與跟進紀錄</th>
-                    <th>🔄 最後更新日期</th>
-                    <th>🎯 預定追蹤日期</th>
-                    <th>🏁 實際完成日期</th>
-                    <th>快速操作</th>
-                </tr>
-            </thead>
-            <tbody id="table-tracking-body"></tbody>
-        </table>
-    </div>
-
-    <!-- 視圖 3：已完成結案清單 -->
+    <!-- 視圖 4：已完成結案清單 -->
     <div class="table-container" id="view-completed">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <h3 style="margin:0; color:var(--success);">✅ 已完成任務結案歷史清單 (Completed Archive)</h3>
-            <span style="font-size:12px; color:#718096;">完整保留結案紀錄，不再怕白忙一場或查無紀錄</span>
+            <span style="font-size:12px; color:#718096;">完整保留結案紀錄，不再怕白忙一場</span>
         </div>
         <table class="tracking-table">
             <thead>
@@ -225,9 +289,10 @@
                     <th>責任單位</th>
                     <th>任務名稱</th>
                     <th>執行重點與成果</th>
-                    <th>🔄 最後更新日期</th>
-                    <th>🎯 原定追蹤日期</th>
-                    <th>🏁 實際完成日期</th>
+                    <th>🧩 克服的麻煩/關鍵點</th>
+                    <th>🔄 最後更新日</th>
+                    <th>🎯 原定目標日</th>
+                    <th>🏁 實際完成日</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -239,7 +304,7 @@
 <!-- 新增 / 編輯任務彈窗 -->
 <div class="modal" id="taskModal">
     <div class="modal-content">
-        <h2 id="modalTitle">新增跨單位任務</h2>
+        <h2 id="modalTitle">新增目標導向任務</h2>
         <input type="hidden" id="editTaskId">
         
         <div class="form-row">
@@ -259,7 +324,7 @@
             <div class="form-group">
                 <label>目前狀態：</label>
                 <select id="taskStatus">
-                    <option value="todo">🔴 待處理 / 中斷卡關</option>
+                    <option value="todo">🔴 待處理 / 規劃中</option>
                     <option value="doing">🟡 進行中 / 持續跟進</option>
                     <option value="done">🟢 已完成 / 結案歸檔</option>
                 </select>
@@ -268,23 +333,28 @@
 
         <div class="form-group">
             <label>任務名稱：</label>
-            <input type="text" id="taskTitle" placeholder="例如：EPDM 貨櫃船期確認、一廠集塵器保養...">
-        </div>
-
-        <div class="form-group">
-            <label>執行重點 (目前跟進到哪裡 / 卡關原因 / 注意事項)：</label>
-            <textarea id="taskDesc" rows="3" placeholder="請寫下具體執行重點，即使中途被其他事情打斷，回來一看就能馬上接續！"></textarea>
+            <input type="text" id="taskTitle" placeholder="例如：11月底新倉庫全面騰空與大貨櫃集中出貨專案">
         </div>
 
         <div class="form-row">
             <div class="form-group">
+                <label>🎯 目標/追蹤日期 (系統自動算倒數天數)：</label>
+                <input type="date" id="taskTrackDate">
+            </div>
+            <div class="form-group">
                 <label>🔄 更新日期 (預設今日)：</label>
                 <input type="date" id="taskUpdateDate">
             </div>
-            <div class="form-group">
-                <label>🎯 追蹤日期 (預計何時追進度)：</label>
-                <input type="date" id="taskTrackDate">
-            </div>
+        </div>
+
+        <div class="form-group">
+            <label>執行重點 (目前跟進到哪裡 / 階段目標)：</label>
+            <textarea id="taskDesc" rows="2" placeholder="請寫下具體執行步驟，中途被打斷也能馬上接續..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>🧩 為什麼需要這麼多天？(麻煩點 / 跨單位前置作業 / 潛在卡關處)：</label>
+            <textarea id="taskTrouble" rows="2" placeholder="例如：需等國外船期確認、機動組需先花5天除水理料、還需天車與鐵箱配合，所以才排到11/30..."></textarea>
         </div>
 
         <div class="form-group">
@@ -294,7 +364,7 @@
 
         <div class="modal-actions">
             <button onclick="closeModal()" style="background:#CBD5E0; color:#2D3748; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">取消</button>
-            <button onclick="saveTask()" style="background:var(--accent); color:white; border:none; padding:8px 18px; border-radius:6px; font-weight:bold; cursor:pointer;">💾 儲存任務</button>
+            <button onclick="saveTask()" style="background:var(--accent); color:white; border:none; padding:8px 18px; border-radius:6px; font-weight:bold; cursor:pointer;">💾 儲存任務與排程</button>
         </div>
     </div>
 </div>
@@ -309,63 +379,99 @@
         return `${yyyy}-${mm}-${dd}`;
     }
 
-    // 預設範例資料（涵蓋現場、廠長、機動組、品保、出貨、國貿、廠務、業務，以及三個日期欄位）
+    // 計算目標日與今天的相差天數 (正數代表還有幾天，負數代表已逾期幾天)
+    function calcDaysLeft(targetDateStr) {
+        if (!targetDateStr) return null;
+        const today = new Date(getTodayStr() + 'T00:00:00');
+        const target = new Date(targetDateStr + 'T00:00:00');
+        const diffTime = target - today;
+        return Math.round(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    // 取得當月月底 11/30 或動態偏移日期輔助函式
+    function getOffsetDateStr(offsetDays) {
+        const d = new Date();
+        d.setDate(d.getDate() + offsetDays);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // 預設範例資料（特別展示 11/30 長天數高難度任務，以及中短期倒數任務）
     const defaultTasks = [
         {
-            id: 101,
-            title: '40呎貨櫃裝載與出貨限重確認',
-            unit: '出貨',
-            desc: '確認40呎櫃重量限制及好運箱配置，避免超載退回。需與貨車司機確認進廠時間。',
-            updateDate: getTodayStr(),
-            trackDate: getTodayStr(),
-            doneDate: '',
-            status: 'doing'
-        },
-        {
-            id: 102,
-            title: 'EPDM 進口船期與報關文件追蹤',
+            id: 201,
+            title: '11月底大宗 EPDM 40呎貨櫃集中裝櫃與跨國船期結關',
             unit: '國貿',
-            desc: '核對產地證明(EPDM需求為主)、SDS 與木質包裝燻蒸證明，確認目的港免櫃期天數。',
+            desc: '整合一廠夜班雙機連續生產批次，完成全櫃打包、秤重與報關放行。',
+            trouble: '牽涉國外客戶信用狀審單、產地證明申請、奇美鐵箱調度及拖車預約，環節極多且不能出錯，故設定 11/30 為最終大目標。',
             updateDate: getTodayStr(),
-            trackDate: getTodayStr(),
+            trackDate: '2026-11-30',
             doneDate: '',
             status: 'doing'
         },
         {
-            id: 103,
-            title: '一廠屋頂通風口與集塵設備保養',
-            unit: '廠務',
-            desc: '每月執行2次集塵袋清洗，指派主管現場驗收，防止粉塵逸散影響鄰里。',
-            updateDate: getTodayStr(),
-            trackDate: getTodayStr(),
-            doneDate: '',
-            status: 'todo'
-        },
-        {
-            id: 104,
-            title: 'SBR/NBR 次級料除水與理料支援',
+            id: 202,
+            title: '新倉庫歷史廢料清運（目標 240 包）與庫位重整專案',
             unit: '機動組',
-            desc: '趁一廠開雙機時，機動組支援二廠將高水分邊角料攤開瀝乾並挑除雜質。',
+            desc: '趁二廠停機或一廠開雙機空檔，每日分段打包清理廢料並過磅紀錄。',
+            trouble: '垃圾量大且混雜高水分邊角料，需配合抓斗車清運檔期與現場人力調度，無法一天做完，需分三週逐步推進至月底。',
             updateDate: getTodayStr(),
-            trackDate: getTodayStr(),
-            doneDate: '',
-            status: 'todo'
-        },
-        {
-            id: 105,
-            title: '大批量夜班友善訂單報價與收款跟進',
-            unit: '業務',
-            desc: '推動單一規格大批量訂單以配合夜班離峰生產，並追蹤客戶應收帳款入帳進度。',
-            updateDate: getTodayStr(),
-            trackDate: getTodayStr(),
+            trackDate: '2026-11-28',
             doneDate: '',
             status: 'doing'
         },
         {
-            id: 106,
-            title: '二廠進料水分抽驗與 TDS 歸檔',
+            id: 203,
+            title: '全廠集塵設備第 2 次月度深度保養與屋頂死角巡檢',
+            unit: '廠務',
+            desc: '更換與清洗集塵袋、檢查屋頂通風口無積塵殘留，並由主管拍照驗收。',
+            trouble: '需配合一廠停機時段施工，並提前確認高空作業安全與天車/清理工具就緒。',
+            updateDate: getTodayStr(),
+            trackDate: getOffsetDateStr(9),
+            doneDate: '',
+            status: 'todo'
+        },
+        {
+            id: 204,
+            title: '大批量夜班友善訂單（單一規格）客戶報價與收款跟進',
+            unit: '業務',
+            desc: '針對高毛利客戶提供奇美鐵箱與好運箱雙方案報價，追蹤前期應收帳款入帳。',
+            trouble: '需等待客戶內部測試 3 箱樣品影片確認，並協調帳期條件。',
+            updateDate: getTodayStr(),
+            trackDate: getOffsetDateStr(5),
+            doneDate: '',
+            status: 'doing'
+        },
+        {
+            id: 205,
+            title: '二廠 SBR/NBR 高水分次級料瀝乾與大切前處理',
+            unit: '現場',
+            desc: '將水分偏高批次預先攤開除水並挑除異物，確保後續每噸切料成本壓在 600 元內。',
+            trouble: '原料尺寸不一且部分夾帶雜質，需廠長盯緊主班底時效（目標 >208 KG/H）。',
+            updateDate: getTodayStr(),
+            trackDate: getOffsetDateStr(2),
+            doneDate: '',
+            status: 'doing'
+        },
+        {
+            id: 206,
+            title: '本週貨車出貨棧板加固與限重複查',
+            unit: '出貨',
+            desc: '核對 35KG PE 袋封口與鐵箱堆疊穩固度，確認司機進廠時間。',
+            trouble: '需在中午前完成理貨與磅單核對，避免下午塞車延誤交期。',
+            updateDate: getTodayStr(),
+            trackDate: getOffsetDateStr(1),
+            doneDate: '',
+            status: 'todo'
+        },
+        {
+            id: 207,
+            title: 'SSBR 批次門尼黏度與結合苯乙烯 TDS 檢驗歸檔',
             unit: '品保',
-            desc: '已完成本批 SSBR Repro 結合苯乙烯與灰分抽測，數據合格已歸檔。',
+            desc: '已完成抽樣檢測並更新至線上雙語 TDS 規格中心。',
+            trouble: '已克服取樣均勻度問題並完成客戶 COA 出具。',
             updateDate: getTodayStr(),
             trackDate: getTodayStr(),
             doneDate: getTodayStr(),
@@ -373,23 +479,297 @@
         }
     ];
 
-    let tasks = JSON.parse(localStorage.getItem('yantai_tasks_v2')) || defaultTasks;
-    let currentView = 'board';
+    let tasks = JSON.parse(localStorage.getItem('yantai_tasks_v3_countdown')) || defaultTasks;
+    let currentView = 'timeline';
 
     function syncStorage() {
-        localStorage.setItem('yantai_tasks_v2', JSON.stringify(tasks));
+        localStorage.setItem('yantai_tasks_v3_countdown', JSON.stringify(tasks));
     }
 
     function switchView(viewName) {
         currentView = viewName;
-        document.getElementById('tab-board').classList.toggle('active', viewName === 'board');
-        document.getElementById('tab-tracking').classList.toggle('active', viewName === 'tracking');
-        document.getElementById('tab-completed').classList.toggle('active', viewName === 'completed');
+        ['timeline', 'tracking', 'board', 'completed'].forEach(v => {
+            document.getElementById(`tab-${v}`).classList.toggle('active', v === viewName);
+        });
 
-        document.getElementById('view-board').style.display = viewName === 'board' ? 'grid' : 'none';
+        document.getElementById('view-timeline').style.display = viewName === 'timeline' ? 'block' : 'none';
         document.getElementById('view-tracking').style.display = viewName === 'tracking' ? 'block' : 'none';
+        document.getElementById('view-board').style.display = viewName === 'board' ? 'grid' : 'none';
         document.getElementById('view-completed').style.display = viewName === 'completed' ? 'block' : 'none';
         renderAll();
+    }
+
+    // 產生倒數天數視覺徽章
+    function getCountdownBadgeHTML(t) {
+        if (t.status === 'done') {
+            return `<span class="countdown-badge cd-done">🏁 已完成 (${t.doneDate || '結案'})</span>`;
+        }
+        const days = calcDaysLeft(t.trackDate);
+        if (days === null) {
+            return `<span class="countdown-badge cd-medium">📅 未設目標日</span>`;
+        }
+        if (days >= 10) {
+            return `<span class="countdown-badge cd-complex">🐘 倒數 ${days} 天 (長天期/高複雜度)</span>`;
+        } else if (days >= 4) {
+            return `<span class="countdown-badge cd-medium">🚙 倒數 ${days} 天 (中期推進)</span>`;
+        } else if (days >= 1) {
+            return `<span class="countdown-badge cd-urgent">⚡ 倒數 ${days} 天 (近期衝刺)</span>`;
+        } else if (days === 0) {
+            return `<span class="countdown-badge cd-today">🔥 今天到期 (立即結案)</span>`;
+        } else {
+            return `<span class="countdown-badge cd-today">🚨 已逾期 ${Math.abs(days)} 天</span>`;
+        }
+    }
+
+    function getStatusText(status) {
+        if (status === 'todo') return '🔴 待處理';
+        if (status === 'doing') return '🟡 進行中';
+        return '🟢 已完成';
+    }
+
+    function createCardElement(t) {
+        const days = calcDaysLeft(t.trackDate);
+        let borderClass = '';
+        if (t.status !== 'done' && days !== null) {
+            if (days >= 10) borderClass = 'complex-border';
+            else if (days < 0) borderClass = 'overdue-border';
+            else if (days <= 3) borderClass = 'urgent-border';
+        }
+
+        const card = document.createElement('div');
+        card.className = `task-card ${borderClass}`;
+        card.innerHTML = `
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                    <span class="badge badge-${t.unit}">${t.unit}</span>
+                    ${getCountdownBadgeHTML(t)}
+                </div>
+                <div class="task-title">${t.title}</div>
+                <div class="task-desc"><strong>📌 執行重點：</strong>${t.desc || '（尚無說明）'}</div>
+                ${t.trouble ? `<div class="trouble-box"><strong>🧩 複雜度/為什麼需多天：</strong>${t.trouble}</div>` : ''}
+            </div>
+            <div>
+                <div class="date-grid">
+                    <div class="date-item">
+                        <span class="date-label">🎯 目標/追蹤日</span>
+                        <span class="date-val" style="color:#1A365D;">${t.trackDate || '未設定'}</span>
+                    </div>
+                    <div class="date-item">
+                        <span class="date-label">🔄 最後更新日</span>
+                        <span class="date-val">${t.updateDate || '-'}</span>
+                    </div>
+                    <div class="date-item">
+                        <span class="date-label">🏁 實際完成日</span>
+                        <span class="date-val" style="color:#38A169;">${t.doneDate || '未完成'}</span>
+                    </div>
+                </div>
+                <div class="task-meta">
+                    <div class="action-btns">
+                        ${t.status !== 'todo' ? `<button onclick="changeStatus(${t.id}, 'todo')">⬅ 待處理</button>` : ''}
+                        ${t.status !== 'doing' ? `<button onclick="changeStatus(${t.id}, 'doing')">▶ 進行中</button>` : ''}
+                        ${t.status !== 'done' ? `<button onclick="changeStatus(${t.id}, 'done')" style="color:#22543D; border-color:#9AE6B4; background:#F0FFF4;">✅ 結案完成</button>` : ''}
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-edit" onclick="openModal(${t.id})">✏️ 編輯/更新</button>
+                        <button class="btn-del" onclick="deleteTask(${t.id})">刪除</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        return card;
+    }
+
+    function renderAll() {
+        document.getElementById('todayDisplay').innerText = getTodayStr();
+        const searchTxt = document.getElementById('searchInput').value.toLowerCase();
+        const unitFilter = document.getElementById('unitFilter').value;
+        const sortOrder = document.getElementById('sortOrder').value;
+
+        // 統計 KPI (僅針對未完成任務)
+        let kpiComplex = 0, kpiMedium = 0, kpiUrgent = 0, kpiOverdue = 0;
+        tasks.forEach(t => {
+            if (t.status === 'done') return;
+            const d = calcDaysLeft(t.trackDate);
+            if (d === null) kpiMedium++;
+            else if (d >= 10) kpiComplex++;
+            else if (d >= 4) kpiMedium++;
+            else if (d >= 0) kpiUrgent++;
+            else kpiOverdue++;
+        });
+        document.getElementById('kpi-complex').innerText = kpiComplex;
+        document.getElementById('kpi-medium').innerText = kpiMedium;
+        document.getElementById('kpi-urgent').innerText = kpiUrgent;
+        document.getElementById('kpi-overdue').innerText = kpiOverdue;
+
+        // 過濾任務
+        let filtered = tasks.filter(t => {
+            const matchSearch = t.title.toLowerCase().includes(searchTxt) ||
+                                (t.desc && t.desc.toLowerCase().includes(searchTxt)) ||
+                                (t.trouble && t.trouble.toLowerCase().includes(searchTxt)) ||
+                                t.unit.toLowerCase().includes(searchTxt);
+            const matchUnit = unitFilter === 'ALL' || t.unit === unitFilter;
+            return matchSearch && matchUnit;
+        });
+
+        // 排序邏輯
+        filtered.sort((a, b) => {
+            const daysA = calcDaysLeft(a.trackDate);
+            const daysB = calcDaysLeft(b.trackDate);
+            if (sortOrder === 'days_desc') {
+                // 剩餘天數最多排最前（未完成優先於已完成）
+                if ((a.status === 'done') !== (b.status === 'done')) return a.status === 'done' ? 1 : -1;
+                return (daysB !== null ? daysB : -999) - (daysA !== null ? daysA : -999);
+            } else if (sortOrder === 'days_asc') {
+                if ((a.status === 'done') !== (b.status === 'done')) return a.status === 'done' ? 1 : -1;
+                return (daysA !== null ? daysA : 999) - (daysB !== null ? daysB : 999);
+            } else if (sortOrder === 'update_desc') {
+                return (b.updateDate || '').localeCompare(a.updateDate || '');
+            } else if (sortOrder === 'done_desc') {
+                return (b.doneDate || '').localeCompare(a.doneDate || '');
+            }
+            return 0;
+        });
+
+        document.getElementById('tab-count-all').innerText = filtered.length;
+        document.getElementById('tab-count-done').innerText = tasks.filter(t => t.status === 'done').length;
+
+        // 1. 渲染「目標日期與天數倒數排程 (view-timeline)」
+        const timelineContainer = document.getElementById('timeline-container');
+        timelineContainer.innerHTML = '';
+
+        const activeTasks = filtered.filter(t => t.status !== 'done');
+        const groups = [
+            {
+                key: 'complex',
+                title: '🐘 【遠期高難度 / 大型目標區 (倒數 ≥ 10 天)】— 天數最多代表跨部門協調最繁瑣，必須現在先拆解前置作業！',
+                headerClass: 'th-complex',
+                items: activeTasks.filter(t => calcDaysLeft(t.trackDate) !== null && calcDaysLeft(t.trackDate) >= 10)
+            },
+            {
+                key: 'medium',
+                title: '🚙 【中期穩步推進區 (倒數 4 ~ 9 天)】— 緊盯各單位交接進度，防止中途被打斷',
+                headerClass: 'th-medium',
+                items: activeTasks.filter(t => {
+                    const d = calcDaysLeft(t.trackDate);
+                    return d === null || (d >= 4 && d <= 9);
+                })
+            },
+            {
+                key: 'urgent',
+                title: '⚡ 【近期衝刺 / 臨界結案區 (倒數 0 ~ 3 天)】— 進入最後倒數，現場與負責單位優先收尾',
+                headerClass: 'th-urgent',
+                items: activeTasks.filter(t => {
+                    const d = calcDaysLeft(t.trackDate);
+                    return d !== null && d >= 0 && d <= 3;
+                })
+            },
+            {
+                key: 'overdue',
+                title: '🚨 【已逾目標日警示區 (倒數 < 0 天)】— 已超過預定追蹤日，請立即檢討卡關原因或更新目標日',
+                headerClass: 'th-overdue',
+                items: activeTasks.filter(t => {
+                    const d = calcDaysLeft(t.trackDate);
+                    return d !== null && d < 0;
+                })
+            }
+        ];
+
+        // 若使用者選擇「剩餘天數由少到多」，將分組順序反轉，讓急件置頂；預設「由多到少」則讓長天數大魔王置頂
+        const orderedGroups = sortOrder === 'days_asc' ? [...groups].reverse() : groups;
+
+        orderedGroups.forEach(g => {
+            if (g.items.length === 0) return;
+            const sec = document.createElement('div');
+            sec.className = 'timeline-section';
+            sec.innerHTML = `
+                <div class="timeline-header ${g.headerClass}">
+                    <span>${g.title}</span>
+                    <span style="background:rgba(255,255,255,0.8); padding:2px 10px; border-radius:12px; font-size:13px;">共 ${g.items.length} 項</span>
+                </div>
+                <div class="timeline-grid" id="grid-${g.key}"></div>
+            `;
+            timelineContainer.appendChild(sec);
+            const grid = sec.querySelector(`#grid-${g.key}`);
+            g.items.forEach(item => grid.appendChild(createCardElement(item)));
+        });
+
+        if (activeTasks.length === 0) {
+            timelineContainer.innerHTML = `<div style="background:white; padding:40px; text-align:center; border-radius:12px; color:#718096;">🎉 目前沒有待辦或進行中的任務，或請調整上方篩選條件。</div>`;
+        }
+
+        // 2. 渲染「倒數天數與更新追蹤總表 (view-tracking)」
+        const trackingBody = document.getElementById('table-tracking-body');
+        trackingBody.innerHTML = '';
+        filtered.forEach(t => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${getCountdownBadgeHTML(t)}</td>
+                <td style="font-weight:800; color:#1A365D;">${t.trackDate || '-'}</td>
+                <td><span class="status-pill status-${t.status}">${getStatusText(t.status)}</span></td>
+                <td><span class="badge badge-${t.unit}">${t.unit}</span></td>
+                <td style="font-weight:bold; color:#1A202C; max-width:220px;">${t.title}</td>
+                <td style="max-width:260px; color:#4A5568;">${t.desc || '-'}</td>
+                <td style="max-width:260px; color:#553C9A; background:#FAF5FF; font-size:12px;">${t.trouble || '-'}</td>
+                <td style="font-weight:bold; color:#2B6CB0;">${t.updateDate || '-'}</td>
+                <td style="font-weight:bold; color:#38A169;">${t.doneDate || '-'}</td>
+                <td>
+                    <div class="action-btns">
+                        ${t.status !== 'done' ? `<button onclick="changeStatus(${t.id}, 'done')" style="color:#22543D;">✅ 完成</button>` : ''}
+                        <button class="btn-edit" onclick="openModal(${t.id})">✏️ 更新</button>
+                        <button class="btn-del" onclick="deleteTask(${t.id})">刪除</button>
+                    </div>
+                </td>
+            `;
+            trackingBody.appendChild(tr);
+        });
+
+        // 3. 渲染「三欄看板 (view-board)」
+        const todoList = document.getElementById('list-todo');
+        const doingList = document.getElementById('list-doing');
+        const doneList = document.getElementById('list-done');
+        todoList.innerHTML = '';
+        doingList.innerHTML = '';
+        doneList.innerHTML = '';
+        let cTodo = 0, cDoing = 0, cDone = 0;
+
+        filtered.forEach(t => {
+            const card = createCardElement(t);
+            if (t.status === 'todo') { todoList.appendChild(card); cTodo++; }
+            else if (t.status === 'doing') { doingList.appendChild(card); cDoing++; }
+            else { doneList.appendChild(card); cDone++; }
+        });
+        document.getElementById('count-todo').innerText = cTodo;
+        document.getElementById('count-doing').innerText = cDoing;
+        document.getElementById('count-done').innerText = cDone;
+
+        // 4. 渲染「已完成結案清單 (view-completed)」
+        const completedBody = document.getElementById('table-completed-body');
+        completedBody.innerHTML = '';
+        const completedTasks = filtered.filter(t => t.status === 'done');
+        if (completedTasks.length === 0) {
+            completedBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#A0AEC0;">目前尚無符合篩選條件的已完成任務</td></tr>`;
+        } else {
+            completedTasks.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="badge badge-${t.unit}">${t.unit}</span></td>
+                    <td style="font-weight:bold; color:#1A202C;">${t.title}</td>
+                    <td style="max-width:280px; color:#4A5568;">${t.desc || '-'}</td>
+                    <td style="max-width:260px; color:#553C9A; font-size:12px;">${t.trouble || '-'}</td>
+                    <td>${t.updateDate || '-'}</td>
+                    <td>${t.trackDate || '-'}</td>
+                    <td style="font-weight:bold; color:#38A169;">🏁 ${t.doneDate || '-'}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button onclick="changeStatus(${t.id}, 'doing')">↩ 退回進行中</button>
+                            <button class="btn-edit" onclick="openModal(${t.id})">✏️ 編輯</button>
+                            <button class="btn-del" onclick="deleteTask(${t.id})">刪除</button>
+                        </div>
+                    </td>
+                `;
+                completedBody.appendChild(tr);
+            });
+        }
     }
 
     function openModal(taskId = null) {
@@ -399,24 +779,26 @@
         if (taskId) {
             const t = tasks.find(item => item.id === taskId);
             if (!t) return;
-            document.getElementById('modalTitle').innerText = '✏️ 編輯與更新任務進度';
+            document.getElementById('modalTitle').innerText = '✏️ 編輯目標排程與更新進度';
             document.getElementById('editTaskId').value = t.id;
             document.getElementById('taskUnit').value = t.unit;
             document.getElementById('taskStatus').value = t.status;
             document.getElementById('taskTitle').value = t.title;
-            document.getElementById('taskDesc').value = t.desc;
-            document.getElementById('taskUpdateDate').value = today; // 編輯時預設自動更新為今日
+            document.getElementById('taskDesc').value = t.desc || '';
+            document.getElementById('taskTrouble').value = t.trouble || '';
+            document.getElementById('taskUpdateDate').value = today;
             document.getElementById('taskTrackDate').value = t.trackDate || '';
             document.getElementById('taskDoneDate').value = t.doneDate || (t.status === 'done' ? today : '');
         } else {
-            document.getElementById('modalTitle').innerText = '＋ 新增跨單位任務';
+            document.getElementById('modalTitle').innerText = '＋ 新增目標日期導向任務';
             document.getElementById('editTaskId').value = '';
             document.getElementById('taskUnit').value = '現場';
             document.getElementById('taskStatus').value = 'todo';
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDesc').value = '';
+            document.getElementById('taskTrouble').value = '';
             document.getElementById('taskUpdateDate').value = today;
-            document.getElementById('taskTrackDate').value = today;
+            document.getElementById('taskTrackDate').value = '2026-11-30';
             document.getElementById('taskDoneDate').value = '';
         }
         modal.style.display = 'flex';
@@ -432,6 +814,7 @@
         const unit = document.getElementById('taskUnit').value;
         const status = document.getElementById('taskStatus').value;
         const desc = document.getElementById('taskDesc').value.trim();
+        const trouble = document.getElementById('taskTrouble').value.trim();
         const updateDate = document.getElementById('taskUpdateDate').value || getTodayStr();
         const trackDate = document.getElementById('taskTrackDate').value;
         let doneDate = document.getElementById('taskDoneDate').value;
@@ -441,7 +824,6 @@
             return;
         }
 
-        // 若狀態設為已完成且未填完成日，自動帶入今日
         if (status === 'done' && !doneDate) {
             doneDate = getTodayStr();
         } else if (status !== 'done') {
@@ -450,12 +832,12 @@
 
         if (editId) {
             tasks = tasks.map(t => t.id === Number(editId) ? {
-                ...t, title, unit, status, desc, updateDate, trackDate, doneDate
+                ...t, title, unit, status, desc, trouble, updateDate, trackDate, doneDate
             } : t);
         } else {
             tasks.push({
                 id: Date.now(),
-                title, unit, status, desc, updateDate, trackDate, doneDate
+                title, unit, status, desc, trouble, updateDate, trackDate, doneDate
             });
         }
 
@@ -464,7 +846,6 @@
         closeModal();
     }
 
-    // 快速變更狀態（同時自動記錄更新日期與完成日期）
     function changeStatus(id, newStatus) {
         const today = getTodayStr();
         tasks = tasks.map(t => {
@@ -490,178 +871,23 @@
         }
     }
 
-    function getStatusText(status) {
-        if (status === 'todo') return '🔴 待處理';
-        if (status === 'doing') return '🟡 進行中';
-        return '🟢 已完成';
-    }
-
-    function renderAll() {
-        const searchTxt = document.getElementById('searchInput').value.toLowerCase();
-        const unitFilter = document.getElementById('unitFilter').value;
-        const sortOrder = document.getElementById('sortOrder').value;
-        const today = getTodayStr();
-
-        // 過濾
-        let filtered = tasks.filter(t => {
-            const matchSearch = t.title.toLowerCase().includes(searchTxt) || 
-                                (t.desc && t.desc.toLowerCase().includes(searchTxt)) ||
-                                t.unit.toLowerCase().includes(searchTxt);
-            const matchUnit = unitFilter === 'ALL' || t.unit === unitFilter;
-            return matchSearch && matchUnit;
-        });
-
-        // 排序
-        filtered.sort((a, b) => {
-            if (sortOrder === 'track_asc') {
-                return (a.trackDate || '9999-99-99').localeCompare(b.trackDate || '9999-99-99');
-            } else if (sortOrder === 'update_desc') {
-                return (b.updateDate || '').localeCompare(a.updateDate || '');
-            } else if (sortOrder === 'done_desc') {
-                return (b.doneDate || '').localeCompare(a.doneDate || '');
-            }
-            return 0;
-        });
-
-        // 1. 渲染三欄看板
-        const todoList = document.getElementById('list-todo');
-        const doingList = document.getElementById('list-doing');
-        const doneList = document.getElementById('list-done');
-        todoList.innerHTML = '';
-        doingList.innerHTML = '';
-        doneList.innerHTML = '';
-
-        let countTodo = 0, countDoing = 0, countDone = 0;
-
-        filtered.forEach(t => {
-            const isOverdue = t.status !== 'done' && t.trackDate && t.trackDate < today;
-            const card = document.createElement('div');
-            card.className = `task-card ${isOverdue ? 'overdue' : ''}`;
-            
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="badge badge-${t.unit}">${t.unit}</span>
-                    ${isOverdue ? '<span style="font-size:11px; color:#E53E3E; font-weight:bold;">⚠️ 已逾追蹤日</span>' : ''}
-                </div>
-                <div class="task-title">
-                    <span>${t.title}</span>
-                </div>
-                <div class="task-desc">${t.desc || '（尚無詳細執行重點說明）'}</div>
-                
-                <div class="date-grid">
-                    <div class="date-item">
-                        <span class="date-label">🔄 更新日期</span>
-                        <span class="date-val">${t.updateDate || '-'}</span>
-                    </div>
-                    <div class="date-item">
-                        <span class="date-label">🎯 追蹤日期</span>
-                        <span class="date-val ${isOverdue ? 'alert' : ''}">${t.trackDate || '未設定'}</span>
-                    </div>
-                    <div class="date-item">
-                        <span class="date-label">🏁 完成日期</span>
-                        <span class="date-val completed">${t.doneDate || '未完成'}</span>
-                    </div>
-                </div>
-
-                <div class="task-meta">
-                    <div class="action-btns">
-                        ${t.status !== 'todo' ? `<button onclick="changeStatus(${t.id}, 'todo')">⬅ 待處理</button>` : ''}
-                        ${t.status !== 'doing' ? `<button onclick="changeStatus(${t.id}, 'doing')">▶ 進行中</button>` : ''}
-                        ${t.status !== 'done' ? `<button onclick="changeStatus(${t.id}, 'done')" style="color:#22543D; border-color:#9AE6B4; background:#F0FFF4;">✅ 結案完成</button>` : ''}
-                    </div>
-                    <div class="action-btns">
-                        <button class="btn-edit" onclick="openModal(${t.id})">✏️ 編輯/更新</button>
-                        <button class="btn-del" onclick="deleteTask(${t.id})">刪除</button>
-                    </div>
-                </div>
-            `;
-
-            if (t.status === 'todo') {
-                todoList.appendChild(card);
-                countTodo++;
-            } else if (t.status === 'doing') {
-                doingList.appendChild(card);
-                countDoing++;
-            } else {
-                doneList.appendChild(card);
-                countDone++;
-            }
-        });
-
-        document.getElementById('count-todo').innerText = countTodo;
-        document.getElementById('count-doing').innerText = countDoing;
-        document.getElementById('count-done').innerText = countDone;
-        document.getElementById('tab-count-all').innerText = filtered.length;
-        document.getElementById('tab-count-done').innerText = tasks.filter(t => t.status === 'done').length;
-
-        // 2. 渲染「更新與追蹤日期總表」
-        const trackingBody = document.getElementById('table-tracking-body');
-        trackingBody.innerHTML = '';
-        filtered.forEach(t => {
-            const isOverdue = t.status !== 'done' && t.trackDate && t.trackDate < today;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><span class="status-pill status-${t.status}">${getStatusText(t.status)}</span></td>
-                <td><span class="badge badge-${t.unit}">${t.unit}</span></td>
-                <td style="font-weight:bold; color:#1A202C;">${t.title}</td>
-                <td style="max-width:320px; color:#4A5568;">${t.desc || '-'}</td>
-                <td style="font-weight:bold; color:#2B6CB0;">${t.updateDate || '-'}</td>
-                <td style="font-weight:bold; color:${isOverdue ? '#E53E3E' : '#2D3748'};">
-                    ${t.trackDate || '-'} ${isOverdue ? '⚠️逾期' : ''}
-                </td>
-                <td style="font-weight:bold; color:#38A169;">${t.doneDate || '-'}</td>
-                <td>
-                    <div class="action-btns">
-                        ${t.status !== 'done' ? `<button onclick="changeStatus(${t.id}, 'done')" style="color:#22543D;">✅ 完成</button>` : ''}
-                        <button class="btn-edit" onclick="openModal(${t.id})">✏️ 更新</button>
-                        <button class="btn-del" onclick="deleteTask(${t.id})">刪除</button>
-                    </div>
-                </td>
-            `;
-            trackingBody.appendChild(tr);
-        });
-
-        // 3. 渲染「已完成結案清單」
-        const completedBody = document.getElementById('table-completed-body');
-        completedBody.innerHTML = '';
-        const completedTasks = filtered.filter(t => t.status === 'done');
-        if (completedTasks.length === 0) {
-            completedBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#A0AEC0;">目前尚無符合篩選條件的已完成任務</td></tr>`;
-        } else {
-            completedTasks.forEach(t => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><span class="badge badge-${t.unit}">${t.unit}</span></td>
-                    <td style="font-weight:bold; color:#1A202C;">${t.title}</td>
-                    <td style="max-width:360px; color:#4A5568;">${t.desc || '-'}</td>
-                    <td>${t.updateDate || '-'}</td>
-                    <td>${t.trackDate || '-'}</td>
-                    <td style="font-weight:bold; color:#38A169;">🏁 ${t.doneDate || '-'}</td>
-                    <td>
-                        <div class="action-btns">
-                            <button onclick="changeStatus(${t.id}, 'doing')">↩ 退回進行中</button>
-                            <button class="btn-edit" onclick="openModal(${t.id})">✏️ 編輯</button>
-                            <button class="btn-del" onclick="deleteTask(${t.id})">刪除</button>
-                        </div>
-                    </td>
-                `;
-                completedBody.appendChild(tr);
-            });
-        }
-    }
-
-    // 匯出 CSV 報表（支援 Excel 直接打開不亂碼）
     function exportCSV() {
-        const headers = ['任務狀態', '責任單位', '任務名稱', '執行重點', '更新日期', '追蹤日期', '完成日期'];
-        const rows = tasks.map(t => [
-            getStatusText(t.status),
-            t.unit,
-            `"${(t.title || '').replace(/"/g, '""')}"`,
-            `"${(t.desc || '').replace(/"/g, '""')}"`,
-            t.updateDate || '',
-            t.trackDate || '',
-            t.doneDate || ''
-        ]);
+        const headers = ['倒數天數', '目標/追蹤日期', '任務狀態', '責任單位', '任務名稱', '執行重點', '為什麼需要這麼多天(麻煩與卡關點)', '最後更新日期', '實際完成日期'];
+        const rows = tasks.map(t => {
+            const d = calcDaysLeft(t.trackDate);
+            const cdStr = t.status === 'done' ? '已完成' : (d === null ? '未設定' : `倒數 ${d} 天`);
+            return [
+                cdStr,
+                t.trackDate || '',
+                getStatusText(t.status),
+                t.unit,
+                `"${(t.title || '').replace(/"/g, '""')}"`,
+                `"${(t.desc || '').replace(/"/g, '""')}"`,
+                `"${(t.trouble || '').replace(/"/g, '""')}"`,
+                t.updateDate || '',
+                t.doneDate || ''
+            ];
+        });
 
         const csvContent = '﻿' + [headers.join(','), ...rows.map(r => r.join(','))].join('
 ');
@@ -669,7 +895,7 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `彥泰跨單位任務追蹤清單_${getTodayStr()}.csv`;
+        link.download = `彥泰目標日期與倒數天數排程表_${getTodayStr()}.csv`;
         link.click();
         URL.revokeObjectURL(url);
     }
