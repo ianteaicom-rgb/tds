@@ -3,25 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EPDM 生產配方、真實成本、業務銷售定價系統 暨 原廠 TDS 規格資料庫中心 - 彥泰改善計劃</title>
+  <title>EPDM 生產配方、真實成本與業務銷售定價系統</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            brand: {
-              blue: '#2563EB',
-              darkBlue: '#1D4ED8',
-              slate: '#334155',
-              darkSlate: '#1E293B',
-              indigo: '#4F46E5',
-              navy: '#0F172A',
-              cardBg: '#FFFFFF',
-              inputBg: '#F8FAFC'
-            }
-          },
           fontFamily: {
             sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Microsoft JhengHei', 'sans-serif']
           }
@@ -30,31 +18,33 @@
     }
   </script>
   <style>
-    /* 移除數字輸入框原生上下箭頭微調按鈕 */
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
+    /* 移除數字輸入框原生上下箭頭微調按鈕，讓數字顯示更寬敞清晰 */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
-    input[type=number] { -moz-appearance: textfield; }
-    
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
     .card-shadow {
       box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
     }
     .result-shadow {
       box-shadow: 0 10px 28px -4px rgba(15, 23, 42, 0.1), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
     }
-    
-    /* 核心佈局關鍵：強制鎖定 1:1:1 三等份三欄，絕不塌陷成單欄上下堆疊 */
+
+    /* 強制鎖定 1:1:1 三等份三欄並排，絕不因視窗縮小而垂直塌陷 */
     .strict-three-column-grid {
       display: grid !important;
-      grid-template-columns: repeat(3, minmax(360px, 1fr)) !important;
-      min-width: 1140px !important;
+      grid-template-columns: repeat(3, minmax(365px, 1fr)) !important;
+      min-width: 1130px !important;
       gap: 16px !important;
       align-items: start !important;
     }
 
-    /* 平滑美觀捲軸樣式 */
+    /* 自訂平滑捲軸 */
     .custom-scroll::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -71,7 +61,7 @@
       background: #94A3B8;
     }
 
-    /* 列印專屬配置 */
+    /* 列印專用樣式 */
     @media print {
       body { background-color: white !important; padding: 0 !important; color: black !important; }
       header, .no-print, #toast, .action-bar, .modal-backdrop { display: none !important; }
@@ -80,183 +70,200 @@
     }
   </style>
 </head>
-<body class="bg-slate-100/90 text-slate-800 min-h-screen py-4 px-3 sm:px-4">
+<body class="bg-slate-100/90 text-slate-800 min-h-screen py-4 px-3 sm:px-4 font-sans">
 
-  <!-- 頂部導航與功能狀態條 -->
-  <header class="max-w-full mx-auto mb-4 flex items-center justify-between gap-3 bg-white p-3.5 px-4 rounded-2xl border border-slate-200/90 shadow-sm min-w-[1140px]">
+  <!-- ======================================================== -->
+  <!-- 頂部導航與品牌標題列                                       -->
+  <!-- ======================================================== -->
+  <header class="max-w-full mx-auto mb-4 flex items-center justify-between gap-3 bg-white p-3.5 px-4 rounded-2xl border border-slate-200/90 shadow-sm min-w-[1130px]">
     <div class="flex items-center gap-3">
-      <!-- TIT 專屬品牌 Logo 圖示 (含自訂圖片上傳與重設支援) -->
+      <!-- TIT 幾何六角分子專屬 Logo (點擊可上傳自訂圖檔並永久記憶於 localStorage) -->
       <div class="relative group cursor-pointer shrink-0" onclick="triggerLogoUpload()" title="點擊上傳更換自訂 TIT Logo 圖檔 (支援 PNG/JPG/SVG)">
         <div id="titLogoContainer" class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center bg-slate-900 border border-slate-700/80 shadow-md shadow-blue-500/20 transition-all group-hover:border-blue-400 group-hover:shadow-blue-500/30">
-          <!-- 預設由 JavaScript 渲染高質感 TIT 向量 Logo 或使用者自訂圖片 -->
+          <!-- 預設渲染幾何六角分子 SVG Logo -->
         </div>
 
-        <!-- 懸停操作遮罩 (換圖提示) -->
-        <div class="absolute inset-0 bg-blue-950/80 rounded-xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-[9px] font-bold transition-all backdrop-blur-[1px] pointer-events-none">
+        <!-- 懸停上傳提示遮罩 -->
+        <div class="absolute inset-0 bg-blue-950/85 rounded-xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-[9px] font-bold transition-all backdrop-blur-[1px] pointer-events-none">
           <svg class="w-3.5 h-3.5 mb-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12"></path></svg>
           更換圖檔
         </div>
 
-        <!-- 隱藏式檔案上傳 Input -->
         <input type="file" id="customLogoFileInput" accept="image/*" class="hidden" onchange="handleLogoUpload(event)" onclick="event.stopPropagation()">
 
-        <!-- 重設回預設 Logo 快捷小按鈕 (當有自訂圖檔時浮現) -->
+        <!-- 重設回預設 SVG Logo 按鈕 (僅在已上傳自訂圖檔時顯示) -->
         <button id="btnResetLogo" onclick="resetTitLogo(event)" title="重設回預設 TIT 向量 Logo" class="hidden absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-slate-700 text-slate-200 hover:bg-rose-600 hover:text-white flex items-center justify-center text-[10px] font-black border border-white shadow transition-all z-10">
           ✕
         </button>
       </div>
 
       <div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <h1 class="text-base sm:text-lg font-black tracking-tight text-slate-900">EPDM 生產配方、真實成本與業務銷售定價系統</h1>
           <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
             1:1:1 三等份三欄戰情版
           </span>
           <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
-            📦 庫存去化 & 貨櫃排程引擎
+            📦 庫存去化 &amp; 貨櫃排程引擎
           </span>
         </div>
-        <p class="text-[11px] text-slate-500 font-medium">TIT 彥泰改善計劃 ｜ 【左欄】原料參數與庫存 ｜ 【中欄】配方與製程 ｜ 【右欄】數據、報價與貨櫃排程</p>
+        <p class="text-[11px] text-slate-500 font-medium mt-0.5">TIT 彥泰改善計劃 ｜ 【左欄】原料參數與庫存 ｜ 【中欄】配方與製程 ｜ 【右欄】數據、報價與貨櫃排程</p>
       </div>
     </div>
-    
-    <!-- 頂端操作快捷按鈕組 -->
+
+    <!-- 頂端功能按鈕群 -->
     <div class="flex items-center gap-2 action-bar shrink-0">
-      <button onclick="openTdsCenterModal()" class="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-md shadow-blue-500/20 flex items-center gap-1.5">
-        <svg class="w-3.5 h-3.5 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-        📚 原廠 TDS 規格中心
+      <button onclick="openTdsCenterModal()" class="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-md shadow-blue-500/20 flex items-center gap-1">
+        <span>📄</span> 原廠 TDS 規格中心
       </button>
       <button onclick="openSaveRecipeModal()" class="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all shadow-sm flex items-center gap-1">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-        存為新配方
+        <span>💾</span> 存為新配方
       </button>
       <button onclick="exportRecipesJSON()" class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all shadow-sm flex items-center gap-1">
-        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        備份
+        <span>📥</span> 備份
       </button>
       <label class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all shadow-sm flex items-center gap-1 cursor-pointer">
-        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12"></path></svg>
-        匯入
+        <span>📤</span> 匯入
         <input type="file" id="importJsonFileInput" accept=".json" class="hidden" onchange="importRecipesJSON(event)">
       </label>
       <button onclick="window.print()" class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all shadow-sm flex items-center gap-1">
-        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-        列印
+        <span>🖨️</span> 列印
       </button>
       <button onclick="copySummaryReport()" class="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-        複製報價摘要
+        <span>📋</span> 複製報價摘要
       </button>
     </div>
   </header>
 
-  <!-- 外層橫向滾動容器：鎖定 1:1:1 左中右三欄並排 (min-width: 1140px) -->
+  <!-- ======================================================== -->
+  <!-- 主工作區：水平滾動包裹層 + 嚴格 1:1:1 三欄並排網格         -->
+  <!-- ======================================================== -->
   <div class="w-full overflow-x-auto custom-scroll pb-6">
     <main class="strict-three-column-grid">
-      
+
       <!-- ======================================================== -->
-      <!-- 【左欄 1/3】：1. 原料基礎參數庫 (含庫存數量輸入)        -->
+      <!-- 【左欄 1/3】：1 原料基礎參數庫 & 現有庫存                 -->
       <!-- ======================================================== -->
       <div class="space-y-4">
         <section class="bg-white rounded-2xl overflow-hidden card-shadow border border-slate-200/90 flex flex-col">
-          <!-- 亮藍色實心標題條 -->
-          <div class="bg-blue-600 px-4 py-3 flex items-center justify-between text-white shrink-0">
+          <!-- 亮藍色實心標題條 (#2563EB) -->
+          <div class="bg-[#2563EB] px-4 py-3 flex items-center justify-between text-white shrink-0">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center text-xs font-black">1</span>
-              <h2 class="font-bold text-sm sm:text-base tracking-wide">原料基礎參數庫 ＆ 現有庫存</h2>
+              <h2 class="font-bold text-sm sm:text-base tracking-wide">原料基礎參數庫 &amp; 現有庫存</h2>
             </div>
             <div class="flex items-center gap-1.5">
               <button onclick="openTdsCenterModal()" class="text-xs bg-white/20 hover:bg-white/30 text-white font-bold px-2 py-1 rounded-md transition-all flex items-center gap-1">
                 <span>📄</span> TDS
               </button>
-              <button onclick="openAddMaterialModal()" class="text-xs bg-white text-blue-700 font-bold px-2 py-1 rounded-md hover:bg-blue-50 transition-all shadow-sm">
-                ＋ 詳細建檔
+              <button onclick="resetToFactoryDefaults()" title="恢復出廠預設 11 種原料與配方" class="text-xs bg-white/15 hover:bg-white/25 text-white font-semibold px-2 py-1 rounded-md transition-all">
+                重設預設
               </button>
             </div>
           </div>
 
           <div class="p-3.5 space-y-3">
-            <!-- ⚡ 快速連續 KEY-IN 原料工具列 (免開彈窗即打即增) -->
+            <!-- ⚡ 快速連續 KEY-IN 新原料快捷列 -->
             <div class="bg-blue-50/90 rounded-xl p-2.5 border border-blue-200 shadow-sm space-y-2">
               <div class="flex items-center justify-between">
                 <span class="text-[11px] font-black text-blue-900 flex items-center gap-1">
                   <span>⚡</span> 快速連續 KEY-IN 新原料
                 </span>
-                <span class="text-[10px] text-blue-600 font-bold">新料隨到隨建・自動入庫</span>
+                <span class="text-[10px] text-blue-600 font-bold">新料隨到隨建・按 Enter 立即入庫</span>
               </div>
-              <div class="grid grid-cols-12 gap-1 text-[10px]">
-                <div class="col-span-4">
-                  <input type="text" id="quick_mat_name" placeholder="新原料名稱 (如: 比利時5050)" class="w-full bg-white border border-blue-300 rounded px-1.5 py-1 font-bold text-slate-800 outline-none focus:border-blue-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
+
+              <!-- 第一排：名稱 + 單價 + 水分 -->
+              <div class="grid grid-cols-12 gap-1.5 text-[10px]">
+                <div class="col-span-6">
+                  <label class="block text-[9px] font-bold text-slate-600 mb-0.5">原料名稱</label>
+                  <input type="text" id="quick_mat_name" placeholder="如: 比利時5050 / 再生膠" class="w-full bg-white border border-blue-300 rounded px-2 py-1 font-bold text-slate-800 outline-none focus:border-blue-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
                 </div>
-                <div class="col-span-2">
-                  <input type="number" id="quick_mat_cost" placeholder="單價$" value="1000" step="10" class="w-full bg-white border border-blue-300 rounded px-1 py-1 text-right font-bold text-slate-800 outline-none focus:border-blue-600" title="採購單價 USD/噸">
+                <div class="col-span-3">
+                  <label class="block text-[9px] font-bold text-slate-600 mb-0.5">單價 (USD/T)</label>
+                  <input type="number" id="quick_mat_cost" value="1000" step="10" class="w-full bg-white border border-blue-300 rounded px-1.5 py-1 text-right font-bold text-slate-800 outline-none focus:border-blue-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
                 </div>
-                <div class="col-span-2">
-                  <input type="number" id="quick_mat_moist" placeholder="水分%" value="10" step="0.5" class="w-full bg-white border border-blue-300 rounded px-1 py-1 text-right font-bold text-slate-800 outline-none focus:border-blue-600" title="水分比例 %">
-                </div>
-                <div class="col-span-2">
-                  <input type="number" id="quick_mat_enb" placeholder="ENB%" value="4.5" step="0.1" class="w-full bg-white border border-blue-300 rounded px-1 py-1 text-right font-bold text-slate-800 outline-none focus:border-blue-600" title="第三單體 ENB %">
-                </div>
-                <div class="col-span-2">
-                  <input type="number" id="quick_mat_stock" placeholder="庫存T" value="20" step="1" class="w-full bg-amber-50 border border-amber-300 rounded px-1 py-1 text-right font-black text-amber-900 outline-none focus:border-amber-600" title="現有庫存 (噸)">
+                <div class="col-span-3">
+                  <label class="block text-[9px] font-bold text-slate-600 mb-0.5">水分 (%)</label>
+                  <input type="number" id="quick_mat_moist" value="10" step="0.5" class="w-full bg-white border border-blue-300 rounded px-1.5 py-1 text-right font-bold text-slate-800 outline-none focus:border-blue-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
                 </div>
               </div>
-              <div class="flex items-center justify-between pt-0.5">
-                <span class="text-[9px] text-slate-500">提示：輸入後點擊右側按鈕，或在名稱欄按 Enter 即可快速加入</span>
-                <button type="button" onclick="quickAddNewMaterial()" class="px-2.5 py-1 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded transition-all shadow-sm flex items-center gap-1">
-                  <span>＋</span> 加入原料庫
-                </button>
+
+              <!-- 第二排：ENB + ML + 乙烯C2 + 庫存(噸) + 加入鈕 -->
+              <div class="grid grid-cols-12 gap-1.5 text-[10px] items-end">
+                <div class="col-span-2">
+                  <label class="block text-[9px] font-bold text-amber-800 mb-0.5">ENB (%)</label>
+                  <input type="number" id="quick_mat_enb" value="4.5" step="0.1" class="w-full bg-amber-50/70 border border-amber-300 rounded px-1 py-1 text-right font-bold text-amber-900 outline-none focus:border-amber-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
+                </div>
+                <div class="col-span-2">
+                  <label class="block text-[9px] font-bold text-blue-800 mb-0.5">ML (MU)</label>
+                  <input type="number" id="quick_mat_ml" value="60" step="1" class="w-full bg-blue-100/60 border border-blue-300 rounded px-1 py-1 text-right font-bold text-blue-900 outline-none focus:border-blue-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
+                </div>
+                <div class="col-span-2">
+                  <label class="block text-[9px] font-bold text-emerald-800 mb-0.5">乙烯 C2%</label>
+                  <input type="number" id="quick_mat_c2" value="66" step="0.5" class="w-full bg-emerald-50/70 border border-emerald-300 rounded px-1 py-1 text-right font-bold text-emerald-900 outline-none focus:border-emerald-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
+                </div>
+                <div class="col-span-3">
+                  <label class="block text-[9px] font-bold text-amber-900 mb-0.5">庫存 (噸)</label>
+                  <input type="number" id="quick_mat_stock" value="20" step="1" class="w-full bg-amber-50 border border-amber-400 rounded px-1.5 py-1 text-right font-black text-amber-950 outline-none focus:border-amber-600" onkeydown="if(event.key==='Enter') quickAddNewMaterial()">
+                </div>
+                <div class="col-span-3">
+                  <button type="button" onclick="quickAddNewMaterial()" class="w-full py-1 px-1.5 text-[11px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded transition-all shadow-sm flex items-center justify-center gap-0.5">
+                    <span>+ 加入原料庫</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- 原料卡片容器（獨立滾動） -->
-            <div class="space-y-2.5 max-h-[calc(100vh-270px)] overflow-y-auto pr-1 custom-scroll" id="materialsLibraryContainer">
-              <!-- 由 JavaScript 動態生成原料庫卡片 -->
+            <!-- 原料卡片捲動列表 -->
+            <div class="space-y-2.5 max-h-[calc(100vh-285px)] overflow-y-auto pr-1 custom-scroll" id="materialsLibraryContainer">
+              <!-- 由 JavaScript 立即渲染 11 種預載原料卡片 -->
             </div>
           </div>
         </section>
       </div>
 
       <!-- ======================================================== -->
-      <!-- 【中欄 1/3】：2. 廠務生產配方填寫 與 製程參數             -->
+      <!-- 【中欄 1/3】：2 廠務生產配方填寫 (現場投料) - 重點強化版    -->
       <!-- ======================================================== -->
       <div class="space-y-4">
-        
-        <!-- 區塊 A：快捷分類套用庫 -->
+
+        <!-- 區塊 A：快捷套用方案庫 (可摺疊設計) -->
         <section class="bg-white rounded-2xl overflow-hidden card-shadow border border-slate-200/90">
-          <div class="bg-indigo-600 px-4 py-2.5 flex items-center justify-between text-white shrink-0">
+          <div class="bg-indigo-600 px-4 py-2.5 flex items-center justify-between text-white cursor-pointer select-none" onclick="toggleQuickLibraryPanel()">
             <div class="flex items-center gap-2">
               <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
               <h3 class="font-bold text-xs sm:text-sm tracking-wide">快捷套用方案（點擊即時載入）</h3>
             </div>
-            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded text-white font-medium" id="recipeCountBadge">共 8 組紀錄</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded text-white font-medium" id="recipeCountBadge">共 8 組紀錄</span>
+              <span id="quickLibToggleIcon" class="text-xs font-bold bg-white/15 px-1.5 py-0.5 rounded">▲</span>
+            </div>
           </div>
 
-          <div class="p-3 space-y-2">
-            <!-- 分類標籤列 -->
+          <div id="quickLibraryBody" class="p-3 space-y-2">
+            <!-- 分類篩選標籤列 -->
             <div class="flex flex-wrap gap-1" id="categoryTabsContainer"></div>
-
-            <!-- 方案卡片清單 (限制高度滾動) -->
-            <div class="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1 custom-scroll" id="recipesListContainer"></div>
+            <!-- 方案卡片清單 -->
+            <div class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 custom-scroll" id="recipesListContainer"></div>
           </div>
         </section>
 
-        <!-- 區塊 B：廠務生產配方填寫 -->
+        <!-- 區塊 B：2 廠務生產配方填寫 (現場投料) -->
         <section class="bg-white rounded-2xl overflow-hidden card-shadow border border-slate-200/90">
-          <!-- 深灰藍色實心標題條 -->
-          <div class="bg-slate-700 px-4 py-3 flex items-center justify-between text-white shrink-0">
+          <!-- 深灰藍色實心標題條 (#334155) -->
+          <div class="bg-[#334155] px-4 py-3 flex items-center justify-between text-white shrink-0">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center text-xs font-black">2</span>
               <h2 class="font-bold text-sm sm:text-base tracking-wide">廠務生產配方填寫 (現場投料)</h2>
             </div>
             <div id="recipeStatusBadge" class="text-[11px] px-2 py-0.5 rounded-md font-bold transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-              配比 100.0% 合格
+              合計 100.0% 合格 ✓
             </div>
           </div>
 
-          <div class="p-3.5 space-y-3.5">
-            <!-- 自訂配方名稱與快速存檔列 -->
+          <div class="p-3.5 space-y-3">
+            <!-- 自訂配方名稱與一鍵儲存列 -->
             <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1.5">
               <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
@@ -265,12 +272,12 @@
                 <span class="text-[10px] text-indigo-600 font-semibold">隨時修改・一鍵入庫</span>
               </div>
               <div class="flex items-center gap-1.5">
-                <input type="text" id="recipeNameInput" value="512E 平衡效益首選 (方案二)" oninput="handleRecipeNameChange(this.value)" placeholder="請輸入配方名稱 (如: 壓出耐候水管配方)" 
+                <input type="text" id="recipeNameInput" value="512E 平衡效益首選 (方案二)" oninput="handleRecipeNameChange(this.value)" placeholder="請輸入配方名稱 (如: 壓出耐候水管配方)"
                   class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 shadow-sm">
                 <select id="recipeCategorySelect" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500">
                   <option value="橡膠用">橡膠用</option>
                   <option value="發泡用">發泡用</option>
-                  <option value="無特殊要求">無特殊要求</option>
+                  <option value="無特殊要求" selected>無特殊要求</option>
                   <option value="ML要求">ML要求</option>
                   <option value="ENB要求">ENB要求</option>
                   <option value="其他">其他</option>
@@ -281,13 +288,13 @@
               </div>
             </div>
 
-            <!-- 投料模式切換：重量 (KG) vs 比例 (%) -->
+            <!-- 投料模式切換：重量 (KG) vs 比例 (%) + 批次總重 -->
             <div class="flex items-center justify-between gap-2 p-2 bg-slate-100 rounded-xl border border-slate-200">
               <div class="flex items-center gap-1.5">
                 <span class="text-[11px] font-bold text-slate-700">模式：</span>
                 <div class="inline-flex rounded-lg p-0.5 bg-white border border-slate-200 shadow-sm">
                   <button type="button" id="btnModeWeight" onclick="switchInputMode('weight')" class="px-2.5 py-1 text-[11px] font-bold rounded-md transition-all bg-blue-600 text-white shadow-sm">
-                    ⚖️ 依秤重 (KG)
+                    ⚖️ 依重量 (KG)
                   </button>
                   <button type="button" id="btnModePercent" onclick="switchInputMode('percent')" class="px-2.5 py-1 text-[11px] font-bold rounded-md transition-all text-slate-600 hover:text-slate-900">
                     📊 依比例 (%)
@@ -305,46 +312,69 @@
               </div>
             </div>
 
-            <!-- 配方明細輸入表格 (DOM鎖定無卡頓) -->
-            <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
-              <div class="grid grid-cols-12 bg-slate-100/90 text-slate-600 text-[11px] font-bold py-2 px-2 border-b border-slate-200 text-center">
-                <span class="col-span-5 text-left pl-1">原料選擇 (含水分/乾成本)</span>
-                <span class="col-span-3">投料重 (KG)</span>
-                <span class="col-span-2">比例(%)</span>
+            <!-- ======================================================== -->
+            <!-- 配方明細輸入表格 (清楚標示每項原料 ML / ENB / 乙烯 C2)     -->
+            <!-- ======================================================== -->
+            <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+              <!-- 表頭 -->
+              <div class="grid grid-cols-12 bg-slate-100 text-slate-700 text-[11px] font-extrabold py-2 px-2 border-b border-slate-200 text-center items-center">
+                <span class="col-span-6 text-left pl-1">原料選擇 &amp; 物性 (ML / ENB / 乙烯)</span>
+                <span class="col-span-2">投料重 (KG)</span>
+                <span class="col-span-2">比例 (%)</span>
                 <span class="col-span-1 text-right">乾佔比</span>
                 <span class="col-span-1">刪</span>
               </div>
-              <div id="recipeRowsContainer" class="divide-y divide-slate-200/80 bg-white">
-                <!-- 由 JavaScript 動態生成輸入列 -->
+
+              <!-- 投料列容器 (DOM節點鎖定，輸入數字絕不重繪導致失焦) -->
+              <div id="recipeRowsContainer" class="divide-y divide-slate-200 bg-white">
+                <!-- 由 JavaScript 渲染各投料原料列與彩色物性徽章 -->
               </div>
-              <!-- 表格加總行 -->
-              <div class="grid grid-cols-12 bg-slate-50 py-2 px-2 text-[11px] font-bold text-slate-700 border-t border-slate-200">
-                <span class="col-span-5 text-left pl-1">合計總投料</span>
-                <span class="col-span-3 text-center text-blue-700 font-black" id="tableTotalWeight">1,000.0 KG</span>
+
+              <!-- 表格加總列 -->
+              <div class="grid grid-cols-12 bg-slate-100 py-2 px-2 text-[11px] font-extrabold text-slate-800 border-t border-slate-200 items-center">
+                <span class="col-span-6 text-left pl-1">合計總投料 (乾膠產出率)</span>
+                <span class="col-span-2 text-center text-blue-700 font-black" id="tableTotalWeight">1,000.0 KG</span>
                 <span class="col-span-2 text-center text-blue-700 font-black" id="tableTotalRatio">100.0%</span>
                 <span class="col-span-1 text-right text-emerald-700 font-black" id="tableTotalDryShare">77.2%</span>
                 <span class="col-span-1"></span>
               </div>
+
+              <!-- 配方加權物性總覽橫條 (直接於第 2 區明確呈現加權 ML、加權 ENB、加權乙烯 C2%) -->
+              <div class="bg-slate-900 text-white px-2.5 py-2 border-t border-slate-700 flex flex-wrap items-center justify-between gap-1.5">
+                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+                  <span>🧪</span> 配方加權物性：
+                </span>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="px-2 py-0.5 rounded bg-blue-500/25 border border-blue-400/50 text-blue-200 text-[11px] font-black">
+                    加權 ML: <span id="sec2_weighted_ml" class="text-white">49.0</span> MU
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-amber-500/25 border border-amber-400/50 text-amber-200 text-[11px] font-black">
+                    加權 ENB: <span id="sec2_weighted_enb" class="text-white">4.42</span>%
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/25 border border-emerald-400/50 text-emerald-200 text-[11px] font-black">
+                    加權乙烯 (C2): <span id="sec2_weighted_c2" class="text-white">66.4</span>%
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <!-- 配方列操作輔助按鈕群 -->
+            <!-- 配方操作按鈕列 -->
             <div class="flex flex-wrap justify-between items-center gap-1.5 pt-0.5">
               <div class="flex items-center gap-1.5">
-                <button onclick="addRecipeRow()" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-lg border border-blue-200 transition-all shadow-sm">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                  ＋ 增加投料料列
+                <button type="button" onclick="addRecipeRow()" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 transition-all shadow-sm">
+                  + 增加投料料列
                 </button>
-                <button onclick="cloneCurrentRecipe()" class="text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-all" title="複製目前配方為新配方副本">
+                <button type="button" onclick="cloneCurrentRecipe()" class="text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-all">
                   複製副本
                 </button>
-                <button onclick="clearRecipeRows()" class="text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-lg transition-all" title="清空所有投料列重新配置">
+                <button type="button" onclick="clearRecipeRows()" class="text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-lg transition-all">
                   清空配方
                 </button>
               </div>
-              <span class="text-[11px] text-slate-400">目前調配：<span id="currentLoadedRecipeName" class="font-bold text-slate-700">512E 平衡效益首選 (方案二)</span></span>
+              <span class="text-[10px] text-slate-400 truncate max-w-[160px]" title="目前調配配方">目前：<span id="currentLoadedRecipeName" class="font-bold text-slate-700">512E 平衡效益首選 (方案二)</span></span>
             </div>
 
-            <!-- 區塊 C：製程加工與管銷參數 -->
+            <!-- 區塊 C：製程加工、管銷攤提與匯率設定 -->
             <div class="pt-3 border-t border-slate-200">
               <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5">製程加工、管銷攤提與匯率設定：</span>
               <div class="grid grid-cols-4 gap-2 text-xs">
@@ -373,14 +403,14 @@
       </div>
 
       <!-- ======================================================== -->
-      <!-- 【右欄 1/3】：3. 生成數據、業務銷售定價 ＆ 庫存排程引擎   -->
+      <!-- 【右欄 1/3】：3. 生成數據與業務銷售定價 & 貨櫃排程引擎     -->
       <!-- ======================================================== -->
       <div class="space-y-4">
-        
-        <!-- 卡片 3：生成數據與業務定價 -->
+
+        <!-- 卡片 3：生成數據與業務銷售定價 -->
         <section class="bg-white rounded-2xl overflow-hidden result-shadow border border-slate-200/90 flex flex-col">
-          <!-- 深黑海軍藍標題條 -->
-          <div class="bg-slate-900 px-4 py-3 flex items-center justify-between text-white shrink-0">
+          <!-- 深海軍藍標題條 (#1E293B) -->
+          <div class="bg-[#1E293B] px-4 py-3 flex items-center justify-between text-white shrink-0">
             <div>
               <h2 class="font-black text-sm sm:text-base tracking-wide flex items-center gap-1.5">
                 <span>3.</span> 生成數據與業務銷售定價
@@ -394,7 +424,7 @@
           </div>
 
           <div class="p-3.5 space-y-3">
-            
+
             <!-- 階段一：純原料乾膠真實成本 -->
             <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-sm relative space-y-1">
               <div class="flex items-center justify-between mb-0.5">
@@ -422,7 +452,6 @@
                 <strong class="text-slate-800 font-bold" id="res_dry_cost_kg">NT$ 41.00 / KG</strong>
               </div>
 
-              <!-- 出膠淨得率與脫水能耗 -->
               <div class="mt-2 pt-1.5 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span class="text-slate-400 text-[10px] block">綜合乾膠淨得率</span>
@@ -435,21 +464,20 @@
               </div>
             </div>
 
-            <!-- 成品物性：原廠體系指標 (ENB / 門尼 ML / 乙烯 C2) -->
+            <!-- 成品物理特性（對標原廠 TDS） -->
             <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-sm space-y-2">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-extrabold text-slate-500 tracking-wide uppercase">成品物理特性 (對標原廠 TDS)</span>
+                <span class="text-[11px] font-extrabold text-slate-500 tracking-wide uppercase">成品物理特性（對標原廠 TDS）</span>
                 <span id="enbQualityTag" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                   品質優良 (ENB ≥ 4.2%)
                 </span>
               </div>
 
-              <!-- 三大物性指標網格 (ENB, 門尼黏度 ML, 乙烯含量 C2) -->
               <div class="grid grid-cols-3 gap-1.5 bg-slate-50 p-2 rounded-lg border border-slate-200/80 text-center">
                 <div>
                   <span class="text-[9px] text-slate-400 block font-semibold">第三單體 (ENB)</span>
                   <div class="flex items-baseline justify-center gap-0.5 mt-0.5">
-                    <span class="text-lg font-black text-amber-500" id="res_enb_value">4.19</span>
+                    <span class="text-lg font-black text-amber-500" id="res_enb_value">4.42</span>
                     <span class="text-[9px] font-bold text-slate-400">%</span>
                   </div>
                   <span class="text-[8px] text-slate-400 block">512E基準 5.0%</span>
@@ -457,7 +485,7 @@
                 <div class="border-x border-slate-200 px-1">
                   <span class="text-[9px] text-slate-400 block font-semibold">門尼黏度 (ML)</span>
                   <div class="flex items-baseline justify-center gap-0.5 mt-0.5">
-                    <span class="text-lg font-black text-blue-600" id="res_ml_value">57.0</span>
+                    <span class="text-lg font-black text-blue-600" id="res_ml_value">49.0</span>
                     <span class="text-[9px] font-bold text-slate-400">MU</span>
                   </div>
                   <span class="text-[8px] text-slate-400 block">ML(1+4) @125°C</span>
@@ -465,26 +493,24 @@
                 <div>
                   <span class="text-[9px] text-slate-400 block font-semibold">乙烯含量 (C2)</span>
                   <div class="flex items-baseline justify-center gap-0.5 mt-0.5">
-                    <span class="text-lg font-black text-indigo-600" id="res_c2_value">66.5</span>
+                    <span class="text-lg font-black text-emerald-600" id="res_c2_value">66.4</span>
                     <span class="text-[9px] font-bold text-slate-400">%</span>
                   </div>
                   <span class="text-[8px] text-slate-400 block">ASTM D3900</span>
                 </div>
               </div>
 
-              <!-- ENB 進度條 -->
               <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
                 <div id="enbProgress" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 84%;"></div>
               </div>
 
-              <!-- 應用適配性評估與氣味狀態 -->
               <div class="space-y-1 pt-1 border-t border-slate-100">
                 <div class="flex items-center justify-between text-[10px]">
                   <span class="text-slate-400 font-medium">加工應用適配：</span>
                   <strong class="text-blue-700 font-bold" id="res_suitability_text">通用型橡膠配方 (兼顧流動性與抗塌陷)</strong>
                 </div>
                 <div class="flex items-center justify-between text-[10px]">
-                  <span class="text-slate-400 font-medium">異味控制：</span>
+                  <span class="text-slate-400 font-medium">異味風險監控：</span>
                   <span id="odorBadge" class="text-[10px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.2 rounded">安全稀釋 20%</span>
                 </div>
               </div>
@@ -506,7 +532,7 @@
               </div>
             </div>
 
-            <!-- 階段三：業務銷售價格計算 (核心定價引擎) -->
+            <!-- 階段三：業務銷售基本價格 -->
             <div class="bg-blue-50/70 rounded-xl p-3 border-2 border-blue-300 shadow-sm relative space-y-2">
               <div class="flex items-center justify-between">
                 <span class="text-[11px] font-black text-blue-900 tracking-wider uppercase">階段三：業務銷售基本價格</span>
@@ -531,7 +557,7 @@
                 </div>
               </div>
 
-              <!-- 業務建議銷售單價 (大字重點卡) -->
+              <!-- 業務建議銷售單價 -->
               <div class="bg-white p-2.5 rounded-xl border border-blue-200 shadow-sm space-y-1">
                 <div class="flex items-baseline justify-between">
                   <div>
@@ -562,21 +588,19 @@
                   <strong class="text-emerald-600 font-bold text-xs" id="res_batch_total_profit">NT$ +6,971</strong>
                 </div>
               </div>
-
             </div>
 
           </div>
         </section>
 
-        <!-- 卡片 4：【全新核心】庫存可產規模、貨櫃數量 ＆ 廠務排程交期預估引擎 -->
+        <!-- 卡片 4：庫存去化、24噸貨櫃與排程預估 -->
         <section class="bg-white rounded-2xl overflow-hidden result-shadow border-2 border-amber-300/80 flex flex-col">
-          <!-- 琥珀橘色專業標題條 -->
           <div class="bg-gradient-to-r from-amber-600 to-amber-700 px-4 py-3 flex items-center justify-between text-white shrink-0">
             <div>
               <h2 class="font-black text-sm sm:text-base tracking-wide flex items-center gap-1.5">
-                <span>4.</span> 庫存去化、貨櫃量 ＆ 排程交期
+                <span>4.</span> 庫存去化、24噸貨櫃與排程預估
               </h2>
-              <p class="text-[10px] text-amber-100 font-normal">木桶效應瓶頸分析 ｜ 1櫃=24噸 ｜ 多情境生產排程</p>
+              <p class="text-[10px] text-amber-100 font-normal">木桶短板限制分析 ｜ 1櫃=24噸 ｜ 多情境排程</p>
             </div>
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white border border-white/30">
               智能演算中
@@ -584,14 +608,13 @@
           </div>
 
           <div class="p-3.5 space-y-3 text-xs">
-            
             <!-- 貨櫃容量與排程情境控制列 -->
             <div class="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200/90 space-y-2">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-1.5">
                   <label class="text-[11px] font-bold text-slate-700">單櫃裝載量：</label>
                   <div class="relative w-20">
-                    <input type="number" id="cfg_container_capacity" value="24" step="0.5" oninput="calculate()" 
+                    <input type="number" id="cfg_container_capacity" value="24" step="0.5" oninput="calculate()"
                       class="w-full bg-white border border-amber-300 rounded px-1.5 py-0.5 text-right font-black text-amber-900 outline-none focus:border-amber-500">
                     <span class="absolute right-1 top-0.5 text-[9px] text-slate-400 font-bold">噸</span>
                   </div>
@@ -599,19 +622,17 @@
                 <span class="text-[10px] text-amber-800 font-semibold">40 呎高櫃標準</span>
               </div>
 
-              <!-- 排程模式切換器 -->
               <div>
-                <label class="block text-[10px] font-bold text-slate-600 mb-1">生產排程戰術情境：</label>
+                <label class="block text-[10px] font-bold text-slate-600 mb-1">工廠排程戰術模式：</label>
                 <select id="cfg_schedule_mode" onchange="calculate()" class="w-full bg-white border border-slate-300 rounded-lg p-1.5 font-bold text-slate-800 outline-none focus:border-amber-500 text-xs">
-                  <option value="standard">⚡ 模式 A：標準排程 (一至五夜班4.5噸 + 六日全天9.2噸，週產40.9噸)</option>
-                  <option value="f1_single">⚙️ 模式 B：一二廠同時開 (一廠降單機: 平日夜2.25噸 + 六日4.6噸，週產20.5噸)</option>
-                  <option value="single_const">🔨 模式 C：單設備連續常態 (每日固定 2.3 噸)</option>
-                  <option value="double_const">🚀 模式 D：雙設備連續常態 (每日固定 4.6 噸)</option>
-                  <option value="custom">✍️ 模式 E：自訂每日生產量 (噸/天)</option>
+                  <option value="standard">⚡ 標準滿載 40.9T/週 (平日夜班4.5T + 六日全天9.2T)</option>
+                  <option value="f1_single">⚙️ 一二廠同開一廠單機 20.45T/週 (平日夜2.25T + 六日4.6T)</option>
+                  <option value="single_const">🔨 單機固定 2.3T/日 (單設備連續常態)</option>
+                  <option value="double_const">🚀 雙機固定 4.6T/日 (雙設備連續常態)</option>
+                  <option value="custom">✍️ 自訂日產能 (噸/天)</option>
                 </select>
               </div>
 
-              <!-- 自訂產量輸入框 (當選模式E時顯示) -->
               <div id="customDailyCapWrapper" class="hidden flex items-center justify-between pt-1">
                 <span class="text-[10px] text-slate-500 font-bold">自訂每日產出乾膠：</span>
                 <div class="relative w-24">
@@ -621,24 +642,24 @@
               </div>
             </div>
 
-            <!-- 兩大核心結果：最大可產乾膠 ＆ 貨櫃總數 -->
+            <!-- 兩大核心結果：最大可產乾膠 & 貨櫃總數 -->
             <div class="grid grid-cols-2 gap-2">
               <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                 <span class="text-[10px] text-slate-400 font-medium block">最大可產乾膠成品</span>
                 <div class="flex items-baseline gap-1 mt-0.5">
-                  <span class="text-xl font-black text-slate-900 tracking-tight" id="res_max_finished_dry_tons">76.0</span>
+                  <span class="text-xl font-black text-slate-900 tracking-tight" id="res_max_finished_dry_tons">91.2</span>
                   <span class="text-[10px] font-bold text-slate-500">噸 (MT)</span>
                 </div>
-                <span class="text-[9px] text-slate-500 block mt-0.5" id="res_max_wet_feed_tons">濕料總投料: 100 噸</span>
+                <span class="text-[9px] text-slate-500 block mt-0.5" id="res_max_wet_feed_tons">濕料總投料: 120.0 噸</span>
               </div>
 
               <div class="bg-amber-50/80 p-2.5 rounded-xl border border-amber-200">
                 <span class="text-[10px] text-amber-700 font-medium block">預估可裝貨櫃總數</span>
                 <div class="flex items-baseline gap-1 mt-0.5">
-                  <span class="text-xl font-black text-amber-600 tracking-tight" id="res_container_count">3.2</span>
+                  <span class="text-xl font-black text-amber-600 tracking-tight" id="res_container_count">3.8</span>
                   <span class="text-[10px] font-bold text-amber-700">櫃</span>
                 </div>
-                <span class="text-[9px] text-amber-800 font-bold block mt-0.5" id="res_container_detail">3 整櫃 + 4.0 噸散貨</span>
+                <span class="text-[9px] text-amber-800 font-bold block mt-0.5" id="res_container_detail">3 整櫃 + 19.2 噸散貨</span>
               </div>
             </div>
 
@@ -647,15 +668,13 @@
               <div class="flex items-baseline justify-between">
                 <div>
                   <span class="text-[11px] font-bold text-slate-700 block">預估消化總工期</span>
-                  <span class="text-[9px] text-slate-400" id="res_schedule_desc">平日夜班4.5T + 六日全天9.2T</span>
+                  <span class="text-[9px] text-slate-400" id="res_schedule_desc">平日夜班4.5T + 六日全天9.2T (週產40.9T)</span>
                 </div>
                 <div class="text-right">
-                  <span class="text-xl font-black text-indigo-700 tracking-tight" id="res_schedule_days">13</span>
-                  <span class="text-[10px] font-bold text-slate-600">生產天 (約 <span id="res_schedule_weeks">1.9</span> 週)</span>
+                  <span class="text-xl font-black text-indigo-700 tracking-tight" id="res_schedule_days">17</span>
+                  <span class="text-[10px] font-bold text-slate-600">天 (約 <span id="res_schedule_weeks">2.4</span> 週)</span>
                 </div>
               </div>
-
-              <!-- 進度條意象 -->
               <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
                 <div class="bg-gradient-to-r from-amber-500 to-indigo-600 h-full rounded-full w-full"></div>
               </div>
@@ -664,7 +683,7 @@
             <!-- 木桶短板原料警示框 -->
             <div class="p-2 rounded-xl border border-rose-200 bg-rose-50/70 space-y-0.5" id="bottleneckNoticeBox">
               <div class="flex items-center gap-1.5 text-rose-800 font-bold text-[11px]">
-                <span>⚠️ 限制短板：</span>
+                <span>⚠️ 限制短板原料：</span>
                 <span id="res_bottleneck_material_name">中東 512E 廢料 (濕膠)</span>
               </div>
               <p class="text-[10px] text-rose-700 leading-tight" id="res_bottleneck_detail">
@@ -672,7 +691,7 @@
               </p>
             </div>
 
-            <!-- 摺疊按鈕：查看各原料庫存消耗與剩餘明細 -->
+            <!-- 可展開各原料庫存消耗與剩餘明細 -->
             <div>
               <button type="button" onclick="toggleInventoryUsageTable()" class="w-full py-1 text-[10px] font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all flex items-center justify-center gap-1">
                 <span>📋 查看各原料庫存去化與剩餘明細</span>
@@ -690,7 +709,7 @@
                     </tr>
                   </thead>
                   <tbody id="inventoryUsageTableBody" class="divide-y divide-slate-100 text-slate-700">
-                    <!-- 由 JavaScript 動態生成明細 -->
+                    <!-- 由 JavaScript 動態渲染明細 -->
                   </tbody>
                 </table>
               </div>
@@ -707,14 +726,14 @@
   <!-- 浮動提示 Toast -->
   <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none z-50">
     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-    <span id="toastMsg">已成功複製業務報價摘要！</span>
+    <span id="toastMsg">操作成功！</span>
   </div>
 
-  <!-- Modal 1：原廠 TDS 規格資料庫與比對中心 -->
+  <!-- ======================================================== -->
+  <!-- Modal 1：原廠 TDS 規格中心 (Sumitomo 512E & Dow 4牌號)     -->
+  <!-- ======================================================== -->
   <div id="tdsCenterModal" class="modal-backdrop fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 sm:p-5">
     <div class="bg-white rounded-2xl max-w-5xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden">
-      
-      <!-- 標題與分頁切換 -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3 shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-blue-600 text-white font-black flex items-center justify-center text-lg shadow-md shadow-blue-500/20">
@@ -729,7 +748,6 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- 分頁切換鈕 -->
           <div class="inline-flex rounded-lg p-0.5 bg-slate-100 border border-slate-200 text-xs">
             <button id="tabBtnComparison" onclick="switchTdsTab('comparison')" class="px-3 py-1 font-bold rounded-md transition-all bg-white text-blue-700 shadow-sm">
               📊 橫向全規格對照表
@@ -742,18 +760,16 @@
         </div>
       </div>
 
-      <!-- 內容區：可滾動 -->
       <div class="overflow-y-auto custom-scroll py-3 pr-1 flex-1 space-y-4">
-        
-        <!-- 分頁 1：5大原廠膠橫向比對矩陣 -->
+        <!-- 分頁 1：橫向比對矩陣 -->
         <div id="tdsViewComparison" class="space-y-3">
           <div class="flex items-center justify-between text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-            <span>📌 <strong>原廠數據標準比對：</strong> 橫向涵蓋門尼黏度 (ML)、乙烯含量 (C2)、雙烯烴 (ENB)、密度、型態與主要用途。點擊右側按鈕可將規格直接導入原料庫。</span>
-            <span class="font-bold text-blue-700 text-[11px]">共收錄 5 款原廠牌號</span>
+            <span>📌 <strong>原廠數據標準比對：</strong> 橫向涵蓋門尼黏度 (ML)、乙烯含量 (C2)、第三單體 (ENB)、密度、型態與主要用途。點擊右側按鈕可查看詳細或直接導入原料庫。</span>
+            <span class="font-bold text-blue-700 text-[11px] shrink-0">共收錄 5 款原廠牌號</span>
           </div>
 
           <div class="border border-slate-200 rounded-xl overflow-x-auto custom-scroll">
-            <table class="w-full text-xs text-left border-collapse min-w-[760px]">
+            <table class="w-full text-xs text-left border-collapse min-w-[780px]">
               <thead>
                 <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
                   <th class="py-2.5 px-3">原廠 / 牌號</th>
@@ -767,39 +783,31 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-200 bg-white" id="tdsComparisonTableBody">
-                <!-- 由 JavaScript 動態生成對照列 -->
+                <!-- 由 JavaScript 動態渲染 -->
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- 分頁 2：單一牌號完整技術規格卡 -->
+        <!-- 分頁 2：單一牌號詳細卡片 -->
         <div id="tdsViewCards" class="hidden space-y-3">
-          <!-- 牌號切換下拉或按鈕組 -->
-          <div class="flex flex-wrap items-center gap-2" id="tdsGradeButtonTabs">
-            <!-- 由 JavaScript 動態生成 5 個牌號按鈕 -->
-          </div>
-
-          <!-- 詳細卡片展示容器 -->
-          <div id="tdsSingleCardDisplay" class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50">
-            <!-- 由 JavaScript 動態渲染單一 TDS 詳細內容 -->
-          </div>
+          <div class="flex flex-wrap items-center gap-2" id="tdsGradeButtonTabs"></div>
+          <div id="tdsSingleCardDisplay" class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50"></div>
         </div>
-
       </div>
 
-      <!-- 底部列 -->
       <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-400 shrink-0">
         <span>規範依據：ASTM D1646 / ASTM D3900 / ASTM D6047 / ASTM D297 ｜ FDA 21 CFR 177.2600 ｜ RoHS 2011/65/EU</span>
         <button onclick="closeTdsCenterModal()" class="px-4 py-1.5 font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-all shadow-sm">
           關閉 TDS 中心
         </button>
       </div>
-
     </div>
   </div>
 
-  <!-- Modal 2：儲存配方為新紀錄 -->
+  <!-- ======================================================== -->
+  <!-- Modal 2：儲存配方為新紀錄                                 -->
+  <!-- ======================================================== -->
   <div id="saveRecipeModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
@@ -819,7 +827,6 @@
           <div>
             <label class="block font-bold text-slate-700 mb-1">主要類別</label>
             <select id="modal_recipe_cat" onchange="updateSubcatOptions(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 outline-none focus:border-indigo-500">
-              <option value="全部">全部</option>
               <option value="橡膠用">橡膠用</option>
               <option value="發泡用">發泡用</option>
               <option value="無特殊要求">無特殊要求</option>
@@ -840,7 +847,7 @@
         </div>
 
         <div class="bg-indigo-50/70 p-2.5 rounded-xl border border-indigo-100">
-          <span class="text-[11px] font-bold text-indigo-900 block mb-0.5">即將保存的成分投料明細：</span>
+          <span class="text-[11px] font-bold text-indigo-900 block mb-0.5">即將保存的成分投料與物性明細：</span>
           <p id="modal_recipe_preview" class="text-[11px] text-indigo-800 font-medium leading-relaxed"></p>
         </div>
       </div>
@@ -852,71 +859,12 @@
     </div>
   </div>
 
-  <!-- Modal 3：新增原料至基礎庫 -->
-  <div id="addMaterialModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200">
-      <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-800">新增原料至參數庫</h3>
-        <button onclick="closeAddMaterialModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">原料名稱 (如：中東 512E 乾膠、Dow 4725P、陶氏 4770P)</label>
-          <input type="text" id="new_mat_name" placeholder="請輸入品名" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 outline-none focus:border-blue-500">
-        </div>
-        
-        <div class="grid grid-cols-4 gap-2">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">單價 ($/噸)</label>
-            <input type="number" id="new_mat_cost" value="1000" step="10" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 outline-none focus:border-blue-500 text-right">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">水分 (%)</label>
-            <input type="number" id="new_mat_moisture" value="0" step="1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 outline-none focus:border-blue-500 text-right">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">ENB(%)</label>
-            <input type="number" id="new_mat_enb" value="5.0" step="0.1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 outline-none focus:border-blue-500 text-right">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">現有庫存(噸)</label>
-            <input type="number" id="new_mat_stock" value="20" step="1" class="w-full bg-amber-50 border border-amber-300 rounded-lg p-2 font-black text-amber-900 outline-none focus:border-amber-500 text-right">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">門尼黏度 ML(1+4)</label>
-            <input type="number" id="new_mat_ml" value="64" step="1" placeholder="如 512E:64, 4725P:25" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 outline-none focus:border-blue-500 text-right">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">乙烯含量 C2 (%)</label>
-            <input type="number" id="new_mat_c2" value="68" step="1" placeholder="如 512E:68, 4570:50" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 outline-none focus:border-blue-500 text-right">
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">手動指定純乾膠成本 (選填，直接覆蓋除水公式)</label>
-          <input type="number" id="new_mat_override" placeholder="留空則依單價÷(1-水分)自動計算" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-slate-700 outline-none focus:border-blue-500 text-right">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">特性與限制備註</label>
-          <input type="text" id="new_mat_note" placeholder="如：住友 512E 系列、陶氏顆粒料、高門尼剛性膠" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-slate-700 outline-none focus:border-blue-500">
-        </div>
-      </div>
-
-      <div class="mt-5 flex justify-end gap-2">
-        <button onclick="closeAddMaterialModal()" class="px-3.5 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all">取消</button>
-        <button onclick="saveNewMaterial()" class="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-md">儲存並加入原料庫</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- ======================================================== -->
+  <!-- JavaScript 核心邏輯與即時演算引擎                         -->
+  <!-- ======================================================== -->
   <script>
     // ==========================================
-    // 原廠 TDS 規格資料庫 (5 大官方牌號數據庫)
+    // 1. 原廠 TDS 規格資料庫 (5 大官方牌號)
     // ==========================================
     const TDS_DATABASE = [
       {
@@ -925,11 +873,11 @@
         manufacturer: "住友化學 SUMITOMO / 沙烏地 Petro Rabigh",
         origin: "沙烏地阿拉伯 (Saudi Arabia)",
         gradeType: "Non-Oil Grade (非充油型非極性三元乙丙)",
-        form: "25kg 膠塊 (Bales in Steel Boxes 鐵箱)",
+        form: "25kg 膠塊 (Steel Boxes 鐵箱)",
         density: 0.870,
-        mooneyML: 64, // ML(1+4) @125°C ASTM D1646
-        ethylene: 68.0, // wt% ASTM D3900
-        enb: 5.0, // wt% ASTM D6047
+        mooneyML: 64,
+        ethylene: 68.0,
+        enb: 5.0,
         propylene: 27.0,
         crystallinity: "中高結晶度 / 高生膠強度 (High Green Strength)",
         ashContent: "< 0.1 wt%",
@@ -947,15 +895,15 @@
         gradeType: "Hydrocarbon Rubber (Decarbia™ 減碳認證可選)",
         form: "透明顆粒 (Clear Pellets)",
         density: 0.870,
-        mooneyML: 63, // ML(1+4) @125°C (257°F) ASTM D1646
-        ethylene: 67.0, // wt% ASTM D3900
-        enb: 2.2, // wt% 低雙烯烴 (Low diene) ASTM D6047
-        propylene: 32.0, // wt% ASTM D3900
+        mooneyML: 63,
+        ethylene: 67.0,
+        enb: 2.2,
+        propylene: 32.0,
         crystallinity: "中結晶 (Medium Crystalline)",
         ashContent: "< 0.1 wt%",
         volatileMatter: "< 0.40 wt% (Dow Method)",
         certifications: "FDA 21 CFR 177.2600 / 175.1520 / 175.105 / 177.1210 / ISCC PLUS",
-        applications: "電線電纜 (Wire & Cable)、過氧化物硫化耐熱膠管 (Peroxide cured heat resistant hose)、塑膠抗衝擊改質 (Impact modification)。低模數、高延伸率、耐熱與耐候穩定性優異。",
+        applications: "電線電纜 (Wire & Cable)、過氧化物硫化耐熱膠管 (Peroxide cured heat resistant hose)、塑膠抗衝擊改質。低模數、高延伸率、耐熱與耐候穩定性優異。",
         storageNotice: "顆粒態常溫不易結塊，易於自動計量輸送。需儲存於室內陰涼乾燥處，避免紫外線直射影響聚合物物性。",
         defaultCostUSD: 1280
       },
@@ -967,10 +915,10 @@
         gradeType: "Hydrocarbon Rubber (低乙烯無定形牌號)",
         form: "膠塊 (Bales)",
         density: 0.860,
-        mooneyML: 70, // ML(1+4) @125°C ASTM D1646
-        ethylene: 50.0, // wt% 低乙烯 ASTM D3900
-        enb: 5.0, // wt% 中雙烯烴 ASTM D6047
-        propylene: 45.0, // wt% ASTM D3900
+        mooneyML: 70,
+        ethylene: 50.0,
+        enb: 5.0,
+        propylene: 45.0,
         crystallinity: "無定形 (Amorphous / 零結晶性)",
         ashContent: "< 0.1 wt% (ASTM D296)",
         volatileMatter: "< 0.40 wt%",
@@ -987,10 +935,10 @@
         gradeType: "Hydrocarbon Rubber (低黏度半結晶顆粒)",
         form: "顆粒 (Pellets)",
         density: 0.880,
-        mooneyML: 25, // 低黏度 ML(1+4) @125°C ASTM D1646
-        ethylene: 70.0, // 高乙烯 wt% ASTM D3900
-        enb: 5.0, // wt% ASTM D6047
-        propylene: 25.0, // wt% ASTM D3900
+        mooneyML: 25,
+        ethylene: 70.0,
+        enb: 5.0,
+        propylene: 25.0,
         crystallinity: "半結晶 (Semi-crystalline) / 高生膠強度",
         ashContent: "< 0.1 wt%",
         volatileMatter: "< 0.40 wt%",
@@ -1007,64 +955,52 @@
         gradeType: "Hydrocarbon Rubber (高分子量半結晶顆粒)",
         form: "顆粒 (Pellets)",
         density: 0.870,
-        mooneyML: 70, // 高黏度 ML(1+4) @125°C ASTM D1646
-        ethylene: 70.0, // 高乙烯 wt% ASTM D3900
-        enb: 5.0, // wt% ASTM D6047
-        propylene: 25.0, // wt% ASTM D3900
-        crystallinity: "半結晶 (Semi-crystalline / 高生膠強度)",
+        mooneyML: 70,
+        ethylene: 70.0,
+        enb: 5.0,
+        propylene: 25.0,
+        crystallinity: "半結晶 (Semi-crystalline) / 高生膠強度",
         ashContent: "< 0.1 wt%",
         volatileMatter: "< 0.40 wt%",
         certifications: "FDA 21 CFR 177.2600 / 177.1520 / 175.105 / 177.1210",
         applications: "汽車暖氣管/水箱管 (Hoses)、耐候車身膠條 (Weather strip)、高分子塑膠增韌改質。高生膠強度、高延展性、標準硫化體系下快速交聯。",
         storageNotice: "高黏度顆粒製品，混煉時吃油吃碳黑容納量大。常溫乾燥儲存避光。",
-        defaultCostUSD: 1380
+        defaultCostUSD: 1360
       }
     ];
 
     // ==========================================
-    // 原料基礎參數庫 (新增現有庫存 stockTons 欄位)
+    // 2. 出廠預設 11 種原料基礎參數庫
     // ==========================================
-    let rawMaterials = [
-      { id: 'mat_1', name: "中東 512E 廢料 (濕膠)", costUSD: 1000, moisture: 40.0, enb: 5.0, ml: 64, c2: 68, stockTons: 60.0, overrideCostUSD: 0, tdsRef: "tds_512e", note: "住友512E廢料・水分40%・去庫存料" },
-      { id: 'mat_2', name: "中東 512E 正品 (乾燥乾膠)", costUSD: 1350, moisture: 0.0,  enb: 5.0, ml: 64, c2: 68, stockTons: 15.0, overrideCostUSD: 0, tdsRef: "tds_512e", note: "住友512E純膠・ML64・乙烯68%" },
-      { id: 'mat_3', name: "陶氏 NORDEL™ 4725P",       costUSD: 1300, moisture: 0.0,  enb: 5.0, ml: 25, c2: 70, stockTons: 30.0, overrideCostUSD: 0, tdsRef: "tds_4725p", note: "陶氏原廠顆粒・ML25低黏度骨架料" },
-      { id: 'mat_4', name: "陶氏 NORDEL™ 4570",        costUSD: 1350, moisture: 0.0,  enb: 5.0, ml: 70, c2: 50, stockTons: 10.0, overrideCostUSD: 0, tdsRef: "tds_4570", note: "陶氏無定形膠塊・ML70低溫耐寒" },
-      { id: 'mat_5', name: "陶氏 NORDEL™ 3760P",       costUSD: 1280, moisture: 0.0,  enb: 2.2, ml: 63, c2: 67, stockTons: 10.0, overrideCostUSD: 0, tdsRef: "tds_3760p", note: "陶氏顆粒・ENB 2.2%低雙烯耐老化" },
-      { id: 'mat_6', name: "陶氏 NORDEL™ 4770P",       costUSD: 1380, moisture: 0.0,  enb: 5.0, ml: 70, c2: 70, stockTons: 10.0, overrideCostUSD: 0, tdsRef: "tds_4770p", note: "陶氏高生膠強度顆粒・ML70" },
-      { id: 'mat_7', name: "美國 LION 廢料",            costUSD: 700,  moisture: 10.0, enb: 4.5, ml: 55, c2: 64, stockTons: 25.0, overrideCostUSD: 0, tdsRef: null, note: "低成本優質膠・輕微異味需稀釋" },
-      { id: 'mat_8', name: "美國 LION EPM",             costUSD: 600,  moisture: 10.0, enb: 0.0, ml: 45, c2: 55, stockTons: 12.0, overrideCostUSD: 0, tdsRef: null, note: "全廠最低價・無第三單體" },
-      { id: 'mat_9', name: "自訂填充料/其他",           costUSD: 200,  moisture: 0.0,  enb: 0.0, ml: 0,  c2: 0,  stockTons: 5.0,  overrideCostUSD: 0, tdsRef: null, note: "如：高嶺土、增白劑" }
+    const DEFAULT_RAW_MATERIALS = [
+      { id: 'mat_1',  name: "中東 512E 廢料 (濕膠)",     costUSD: 1000, moisture: 40.0, enb: 5.0, ml: 64, c2: 68, stockTons: 60.0, overrideCostUSD: 0, tdsRef: "tds_512e",  note: "住友512E廢料・水分40%・去庫存主力" },
+      { id: 'mat_2',  name: "中東 512E 正品 (乾燥乾膠)", costUSD: 1350, moisture: 0.0,  enb: 5.0, ml: 64, c2: 68, stockTons: 20.0, overrideCostUSD: 0, tdsRef: "tds_512e",  note: "住友512E純膠・ML64・乙烯68%" },
+      { id: 'mat_3',  name: "中東廢料 (酸膠)",           costUSD: 950,  moisture: 30.0, enb: 4.2, ml: 58, c2: 65, stockTons: 15.0, overrideCostUSD: 0, tdsRef: null,        note: "需留意高溫真空排氣脫酸" },
+      { id: 'mat_4',  name: "比利時料",                   costUSD: 1250, moisture: 2.0,  enb: 4.6, ml: 60, c2: 66, stockTons: 18.0, overrideCostUSD: 0, tdsRef: null,        note: "純淨無味料源・品質平穩" },
+      { id: 'mat_5',  name: "美國 LION 廢料",             costUSD: 700,  moisture: 10.0, enb: 4.5, ml: 55, c2: 64, stockTons: 25.0, overrideCostUSD: 0, tdsRef: null,        note: "低成本優質膠・輕微異味需控制在25%內" },
+      { id: 'mat_6',  name: "美國 LION EPM",              costUSD: 600,  moisture: 10.0, enb: 0.0, ml: 45, c2: 55, stockTons: 12.0, overrideCostUSD: 0, tdsRef: null,        note: "全廠最低價・無第三單體" },
+      { id: 'mat_7',  name: "美國 DOW 4725P",             costUSD: 1300, moisture: 0.0,  enb: 5.0, ml: 25, c2: 70, stockTons: 30.0, overrideCostUSD: 0, tdsRef: "tds_4725p", note: "陶氏原廠顆粒・ML25低黏度骨架料" },
+      { id: 'mat_8',  name: "美國 DOW 4570",              costUSD: 1350, moisture: 0.0,  enb: 5.0, ml: 70, c2: 50, stockTons: 15.0, overrideCostUSD: 0, tdsRef: "tds_4570",  note: "陶氏無定形膠塊・ML70低溫耐寒" },
+      { id: 'mat_9',  name: "美國 DOW 3760P",             costUSD: 1280, moisture: 0.0,  enb: 2.2, ml: 63, c2: 67, stockTons: 15.0, overrideCostUSD: 0, tdsRef: "tds_3760p", note: "陶氏顆粒・ENB 2.2%低雙烯耐老化" },
+      { id: 'mat_10', name: "美國 DOW 4770P",             costUSD: 1360, moisture: 0.0,  enb: 5.0, ml: 70, c2: 70, stockTons: 10.0, overrideCostUSD: 0, tdsRef: "tds_4770p", note: "陶氏高生膠強度顆粒・ML70" },
+      { id: 'mat_11', name: "自訂填充料/其他",             costUSD: 200,  moisture: 0.0,  enb: 0.0, ml: 0,  c2: 0,  stockTons: 50.0, overrideCostUSD: 0, tdsRef: null,        note: "如：高嶺土、碳酸鈣、增白劑" }
     ];
 
-    // 配方分類清單
     const CATEGORIES = ["全部", "橡膠用", "發泡用", "無特殊要求", "ML要求", "ENB要求", "其他"];
 
-    // 預設配方資料庫
-    let recipesDatabase = [
-      {
-        id: 'rec_rubber_ext_512e',
-        name: "512E 壓出 / 膠管條高生膠強度配方",
-        category: "橡膠用",
-        subCategory: "壓出 / 膠管條",
-        description: "以住友 512E (乾膠) 為骨架，搭配 LION 廢料降本，ENB 4.8%，尺寸安定性極佳",
-        items: [
-          { materialName: "中東 512E 正品 (乾燥乾膠)", ratio: 50.0 },
-          { materialName: "美國 LION 廢料", ratio: 20.0 },
-          { materialName: "美國 LION EPM", ratio: 8.0 },
-          { materialName: "陶氏 NORDEL™ 4725P", ratio: 22.0 }
-        ]
-      },
+    // 預設經典配方資料庫
+    const DEFAULT_RECIPES_DB = [
       {
         id: 'rec_general_balanced_512e',
         name: "512E 平衡效益首選 (方案二)",
         category: "無特殊要求",
         subCategory: "常態大量生產",
-        description: "512E濕膠50/LION20/EPM8/DOW22，兼顧除水速度與純料成本",
+        description: "中東512E濕膠50/LION20/EPM8/DOW4725P 22，兼顧除水速度與純料成本",
         items: [
           { materialName: "中東 512E 廢料 (濕膠)", ratio: 50.0 },
           { materialName: "美國 LION 廢料", ratio: 20.0 },
           { materialName: "美國 LION EPM", ratio: 8.0 },
-          { materialName: "陶氏 NORDEL™ 4725P", ratio: 22.0 }
+          { materialName: "美國 DOW 4725P", ratio: 22.0 }
         ]
       },
       {
@@ -1077,7 +1013,20 @@
           { materialName: "中東 512E 廢料 (濕膠)", ratio: 60.0 },
           { materialName: "美國 LION 廢料", ratio: 20.0 },
           { materialName: "美國 LION EPM", ratio: 6.0 },
-          { materialName: "陶氏 NORDEL™ 4725P", ratio: 14.0 }
+          { materialName: "美國 DOW 4725P", ratio: 14.0 }
+        ]
+      },
+      {
+        id: 'rec_rubber_ext_512e',
+        name: "512E 壓出 / 膠管條高生膠強度配方",
+        category: "橡膠用",
+        subCategory: "壓出 / 膠管條",
+        description: "以住友 512E (乾膠) 為骨架，搭配 LION 廢料降本，尺寸安定性極佳",
+        items: [
+          { materialName: "中東 512E 正品 (乾燥乾膠)", ratio: 50.0 },
+          { materialName: "美國 LION 廢料", ratio: 20.0 },
+          { materialName: "美國 LION EPM", ratio: 8.0 },
+          { materialName: "美國 DOW 4725P", ratio: 22.0 }
         ]
       },
       {
@@ -1087,7 +1036,7 @@
         subCategory: "模壓迫緊用",
         description: "採用低黏度 4725P (ML 25) 促進模腔流動，高乙烯 70% 提升定伸應力與硬度",
         items: [
-          { materialName: "陶氏 NORDEL™ 4725P", ratio: 45.0 },
+          { materialName: "美國 DOW 4725P", ratio: 45.0 },
           { materialName: "中東 512E 正品 (乾燥乾膠)", ratio: 25.0 },
           { materialName: "美國 LION 廢料", ratio: 20.0 },
           { materialName: "美國 LION EPM", ratio: 10.0 }
@@ -1098,10 +1047,10 @@
         name: "耐寒冷卻水管配方 (4570 無定形)",
         category: "橡膠用",
         subCategory: "耐寒 / 冷卻水管",
-        description: "以 4570 (乙烯 50% 無定形) 為核心，賦予極優異零下耐寒彈性，不硬化不脆裂",
+        description: "以 4570 (乙烯 50% 無定形) 為核心，賦予極優異零下耐寒彈性",
         items: [
-          { materialName: "陶氏 NORDEL™ 4570", ratio: 40.0 },
-          { materialName: "陶氏 NORDEL™ 4725P", ratio: 30.0 },
+          { materialName: "美國 DOW 4570", ratio: 40.0 },
+          { materialName: "美國 DOW 4725P", ratio: 30.0 },
           { materialName: "美國 LION 廢料", ratio: 20.0 },
           { materialName: "美國 LION EPM", ratio: 10.0 }
         ]
@@ -1111,11 +1060,11 @@
         name: "發泡管條 / 海綿保溫低水鎖氣配方",
         category: "發泡用",
         subCategory: "保溫管 / 發泡密封條",
-        description: "水分控制低於4%，防止泡孔破裂，高ENB快速定型鎖氣",
+        description: "水分控制極低，防止泡孔破裂，高ENB快速定型鎖氣",
         items: [
           { materialName: "中東 512E 正品 (乾燥乾膠)", ratio: 40.0 },
-          { materialName: "陶氏 NORDEL™ 4770P", ratio: 35.0 },
-          { materialName: "陶氏 NORDEL™ 4725P", ratio: 20.0 },
+          { materialName: "美國 DOW 4770P", ratio: 35.0 },
+          { materialName: "美國 DOW 4725P", ratio: 20.0 },
           { materialName: "美國 LION EPM", ratio: 5.0 }
         ]
       },
@@ -1126,7 +1075,7 @@
         subCategory: "高門尼黏度",
         description: "利用陶氏 4770P (ML 70) 與住友 512E (ML 64)，提升厚件高溫抗塌陷性",
         items: [
-          { materialName: "陶氏 NORDEL™ 4770P", ratio: 50.0 },
+          { materialName: "美國 DOW 4770P", ratio: 50.0 },
           { materialName: "中東 512E 正品 (乾燥乾膠)", ratio: 35.0 },
           { materialName: "美國 LION 廢料", ratio: 15.0 }
         ]
@@ -1138,21 +1087,25 @@
         subCategory: "低雙烯耐熱老化",
         description: "採用 3760P (ENB 2.2%)，主鏈飽和度高，專供高溫過氧化物硫化蒸氣膠管",
         items: [
-          { materialName: "陶氏 NORDEL™ 3760P", ratio: 50.0 },
-          { materialName: "陶氏 NORDEL™ 4725P", ratio: 30.0 },
+          { materialName: "美國 DOW 3760P", ratio: 50.0 },
+          { materialName: "美國 DOW 4725P", ratio: 30.0 },
           { materialName: "美國 LION 廢料", ratio: 20.0 }
         ]
       }
     ];
 
-    // 當前投料配方清單 (預設為 512E 平衡效益首選)
-    let currentRecipe = [
+    // 預設投料配方 (中東 512E 廢料 500KG, 美國 LION 廢料 200KG, 美國 LION EPM 80KG, 美國 DOW 4725P 220KG)
+    const DEFAULT_CURRENT_RECIPE = [
       { materialId: 'mat_1', weight: 500, ratio: 50.0 },
-      { materialId: 'mat_7', weight: 200, ratio: 20.0 },
-      { materialId: 'mat_8', weight: 80,  ratio: 8.0 },
-      { materialId: 'mat_3', weight: 220, ratio: 22.0 }
+      { materialId: 'mat_5', weight: 200, ratio: 20.0 },
+      { materialId: 'mat_6', weight: 80,  ratio: 8.0 },
+      { materialId: 'mat_7', weight: 220, ratio: 22.0 }
     ];
 
+    // 系統運行狀態變數
+    let rawMaterials = JSON.parse(JSON.stringify(DEFAULT_RAW_MATERIALS));
+    let recipesDatabase = JSON.parse(JSON.stringify(DEFAULT_RECIPES_DB));
+    let currentRecipe = JSON.parse(JSON.stringify(DEFAULT_CURRENT_RECIPE));
     let currentSelectedCategory = "全部";
     let inputMode = 'weight';
     let targetMarginPercent = 15;
@@ -1160,8 +1113,18 @@
     let currentTdsTab = 'comparison';
     let activeTdsCardId = 'tds_512e';
     let currentRecipeName = "512E 平衡效益首選 (方案二)";
+    let isQuickLibExpanded = true;
 
-    // 啟動初始化
+    // 持久化 Key (採用 v6 獨立版本鍵值確保載入完整物性結構)
+    const STORAGE_KEY_MATS    = "tit_epdm_v6_materials";
+    const STORAGE_KEY_RECIPES = "tit_epdm_v6_recipes";
+    const STORAGE_KEY_CURRENT = "tit_epdm_v6_current_recipe";
+    const STORAGE_KEY_NAME    = "tit_epdm_v6_recipe_name";
+    const STORAGE_KEY_LOGO    = "tit_custom_logo";
+
+    // ==========================================
+    // 3. 頁面載入與初始化
+    // ==========================================
     window.addEventListener("DOMContentLoaded", () => {
       loadUserDataFromStorage();
       initTitLogo();
@@ -1173,15 +1136,12 @@
       calculate();
     });
 
-    // ==========================================
-    // 本機資料快取保存機制 (LocalStorage Persistence)
-    // ==========================================
     function saveUserDataToStorage() {
       try {
-        localStorage.setItem("yantai_epdm_raw_materials", JSON.stringify(rawMaterials));
-        localStorage.setItem("yantai_epdm_recipes_db", JSON.stringify(recipesDatabase));
-        localStorage.setItem("yantai_epdm_current_recipe", JSON.stringify(currentRecipe));
-        localStorage.setItem("yantai_epdm_current_recipe_name", currentRecipeName);
+        localStorage.setItem(STORAGE_KEY_MATS, JSON.stringify(rawMaterials));
+        localStorage.setItem(STORAGE_KEY_RECIPES, JSON.stringify(recipesDatabase));
+        localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(currentRecipe));
+        localStorage.setItem(STORAGE_KEY_NAME, currentRecipeName);
       } catch (e) {
         console.warn("無法存入 LocalStorage:", e);
       }
@@ -1189,16 +1149,33 @@
 
     function loadUserDataFromStorage() {
       try {
-        const savedMats = localStorage.getItem("yantai_epdm_raw_materials");
-        if (savedMats) rawMaterials = JSON.parse(savedMats);
+        const savedMats = localStorage.getItem(STORAGE_KEY_MATS);
+        if (savedMats) {
+          const parsedMats = JSON.parse(savedMats);
+          if (Array.isArray(parsedMats) && parsedMats.length > 0) {
+            rawMaterials = parsedMats;
+          }
+        }
 
-        const savedRecipes = localStorage.getItem("yantai_epdm_recipes_db");
-        if (savedRecipes) recipesDatabase = JSON.parse(savedRecipes);
+        const savedRecipes = localStorage.getItem(STORAGE_KEY_RECIPES);
+        if (savedRecipes) {
+          const parsedRec = JSON.parse(savedRecipes);
+          if (Array.isArray(parsedRec) && parsedRec.length > 0) {
+            recipesDatabase = parsedRec;
+          }
+        }
 
-        const savedCurrent = localStorage.getItem("yantai_epdm_current_recipe");
-        if (savedCurrent) currentRecipe = JSON.parse(savedCurrent);
+        const savedCurrent = localStorage.getItem(STORAGE_KEY_CURRENT);
+        if (savedCurrent) {
+          const parsedCur = JSON.parse(savedCurrent);
+          if (Array.isArray(parsedCur) && parsedCur.length > 0) {
+            // 確認 materialId 皆存在
+            const valid = parsedCur.every(item => rawMaterials.some(m => m.id === item.materialId));
+            if (valid) currentRecipe = parsedCur;
+          }
+        }
 
-        const savedName = localStorage.getItem("yantai_epdm_current_recipe_name");
+        const savedName = localStorage.getItem(STORAGE_KEY_NAME);
         if (savedName) {
           currentRecipeName = savedName;
           const inputEl = document.getElementById("recipeNameInput");
@@ -1211,120 +1188,69 @@
       }
     }
 
-    // 快捷連續建檔新原料
-    function quickAddNewMaterial() {
-      const nameInput = document.getElementById("quick_mat_name");
-      const name = nameInput.value.trim();
-      if (!name) {
-        showToast("請輸入新原料名稱！");
-        nameInput.focus();
-        return;
-      }
-
-      const cost = parseFloat(document.getElementById("quick_mat_cost").value) || 1000;
-      const moist = parseFloat(document.getElementById("quick_mat_moist").value) || 0;
-      const enb = parseFloat(document.getElementById("quick_mat_enb").value) || 4.5;
-      const stock = parseFloat(document.getElementById("quick_mat_stock").value) || 20.0;
-
-      const newId = 'mat_' + Date.now();
-      rawMaterials.unshift({
-        id: newId,
-        name: name,
-        costUSD: cost,
-        moisture: moist,
-        enb: enb,
-        ml: 60,
-        c2: 66,
-        stockTons: stock,
-        overrideCostUSD: 0,
-        tdsRef: null,
-        note: "快捷連續建檔料"
-      });
-
-      nameInput.value = "";
+    function resetToFactoryDefaults() {
+      rawMaterials = JSON.parse(JSON.stringify(DEFAULT_RAW_MATERIALS));
+      recipesDatabase = JSON.parse(JSON.stringify(DEFAULT_RECIPES_DB));
+      currentRecipe = JSON.parse(JSON.stringify(DEFAULT_CURRENT_RECIPE));
+      currentRecipeName = "512E 平衡效益首選 (方案二)";
+      document.getElementById("recipeNameInput").value = currentRecipeName;
+      document.getElementById("currentLoadedRecipeName").innerText = currentRecipeName;
+      document.getElementById("batchTotalWeightInput").value = 1000;
+      renderCategoryTabs();
+      renderRecipesList();
       renderMaterialsLibrary();
       renderRecipeRows();
       calculate();
       saveUserDataToStorage();
-      showToast(`已成功將新原料【${name}】加入參數庫！`);
-      nameInput.focus();
+      showToast("已恢復出廠預設 11 種原料庫與標準配方！");
     }
 
-    // 自訂配方名稱處理
-    function handleRecipeNameChange(val) {
-      currentRecipeName = val.trim() || "未命名配方";
-      const lbl = document.getElementById("currentLoadedRecipeName");
-      if (lbl) lbl.innerText = currentRecipeName;
-      saveUserDataToStorage();
-    }
+    // ==========================================
+    // 4. TIT 幾何六角分子 SVG Logo 渲染與上傳
+    // ==========================================
+    function initTitLogo() {
+      const container = document.getElementById("titLogoContainer");
+      const resetBtn = document.getElementById("btnResetLogo");
+      if (!container) return;
 
-    // 快速一鍵儲存當前自訂配方
-    function quickSaveCurrentRecipe() {
-      const nameInput = document.getElementById("recipeNameInput");
-      const name = nameInput ? nameInput.value.trim() : currentRecipeName;
-      if (!name) {
-        showToast("請輸入配方名稱！");
-        return;
-      }
-
-      const catSelect = document.getElementById("recipeCategorySelect");
-      const category = catSelect ? catSelect.value : "橡膠用";
-
-      const items = currentRecipe.map(r => {
-        const mat = rawMaterials.find(m => m.id === r.materialId) || rawMaterials[0];
-        return {
-          materialName: mat.name,
-          ratio: parseFloat(r.ratio.toFixed(1))
-        };
-      });
-
-      // 檢查是否已有同名配方，有則更新，無則新增
-      const existingIdx = recipesDatabase.findIndex(r => r.name === name);
-      if (existingIdx >= 0) {
-        recipesDatabase[existingIdx].category = category;
-        recipesDatabase[existingIdx].items = items;
-        recipesDatabase[existingIdx].description = `自訂配方更新於 ${new Date().toLocaleDateString()}`;
-        showToast(`已成功覆蓋更新配方【${name}】！`);
+      const customLogoData = localStorage.getItem(STORAGE_KEY_LOGO);
+      if (customLogoData) {
+        container.innerHTML = `<img src="${customLogoData}" alt="TIT Logo" class="w-full h-full object-contain p-1 bg-white">`;
+        if (resetBtn) resetBtn.classList.remove("hidden");
       } else {
-        const newId = 'rec_custom_' + Date.now();
-        recipesDatabase.unshift({
-          id: newId,
-          name: name,
-          category: category,
-          subCategory: category,
-          description: `自訂配方建立於 ${new Date().toLocaleDateString()}`,
-          items: items
-        });
-        showToast(`已成功儲存新配方【${name}】！`);
+        container.innerHTML = `
+          <svg viewBox="0 0 64 64" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="titHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="55%" stop-color="#2563EB"/>
+                <stop offset="100%" stop-color="#1D4ED8"/>
+              </linearGradient>
+              <linearGradient id="titTextGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FFFFFF"/>
+                <stop offset="100%" stop-color="#BAE6FD"/>
+              </linearGradient>
+            </defs>
+            <!-- 深色科技底盤 -->
+            <rect width="64" height="64" rx="12" fill="#0F172A"/>
+            <!-- 外層六角分子晶格 -->
+            <polygon points="32,5 55,18.5 55,45.5 32,59 9,45.5 9,18.5" fill="none" stroke="url(#titHexGrad)" stroke-width="2.5"/>
+            <!-- 內層聚合物交聯鍵鏈節點 -->
+            <polygon points="32,11 49,21 49,43 32,53 15,43 15,21" fill="rgba(37, 99, 235, 0.14)" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1"/>
+            <circle cx="32" cy="5" r="2.3" fill="#38BDF8"/>
+            <circle cx="55" cy="18.5" r="2.3" fill="#38BDF8"/>
+            <circle cx="55" cy="45.5" r="2.3" fill="#38BDF8"/>
+            <circle cx="32" cy="59" r="2.3" fill="#38BDF8"/>
+            <circle cx="9" cy="45.5" r="2.3" fill="#38BDF8"/>
+            <circle cx="9" cy="18.5" r="2.3" fill="#38BDF8"/>
+            <!-- TIT 品牌字標 -->
+            <text x="32" y="35" text-anchor="middle" fill="url(#titTextGrad)" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="18.5" letter-spacing="1.2">TIT</text>
+            <!-- 底部 RUBBER 標籤 -->
+            <text x="32" y="45.5" text-anchor="middle" fill="#38BDF8" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="6.8" letter-spacing="1.4">RUBBER</text>
+          </svg>
+        `;
+        if (resetBtn) resetBtn.classList.add("hidden");
       }
-
-      currentRecipeName = name;
-      renderCategoryTabs();
-      renderRecipesList();
-      saveUserDataToStorage();
-    }
-
-    // 複製目前配方為新副本
-    function cloneCurrentRecipe() {
-      const copyName = currentRecipeName + " (副本)";
-      currentRecipeName = copyName;
-      const inputEl = document.getElementById("recipeNameInput");
-      if (inputEl) inputEl.value = copyName;
-      const labelEl = document.getElementById("currentLoadedRecipeName");
-      if (labelEl) labelEl.innerText = copyName;
-      quickSaveCurrentRecipe();
-    }
-
-    // 清空配方列
-    function clearRecipeRows() {
-      if (rawMaterials.length === 0) return;
-      currentRecipe = [
-        { materialId: rawMaterials[0].id, weight: 1000, ratio: 100.0 }
-      ];
-      renderRecipeRows();
-      calculate();
-      saveUserDataToStorage();
-      showToast("已重設配方投料列");
     }
 
     function triggerLogoUpload() {
@@ -1334,19 +1260,16 @@
     function handleLogoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       if (!file.type.startsWith("image/")) {
         showToast("請上傳有效的圖片檔案 (PNG, JPG, SVG 等)！");
         return;
       }
-
       const reader = new FileReader();
       reader.onload = function(e) {
-        const dataUrl = e.target.result;
         try {
-          localStorage.setItem("tit_custom_logo", dataUrl);
+          localStorage.setItem(STORAGE_KEY_LOGO, e.target.result);
           initTitLogo();
-          showToast("已成功套用並儲存自訂 TIT Logo！");
+          showToast("已成功套用並永久儲存自訂 TIT Logo！");
         } catch (err) {
           showToast("圖片檔案過大，無法儲存至本機快取！");
         }
@@ -1357,216 +1280,234 @@
 
     function resetTitLogo(event) {
       event.stopPropagation();
-      localStorage.removeItem("tit_custom_logo");
+      localStorage.removeItem(STORAGE_KEY_LOGO);
       initTitLogo();
-      showToast("已恢復為預設 TIT 向量科技 Logo！");
+      showToast("已恢復為預設 TIT 幾何向量 Logo！");
     }
 
     // ==========================================
-    // TDS 彈窗開關控制與比對中心邏輯
+    // 5. 左欄：原料基礎參數庫 & 現有庫存
     // ==========================================
-    function openTdsCenterModal(tdsId) {
-      const modal = document.getElementById("tdsCenterModal");
-      if (modal) modal.classList.remove("hidden");
-      if (tdsId) {
-        switchTdsTab('cards');
-        renderTdsSingleCard(tdsId);
+    function getMaterialRealDryCost(mat) {
+      const dryYield = (100 - mat.moisture) / 100;
+      if (mat.overrideCostUSD && mat.overrideCostUSD > 0) {
+        return mat.overrideCostUSD;
       }
+      return dryYield > 0 ? (mat.costUSD / dryYield) : mat.costUSD;
     }
 
-    function closeTdsCenterModal() {
-      const modal = document.getElementById("tdsCenterModal");
-      if (modal) modal.classList.add("hidden");
-    }
-
-    function switchTdsTab(tab) {
-      currentTdsTab = tab;
-      const viewComp = document.getElementById("tdsViewComparison");
-      const viewCards = document.getElementById("tdsViewCards");
-      const tabComp = document.getElementById("tabBtnComparison");
-      const tabCards = document.getElementById("tabBtnCards");
-
-      if (tab === 'comparison') {
-        viewComp.classList.remove("hidden");
-        viewCards.classList.add("hidden");
-        tabComp.className = "px-3 py-1 font-bold rounded-md transition-all bg-white text-blue-700 shadow-sm";
-        tabCards.className = "px-3 py-1 font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
-      } else {
-        viewComp.classList.add("hidden");
-        viewCards.classList.remove("hidden");
-        tabCards.className = "px-3 py-1 font-bold rounded-md transition-all bg-white text-blue-700 shadow-sm";
-        tabComp.className = "px-3 py-1 font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
-        renderTdsSingleCard(activeTdsCardId);
-      }
-    }
-
-    function initTdsCenterUI() {
-      const tbody = document.getElementById("tdsComparisonTableBody");
-      if (tbody) {
-        tbody.innerHTML = "";
-        TDS_DATABASE.forEach(tds => {
-          const tr = document.createElement("tr");
-          tr.className = "hover:bg-slate-50 transition-colors";
-          tr.innerHTML = `
-            <td class="py-2.5 px-3 font-bold text-slate-800">
-              <div class="text-xs text-blue-700">${tds.code}</div>
-              <div class="text-[10px] text-slate-400 font-normal">${tds.manufacturer.split('/')[0]}</div>
-            </td>
-            <td class="py-2.5 px-2 text-center text-[11px] text-slate-600">${tds.form}</td>
-            <td class="py-2.5 px-2 text-center font-bold text-blue-700">${tds.mooneyML}</td>
-            <td class="py-2.5 px-2 text-center font-bold text-indigo-700">${tds.ethylene}%</td>
-            <td class="py-2.5 px-2 text-center font-bold text-amber-600">${tds.enb}%</td>
-            <td class="py-2.5 px-2 text-center text-[10px] text-slate-600">${tds.density} / ${tds.crystallinity.includes("無定形") ? "無定形" : "半結晶"}</td>
-            <td class="py-2.5 px-3 text-[11px] text-slate-600 max-w-xs truncate" title="${tds.applications}">${tds.applications}</td>
-            <td class="py-2.5 px-2 text-center">
-              <button onclick="renderTdsSingleCard('${tds.id}'); switchTdsTab('cards');" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
-                查看詳細
-              </button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
+    function quickAddNewMaterial() {
+      const nameInput = document.getElementById("quick_mat_name");
+      const name = nameInput.value.trim();
+      if (!name) {
+        showToast("請輸入新原料名稱！");
+        nameInput.focus();
+        return;
       }
 
-      const btnGroup = document.getElementById("tdsGradeButtonTabs");
-      if (btnGroup) {
-        btnGroup.innerHTML = "";
-        TDS_DATABASE.forEach(tds => {
-          const b = document.createElement("button");
-          b.type = "button";
-          b.id = `btn_tds_tab_${tds.id}`;
-          b.onclick = () => renderTdsSingleCard(tds.id);
-          b.className = `px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${tds.id === activeTdsCardId ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`;
-          b.innerText = tds.code;
-          btnGroup.appendChild(b);
-        });
-      }
+      const costUSD   = parseFloat(document.getElementById("quick_mat_cost").value) || 1000;
+      const moisture  = parseFloat(document.getElementById("quick_mat_moist").value) || 0;
+      const enb       = parseFloat(document.getElementById("quick_mat_enb").value) || 0;
+      const ml        = parseFloat(document.getElementById("quick_mat_ml").value) || 0;
+      const c2        = parseFloat(document.getElementById("quick_mat_c2").value) || 0;
+      const stockTons = parseFloat(document.getElementById("quick_mat_stock").value) || 20.0;
 
-      renderTdsSingleCard(activeTdsCardId);
-    }
-
-    function renderTdsSingleCard(tdsId) {
-      activeTdsCardId = tdsId;
-      const tds = TDS_DATABASE.find(t => t.id === tdsId) || TDS_DATABASE[0];
-
-      TDS_DATABASE.forEach(t => {
-        const btn = document.getElementById(`btn_tds_tab_${t.id}`);
-        if (btn) {
-          if (t.id === tdsId) {
-            btn.className = "px-2.5 py-1 text-xs font-bold rounded-lg border bg-blue-600 text-white border-blue-600 shadow-sm";
-          } else {
-            btn.className = "px-2.5 py-1 text-xs font-bold rounded-lg border bg-white text-slate-700 border-slate-200 hover:bg-slate-50";
-          }
-        }
+      const newId = 'mat_' + Date.now();
+      rawMaterials.unshift({
+        id: newId,
+        name: name,
+        costUSD: costUSD,
+        moisture: moisture,
+        enb: enb,
+        ml: ml,
+        c2: c2,
+        stockTons: stockTons,
+        overrideCostUSD: 0,
+        tdsRef: null,
+        note: "快捷連續建檔新料"
       });
 
-      const container = document.getElementById("tdsSingleCardDisplay");
-      if (!container) return;
-
-      container.innerHTML = `
-        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <h4 class="text-base font-black text-slate-900">${tds.code}</h4>
-                <span class="text-xs px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-800">${tds.gradeType}</span>
-              </div>
-              <p class="text-xs text-slate-500 mt-0.5">原廠製造商：${tds.manufacturer} ｜ 產地：${tds.origin}</p>
-            </div>
-            <button onclick="importTdsToLibrary('${tds.id}')" class="px-3.5 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all shadow-sm flex items-center gap-1 self-start sm:self-auto">
-              <span>📥</span> 將此牌號規格導入左欄原料庫
-            </button>
-          </div>
-
-          <div>
-            <h5 class="text-xs font-bold text-slate-700 mb-2">▍ 官方技術物性典型值 (Typical Properties)</h5>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                <span class="text-[10px] text-slate-400 block font-semibold">門尼黏度 ML(1+4) @125°C</span>
-                <strong class="text-xl font-black text-blue-700">${tds.mooneyML}</strong>
-                <span class="text-[9px] text-slate-400 block">ASTM D1646</span>
-              </div>
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                <span class="text-[10px] text-slate-400 block font-semibold">乙烯含量 (Ethylene)</span>
-                <strong class="text-xl font-black text-indigo-700">${tds.ethylene}%</strong>
-                <span class="text-[9px] text-slate-400 block">ASTM D3900</span>
-              </div>
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                <span class="text-[10px] text-slate-400 block font-semibold">第三單體 (ENB)</span>
-                <strong class="text-xl font-black text-amber-600">${tds.enb}%</strong>
-                <span class="text-[9px] text-slate-400 block">ASTM D6047</span>
-              </div>
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                <span class="text-[10px] text-slate-400 block font-semibold">聚合物密度 (Density)</span>
-                <strong class="text-xl font-black text-slate-800">${tds.density}</strong>
-                <span class="text-[9px] text-slate-400 block">g/cm³ (ASTM D297)</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-              <div><span class="text-slate-400">分子結構/結晶性：</span><strong class="text-slate-700">${tds.crystallinity}</strong></div>
-              <div><span class="text-slate-400">丙烯含量 (Propylene)：</span><strong class="text-slate-700">${tds.propylene}%</strong></div>
-              <div><span class="text-slate-400">灰分 (Ash Content)：</span><span class="text-slate-600">${tds.ashContent}</span></div>
-              <div><span class="text-slate-400">揮發份 (Volatile Matter)：</span><span class="text-slate-600">${tds.volatileMatter}</span></div>
-              <div><span class="text-slate-400">法規認證：</span><span class="text-emerald-700 font-semibold">${tds.certifications}</span></div>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-              <strong class="text-slate-800 block mb-0.5">📦 包裝規格與保存注意事項：</strong>
-              <p class="text-[11px] text-slate-600 leading-relaxed">${tds.storageNotice}</p>
-            </div>
-          </div>
-
-          <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 text-xs">
-            <strong class="text-blue-900 block mb-1">🚀 官方推薦應用場景與混煉特性：</strong>
-            <p class="text-[11px] text-blue-800 leading-relaxed">${tds.applications}</p>
-          </div>
-        </div>
-      `;
-    }
-
-    function importTdsToLibrary(tdsId) {
-      const tds = TDS_DATABASE.find(t => t.id === tdsId);
-      if (!tds) return;
-
-      let existing = rawMaterials.find(m => m.name.includes(tds.code) || tds.code.includes(m.name));
-      if (existing) {
-        existing.ml = tds.mooneyML;
-        existing.c2 = tds.ethylene;
-        existing.enb = tds.enb;
-        existing.tdsRef = tds.id;
-        showToast(`已成功同步【${tds.code}】之 TDS 物性至現有原料！`);
-      } else {
-        const newId = 'mat_tds_' + Date.now();
-        rawMaterials.push({
-          id: newId,
-          name: tds.code,
-          costUSD: tds.defaultCostUSD || 1300,
-          moisture: 0.0,
-          enb: tds.enb,
-          ml: tds.mooneyML,
-          c2: tds.ethylene,
-          stockTons: 10.0,
-          overrideCostUSD: 0,
-          tdsRef: tds.id,
-          note: `原廠TDS導入・${tds.form.includes('顆粒') ? '顆粒料' : '膠塊'}`
-        });
-        showToast(`已將全新牌號【${tds.code}】導入左欄原料參數庫！`);
-      }
-
+      nameInput.value = "";
       renderMaterialsLibrary();
       renderRecipeRows();
       calculate();
+      saveUserDataToStorage();
+      showToast(`已成功將新原料【${name}】加入原料庫！`);
+      nameInput.focus();
+    }
+
+    function renderMaterialsLibrary() {
+      const container = document.getElementById("materialsLibraryContainer");
+      if (!container) return;
+      container.innerHTML = "";
+
+      rawMaterials.forEach((mat) => {
+        const dryYieldPct = Math.max(0, 100 - mat.moisture);
+        const realDryCostUSD = getMaterialRealDryCost(mat);
+        const isExpensiveThanDow = realDryCostUSD > 1300;
+
+        const card = document.createElement("div");
+        card.id = `mat_card_${mat.id}`;
+        card.className = "p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all text-xs space-y-2";
+
+        card.innerHTML = `
+          <!-- 卡片標頭：可編輯名稱 + TDS按鈕 + 刪除鈕 -->
+          <div class="flex items-center justify-between gap-1.5">
+            <input type="text" value="${mat.name}" onchange="updateMaterialName('${mat.id}', this.value)"
+              class="font-black text-slate-800 text-xs bg-slate-50/60 border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:bg-white px-1.5 py-0.5 outline-none rounded truncate flex-1" title="點擊修改原料名稱">
+            <div class="flex items-center gap-1 shrink-0">
+              ${mat.tdsRef ?
+                `<button type="button" onclick="openTdsCenterModal('${mat.tdsRef}')" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 hover:bg-blue-200 text-blue-800 transition-all border border-blue-200" title="查看原廠 TDS 規格書">
+                  📄 TDS
+                 </button>` : ''}
+              <button type="button" onclick="deleteMaterial('${mat.id}')" title="刪除此原料" class="text-slate-400 hover:text-rose-600 p-0.5 rounded transition-colors">
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- 自動計算資訊條：乾膠淨得率 % & 真實乾膠成本 ($/T) -->
+          <div class="flex items-center justify-between bg-slate-50 px-2 py-1 rounded-lg border border-slate-200/80 text-[10px]">
+            <span class="text-slate-600 font-semibold">
+              乾膠淨得率: <strong id="card_dry_yield_${mat.id}" class="text-slate-900 font-black">${dryYieldPct.toFixed(1)}%</strong>
+            </span>
+            <span class="text-slate-600 font-semibold flex items-center gap-1">
+              真實乾膠成本:
+              <strong id="card_real_cost_${mat.id}" class="px-1.5 py-0.2 rounded font-black text-[11px] ${isExpensiveThanDow ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
+                $${realDryCostUSD.toFixed(1)}/T
+              </strong>
+              <span id="card_override_tag_${mat.id}" class="${mat.overrideCostUSD > 0 ? '' : 'hidden'} text-[9px] bg-purple-100 text-purple-700 px-1 rounded font-bold">手動</span>
+            </span>
+          </div>
+
+          <!-- 第一列參數：單價、水分、ENB、門尼 ML -->
+          <div class="grid grid-cols-4 gap-1.5 text-[10px]">
+            <div>
+              <span class="text-[9px] text-slate-500 font-bold block mb-0.5">單價 ($/T)</span>
+              <input type="number" id="mat_cost_${mat.id}" value="${mat.costUSD}" step="10" oninput="updateMaterialProperty('${mat.id}', 'costUSD', this.value)"
+                class="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-1 text-right font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-500">
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-500 font-bold block mb-0.5">水分 (%)</span>
+              <input type="number" id="mat_moist_${mat.id}" value="${mat.moisture}" step="0.5" oninput="updateMaterialProperty('${mat.id}', 'moisture', this.value)"
+                class="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-1 text-right font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-500">
+            </div>
+            <div>
+              <span class="text-[9px] text-amber-800 font-bold block mb-0.5">ENB (%)</span>
+              <input type="number" id="mat_enb_${mat.id}" value="${mat.enb}" step="0.1" oninput="updateMaterialProperty('${mat.id}', 'enb', this.value)"
+                class="w-full bg-amber-50/50 border border-amber-200 rounded px-1.5 py-1 text-right font-bold text-amber-900 outline-none focus:bg-white focus:border-amber-500">
+            </div>
+            <div>
+              <span class="text-[9px] text-blue-800 font-bold block mb-0.5">門尼 ML</span>
+              <input type="number" id="mat_ml_${mat.id}" value="${mat.ml}" step="1" oninput="updateMaterialProperty('${mat.id}', 'ml', this.value)"
+                class="w-full bg-blue-50/50 border border-blue-200 rounded px-1.5 py-1 text-right font-bold text-blue-900 outline-none focus:bg-white focus:border-blue-500">
+            </div>
+          </div>
+
+          <!-- 第二列參數：乙烯 C2 (%)、現有庫存 (噸)、手動乾膠覆蓋 ($/T) -->
+          <div class="grid grid-cols-3 gap-1.5 text-[10px]">
+            <div>
+              <span class="text-[9px] text-emerald-800 font-bold block mb-0.5">乙烯 C2 (%)</span>
+              <input type="number" id="mat_c2_${mat.id}" value="${mat.c2}" step="0.5" oninput="updateMaterialProperty('${mat.id}', 'c2', this.value)"
+                class="w-full bg-emerald-50/50 border border-emerald-200 rounded px-1.5 py-1 text-right font-bold text-emerald-900 outline-none focus:bg-white focus:border-emerald-500">
+            </div>
+            <div>
+              <span class="text-[9px] text-amber-900 font-black block mb-0.5">庫存 (噸)</span>
+              <input type="number" id="mat_stock_${mat.id}" value="${mat.stockTons !== undefined ? mat.stockTons : 20.0}" step="1" min="0" oninput="updateMaterialProperty('${mat.id}', 'stockTons', this.value)"
+                class="w-full bg-amber-50 border border-amber-300 rounded px-1.5 py-1 text-right font-black text-amber-950 outline-none focus:bg-white focus:border-amber-500">
+            </div>
+            <div>
+              <span class="text-[9px] text-indigo-800 font-bold block mb-0.5">手動乾膠覆蓋</span>
+              <input type="number" id="mat_override_${mat.id}" placeholder="選填 $/T" value="${mat.overrideCostUSD > 0 ? mat.overrideCostUSD : ''}" step="10" oninput="updateMaterialProperty('${mat.id}', 'overrideCostUSD', this.value)"
+                class="w-full bg-indigo-50/50 border border-indigo-200 rounded px-1.5 py-1 text-right font-bold text-indigo-900 outline-none focus:bg-white focus:border-indigo-500">
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 修改原料數值時：僅更新 DOM 局部文字與第 2 區對應的下拉選項/物性徽章，絕不重繪導致失焦
+    function updateMaterialProperty(id, prop, val) {
+      const mat = rawMaterials.find(m => m.id === id);
+      if (!mat) return;
+
+      const numVal = parseFloat(val);
+      mat[prop] = isNaN(numVal) ? 0 : numVal;
+
+      const dryYieldPct = Math.max(0, 100 - mat.moisture);
+      const realDryCostUSD = getMaterialRealDryCost(mat);
+      const isExpensiveThanDow = realDryCostUSD > 1300;
+
+      // 1. 更新左欄卡片的淨得率與真實乾膠成本
+      const yieldEl = document.getElementById(`card_dry_yield_${mat.id}`);
+      if (yieldEl) yieldEl.innerText = `${dryYieldPct.toFixed(1)}%`;
+
+      const costBadge = document.getElementById(`card_real_cost_${mat.id}`);
+      if (costBadge) {
+        costBadge.innerText = `$${realDryCostUSD.toFixed(1)}/T`;
+        costBadge.className = `px-1.5 py-0.2 rounded font-black text-[11px] ${isExpensiveThanDow ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}`;
+      }
+
+      const tagEl = document.getElementById(`card_override_tag_${mat.id}`);
+      if (tagEl) {
+        if (mat.overrideCostUSD > 0) tagEl.classList.remove('hidden');
+        else tagEl.classList.add('hidden');
+      }
+
+      // 2. 同步更新中欄所有下拉選單選項文字與物性徽章
+      syncRecipeRowOptionAndBadges(mat.id);
+
+      // 3. 重新計算所有加權數據與定價
+      calculate();
+      saveUserDataToStorage();
+    }
+
+    function updateMaterialName(id, newName) {
+      const mat = rawMaterials.find(m => m.id === id);
+      if (!mat) return;
+      mat.name = newName.trim() || "未命名膠料";
+      syncRecipeRowOptionAndBadges(mat.id);
+      calculate();
+      saveUserDataToStorage();
+    }
+
+    function deleteMaterial(id) {
+      if (rawMaterials.length <= 1) {
+        showToast("原料庫至少需保留一種原料！");
+        return;
+      }
+      rawMaterials = rawMaterials.filter(m => m.id !== id);
+      currentRecipe = currentRecipe.filter(r => r.materialId !== id);
+      if (currentRecipe.length === 0 && rawMaterials.length > 0) {
+        currentRecipe.push({ materialId: rawMaterials[0].id, weight: 1000, ratio: 100.0 });
+      }
+      renderMaterialsLibrary();
+      renderRecipeRows();
+      calculate();
+      saveUserDataToStorage();
+      showToast("已從原料庫中移除該原料");
     }
 
     // ==========================================
-    // 模組 A：配方分類與資料庫
+    // 6. 中欄：快捷套用方案庫
     // ==========================================
+    function toggleQuickLibraryPanel() {
+      isQuickLibExpanded = !isQuickLibExpanded;
+      const body = document.getElementById("quickLibraryBody");
+      const icon = document.getElementById("quickLibToggleIcon");
+      if (isQuickLibExpanded) {
+        body.classList.remove("hidden");
+        icon.innerText = "▲";
+      } else {
+        body.classList.add("hidden");
+        icon.innerText = "▼";
+      }
+    }
 
     function renderCategoryTabs() {
       const container = document.getElementById("categoryTabsContainer");
+      if (!container) return;
       container.innerHTML = "";
 
       CATEGORIES.forEach(cat => {
@@ -1587,10 +1528,11 @@
 
     function renderRecipesList() {
       const container = document.getElementById("recipesListContainer");
+      if (!container) return;
       container.innerHTML = "";
 
-      const filtered = currentSelectedCategory === "全部" 
-        ? recipesDatabase 
+      const filtered = currentSelectedCategory === "全部"
+        ? recipesDatabase
         : recipesDatabase.filter(r => r.category === currentSelectedCategory);
 
       document.getElementById("recipeCountBadge").innerText = `共 ${recipesDatabase.length} 組紀錄`;
@@ -1603,7 +1545,7 @@
       filtered.forEach((rec) => {
         const card = document.createElement("div");
         card.className = "p-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-indigo-300 hover:shadow-sm transition-all flex flex-col justify-between text-xs";
-        
+
         const compSummary = rec.items.map(it => `${it.materialName.replace(/\(.*?\)/g, '').trim()} ${it.ratio}%`).join("+");
 
         card.innerHTML = `
@@ -1617,11 +1559,11 @@
             </div>
           </div>
           <div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
-            <button onclick="loadRecipeFromDb('${rec.id}')" class="text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-2 py-0.5 rounded transition-all shadow-sm">
+            <button type="button" onclick="loadRecipeFromDb('${rec.id}')" class="text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-2 py-0.5 rounded transition-all shadow-sm">
               套用此配方
             </button>
-            <button onclick="deleteRecipeFromDb('${rec.id}')" title="刪除此紀錄" class="text-slate-400 hover:text-rose-500 p-0.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            <button type="button" onclick="deleteRecipeFromDb('${rec.id}')" title="刪除此紀錄" class="text-slate-400 hover:text-rose-500 p-0.5 font-bold text-xs">
+              ✕
             </button>
           </div>
         `;
@@ -1634,9 +1576,9 @@
       if (!rec) return;
 
       const batchTotal = parseFloat(document.getElementById("batchTotalWeightInput").value) || 1000;
-      
+
       currentRecipe = rec.items.map(it => {
-        let mat = rawMaterials.find(m => m.name.includes(it.materialName) || it.materialName.includes(m.name));
+        let mat = rawMaterials.find(m => m.name === it.materialName || m.name.includes(it.materialName) || it.materialName.includes(m.name));
         if (!mat) mat = rawMaterials[0];
         return {
           materialId: mat.id,
@@ -1667,6 +1609,107 @@
       renderRecipesList();
       saveUserDataToStorage();
       showToast("已刪除該配方紀錄");
+    }
+
+    function handleRecipeNameChange(val) {
+      currentRecipeName = val.trim() || "未命名配方";
+      const lbl = document.getElementById("currentLoadedRecipeName");
+      if (lbl) lbl.innerText = currentRecipeName;
+      saveUserDataToStorage();
+    }
+
+    function quickSaveCurrentRecipe() {
+      const nameInput = document.getElementById("recipeNameInput");
+      const name = nameInput ? nameInput.value.trim() : currentRecipeName;
+      if (!name) {
+        showToast("請輸入配方名稱！");
+        return;
+      }
+
+      const catSelect = document.getElementById("recipeCategorySelect");
+      const category = catSelect ? catSelect.value : "橡膠用";
+
+      const items = currentRecipe.map(r => {
+        const mat = rawMaterials.find(m => m.id === r.materialId) || rawMaterials[0];
+        return {
+          materialName: mat.name,
+          ratio: parseFloat(r.ratio.toFixed(1))
+        };
+      });
+
+      const existingIdx = recipesDatabase.findIndex(r => r.name === name);
+      if (existingIdx >= 0) {
+        recipesDatabase[existingIdx].category = category;
+        recipesDatabase[existingIdx].items = items;
+        recipesDatabase[existingIdx].description = `更新於 ${new Date().toLocaleDateString()}`;
+        showToast(`已成功覆蓋更新配方【${name}】！`);
+      } else {
+        recipesDatabase.unshift({
+          id: 'rec_custom_' + Date.now(),
+          name: name,
+          category: category,
+          subCategory: category,
+          description: `建立於 ${new Date().toLocaleDateString()}`,
+          items: items
+        });
+        showToast(`已成功儲存新配方【${name}】！`);
+      }
+
+      currentRecipeName = name;
+      renderCategoryTabs();
+      renderRecipesList();
+      saveUserDataToStorage();
+    }
+
+    function cloneCurrentRecipe() {
+      const copyName = currentRecipeName + " (副本)";
+      currentRecipeName = copyName;
+      const inputEl = document.getElementById("recipeNameInput");
+      if (inputEl) inputEl.value = copyName;
+      const labelEl = document.getElementById("currentLoadedRecipeName");
+      if (labelEl) labelEl.innerText = copyName;
+      quickSaveCurrentRecipe();
+    }
+
+    function clearRecipeRows() {
+      if (rawMaterials.length === 0) return;
+      currentRecipe = [
+        { materialId: rawMaterials[0].id, weight: 1000, ratio: 100.0 }
+      ];
+      renderRecipeRows();
+      calculate();
+      saveUserDataToStorage();
+      showToast("已重設配方投料列");
+    }
+
+    function openSaveRecipeModal() {
+      const modal = document.getElementById("saveRecipeModal");
+      const previewEl = document.getElementById("modal_recipe_preview");
+
+      const previewText = currentRecipe.map(item => {
+        const mat = rawMaterials.find(m => m.id === item.materialId) || rawMaterials[0];
+        return `${mat.name} [ML:${mat.ml} / ENB:${mat.enb}% / 乙烯:${mat.c2}%]: ${item.ratio.toFixed(1)}% (${item.weight.toFixed(0)}KG)`;
+      }).join(" ｜ ");
+
+      previewEl.innerText = previewText;
+      document.getElementById("modal_recipe_name").value = currentRecipeName;
+      document.getElementById("modal_recipe_subcat").value = "壓出/膠條用";
+      document.getElementById("modal_recipe_desc").value = "";
+      modal.classList.remove("hidden");
+    }
+
+    function closeSaveRecipeModal() {
+      document.getElementById("saveRecipeModal").classList.add("hidden");
+    }
+
+    function updateSubcatOptions(cat) {
+      const subInput = document.getElementById("modal_recipe_subcat");
+      if (cat === "橡膠用") subInput.value = "壓出 / 膠條用";
+      else if (cat === "發泡用") subInput.value = "保溫管條 / 海綿發泡";
+      else if (cat === "無特殊要求") subInput.value = "去庫存 / 經濟型配方";
+      else if (cat === "ML要求") subInput.value = "高門尼黏度 ML 65+";
+      else if (cat === "ENB要求") subInput.value = "高ENB快速硫化";
+      else subInput.value = "通用客製";
     }
 
     function confirmSaveNewRecipe() {
@@ -1704,14 +1747,19 @@
     }
 
     function exportRecipesJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(recipesDatabase, null, 2));
+      const backupPayload = {
+        exportedAt: new Date().toISOString(),
+        rawMaterials: rawMaterials,
+        recipesDatabase: recipesDatabase
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `彥泰企業_EPDM配方資料庫備份_${new Date().toISOString().slice(0,10)}.json`);
+      downloadAnchor.setAttribute("download", `TIT彥泰_EPDM原料與配方備份_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      showToast("已成功匯出配方庫備份檔案！");
+      showToast("已成功匯出完整原料與配方備份檔！");
     }
 
     function importRecipesJSON(event) {
@@ -1726,7 +1774,20 @@
             recipesDatabase = parsed;
             renderCategoryTabs();
             renderRecipesList();
+            saveUserDataToStorage();
             showToast(`成功匯入 ${parsed.length} 組配方紀錄！`);
+          } else if (parsed && Array.isArray(parsed.recipesDatabase)) {
+            if (Array.isArray(parsed.rawMaterials) && parsed.rawMaterials.length > 0) {
+              rawMaterials = parsed.rawMaterials;
+              renderMaterialsLibrary();
+            }
+            recipesDatabase = parsed.recipesDatabase;
+            renderCategoryTabs();
+            renderRecipesList();
+            renderRecipeRows();
+            calculate();
+            saveUserDataToStorage();
+            showToast(`成功還原 ${rawMaterials.length} 項原料與 ${recipesDatabase.length} 組配方！`);
           } else {
             showToast("匯入檔案格式不相符！");
           }
@@ -1739,432 +1800,109 @@
     }
 
     // ==========================================
-    // 左欄：原料基礎參數庫 (含庫存數量輸入)
+    // 7. 中欄核心：廠務生產配方填寫 (ML / ENB / 乙烯 清晰標示 + 無失焦鎖定)
     // ==========================================
+    function formatOptionLabel(m) {
+      return `${m.name}｜ML:${m.ml}・ENB:${Number(m.enb).toFixed(1)}%・乙烯:${m.c2}%`;
+    }
 
-    function renderMaterialsLibrary() {
-      const container = document.getElementById("materialsLibraryContainer");
-      container.innerHTML = "";
+    function buildMaterialBadgesHTML(mat) {
+      const realDry = getMaterialRealDryCost(mat);
+      const moistureBadgeClass = mat.moisture > 20
+        ? "bg-rose-100 text-rose-800 border-rose-200"
+        : "bg-slate-100 text-slate-700 border-slate-200";
 
-      rawMaterials.forEach((mat) => {
-        const dryYield = (100 - mat.moisture) / 100;
-        let realDryCostUSD = (mat.overrideCostUSD && mat.overrideCostUSD > 0) 
-          ? mat.overrideCostUSD 
-          : (dryYield > 0 ? (mat.costUSD / dryYield) : 0);
+      return `
+        <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-100 text-blue-800 border border-blue-200">
+          ML: ${mat.ml}
+        </span>
+        <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">
+          ENB: ${Number(mat.enb).toFixed(1)}%
+        </span>
+        <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+          乙烯: ${mat.c2}%
+        </span>
+        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${moistureBadgeClass}">
+          水分: ${mat.moisture}% · 乾膠: $${Math.round(realDry).toLocaleString()}
+        </span>
+      `;
+    }
 
-        const isExpensiveThanDow = realDryCostUSD > 1300;
+    // 同步更新中欄所有下拉選單與物性徽章 (不重建整個表格，保留輸入焦點)
+    function syncRecipeRowOptionAndBadges(changedMatId) {
+      const mat = rawMaterials.find(m => m.id === changedMatId);
+      if (!mat) return;
 
-        const card = document.createElement("div");
-        card.id = `mat_card_${mat.id}`;
-        card.className = "p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all text-xs";
-        
-        card.innerHTML = `
-          <div class="flex items-center justify-between gap-1 mb-1.5">
-            <div class="flex items-center gap-1 flex-1 min-w-0">
-              <input type="text" value="${mat.name}" onchange="updateMaterialName('${mat.id}', this.value)" 
-                class="font-black text-slate-800 text-xs bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:bg-white px-1 py-0.5 outline-none rounded truncate w-full">
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              ${mat.tdsRef ? 
-                `<button type="button" onclick="openTdsCenterModal('${mat.tdsRef}')" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 hover:bg-blue-200 text-blue-800 transition-all border border-blue-200 flex items-center gap-0.5" title="點擊查看原廠TDS規格書">
-                  <span>📄</span>TDS
-                 </button>` : ''}
-              <strong id="card_real_cost_${mat.id}" class="px-1.5 py-0.5 rounded font-black text-[11px] ${isExpensiveThanDow ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-blue-50 text-blue-700 border border-blue-100'}">
-                $${realDryCostUSD.toFixed(1)}
-              </strong>
-              <span id="card_override_tag_${mat.id}" class="${mat.overrideCostUSD > 0 ? '' : 'hidden'} text-[9px] bg-purple-100 text-purple-700 px-1 py-0.2 rounded font-bold">手動</span>
-              <button onclick="deleteMaterial('${mat.id}')" title="刪除此原料" class="text-slate-400 hover:text-rose-600 p-0.5 rounded">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- 物性、價格與庫存網格 (6列) -->
-          <div class="grid grid-cols-6 gap-1 text-[10px]">
-            <div>
-              <span class="text-[8px] text-slate-400 block mb-0.5 truncate">單價($/噸)</span>
-              <input type="number" id="mat_cost_${mat.id}" value="${mat.costUSD}" step="10" oninput="updateMaterialProperty('${mat.id}', 'costUSD', this.value)" 
-                class="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 text-right font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-500">
-            </div>
-            <div>
-              <span class="text-[8px] text-slate-400 block mb-0.5 truncate">水分(%)</span>
-              <input type="number" id="mat_moist_${mat.id}" value="${mat.moisture}" step="0.5" oninput="updateMaterialProperty('${mat.id}', 'moisture', this.value)" 
-                class="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 text-right font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-500">
-            </div>
-            <div>
-              <span class="text-[8px] text-slate-400 block mb-0.5 truncate">ENB(%)</span>
-              <input type="number" id="mat_enb_${mat.id}" value="${mat.enb}" step="0.1" oninput="updateMaterialProperty('${mat.id}', 'enb', this.value)" 
-                class="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 text-right font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-500">
-            </div>
-            <div>
-              <span class="text-[8px] text-blue-700 block mb-0.5 truncate font-bold">門尼(ML)</span>
-              <input type="number" id="mat_ml_${mat.id}" value="${mat.ml || 60}" step="1" oninput="updateMaterialProperty('${mat.id}', 'ml', this.value)" 
-                class="w-full bg-blue-50/50 border border-blue-200 rounded px-1 py-1 text-right font-bold text-blue-900 outline-none focus:bg-white focus:border-blue-500">
-            </div>
-            <!-- 庫存數量輸入格 -->
-            <div>
-              <span class="text-[8px] text-amber-700 block mb-0.5 truncate font-black">庫存(噸)</span>
-              <input type="number" id="mat_stock_${mat.id}" value="${mat.stockTons !== undefined ? mat.stockTons : 20.0}" step="1" min="0" oninput="updateMaterialProperty('${mat.id}', 'stockTons', this.value)" 
-                class="w-full bg-amber-50/70 border border-amber-300 rounded px-1 py-1 text-right font-black text-amber-900 outline-none focus:bg-white focus:border-amber-500">
-            </div>
-            <div>
-              <span class="text-[8px] text-indigo-700 block mb-0.5 truncate font-bold">乾膠覆蓋</span>
-              <input type="number" id="mat_override_${mat.id}" placeholder="自填" value="${mat.overrideCostUSD > 0 ? mat.overrideCostUSD : ''}" step="10" oninput="updateMaterialProperty('${mat.id}', 'overrideCostUSD', this.value)" 
-                class="w-full bg-indigo-50/50 border border-indigo-200 rounded px-1 py-1 text-right font-bold text-indigo-900 outline-none focus:bg-white focus:border-indigo-500">
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
+      currentRecipe.forEach((item, idx) => {
+        const sel = document.getElementById(`rec_select_${idx}`);
+        if (sel) {
+          const opt = Array.from(sel.options).find(o => o.value === changedMatId);
+          if (opt) opt.text = formatOptionLabel(mat);
+        }
+        if (item.materialId === changedMatId) {
+          const badgeBox = document.getElementById(`row_props_badges_${idx}`);
+          if (badgeBox) badgeBox.innerHTML = buildMaterialBadgesHTML(mat);
+        }
       });
     }
-
-    function updateMaterialProperty(id, prop, val) {
-      const mat = rawMaterials.find(m => m.id === id);
-      if (!mat) return;
-      
-      const numVal = parseFloat(val);
-      mat[prop] = isNaN(numVal) ? 0 : numVal;
-
-      const dryYield = (100 - mat.moisture) / 100;
-      let realDryCostUSD = (mat.overrideCostUSD && mat.overrideCostUSD > 0) 
-        ? mat.overrideCostUSD 
-        : (dryYield > 0 ? (mat.costUSD / dryYield) : 0);
-
-      const isExpensiveThanDow = realDryCostUSD > 1300;
-
-      const costBadge = document.getElementById(`card_real_cost_${mat.id}`);
-      if (costBadge) {
-        costBadge.innerText = `$${realDryCostUSD.toFixed(1)}`;
-        costBadge.className = `px-1.5 py-0.5 rounded font-black text-[11px] ${isExpensiveThanDow ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-blue-50 text-blue-700 border border-blue-100'}`;
-      }
-
-      const tagEl = document.getElementById(`card_override_tag_${mat.id}`);
-      if (tagEl) {
-        if (mat.overrideCostUSD > 0) tagEl.classList.remove('hidden');
-        else tagEl.classList.add('hidden');
-      }
-
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function updateMaterialName(id, newName) {
-      const mat = rawMaterials.find(m => m.id === id);
-      if (!mat) return;
-      mat.name = newName.trim() || "未命名膠料";
-      renderRecipeRows();
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function deleteMaterial(id) {
-      if (rawMaterials.length <= 1) {
-        showToast("原料庫至少需保留一種原料！");
-        return;
-      }
-      rawMaterials = rawMaterials.filter(m => m.id !== id);
-      currentRecipe = currentRecipe.filter(r => r.materialId !== id);
-      if (currentRecipe.length === 0 && rawMaterials.length > 0) {
-        currentRecipe.push({ materialId: rawMaterials[0].id, weight: 1000, ratio: 100.0 });
-      }
-      renderMaterialsLibrary();
-      renderRecipeRows();
-      calculate();
-      saveUserDataToStorage();
-      showToast("已從原料庫中移除該原料");
-    }
-
-    function saveNewMaterial() {
-      const name = document.getElementById("new_mat_name").value.trim() || "自訂新膠料";
-      const costUSD = parseFloat(document.getElementById("new_mat_cost").value) || 1000;
-      const moisture = parseFloat(document.getElementById("new_mat_moisture").value) || 0;
-      const enb = parseFloat(document.getElementById("new_mat_enb").value) || 0;
-      const ml = parseFloat(document.getElementById("new_mat_ml").value) || 64;
-      const c2 = parseFloat(document.getElementById("new_mat_c2").value) || 68;
-      const stockTons = parseFloat(document.getElementById("new_mat_stock").value) || 20.0;
-      const overrideCostUSD = parseFloat(document.getElementById("new_mat_override").value) || 0;
-      const note = document.getElementById("new_mat_note").value.trim() || "自訂添加";
-
-      let matchedTds = TDS_DATABASE.find(t => name.toLowerCase().includes(t.code.toLowerCase()) || t.code.toLowerCase().includes(name.toLowerCase()));
-
-      const newId = 'mat_' + Date.now();
-      rawMaterials.unshift({ 
-        id: newId, 
-        name, 
-        costUSD, 
-        moisture, 
-        enb, 
-        ml, 
-        c2, 
-        stockTons,
-        overrideCostUSD, 
-        tdsRef: matchedTds ? matchedTds.id : null,
-        note 
-      });
-
-      closeAddMaterialModal();
-      renderMaterialsLibrary();
-      renderRecipeRows();
-      calculate();
-      saveUserDataToStorage();
-      showToast(`已成功新增「${name}」至原料庫！`);
-    }
-
-    // ==========================================
-    // 中欄：廠務生產配方填寫 (DOM節點鎖定無卡頓)
-    // ==========================================
 
     function renderRecipeRows() {
       const container = document.getElementById("recipeRowsContainer");
+      if (!container) return;
       container.innerHTML = "";
 
       currentRecipe.forEach((item, idx) => {
+        const selectedMat = rawMaterials.find(m => m.id === item.materialId) || rawMaterials[0];
+        item.materialId = selectedMat.id;
+
         const row = document.createElement("div");
         row.id = `recipe_row_${idx}`;
-        row.className = "grid grid-cols-12 items-center py-1.5 px-2 text-xs hover:bg-slate-50 transition-colors";
+        row.className = "grid grid-cols-12 items-center py-2 px-2 text-xs hover:bg-slate-50/90 transition-colors";
 
-        let optionsHTML = rawMaterials.map(m => {
-          const dryYield = (100 - m.moisture) / 100;
-          const realDry = (m.overrideCostUSD && m.overrideCostUSD > 0) ? m.overrideCostUSD : (dryYield > 0 ? (m.costUSD / dryYield) : m.costUSD);
-          const brief = `${m.name} (水${m.moisture}% · $${Math.round(realDry)})`;
-          return `<option value="${m.id}" ${m.id === item.materialId ? 'selected' : ''}>${brief}</option>`;
-        }).join("");
-
-        row.innerHTML = `
-          <!-- 原料下拉選擇 (顯示名稱、水分與真實乾膠單價) -->
-          <div class="col-span-5 pr-1">
-            <select onchange="updateRecipeMaterial(${idx}, this.value)" 
-              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-1.5 py-1 text-[11px] font-bold text-slate-800 outline-none focus:border-blue-500 truncate" title="選取原料品項">
-              ${optionsHTML}
-            </select>
-          </div>
-
-          <!-- 投料重量 (KG) -->
-          <div class="col-span-3 px-1">
-            <div class="relative w-full">
-              <input type="number" id="rec_weight_${idx}" value="${item.weight.toFixed(1)}" min="0" step="1" 
-                oninput="handleWeightChange(${idx}, this.value)" 
-                class="w-full ${inputMode === 'weight' ? 'bg-white border-blue-400 font-black text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500'} border rounded-lg pr-5 pl-1.5 py-1 text-right text-xs outline-none focus:border-blue-500">
-              <span class="absolute right-1 top-1 text-[9px] text-slate-400 font-bold">KG</span>
-            </div>
-          </div>
-
-          <!-- 投料比例 (%) -->
-          <div class="col-span-2 px-1">
-            <div class="relative w-full">
-              <input type="number" id="rec_ratio_${idx}" value="${item.ratio.toFixed(1)}" min="0" max="100" step="0.5" 
-                oninput="handleRatioChange(${idx}, this.value)" 
-                class="w-full ${inputMode === 'percent' ? 'bg-white border-blue-400 font-black text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500'} border rounded-lg pr-4 pl-1 py-1 text-right text-xs outline-none focus:border-blue-500">
-              <span class="absolute right-1 top-1 text-[9px] text-slate-400 font-bold">%</span>
-            </div>
-          </div>
-
-          <!-- 乾膠實質佔比 -->
-          <div class="col-span-1 text-right font-black text-slate-700 text-xs" id="dry_share_${idx}">
-            0.0%
-          </div>
-
-          <!-- 刪除鈕 -->
-          <div class="col-span-1 text-center">
-            <button onclick="removeRecipeRow(${idx})" class="text-slate-300 hover:text-rose-500 font-bold text-sm transition-colors" title="刪除此投料項目">✕</button>
-          </div>
-        `;
-
-        container.appendChild(row);
-      });
-    }
-
-    function handleWeightChange(idx, val) {
-      const num = parseFloat(val);
-      currentRecipe[idx].weight = isNaN(num) ? 0 : num;
-
-      let totalW = currentRecipe.reduce((sum, item) => sum + item.weight, 0);
-      currentRecipe.forEach((item, i) => {
-        item.ratio = totalW > 0 ? (item.weight / totalW) * 100 : 0;
-        const ratioInput = document.getElementById(`rec_ratio_${i}`);
-        if (ratioInput) ratioInput.value = item.ratio.toFixed(1);
-      });
-
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function handleRatioChange(idx, val) {
-      const num = parseFloat(val);
-      currentRecipe[idx].ratio = isNaN(num) ? 0 : num;
-
-      const batchTotal = parseFloat(document.getElementById("batchTotalWeightInput").value) || 1000;
-      currentRecipe.forEach((item, i) => {
-        item.weight = (item.ratio / 100) * batchTotal;
-        const weightInput = document.getElementById(`rec_weight_${i}`);
-        if (weightInput) weightInput.value = item.weight.toFixed(1);
-      });
-
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function handleBatchTotalChange() {
-      const batchTotal = parseFloat(document.getElementById("batchTotalWeightInput").value) || 1000;
-      if (inputMode === 'percent') {
-        currentRecipe.forEach((item, i) => {
-          item.weight = (item.ratio / 100) * batchTotal;
-          const weightInput = document.getElementById(`rec_weight_${i}`);
-          if (weightInput) weightInput.value = item.weight.toFixed(1);
-        });
-      }
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function addRecipeRow() {
-      currentRecipe.push({
-        materialId: rawMaterials[0].id,
-        weight: 100,
-        ratio: 10.0
-      });
-      renderRecipeRows();
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function removeRecipeRow(idx) {
-      if (currentRecipe.length <= 1) {
-        showToast("配方中至少需保留一項投料！");
-        return;
-      }
-      currentRecipe.splice(idx, 1);
-      renderRecipeRows();
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function updateRecipeMaterial(idx, newMatId) {
-      currentRecipe[idx].materialId = newMatId;
-      calculate();
-      saveUserDataToStorage();
-    }
-
-    function updateMaterialName(id, newName) {
-      const mat = rawMaterials.find(m => m.id === id);
-      if (!mat) return;
-      mat.name = newName.trim() || "未命名膠料";
-      renderRecipeRows();
-      calculate();
-    }
-
-    function deleteMaterial(id) {
-      if (rawMaterials.length <= 1) {
-        showToast("原料庫至少需保留一種原料！");
-        return;
-      }
-      rawMaterials = rawMaterials.filter(m => m.id !== id);
-      currentRecipe = currentRecipe.filter(r => r.materialId !== id);
-      if (currentRecipe.length === 0 && rawMaterials.length > 0) {
-        currentRecipe.push({ materialId: rawMaterials[0].id, weight: 1000, ratio: 100.0 });
-      }
-      renderMaterialsLibrary();
-      renderRecipeRows();
-      calculate();
-      showToast("已從原料庫中移除該原料");
-    }
-
-    function openAddMaterialModal() {
-      document.getElementById("addMaterialModal").classList.remove("hidden");
-    }
-
-    function closeAddMaterialModal() {
-      document.getElementById("addMaterialModal").classList.add("hidden");
-    }
-
-    function saveNewMaterial() {
-      const name = document.getElementById("new_mat_name").value.trim() || "自訂新膠料";
-      const costUSD = parseFloat(document.getElementById("new_mat_cost").value) || 1000;
-      const moisture = parseFloat(document.getElementById("new_mat_moisture").value) || 0;
-      const enb = parseFloat(document.getElementById("new_mat_enb").value) || 0;
-      const ml = parseFloat(document.getElementById("new_mat_ml").value) || 64;
-      const c2 = parseFloat(document.getElementById("new_mat_c2").value) || 68;
-      const stockTons = parseFloat(document.getElementById("new_mat_stock").value) || 20.0;
-      const overrideCostUSD = parseFloat(document.getElementById("new_mat_override").value) || 0;
-      const note = document.getElementById("new_mat_note").value.trim() || "自訂添加";
-
-      let matchedTds = TDS_DATABASE.find(t => name.toLowerCase().includes(t.code.toLowerCase()) || t.code.toLowerCase().includes(name.toLowerCase()));
-
-      const newId = 'mat_' + Date.now();
-      rawMaterials.push({ 
-        id: newId, 
-        name, 
-        costUSD, 
-        moisture, 
-        enb, 
-        ml, 
-        c2, 
-        stockTons,
-        overrideCostUSD, 
-        tdsRef: matchedTds ? matchedTds.id : null,
-        note 
-      });
-
-      closeAddMaterialModal();
-      renderMaterialsLibrary();
-      renderRecipeRows();
-      showToast(`已成功新增「${name}」至原料庫！`);
-    }
-
-    // ==========================================
-    // 中欄：廠務生產配方填寫 (DOM節點鎖定無卡頓)
-    // ==========================================
-
-    function renderRecipeRows() {
-      const container = document.getElementById("recipeRowsContainer");
-      container.innerHTML = "";
-
-      currentRecipe.forEach((item, idx) => {
-        const row = document.createElement("div");
-        row.id = `recipe_row_${idx}`;
-        row.className = "grid grid-cols-12 items-center py-1.5 px-2 text-xs hover:bg-slate-50 transition-colors";
-
-        let optionsHTML = rawMaterials.map(m => 
-          `<option value="${m.id}" ${m.id === item.materialId ? 'selected' : ''}>${m.name}</option>`
+        const optionsHTML = rawMaterials.map(m =>
+          `<option value="${m.id}" ${m.id === selectedMat.id ? 'selected' : ''}>${formatOptionLabel(m)}</option>`
         ).join("");
 
         row.innerHTML = `
-          <!-- 原料下拉選擇 -->
-          <div class="col-span-4 pr-1">
-            <select onchange="updateRecipeMaterial(${idx}, this.value)" 
-              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-1.5 py-1 text-[11px] font-bold text-slate-800 outline-none focus:border-blue-500">
+          <!-- 原料下拉選擇 + 彩色物性徽章 (ML / ENB / 乙烯 / 水分與乾膠) -->
+          <div class="col-span-6 pr-1.5 space-y-1">
+            <select id="rec_select_${idx}" onchange="updateRecipeMaterial(${idx}, this.value)"
+              class="w-full bg-slate-50 border border-slate-300 rounded-lg px-1.5 py-1 text-[11px] font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white" title="選取原料品項">
               ${optionsHTML}
             </select>
+            <div id="row_props_badges_${idx}" class="flex flex-wrap items-center gap-1">
+              ${buildMaterialBadgesHTML(selectedMat)}
+            </div>
           </div>
 
           <!-- 投料重量 (KG) -->
-          <div class="col-span-3 px-1">
+          <div class="col-span-2 px-0.5">
             <div class="relative w-full">
-              <input type="number" id="rec_weight_${idx}" value="${item.weight.toFixed(1)}" min="0" step="1" 
-                oninput="handleWeightChange(${idx}, this.value)" 
-                class="w-full ${inputMode === 'weight' ? 'bg-white border-blue-400 font-black text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500'} border rounded-lg pr-5 pl-1.5 py-1 text-right text-xs outline-none focus:border-blue-500">
-              <span class="absolute right-1 top-1 text-[9px] text-slate-400 font-bold">KG</span>
+              <input type="number" id="rec_weight_${idx}" value="${item.weight.toFixed(1)}" min="0" step="1"
+                oninput="handleWeightChange(${idx}, this.value)"
+                class="w-full ${inputMode === 'weight' ? 'bg-white border-blue-400 font-black text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500'} border rounded-lg pr-5 pl-1 py-1 text-right text-xs outline-none focus:border-blue-500">
+              <span class="absolute right-1 top-1.5 text-[8px] text-slate-400 font-bold">KG</span>
             </div>
           </div>
 
           <!-- 投料比例 (%) -->
-          <div class="col-span-2 px-1">
+          <div class="col-span-2 px-0.5">
             <div class="relative w-full">
-              <input type="number" id="rec_ratio_${idx}" value="${item.ratio.toFixed(1)}" min="0" max="100" step="0.5" 
-                oninput="handleRatioChange(${idx}, this.value)" 
-                class="w-full ${inputMode === 'percent' ? 'bg-white border-blue-400 font-black text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500'} border rounded-lg pr-4 pl-1 py-1 text-right text-xs outline-none focus:border-blue-500">
-              <span class="absolute right-1 top-1 text-[9px] text-slate-400 font-bold">%</span>
+              <input type="number" id="rec_ratio_${idx}" value="${item.ratio.toFixed(1)}" min="0" max="100" step="0.5"
+                oninput="handleRatioChange(${idx}, this.value)"
+                class="w-full ${inputMode === 'percent' ? 'bg-white border-blue-400 font-black text-blue-900 shadow-sm' : 'bg-slate-100 text-slate-500'} border rounded-lg pr-3.5 pl-1 py-1 text-right text-xs outline-none focus:border-blue-500">
+              <span class="absolute right-1 top-1.5 text-[8px] text-slate-400 font-bold">%</span>
             </div>
           </div>
 
           <!-- 乾膠實質佔比 -->
-          <div class="col-span-2 text-right font-black text-slate-700 text-xs" id="dry_share_${idx}">
+          <div class="col-span-1 text-right font-black text-slate-700 text-[11px]" id="dry_share_${idx}">
             0.0%
           </div>
 
           <!-- 刪除鈕 -->
           <div class="col-span-1 text-center">
-            <button onclick="removeRecipeRow(${idx})" class="text-slate-300 hover:text-rose-500 font-bold text-sm transition-colors">✕</button>
+            <button type="button" onclick="removeRecipeRow(${idx})" class="text-slate-300 hover:text-rose-500 font-bold text-sm transition-colors" title="刪除此投料項目">✕</button>
           </div>
         `;
 
@@ -2172,11 +1910,12 @@
       });
     }
 
+    // 鍵盤連續輸入重量時：絕不重繪 DOM，只更新其他列的比例數字與即時計算
     function handleWeightChange(idx, val) {
       const num = parseFloat(val);
       currentRecipe[idx].weight = isNaN(num) ? 0 : num;
 
-      let totalW = currentRecipe.reduce((sum, item) => sum + item.weight, 0);
+      const totalW = currentRecipe.reduce((sum, item) => sum + item.weight, 0);
       currentRecipe.forEach((item, i) => {
         item.ratio = totalW > 0 ? (item.weight / totalW) * 100 : 0;
         const ratioInput = document.getElementById(`rec_ratio_${i}`);
@@ -2184,8 +1923,10 @@
       });
 
       calculate();
+      saveUserDataToStorage();
     }
 
+    // 鍵盤連續輸入比例時：絕不重繪 DOM，只更新其他列的重量數字與即時計算
     function handleRatioChange(idx, val) {
       const num = parseFloat(val);
       currentRecipe[idx].ratio = isNaN(num) ? 0 : num;
@@ -2198,6 +1939,7 @@
       });
 
       calculate();
+      saveUserDataToStorage();
     }
 
     function handleBatchTotalChange() {
@@ -2210,6 +1952,7 @@
         });
       }
       calculate();
+      saveUserDataToStorage();
     }
 
     function switchInputMode(mode) {
@@ -2220,11 +1963,11 @@
       if (mode === 'weight') {
         btnW.className = "px-2.5 py-1 text-[11px] font-bold rounded-md transition-all bg-blue-600 text-white shadow-sm";
         btnP.className = "px-2.5 py-1 text-[11px] font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
-        showToast("切換為：依秤重 (KG) 模式");
+        showToast("已切換為：依重量 (KG) 模式");
       } else {
         btnP.className = "px-2.5 py-1 text-[11px] font-bold rounded-md transition-all bg-blue-600 text-white shadow-sm";
         btnW.className = "px-2.5 py-1 text-[11px] font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
-        showToast("切換為：依比例 (%) 模式");
+        showToast("已切換為：依比例 (%) 模式");
       }
 
       renderRecipeRows();
@@ -2239,6 +1982,7 @@
       });
       renderRecipeRows();
       calculate();
+      saveUserDataToStorage();
     }
 
     function removeRecipeRow(idx) {
@@ -2249,22 +1993,28 @@
       currentRecipe.splice(idx, 1);
       renderRecipeRows();
       calculate();
+      saveUserDataToStorage();
     }
 
     function updateRecipeMaterial(idx, newMatId) {
       currentRecipe[idx].materialId = newMatId;
+      const mat = rawMaterials.find(m => m.id === newMatId) || rawMaterials[0];
+      const badgeBox = document.getElementById(`row_props_badges_${idx}`);
+      if (badgeBox) {
+        badgeBox.innerHTML = buildMaterialBadgesHTML(mat);
+      }
       calculate();
+      saveUserDataToStorage();
     }
 
     // ==========================================
-    // 右欄：生成數據、定價 ＆ 庫存排程引擎
+    // 8. 右欄：核心物理特性、定價與庫存貨櫃排程計算
     // ==========================================
-
     function setMargin(margin) {
       targetMarginPercent = margin;
       document.getElementById("marginDisplay").innerText = margin + '%';
       document.getElementById("customMarginInput").value = '';
-      
+
       const btns = document.querySelectorAll('.margin-btn');
       btns.forEach(btn => {
         if (btn.innerText.includes(margin + '%')) {
@@ -2318,32 +2068,35 @@
       }
 
       let totalWetWeight = 0;
-      let totalWetCostUSD = 0;
+      let totalDryCostBatchUSD = 0;
       let totalDryWeight = 0;
       let totalRatio = 0;
       let odorRatio = 0;
 
-      // 第一輪：統計投料重量、乾重、氣味
+      // 第一輪：統計投料重量、乾重、乾膠成本與氣味原料比例
       currentRecipe.forEach((item) => {
         const mat = rawMaterials.find(m => m.id === item.materialId) || rawMaterials[0];
-        const dryYield = (100 - mat.moisture) / 100;
+        const dryYield = Math.max(0, (100 - mat.moisture) / 100);
+        const realDryCostUSD = getMaterialRealDryCost(mat);
 
         totalWetWeight += item.weight;
         totalRatio += item.ratio;
-        totalWetCostUSD += (item.weight / 1000) * mat.costUSD;
 
         const dryWeight = item.weight * dryYield;
         item._dryWeight = dryWeight;
         totalDryWeight += dryWeight;
 
-        if (mat.name.includes("LION 廢料")) {
+        // 依據實際乾重乘以該原料之真實乾膠成本(含手動覆蓋)
+        totalDryCostBatchUSD += (dryWeight / 1000) * realDryCostUSD;
+
+        if (mat.name.includes("LION 廢料") || mat.name.includes("異味")) {
           odorRatio += item.ratio;
         }
       });
 
-      // 檢核投料百分比
+      // 檢核投料百分比總和
       const statusBadge = document.getElementById("recipeStatusBadge");
-      const isRatioOk = Math.abs(totalRatio - 100) < 0.1;
+      const isRatioOk = Math.abs(totalRatio - 100) < 0.15;
       statusBadge.innerText = `合計 ${totalRatio.toFixed(1)}% ${isRatioOk ? '合格 ✓' : '未滿 100%'}`;
       if (isRatioOk) {
         statusBadge.className = "text-[11px] px-2 py-0.5 rounded-md font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
@@ -2351,7 +2104,7 @@
         statusBadge.className = "text-[11px] px-2 py-0.5 rounded-md font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30";
       }
 
-      // 第二輪：純乾膠實質佔比與加權物性
+      // 第二輪：計算各料乾燥後實質佔比與加權 ML / ENB / 乙烯 C2
       let finalENB = 0;
       let finalML = 0;
       let finalC2 = 0;
@@ -2364,29 +2117,29 @@
           dryShareEl.innerText = (dryShare * 100).toFixed(1) + '%';
         }
         finalENB += dryShare * (mat.enb / 100);
-        finalML += dryShare * (mat.ml || 60);
-        finalC2 += dryShare * (mat.c2 || 68);
+        finalML  += dryShare * (mat.ml || 0);
+        finalC2  += dryShare * (mat.c2 || 0);
       });
 
-      // 綜合出膠率與脫水量
+      // 綜合乾膠淨得率與脫水量
       const overallDryYield = totalWetWeight > 0 ? (totalDryWeight / totalWetWeight) : 0;
       const waterLossPerTon = Math.max(0, (1 - overallDryYield) * 1000);
 
-      // 階段一：純原料乾膠成本
-      const dryRawCostUSD_perTon = totalDryWeight > 0 ? (totalWetCostUSD / (totalDryWeight / 1000)) : 0;
+      // 階段一：每噸純乾膠原料成本
+      const dryRawCostUSD_perTon = totalDryWeight > 0 ? (totalDryCostBatchUSD / (totalDryWeight / 1000)) : 0;
       const dryRawCostNTD_perTon = dryRawCostUSD_perTon * exchangeRate;
       const dryRawCostNTD_perKG  = dryRawCostNTD_perTon / 1000;
 
-      // 階段二：工廠出廠總成本
-      const netYieldFactor = (100 - processLossPct) / 100;
-      const effectiveRawCostNTD_perTon = netYieldFactor > 0 ? (dryRawCostNTD_perTon / netYieldFactor) : dryRawCostNTD_perTon;
+      // 階段二：工廠出廠總製造成本 (納入機械損耗率、加工費、管銷)
+      const netYieldFactor = Math.max(0.01, (100 - processLossPct) / 100);
+      const effectiveRawCostNTD_perTon = dryRawCostNTD_perTon / netYieldFactor;
       const totalFactoryCostNTD_perTon = effectiveRawCostNTD_perTon + processFeeNTD + overheadNTD;
       const totalFactoryCostNTD_perKG  = totalFactoryCostNTD_perTon / 1000;
       const totalFactoryCostUSD_perTon = totalFactoryCostNTD_perTon / exchangeRate;
 
       // 階段三：業務定價
-      const marginFactor = (100 - targetMarginPercent) / 100;
-      const sellingPriceNTD_perTon = marginFactor > 0 ? (totalFactoryCostNTD_perTon / marginFactor) : totalFactoryCostNTD_perTon;
+      const marginFactor = Math.max(0.01, (100 - targetMarginPercent) / 100);
+      const sellingPriceNTD_perTon = totalFactoryCostNTD_perTon / marginFactor;
       const sellingPriceNTD_perKG  = sellingPriceNTD_perTon / 1000;
       const sellingPriceUSD_perTon = sellingPriceNTD_perTon / exchangeRate;
 
@@ -2395,13 +2148,12 @@
       const batchTotalGrossProfit = (finishedBatchWeightKG / 1000) * grossProfitNTD_perTon;
 
       // ==========================================
-      // 【模組 4 核心演算】：庫存短板、貨櫃量與排程天數
+      // 階段四：木桶短板限制、貨櫃數量與交期排程預估
       // ==========================================
       let bottleneckMaterial = null;
       let minWetTonsPossible = Infinity;
-      let recipeMaterialsMap = {};
+      const recipeMaterialsMap = {};
 
-      // 統計配方中各原料的投料比率（合計歸一）
       currentRecipe.forEach(item => {
         if (!recipeMaterialsMap[item.materialId]) {
           recipeMaterialsMap[item.materialId] = 0;
@@ -2409,14 +2161,12 @@
         recipeMaterialsMap[item.materialId] += (item.ratio / 100);
       });
 
-      // 尋找木桶效應中最小支援濕料總量 minWetTons
       Object.keys(recipeMaterialsMap).forEach(matId => {
         const ratioFrac = recipeMaterialsMap[matId];
         if (ratioFrac > 0) {
           const mat = rawMaterials.find(m => m.id === matId);
           const stock = (mat && mat.stockTons !== undefined) ? mat.stockTons : 0;
           const possibleWetTons = stock / ratioFrac;
-
           if (possibleWetTons < minWetTonsPossible) {
             minWetTonsPossible = possibleWetTons;
             bottleneckMaterial = mat;
@@ -2428,30 +2178,31 @@
         minWetTonsPossible = 0;
       }
 
-      // 最大可產出的純乾膠成品噸數 (考慮出膠率與機械損耗)
       const maxFinishedDryTons = minWetTonsPossible * overallDryYield * netYieldFactor;
       const containerCount = containerCapTons > 0 ? (maxFinishedDryTons / containerCapTons) : 0;
       const fullContainers = Math.floor(containerCount);
-      const remainingTons = maxFinishedDryTons - (fullContainers * containerCapTons);
-
-      // 排程工期交期預估推算
+      const remainingTons = Math.max(0, maxFinishedDryTons - (fullContainers * containerCapTons));
       const scheduleResult = calculateScheduleDuration(maxFinishedDryTons, scheduleMode, customDailyCap);
 
-      // 渲染各原料庫存消耗明細表
       renderInventoryUsageTable(minWetTonsPossible, recipeMaterialsMap);
 
-      // ===== 更新介面呈現 =====
-      document.getElementById("tableTotalWeight").innerText = `${totalWetWeight.toFixed(1)} KG`;
-      document.getElementById("tableTotalRatio").innerText = `${totalRatio.toFixed(1)}%`;
-      document.getElementById("tableTotalDryShare").innerText = `乾膠 ${totalDryWeight.toFixed(1)} KG`;
+      // ===== 更新中欄 (Section 2) 表格加總與加權物性橫條 =====
+      const enbPercent = finalENB * 100;
+      document.getElementById("tableTotalWeight").innerText   = `${totalWetWeight.toFixed(1)} KG`;
+      document.getElementById("tableTotalRatio").innerText    = `${totalRatio.toFixed(1)}%`;
+      document.getElementById("tableTotalDryShare").innerText = `${(overallDryYield * 100).toFixed(1)}%`;
 
+      document.getElementById("sec2_weighted_ml").innerText  = finalML.toFixed(1);
+      document.getElementById("sec2_weighted_enb").innerText = enbPercent.toFixed(2);
+      document.getElementById("sec2_weighted_c2").innerText  = finalC2.toFixed(1);
+
+      // ===== 更新右欄 (Section 3) 戰情數據 =====
       document.getElementById("res_dry_cost_usd").innerText = `$${dryRawCostUSD_perTon.toFixed(2)}`;
       document.getElementById("res_dry_cost_twd").innerText = Math.round(dryRawCostNTD_perTon).toLocaleString();
-      document.getElementById("res_dry_cost_kg").innerText = `NT$ ${dryRawCostNTD_perKG.toFixed(2)} / KG`;
-      document.getElementById("res_dry_yield").innerText = (overallDryYield * 100).toFixed(1) + '%';
-      document.getElementById("res_water_loss").innerText = `${Math.round(waterLossPerTon)} KG / 噸`;
+      document.getElementById("res_dry_cost_kg").innerText  = `NT$ ${dryRawCostNTD_perKG.toFixed(2)} / KG`;
+      document.getElementById("res_dry_yield").innerText    = (overallDryYield * 100).toFixed(1) + '%';
+      document.getElementById("res_water_loss").innerText   = `${Math.round(waterLossPerTon)} KG / 噸`;
 
-      // 基準對比標籤
       const diffSavings = BASELINE_DRY_COST_USD - dryRawCostUSD_perTon;
       const diffBadge = document.getElementById("costDiffBadge");
       if (Math.abs(diffSavings) < 1) {
@@ -2468,15 +2219,12 @@
         diffBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200";
       }
 
-      // ENB 品質與物性
-      const enbPercent = finalENB * 100;
       document.getElementById("res_enb_value").innerText = enbPercent.toFixed(2);
-      document.getElementById("res_ml_value").innerText = finalML.toFixed(1);
-      document.getElementById("res_c2_value").innerText = finalC2.toFixed(1);
+      document.getElementById("res_ml_value").innerText  = finalML.toFixed(1);
+      document.getElementById("res_c2_value").innerText  = finalC2.toFixed(1);
 
       const enbTag = document.getElementById("enbQualityTag");
       const enbProgress = document.getElementById("enbProgress");
-
       const progWidth = Math.min(100, Math.max(10, ((enbPercent - 2.0) / (5.5 - 2.0)) * 100));
       enbProgress.style.width = `${progWidth}%`;
 
@@ -2484,9 +2232,9 @@
         enbTag.innerText = "512E/4725P 同級優良 (ENB ≥ 4.5%)";
         enbTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
         enbProgress.className = "bg-emerald-500 h-full rounded-full transition-all duration-300";
-      } else if (enbPercent >= 3.8) {
-        enbTag.innerText = "標準合格 (3.8% ~ 4.4%)";
-        enbTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200";
+      } else if (enbPercent >= 4.0) {
+        enbTag.innerText = "品質優良 (ENB ≥ 4.0%)";
+        enbTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
         enbProgress.className = "bg-amber-500 h-full rounded-full transition-all duration-300";
       } else {
         enbTag.innerText = "低雙烯烴 (對標3760P耐熱型)";
@@ -2494,7 +2242,6 @@
         enbProgress.className = "bg-blue-500 h-full rounded-full transition-all duration-300";
       }
 
-      // 應用適配性評估
       const suitabilityEl = document.getElementById("res_suitability_text");
       if (finalML >= 60 && finalC2 >= 66) {
         suitabilityEl.innerText = "高生膠強度・壓出管條/汽車密封條首選 (512E / 4770P體系)";
@@ -2530,33 +2277,32 @@
 
       // 出廠成本與業務定價
       document.getElementById("res_factory_cost_twd").innerText = `NT$ ${Math.round(totalFactoryCostNTD_perTon).toLocaleString()} / 噸`;
-      document.getElementById("res_factory_cost_kg").innerText = `NT$ ${totalFactoryCostNTD_perKG.toFixed(2)} / KG`;
+      document.getElementById("res_factory_cost_kg").innerText  = `NT$ ${totalFactoryCostNTD_perKG.toFixed(2)} / KG`;
       document.getElementById("res_factory_cost_usd").innerText = `$${totalFactoryCostUSD_perTon.toFixed(2)} USD`;
 
-      document.getElementById("res_breakeven_kg").innerText = totalFactoryCostNTD_perKG.toFixed(2);
-      document.getElementById("res_selling_ntd_kg").innerText = sellingPriceNTD_perKG.toFixed(2);
-      document.getElementById("res_selling_ntd_ton").innerText = `NT$ ${Math.round(sellingPriceNTD_perTon).toLocaleString()}`;
-      document.getElementById("res_selling_usd_ton").innerText = `$${sellingPriceUSD_perTon.toFixed(2)}`;
-      document.getElementById("res_profit_per_ton").innerText = `NT$ +${Math.round(grossProfitNTD_perTon).toLocaleString()}`;
+      document.getElementById("res_breakeven_kg").innerText      = totalFactoryCostNTD_perKG.toFixed(2);
+      document.getElementById("res_selling_ntd_kg").innerText    = sellingPriceNTD_perKG.toFixed(2);
+      document.getElementById("res_selling_ntd_ton").innerText   = `NT$ ${Math.round(sellingPriceNTD_perTon).toLocaleString()}`;
+      document.getElementById("res_selling_usd_ton").innerText   = `$${sellingPriceUSD_perTon.toFixed(2)}`;
+      document.getElementById("res_profit_per_ton").innerText    = `NT$ +${Math.round(grossProfitNTD_perTon).toLocaleString()}`;
       document.getElementById("res_batch_total_profit").innerText = `NT$ +${Math.round(batchTotalGrossProfit).toLocaleString()}`;
 
-      // 卡片 4 數據呈現
+      // 卡片 4：庫存去化、貨櫃數量與排程預估
       document.getElementById("res_max_finished_dry_tons").innerText = maxFinishedDryTons.toFixed(1);
-      document.getElementById("res_max_wet_feed_tons").innerText = `濕料總投料: ${minWetTonsPossible.toFixed(1)} 噸`;
-      document.getElementById("res_container_count").innerText = containerCount.toFixed(1);
-      document.getElementById("res_container_detail").innerText = `${fullContainers} 整櫃 + ${remainingTons.toFixed(1)} 噸散貨`;
+      document.getElementById("res_max_wet_feed_tons").innerText     = `濕料總投料: ${minWetTonsPossible.toFixed(1)} 噸`;
+      document.getElementById("res_container_count").innerText       = containerCount.toFixed(1);
+      document.getElementById("res_container_detail").innerText      = `${fullContainers} 整櫃 + ${remainingTons.toFixed(1)} 噸散貨`;
 
-      document.getElementById("res_schedule_days").innerText = scheduleResult.days;
+      document.getElementById("res_schedule_days").innerText  = scheduleResult.days;
       document.getElementById("res_schedule_weeks").innerText = scheduleResult.weeks;
-      document.getElementById("res_schedule_desc").innerText = scheduleResult.desc;
+      document.getElementById("res_schedule_desc").innerText  = scheduleResult.desc;
 
       if (bottleneckMaterial) {
         document.getElementById("res_bottleneck_material_name").innerText = `${bottleneckMaterial.name} (現存 ${bottleneckMaterial.stockTons || 0} 噸)`;
-        document.getElementById("res_bottleneck_detail").innerText = `此原料將在生產 ${maxFinishedDryTons.toFixed(1)} 噸乾膠時全數耗盡，是本配方的消化瓶頸！`;
+        document.getElementById("res_bottleneck_detail").innerText = `此原料將在生產 ${maxFinishedDryTons.toFixed(1)} 噸乾膠時全數耗盡，限制了最大生產貨櫃數！`;
       }
     }
 
-    // 計算排程工期天數
     function calculateScheduleDuration(totalDryTons, mode, customCap) {
       if (totalDryTons <= 0) {
         return { days: 0, weeks: 0, desc: "庫存為 0 或無可產產量" };
@@ -2569,67 +2315,60 @@
       }
 
       if (mode === 'single_const') {
-        // 單設備每天約 2.3 噸
         const days = Math.ceil(totalDryTons / 2.3);
-        return { days, weeks: (days / 7).toFixed(1), desc: "單設備每日固定約 2.3 噸" };
+        return { days, weeks: (days / 7).toFixed(1), desc: "單機連續常態每日固定 2.3 噸" };
       }
 
       if (mode === 'double_const') {
-        // 雙設備每天約 4.6 噸
         const days = Math.ceil(totalDryTons / 4.6);
-        return { days, weeks: (days / 7).toFixed(1), desc: "雙設備每日固定約 4.6 噸" };
+        return { days, weeks: (days / 7).toFixed(1), desc: "雙機連續常態每日固定 4.6 噸" };
       }
 
       if (mode === 'standard') {
-        // 平日一至五夜班4.5噸/晚，六日全天雙機9.2噸/天
-        // 一週產能 = 5*4.5 + 2*9.2 = 22.5 + 18.4 = 40.9 噸
-        const weeklyCap = 5 * 4.5 + 2 * 9.2;
+        const weeklyCap = 5 * 4.5 + 2 * 9.2; // 40.9 噸/週
         const fullWeeks = Math.floor(totalDryTons / weeklyCap);
         let rem = totalDryTons - fullWeeks * weeklyCap;
         let addDays = 0;
-        
+
         while (rem > 0) {
-          if (addDays < 5) rem -= 4.5; // 平日
-          else rem -= 9.2; // 週末
+          if (addDays < 5) rem -= 4.5;
+          else rem -= 9.2;
           addDays++;
           if (addDays >= 7) break;
         }
 
         const totalDays = fullWeeks * 7 + addDays;
-        return { 
-          days: totalDays, 
-          weeks: (totalDays / 7).toFixed(1), 
-          desc: "一至五夜班4.5T + 六日全天9.2T (週產40.9T)" 
+        return {
+          days: totalDays,
+          weeks: (totalDays / 7).toFixed(1),
+          desc: "平日夜班4.5T + 六日全天9.2T (週產40.9T)"
         };
       }
 
       if (mode === 'f1_single') {
-        // 一二廠同時開: 一廠單機 平日夜2.25噸，六日全天4.6噸
-        // 一週產能 = 5*2.25 + 2*4.6 = 11.25 + 9.2 = 20.45 噸
-        const weeklyCap = 5 * 2.25 + 2 * 4.6;
+        const weeklyCap = 5 * 2.25 + 2 * 4.6; // 20.45 噸/週
         const fullWeeks = Math.floor(totalDryTons / weeklyCap);
         let rem = totalDryTons - fullWeeks * weeklyCap;
         let addDays = 0;
 
         while (rem > 0) {
-          if (addDays < 5) rem -= 2.25; // 平日單機
-          else rem -= 4.6; // 週末單機全天
+          if (addDays < 5) rem -= 2.25;
+          else rem -= 4.6;
           addDays++;
           if (addDays >= 7) break;
         }
 
         const totalDays = fullWeeks * 7 + addDays;
-        return { 
-          days: totalDays, 
-          weeks: (totalDays / 7).toFixed(1), 
-          desc: "一廠降單機: 平日夜2.25T + 六日全天4.6T (週產20.5T)" 
+        return {
+          days: totalDays,
+          weeks: (totalDays / 7).toFixed(1),
+          desc: "一二廠同開一廠單機: 平日夜2.25T + 六日4.6T (週產20.45T)"
         };
       }
 
       return { days: 0, weeks: 0, desc: "未定義排程" };
     }
 
-    // 渲染各原料庫存去化明細
     function renderInventoryUsageTable(totalWetTons, recipeMaterialsMap) {
       const tbody = document.getElementById("inventoryUsageTableBody");
       if (!tbody) return;
@@ -2647,7 +2386,7 @@
           tr.className = isBottleneck ? "bg-rose-50 font-bold" : "hover:bg-slate-50";
 
           tr.innerHTML = `
-            <td class="py-1 px-2 text-left truncate max-w-[120px]" title="${mat.name}">
+            <td class="py-1 px-2 text-left truncate max-w-[125px]" title="${mat.name}">
               ${mat.name} ${isBottleneck ? '<span class="text-rose-600 text-[9px]">(短板)</span>' : ''}
             </td>
             <td class="py-1 px-1 font-semibold">${currentStock.toFixed(1)} 噸</td>
@@ -2661,7 +2400,209 @@
       });
     }
 
-    // 複製報價摘要至剪貼簿 (包含庫存與排程指標)
+    // ==========================================
+    // 9. 原廠 TDS 規格中心 Modal 控制器
+    // ==========================================
+    function openTdsCenterModal(tdsId) {
+      const modal = document.getElementById("tdsCenterModal");
+      if (modal) modal.classList.remove("hidden");
+      if (tdsId) {
+        switchTdsTab('cards');
+        renderTdsSingleCard(tdsId);
+      }
+    }
+
+    function closeTdsCenterModal() {
+      const modal = document.getElementById("tdsCenterModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function switchTdsTab(tab) {
+      currentTdsTab = tab;
+      const viewComp = document.getElementById("tdsViewComparison");
+      const viewCards = document.getElementById("tdsViewCards");
+      const tabComp = document.getElementById("tabBtnComparison");
+      const tabCards = document.getElementById("tabBtnCards");
+
+      if (tab === 'comparison') {
+        viewComp.classList.remove("hidden");
+        viewCards.classList.add("hidden");
+        tabComp.className = "px-3 py-1 font-bold rounded-md transition-all bg-white text-blue-700 shadow-sm";
+        tabCards.className = "px-3 py-1 font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
+      } else {
+        viewComp.classList.add("hidden");
+        viewCards.classList.remove("hidden");
+        tabCards.className = "px-3 py-1 font-bold rounded-md transition-all bg-white text-blue-700 shadow-sm";
+        tabComp.className = "px-3 py-1 font-bold rounded-md transition-all text-slate-600 hover:text-slate-900";
+        renderTdsSingleCard(activeTdsCardId);
+      }
+    }
+
+    function initTdsCenterUI() {
+      const tbody = document.getElementById("tdsComparisonTableBody");
+      if (tbody) {
+        tbody.innerHTML = "";
+        TDS_DATABASE.forEach(tds => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-50 transition-colors";
+          tr.innerHTML = `
+            <td class="py-2.5 px-3 font-bold text-slate-800">
+              <div class="text-xs text-blue-700">${tds.code}</div>
+              <div class="text-[10px] text-slate-400 font-normal">${tds.manufacturer.split('/')[0]}</div>
+            </td>
+            <td class="py-2.5 px-2 text-center text-[11px] text-slate-600">${tds.form}</td>
+            <td class="py-2.5 px-2 text-center font-black text-blue-700">${tds.mooneyML}</td>
+            <td class="py-2.5 px-2 text-center font-black text-emerald-700">${tds.ethylene}%</td>
+            <td class="py-2.5 px-2 text-center font-black text-amber-600">${tds.enb}%</td>
+            <td class="py-2.5 px-2 text-center text-[10px] text-slate-600">${tds.density} / ${tds.crystallinity.includes("無定形") ? "無定形" : "半結晶"}</td>
+            <td class="py-2.5 px-3 text-[11px] text-slate-600 max-w-xs truncate" title="${tds.applications}">${tds.applications}</td>
+            <td class="py-2.5 px-2 text-center space-x-1">
+              <button type="button" onclick="renderTdsSingleCard('${tds.id}'); switchTdsTab('cards');" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
+                詳情
+              </button>
+              <button type="button" onclick="importTdsToLibrary('${tds.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">
+                導入
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      const btnGroup = document.getElementById("tdsGradeButtonTabs");
+      if (btnGroup) {
+        btnGroup.innerHTML = "";
+        TDS_DATABASE.forEach(tds => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.id = `btn_tds_tab_${tds.id}`;
+          b.onclick = () => renderTdsSingleCard(tds.id);
+          b.className = `px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${tds.id === activeTdsCardId ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`;
+          b.innerText = tds.code;
+          btnGroup.appendChild(b);
+        });
+      }
+
+      renderTdsSingleCard(activeTdsCardId);
+    }
+
+    function renderTdsSingleCard(tdsId) {
+      activeTdsCardId = tdsId;
+      const tds = TDS_DATABASE.find(t => t.id === tdsId) || TDS_DATABASE[0];
+
+      TDS_DATABASE.forEach(t => {
+        const btn = document.getElementById(`btn_tds_tab_${t.id}`);
+        if (btn) {
+          btn.className = t.id === tdsId
+            ? "px-2.5 py-1 text-xs font-bold rounded-lg border bg-blue-600 text-white border-blue-600 shadow-sm"
+            : "px-2.5 py-1 text-xs font-bold rounded-lg border bg-white text-slate-700 border-slate-200 hover:bg-slate-50";
+        }
+      });
+
+      const container = document.getElementById("tdsSingleCardDisplay");
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-base font-black text-slate-900">${tds.code}</h4>
+                <span class="text-xs px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-800">${tds.gradeType}</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">原廠製造商：${tds.manufacturer} ｜ 產地：${tds.origin}</p>
+            </div>
+            <button type="button" onclick="importTdsToLibrary('${tds.id}')" class="px-3.5 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all shadow-sm flex items-center gap-1 self-start sm:self-auto">
+              <span>📥</span> 一鍵導入左欄原料庫
+            </button>
+          </div>
+
+          <div>
+            <h5 class="text-xs font-bold text-slate-700 mb-2">▍ 官方技術物性典型值 (Typical Properties)</h5>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-200 text-center">
+                <span class="text-[10px] text-blue-700 block font-bold">門尼黏度 ML(1+4) @125°C</span>
+                <strong class="text-xl font-black text-blue-800">${tds.mooneyML} MU</strong>
+                <span class="text-[9px] text-slate-400 block">ASTM D1646</span>
+              </div>
+              <div class="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-200 text-center">
+                <span class="text-[10px] text-emerald-700 block font-bold">乙烯含量 (Ethylene C2)</span>
+                <strong class="text-xl font-black text-emerald-800">${tds.ethylene}%</strong>
+                <span class="text-[9px] text-slate-400 block">ASTM D3900</span>
+              </div>
+              <div class="bg-amber-50/60 p-2.5 rounded-xl border border-amber-200 text-center">
+                <span class="text-[10px] text-amber-700 block font-bold">第三單體 (ENB)</span>
+                <strong class="text-xl font-black text-amber-700">${tds.enb}%</strong>
+                <span class="text-[9px] text-slate-400 block">ASTM D6047</span>
+              </div>
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
+                <span class="text-[10px] text-slate-500 block font-bold">聚合物密度 (Density)</span>
+                <strong class="text-xl font-black text-slate-800">${tds.density}</strong>
+                <span class="text-[9px] text-slate-400 block">g/cm³ (ASTM D297)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+              <div><span class="text-slate-400">分子結構/結晶性：</span><strong class="text-slate-700">${tds.crystallinity}</strong></div>
+              <div><span class="text-slate-400">丙烯含量 (Propylene)：</span><strong class="text-slate-700">${tds.propylene}%</strong></div>
+              <div><span class="text-slate-400">灰分 / 揮發份：</span><span class="text-slate-600">${tds.ashContent} / ${tds.volatileMatter}</span></div>
+              <div><span class="text-slate-400">法規認證：</span><span class="text-emerald-700 font-semibold">${tds.certifications}</span></div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+              <strong class="text-slate-800 block mb-0.5">📦 包裝規格與保存注意事項：</strong>
+              <p class="text-[11px] text-slate-600 leading-relaxed">${tds.storageNotice}</p>
+            </div>
+          </div>
+
+          <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 text-xs">
+            <strong class="text-blue-900 block mb-1">🚀 官方推薦應用場景與混煉特性：</strong>
+            <p class="text-[11px] text-blue-800 leading-relaxed">${tds.applications}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function importTdsToLibrary(tdsId) {
+      const tds = TDS_DATABASE.find(t => t.id === tdsId);
+      if (!tds) return;
+
+      const shortCode = tds.code.replace("Dow NORDEL™ IP ", "DOW ").replace("SUMITOMO ", "");
+      const existing = rawMaterials.find(m => m.name.includes(shortCode) || tds.code.includes(m.name));
+      if (existing) {
+        existing.ml = tds.mooneyML;
+        existing.c2 = tds.ethylene;
+        existing.enb = tds.enb;
+        existing.tdsRef = tds.id;
+        syncRecipeRowOptionAndBadges(existing.id);
+        showToast(`已同步【${existing.name}】之原廠 TDS 物性 (ML:${tds.mooneyML} / ENB:${tds.enb}% / 乙烯:${tds.ethylene}%)！`);
+      } else {
+        rawMaterials.unshift({
+          id: 'mat_tds_' + Date.now(),
+          name: tds.code,
+          costUSD: tds.defaultCostUSD || 1300,
+          moisture: 0.0,
+          enb: tds.enb,
+          ml: tds.mooneyML,
+          c2: tds.ethylene,
+          stockTons: 15.0,
+          overrideCostUSD: 0,
+          tdsRef: tds.id,
+          note: `原廠TDS導入・${tds.form.includes('顆粒') ? '顆粒料' : '膠塊'}`
+        });
+        showToast(`已將全新牌號【${tds.code}】導入左欄原料庫！`);
+      }
+
+      renderMaterialsLibrary();
+      renderRecipeRows();
+      calculate();
+      saveUserDataToStorage();
+    }
+
+    // ==========================================
+    // 10. 複製報價與配方摘要至剪貼簿
+    // ==========================================
     function copySummaryReport() {
       const loadedName = document.getElementById("currentLoadedRecipeName").innerText;
       const dryCostUSD = document.getElementById("res_dry_cost_usd").innerText;
@@ -2684,16 +2625,16 @@
       const bottleneck = document.getElementById("res_bottleneck_material_name").innerText;
 
       const recipeDesc = currentRecipe.map(r => {
-        const mat = rawMaterials.find(m => m.id === r.materialId);
-        return `${mat ? mat.name : '膠料'}: ${r.weight.toFixed(0)}KG (${r.ratio.toFixed(1)}%)`;
+        const mat = rawMaterials.find(m => m.id === r.materialId) || rawMaterials[0];
+        return `${mat.name} [ML:${mat.ml} / ENB:${mat.enb}% / 乙烯:${mat.c2}%]: ${r.weight.toFixed(0)}KG (${r.ratio.toFixed(1)}%)`;
       }).join("\n  • ");
 
-      const report = `【彥泰企業 - EPDM 生產配方、業務報價與庫存排程核算卡】\n` +
+      const report = `【TIT 彥泰企業 - EPDM 生產配方、業務報價與庫存排程核算卡】\n` +
         `■ 配方名稱：${loadedName}\n` +
         `-----------------------------------------\n` +
         `■ 廠務投料配比：\n  • ${recipeDesc}\n` +
         `■ 綜合成品物性 (對標原廠 TDS 指標)：\n` +
-        `  • 第三單體 (ENB)：${enbVal}% ｜ 門尼 ML：${mlVal} MU ｜ 乙烯 C2：${c2Val}%\n` +
+        `  • 加權門尼黏度 (ML)：${mlVal} MU ｜ 加權第三單體 (ENB)：${enbVal}% ｜ 加權乙烯 (C2)：${c2Val}%\n` +
         `  • 應用評估：${suitText}\n` +
         `  • 綜合乾膠淨得率：${dryYield} ｜ 純乾膠成本：${dryCostUSD} USD/噸\n` +
         `-----------------------------------------\n` +
@@ -2703,11 +2644,11 @@
         `  • 美金出口報價：${sellTonUSD} USD / 噸\n` +
         `  • 預估單噸毛利：${profitPerTon} / 噸\n` +
         `-----------------------------------------\n` +
-        `■ 庫存去化、貨櫃量與交期排程估算：\n` +
+        `■ 庫存去化、24噸貨櫃與交期排程估算：\n` +
         `  • 現有庫存最大可產乾膠：${maxDryTons} 噸\n` +
-        `  • 預估可裝貨櫃總數：${containerCount} 櫃 (${containerDetail}，依24噸/櫃計)\n` +
-        `  • 限制瓶頸原料：${bottleneck}\n` +
-        `  • 預估消化工期：約 ${scheduleDays} 生產天 (約 ${scheduleWeeks} 週)\n` +
+        `  • 預估可裝貨櫃總數：${containerCount} 櫃 (${containerDetail})\n` +
+        `  • 限制短板原料：${bottleneck}\n` +
+        `  • 預估消化工期：約 ${scheduleDays} 天 (約 ${scheduleWeeks} 週)\n` +
         `-----------------------------------------\n` +
         `（計算時間：${new Date().toLocaleString()}）`;
 
@@ -2719,7 +2660,7 @@
       tempTextArea.select();
       try {
         document.execCommand("copy");
-        showToast("已成功將業務報價與排程摘要複製至剪貼簿！");
+        showToast("已成功將完整報價與物性摘要複製至剪貼簿！");
       } catch (err) {
         showToast("複製失敗，請手動複製");
       }
