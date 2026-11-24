@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>全員動起來！簡易流水帳紀錄</title>
+
+  <!-- Google Fonts: Inter & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans TC"', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          keyframes: {
+            popBump: {
+              '0%': { transform: 'scale(1)' },
+              '40%': { transform: 'scale(1.22)' },
+              '100%': { transform: 'scale(1)' },
+            },
+            floatUpFade: {
+              '0%': { opacity: '1', transform: 'translate(-50%, 0) scale(0.85)' },
+              '40%': { opacity: '1', transform: 'translate(-50%, -24px) scale(1.15)' },
+              '100%': { opacity: '0', transform: 'translate(-50%, -48px) scale(0.95)' },
+            },
+            toastSlideIn: {
+              '0%': { opacity: '0', transform: 'translateY(16px) scale(0.95)' },
+              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-3deg)' },
+              '50%': { transform: 'rotate(3deg)' },
+            }
+          },
+          animation: {
+            popBump: 'popBump 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            floatUpFade: 'floatUpFade 0.75s ease-out forwards',
+            toastSlideIn: 'toastSlideIn 0.25s ease-out forwards',
+            wiggle: 'wiggle 1.8s ease-in-out infinite',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Tone.js for subtle tactile click audio feedback -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-amber-50/70 via-slate-50 to-sky-50/80 text-slate-800 antialiased selection:bg-amber-200 selection:text-slate-900 pb-12">
+
+  <!-- =========================================================
+       頂部導覽與即時狀態列 (Header)
+       ========================================================= -->
+  <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-2">
+      <!-- 品牌標題 -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-amber-400 via-orange-400 to-rose-400 text-white flex items-center justify-center shadow-md shadow-orange-200 shrink-0 text-xl animate-wiggle">
+          🚀
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-lg sm:text-xl font-black tracking-tight text-slate-900 truncate">
+            全員動起來！簡易流水帳
+          </h1>
+          <p class="text-xs text-slate-500 font-medium hidden sm:block">
+            零打字負擔・點一下即刻紀錄・團隊即時同步
+          </p>
+        </div>
+      </div>
+
+      <!-- 右側工具按鈕：音效開關 + 同步狀態 -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          id="soundToggleBtn"
+          type="button"
+          title="切換點擊提示音"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-bold transition cursor-pointer"
+        >
+          <span id="soundIcon">🔊</span>
+          <span class="hidden sm:inline" id="soundLabel">音效開</span>
+        </button>
+
+        <button
+          id="syncStatusBtn"
+          type="button"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs sm:text-sm font-bold transition hover:bg-emerald-100 cursor-pointer"
+        >
+          <span id="syncDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="syncText">連線中...</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要內容容器 -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
+
+    <!-- =========================================================
+         區塊 1：現在是誰在紀錄？（快速頭像切換列）
+         ========================================================= -->
+    <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">👋</span>
+          <h2 class="text-sm sm:text-base font-extrabold text-slate-800">
+            現在是誰在紀錄？
+          </h2>
+          <span id="currentMemberPill" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+            載入中...
+          </span>
+        </div>
+        <button
+          id="openAddMemberBtn"
+          type="button"
+          class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
+        >
+          <span>＋</span>
+          <span>新增夥伴</span>
+        </button>
+      </div>
+
+      <!-- 成員按鈕列 -->
+      <div id="memberListContainer" class="flex flex-wrap gap-2 sm:gap-2.5">
+        <!-- 由 JS 動態渲染夥伴按鈕 -->
+      </div>
+    </section>
+
+    <!-- =========================================================
+         區塊 2：今日戰況總覽 + 登記日期選擇列
+         ========================================================= -->
+    <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 space-y-4">
+      <!-- 標題與登記日期選擇器 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📊</span>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-slate-900">今日戰況總覽</h2>
+            <p class="text-xs text-slate-500 font-medium" id="todayDateSubtitle">今天日期載入中...</p>
+          </div>
+        </div>
+
+        <!-- 登記日期選擇器（支援補登） -->
+        <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200/90">
+          <label for="recordDateInput" class="text-xs sm:text-sm font-bold text-slate-700 pl-1.5 flex items-center gap-1">
+            <span>📅</span>
+            <span>登記日期：</span>
+          </label>
+          <input
+            type="date"
+            id="recordDateInput"
+            class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 cursor-pointer"
+          />
+          <button
+            id="resetTodayBtn"
+            type="button"
+            class="hidden px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-bold shadow-sm transition cursor-pointer"
+          >
+            回到今天
+          </button>
+        </div>
+      </div>
+
+      <!-- 補登日期提醒橫幅（當選定日期不是今天時顯示） -->
+      <div id="backfillBanner" class="hidden items-center justify-between gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs sm:text-sm font-bold">
+        <div class="flex items-center gap-2">
+          <span class="text-base">📌</span>
+          <span>目前為補登模式！下方按鈕將登記在 <span id="backfillDateText" class="underline decoration-2"></span></span>
+        </div>
+        <button type="button" id="bannerBackTodayBtn" class="underline font-extrabold hover:text-amber-700 shrink-0 cursor-pointer">
+          切回今日
+        </button>
+      </div>
+
+      <!-- 今日四大戰況指標卡片 -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- 今日進貨 -->
+        <div class="rounded-2xl bg-emerald-50/80 border border-emerald-200/80 p-3.5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-emerald-700">今日進貨</p>
+            <p id="overviewTodayInbound" class="text-2xl sm:text-3xl font-black text-emerald-900 mt-0.5 tabular-nums">0</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-xl flex items-center justify-center">📦</div>
+        </div>
+
+        <!-- 今日出貨 -->
+        <div class="rounded-2xl bg-sky-50/80 border border-sky-200/80 p-3.5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-sky-700">今日出貨</p>
+            <p id="overviewTodayOutbound" class="text-2xl sm:text-3xl font-black text-sky-900 mt-0.5 tabular-nums">0</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-sky-100 text-xl flex items-center justify-center">🚚</div>
+        </div>
+
+        <!-- 今日排除垃圾 -->
+        <div class="rounded-2xl bg-amber-50/80 border border-amber-200/80 p-3.5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-amber-700">今日排除垃圾</p>
+            <p id="overviewTodayTrash" class="text-2xl sm:text-3xl font-black text-amber-900 mt-0.5 tabular-nums">0</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-xl flex items-center justify-center">🗑️</div>
+        </div>
+
+        <!-- 簡易參考差額（總進貨 - 總出貨） -->
+        <div class="rounded-2xl bg-violet-50/80 border border-violet-200/80 p-3.5 flex items-center justify-between">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-violet-700 truncate">今日進貨－出貨</p>
+            <p id="overviewTodayDiff" class="text-2xl sm:text-3xl font-black text-violet-900 mt-0.5 tabular-nums">0</p>
+            <p class="text-[11px] font-semibold text-violet-600/90 mt-0.5">
+              總累計差額：<span id="overviewTotalDiff" class="font-bold">0</span>
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-violet-100 text-xl flex items-center justify-center shrink-0">⚖️</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         區塊 3：三大項目極簡操作區（只有超好按的 － 跟 ＋）
+         ========================================================= -->
+    <section aria-label="三大項目紀錄操作區">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <h2 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>⚡</span>
+          <span>快速打卡紀錄</span>
+        </h2>
+        <span id="actionDateHint" class="text-xs sm:text-sm font-bold text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200">
+          計數顯示：今日
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+
+        <!-- 卡片 1：進貨（綠色系） -->
+        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-emerald-200 transition overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-100/60 pointer-events-none"></div>
+          <div class="relative flex items-center justify-between mb-5">
+            <div class="flex items-center gap-2.5">
+              <span class="w-11 h-11 rounded-2xl bg-emerald-100 text-2xl flex items-center justify-center shadow-inner">📦</span>
+              <div>
+                <h3 class="text-xl font-black text-emerald-950">進貨</h3>
+                <p class="text-xs font-bold text-emerald-600">入庫・補貨點這裡</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-extrabold border border-emerald-200/70">
+              歷史累計 <span id="allTime-inbound" class="tabular-nums">0</span>
+            </span>
+          </div>
+
+          <!-- 極簡操作列：－ 數字 ＋ -->
+          <div class="relative flex items-center justify-between gap-3">
+            <button
+              type="button"
+              data-category="inbound"
+              data-delta="-1"
+              aria-label="進貨減一"
+              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-90 border-2 border-emerald-200 text-emerald-700 text-4xl font-black flex items-center justify-center shadow-sm transition select-none cursor-pointer"
+            >
+              －
+            </button>
+
+            <div class="relative flex-1 text-center py-2">
+              <div id="floatAnchor-inbound" class="absolute left-1/2 top-0 pointer-events-none"></div>
+              <div id="count-inbound" class="text-5xl sm:text-6xl font-black text-emerald-700 tabular-nums leading-none">
+                0
+              </div>
+              <div class="text-xs font-bold text-slate-400 mt-2 date-card-label">選定日累計</div>
+            </div>
+
+            <button
+              type="button"
+              data-category="inbound"
+              data-delta="1"
+              aria-label="進貨加一"
+              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 active:scale-90 text-white text-4xl font-black flex items-center justify-center shadow-lg shadow-emerald-200 transition select-none cursor-pointer"
+            >
+              ＋
+            </button>
+          </div>
+        </article>
+
+        <!-- 卡片 2：出貨（藍色系） -->
+        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-sky-200 transition overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-sky-100/60 pointer-events-none"></div>
+          <div class="relative flex items-center justify-between mb-5">
+            <div class="flex items-center gap-2.5">
+              <span class="w-11 h-11 rounded-2xl bg-sky-100 text-2xl flex items-center justify-center shadow-inner">🚚</span>
+              <div>
+                <h3 class="text-xl font-black text-sky-950">出貨</h3>
+                <p class="text-xs font-bold text-sky-600">寄件・配送點這裡</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-xl bg-sky-50 text-sky-700 text-xs font-extrabold border border-sky-200/70">
+              歷史累計 <span id="allTime-outbound" class="tabular-nums">0</span>
+            </span>
+          </div>
+
+          <!-- 極簡操作列：－ 數字 ＋ -->
+          <div class="relative flex items-center justify-between gap-3">
+            <button
+              type="button"
+              data-category="outbound"
+              data-delta="-1"
+              aria-label="出貨減一"
+              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-90 border-2 border-sky-200 text-sky-700 text-4xl font-black flex items-center justify-center shadow-sm transition select-none cursor-pointer"
+            >
+              －
+            </button>
+
+            <div class="relative flex-1 text-center py-2">
+              <div id="floatAnchor-outbound" class="absolute left-1/2 top-0 pointer-events-none"></div>
+              <div id="count-outbound" class="text-5xl sm:text-6xl font-black text-sky-600 tabular-nums leading-none">
+                0
+              </div>
+              <div class="text-xs font-bold text-slate-400 mt-2 date-card-label">選定日累計</div>
+            </div>
+
+            <button
+              type="button"
+              data-category="outbound"
+              data-delta="1"
+              aria-label="出貨加一"
+              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 active:scale-90 text-white text-4xl font-black flex items-center justify-center shadow-lg shadow-sky-200 transition select-none cursor-pointer"
+            >
+              ＋
+            </button>
+          </div>
+        </article>
+
+        <!-- 卡片 3：排除垃圾（橘色/琥珀色系） -->
+        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-amber-200 transition overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-amber-100/70 pointer-events-none"></div>
+          <div class="relative flex items-center justify-between mb-5">
+            <div class="flex items-center gap-2.5">
+              <span class="w-11 h-11 rounded-2xl bg-amber-100 text-2xl flex items-center justify-center shadow-inner">🗑️</span>
+              <div>
+                <h3 class="text-xl font-black text-amber-950">排除垃圾</h3>
+                <p class="text-xs font-bold text-amber-600">清運・整理點這裡</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-700 text-xs font-extrabold border border-amber-200/70">
+              歷史累計 <span id="allTime-trash" class="tabular-nums">0</span>
+            </span>
+          </div>
+
+          <!-- 極簡操作列：－ 數字 ＋ -->
+          <div class="relative flex items-center justify-between gap-3">
+            <button
+              type="button"
+              data-category="trash"
+              data-delta="-1"
+              aria-label="排除垃圾減一"
+              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-amber-50 hover:bg-amber-100 active:scale-90 border-2 border-amber-200 text-amber-700 text-4xl font-black flex items-center justify-center shadow-sm transition select-none cursor-pointer"
+            >
+              －
+            </button>
+
+            <div class="relative flex-1 text-center py-2">
+              <div id="floatAnchor-trash" class="absolute left-1/2 top-0 pointer-events-none"></div>
+              <div id="count-trash" class="text-5xl sm:text-6xl font-black text-amber-600 tabular-nums leading-none">
+                0
+              </div>
+              <div class="text-xs font-bold text-slate-400 mt-2 date-card-label">選定日累計</div>
+            </div>
+
+            <button
+              type="button"
+              data-category="trash"
+              data-delta="1"
+              aria-label="排除垃圾加一"
+              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-b from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 active:scale-90 text-white text-4xl font-black flex items-center justify-center shadow-lg shadow-amber-200 transition select-none cursor-pointer"
+            >
+              ＋
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         區塊 4：今日全員動起來排行榜 / 團隊總動力
+         ========================================================= -->
+    <section class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-400 to-amber-400 text-white text-xl flex items-center justify-center shadow-sm">
+            🔥
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-slate-900">今日全員動起來排行榜</h2>
+            <p id="teamCheerText" class="text-xs sm:text-sm font-bold text-orange-600">
+              新的一天開始囉！快按下第一個 ＋ 啟動團隊動力！
+            </p>
+          </div>
+        </div>
+
+        <!-- 今日團隊總動作徽章 -->
+        <div class="flex items-center gap-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200 px-4 py-2.5 rounded-2xl self-start md:self-auto">
+          <span class="text-xs font-bold text-amber-800">今日團隊總動力</span>
+          <span id="teamTodayTotalActions" class="text-2xl font-black text-orange-600 tabular-nums">0</span>
+          <span class="text-xs font-bold text-amber-800">筆動作</span>
+        </div>
+      </div>
+
+      <!-- 夥伴進度條排行清單 -->
+      <div id="leaderboardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- 由 JS 動態生成 -->
+      </div>
+    </section>
+
+    <!-- =========================================================
+         區塊 5：登記日期流水帳（即時同步紀錄表）
+         ========================================================= -->
+    <section class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📝</span>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-slate-900">即時流水帳紀錄</h2>
+            <p class="text-xs text-slate-500 font-medium">
+              共顯示 <span id="visibleLogCount" class="font-bold text-slate-700">0</span> 筆紀錄（最新在最上方）
+            </p>
+          </div>
+        </div>
+
+        <!-- 匯出 CSV 按鈕 -->
+        <button
+          id="exportCsvBtn"
+          type="button"
+          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
+        >
+          <span>📥</span>
+          <span>匯出紀錄表 (CSV)</span>
+        </button>
+      </div>
+
+      <!-- 篩選列：項目分類 + 日期範圍 -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200/70">
+        <!-- 項目分類篩選 -->
+        <div class="flex flex-wrap items-center gap-1.5" id="categoryFilterGroup">
+          <button type="button" data-filter-cat="all" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            全部項目
+          </button>
+          <button type="button" data-filter-cat="inbound" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            📦 進貨
+          </button>
+          <button type="button" data-filter-cat="outbound" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            🚚 出貨
+          </button>
+          <button type="button" data-filter-cat="trash" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            🗑️ 排除垃圾
+          </button>
+        </div>
+
+        <!-- 日期範圍篩選 -->
+        <div class="flex flex-wrap items-center gap-1.5" id="dateFilterGroup">
+          <button type="button" data-filter-date="today" class="filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            僅看今日
+          </button>
+          <button type="button" data-filter-date="selected" id="filterSelectedDateBtn" class="hidden filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            僅看選定日
+          </button>
+          <button type="button" data-filter-date="all" class="filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            查看全部日期
+          </button>
+        </div>
+      </div>
+
+      <!-- 電腦版表格顯示 (md 以上) -->
+      <div class="hidden md:block overflow-x-auto rounded-2xl border border-slate-200/80">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 text-xs font-extrabold border-b border-slate-200">
+              <th class="py-3 px-4">登記日期</th>
+              <th class="py-3 px-4">紀錄時間</th>
+              <th class="py-3 px-4">執行夥伴</th>
+              <th class="py-3 px-4">項目分類</th>
+              <th class="py-3 px-4 text-center">動作變動</th>
+              <th class="py-3 px-4 text-right">操作</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerTableBody" class="divide-y divide-slate-100 text-sm">
+            <!-- JS 動態渲染 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 手機版卡片清單顯示 (md 以下，無橫向捲動) -->
+      <div id="ledgerMobileList" class="md:hidden space-y-2.5">
+        <!-- JS 動態渲染 -->
+      </div>
+
+      <!-- 無資料空狀態 -->
+      <div id="emptyLedgerState" class="hidden py-10 text-center space-y-2">
+        <div class="text-4xl">🌱</div>
+        <p class="text-sm font-bold text-slate-600">目前還沒有符合條件的流水帳紀錄</p>
+        <p class="text-xs text-slate-400">點一下上方的「＋」按鈕，馬上新增第一筆吧！</p>
+      </div>
+    </section>
+
+    <!-- 頁尾資訊（顯示同步連線與完整裝置識別碼） -->
+    <footer class="text-center text-xs text-slate-400 pt-2 space-y-1">
+      <p>全員動起來！簡易流水帳紀錄網頁・所有團隊成員即時同步</p>
+      <p class="font-mono text-[11px] break-all px-4">
+        裝置同步 ID：<span id="footerUserId">連線中...</span>
+      </p>
+    </footer>
+  </main>
+
+  <!-- =========================================================
+       自訂彈窗 1：新增團隊夥伴 Modal
+       ========================================================= -->
+  <div id="addMemberModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>✨</span>
+          <span>新增團隊夥伴</span>
+        </h3>
+        <button type="button" id="closeAddMemberModalBtn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <form id="addMemberForm" class="space-y-4">
+        <div>
+          <label for="newMemberNameInput" class="block text-xs font-bold text-slate-600 mb-1.5">
+            夥伴名稱（例如：小華、阿明、早班）
+          </label>
+          <input
+            type="text"
+            id="newMemberNameInput"
+            maxlength="12"
+            placeholder="請輸入姓名或暱稱..."
+            autocomplete="off"
+            class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-base font-bold text-slate-800"
+          />
+          <p id="addMemberError" class="hidden text-xs font-bold text-rose-500 mt-1.5"></p>
+        </div>
+
+        <!-- 頭像表情快速挑選 -->
+        <div>
+          <span class="block text-xs font-bold text-slate-600 mb-1.5">選一個專屬小圖示</span>
+          <div id="emojiPicker" class="grid grid-cols-6 gap-2">
+            <!-- 由 JS 渲染 -->
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 pt-2">
+          <button
+            type="button"
+            id="cancelAddMemberBtn"
+            class="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition cursor-pointer"
+          >
+            取消
+          </button>
+          <button
+            type="submit"
+            class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-extrabold shadow-md shadow-orange-200 transition cursor-pointer"
+          >
+            加入團隊！
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       自訂彈窗 2：刪除/復原誤按確認 Modal（取代 confirm()）
+       ========================================================= -->
+  <div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 text-2xl flex items-center justify-center shrink-0">
+          ↩️
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-slate-900">復原 / 刪除這筆紀錄？</h3>
+          <p class="text-xs font-medium text-slate-500">刪除後會立刻同步更新全員的統計數字</p>
+        </div>
+      </div>
+
+      <div id="deleteLogPreview" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-700 space-y-1">
+        <!-- 由 JS 填入待刪除紀錄摘要 -->
+      </div>
+
+      <div class="flex items-center gap-2.5 pt-1">
+        <button
+          type="button"
+          id="cancelDeleteBtn"
+          class="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition cursor-pointer"
+        >
+          先不要
+        </button>
+        <button
+          type="button"
+          id="confirmDeleteBtn"
+          class="flex-1 py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-sm font-extrabold shadow-md shadow-rose-200 transition cursor-pointer"
+        >
+          確認刪除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       即時鼓勵 Toast 提示容器（底部置中浮動）
+       ========================================================= -->
+  <div id="toastContainer" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 w-[92%] max-w-md pointer-events-none">
+    <!-- JS 動態插入鼓勵提示 -->
+  </div>
+
+  <!-- =========================================================
+       主要應用程式邏輯 (ES Module + Firebase Firestore 即時同步)
+       ========================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      signInWithCustomToken,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      addDoc,
+      deleteDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // =========================================================
+    // 1. 常數設定與台灣本地時間工具
+    // =========================================================
+    const CATEGORIES = {
+      inbound: {
+        key: "inbound",
+        label: "進貨",
+        emoji: "📦",
+        pillClass: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+        textColor: "text-emerald-600"
+      },
+      outbound: {
+        key: "outbound",
+        label: "出貨",
+        emoji: "🚚",
+        pillClass: "bg-sky-100 text-sky-800 border border-sky-200",
+        textColor: "text-sky-600"
+      },
+      trash: {
+        key: "trash",
+        label: "排除垃圾",
+        emoji: "🗑️",
+        pillClass: "bg-amber-100 text-amber-800 border border-amber-200",
+        textColor: "text-amber-600"
+      }
+    };
+
+    const DEFAULT_MEMBERS = [
+      { id: "default_xiaoming", name: "小明", emoji: "⚡", color: "sky", order: 1 },
+      { id: "default_xiaomei", name: "小美", emoji: "🌟", color: "rose", order: 2 },
+      { id: "default_aqiang", name: "阿強", emoji: "💪", color: "emerald", order: 3 },
+      { id: "default_manager", name: "店長", emoji: "👑", color: "amber", order: 4 }
+    ];
+
+    const AVATAR_EMOJIS = ["🚀", "🔥", "🍀", "🎯", "🦁", "🐱", "🐼", "🦊", "🌈", "⭐", "💎", "🎵"];
+    const MEMBER_COLORS = ["emerald", "sky", "amber", "rose", "violet", "indigo", "orange", "teal"];
+
+    const COLOR_STYLES = {
+      emerald: { active: "bg-emerald-500 text-white border-emerald-600 shadow-emerald-200", idle: "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100", bar: "bg-emerald-500" },
+      sky:     { active: "bg-sky-500 text-white border-sky-600 shadow-sky-200",             idle: "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100",             bar: "bg-sky-500" },
+      amber:   { active: "bg-amber-500 text-white border-amber-600 shadow-amber-200",       idle: "bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100",     bar: "bg-amber-500" },
+      rose:    { active: "bg-rose-500 text-white border-rose-600 shadow-rose-200",          idle: "bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100",         bar: "bg-rose-500" },
+      violet:  { active: "bg-violet-500 text-white border-violet-600 shadow-violet-200",    idle: "bg-violet-50 text-violet-800 border-violet-200 hover:bg-violet-100", bar: "bg-violet-500" },
+      indigo:  { active: "bg-indigo-500 text-white border-indigo-600 shadow-indigo-200",    idle: "bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100", bar: "bg-indigo-500" },
+      orange:  { active: "bg-orange-500 text-white border-orange-600 shadow-orange-200",    idle: "bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100", bar: "bg-orange-500" },
+      teal:    { active: "bg-teal-500 text-white border-teal-600 shadow-teal-200",          idle: "bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100",         bar: "bg-teal-500" }
+    };
+
+    const CHEER_MESSAGES_PLUS = [
+      "讚喔！動作超俐落 👏",
+      "水啦！又推進一步 🚀",
+      "神隊友就是你 ⚡",
+      "太給力了！繼續保持 🔥",
+      "完美紀錄！團隊士氣 UP 🌟",
+      "辛苦了！效率滿分 💯"
+    ];
+
+    const CHEER_MESSAGES_MINUS = [
+      "已修正 －1，紀錄準確最棒 👍",
+      "沒問題！已幫你微調 －1 ✨",
+      "細心核對！已完成 －1 紀錄 👌"
+    ];
+
+    /** 取得台灣本地 YYYY-MM-DD */
+    function getLocalTodayStr() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    /** 取得台灣本地 HH:mm:ss */
+    function getLocalTimeStr() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    /** 將 YYYY-MM-DD 轉為 YYYY/MM/DD 顯示格式 */
+    function formatSlashDate(isoDate) {
+      if (!isoDate) return "";
+      return isoDate.replaceAll("-", "/");
+    }
+
+    /** 取得今日星期幾中文 */
+    function getWeekdayZh(isoDate) {
+      const [y, m, d] = isoDate.split("-").map(Number);
+      const day = new Date(y, m - 1, d).getDay();
+      return ["日", "一", "二", "三", "四", "五", "六"][day];
+    }
+
+    // =========================================================
+    // 2. 應用程式狀態 (State)
+    // =========================================================
+    const state = {
+      todayStr: getLocalTodayStr(),
+      selectedDate: getLocalTodayStr(),
+      members: [...DEFAULT_MEMBERS],
+      activeMemberName: DEFAULT_MEMBERS[0].name,
+      logs: [],
+      filterCategory: "all",       // 'all' | 'inbound' | 'outbound' | 'trash'
+      filterDateScope: "today",    // 'today' | 'selected' | 'all'
+      soundEnabled: true,
+      selectedNewEmoji: AVATAR_EMOJIS[0],
+      pendingDeleteLogId: null,
+      isFirebaseReady: false,
+      isCloudMode: false,
+      currentUser: null,
+      hasSeededDefaults: false
+    };
+
+    // Firebase 實例參考
+    let db = null;
+    let auth = null;
+    let appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
+    let membersColRef = null;
+    let logsColRef = null;
+
+    // =========================================================
+    // 3. 音效系統 (Tone.js 輕快回饋音效)
+    // =========================================================
+    let synth = null;
+    function playClickSound(type) {
+      if (!state.soundEnabled || typeof Tone === "undefined") return;
+      try {
+        if (Tone.context.state !== "running") {
+          Tone.start();
+        }
+        if (!synth) {
+          synth = new Tone.Synth({
+            oscillator: { type: "triangle" },
+            envelope: { attack: 0.005, decay: 0.08, sustain: 0.02, release: 0.12 }
+          }).toDestination();
+          synth.volume.value = -10;
+        }
+        if (type === "plus") {
+          synth.triggerAttackRelease("G5", "16n");
+        } else if (type === "minus") {
+          synth.triggerAttackRelease("D4", "16n");
+        } else if (type === "celebrate") {
+          const now = Tone.now();
+          synth.triggerAttackRelease("C5", "16n", now);
+          synth.triggerAttackRelease("E5", "16n", now + 0.07);
+          synth.triggerAttackRelease("G5", "16n", now + 0.14);
+        }
+      } catch (err) {
+        // 忽略瀏覽器音訊自動播放限制錯誤
+      }
+    }
+
+    // =========================================================
+    // 4. DOM 節點快取
+    // =========================================================
+    const els = {
+      soundToggleBtn: document.getElementById("soundToggleBtn"),
+      soundIcon: document.getElementById("soundIcon"),
+      soundLabel: document.getElementById("soundLabel"),
+      syncDot: document.getElementById("syncDot"),
+      syncText: document.getElementById("syncText"),
+      syncStatusBtn: document.getElementById("syncStatusBtn"),
+      footerUserId: document.getElementById("footerUserId"),
+
+      currentMemberPill: document.getElementById("currentMemberPill"),
+      memberListContainer: document.getElementById("memberListContainer"),
+      openAddMemberBtn: document.getElementById("openAddMemberBtn"),
+
+      todayDateSubtitle: document.getElementById("todayDateSubtitle"),
+      recordDateInput: document.getElementById("recordDateInput"),
+      resetTodayBtn: document.getElementById("resetTodayBtn"),
+      backfillBanner: document.getElementById("backfillBanner"),
+      backfillDateText: document.getElementById("backfillDateText"),
+      bannerBackTodayBtn: document.getElementById("bannerBackTodayBtn"),
+      actionDateHint: document.getElementById("actionDateHint"),
+
+      overviewTodayInbound: document.getElementById("overviewTodayInbound"),
+      overviewTodayOutbound: document.getElementById("overviewTodayOutbound"),
+      overviewTodayTrash: document.getElementById("overviewTodayTrash"),
+      overviewTodayDiff: document.getElementById("overviewTodayDiff"),
+      overviewTotalDiff: document.getElementById("overviewTotalDiff"),
+
+      teamCheerText: document.getElementById("teamCheerText"),
+      teamTodayTotalActions: document.getElementById("teamTodayTotalActions"),
+      leaderboardContainer: document.getElementById("leaderboardContainer"),
+
+      visibleLogCount: document.getElementById("visibleLogCount"),
+      filterSelectedDateBtn: document.getElementById("filterSelectedDateBtn"),
+      ledgerTableBody: document.getElementById("ledgerTableBody"),
+      ledgerMobileList: document.getElementById("ledgerMobileList"),
+      emptyLedgerState: document.getElementById("emptyLedgerState"),
+      exportCsvBtn: document.getElementById("exportCsvBtn"),
+
+      addMemberModal: document.getElementById("addMemberModal"),
+      closeAddMemberModalBtn: document.getElementById("closeAddMemberModalBtn"),
+      cancelAddMemberBtn: document.getElementById("cancelAddMemberBtn"),
+      addMemberForm: document.getElementById("addMemberForm"),
+      newMemberNameInput: document.getElementById("newMemberNameInput"),
+      addMemberError: document.getElementById("addMemberError"),
+      emojiPicker: document.getElementById("emojiPicker"),
+
+      deleteConfirmModal: document.getElementById("deleteConfirmModal"),
+      deleteLogPreview: document.getElementById("deleteLogPreview"),
+      cancelDeleteBtn: document.getElementById("cancelDeleteBtn"),
+      confirmDeleteBtn: document.getElementById("confirmDeleteBtn"),
+
+      toastContainer: document.getElementById("toastContainer")
+    };
+
+    // =========================================================
+    // 5. Toast 提示與視覺彈跳特效
+    // =========================================================
+    function showToast(message, tone = "success") {
+      const toast = document.createElement("div");
+      const styles = {
+        success: "bg-slate-900/95 text-white border-slate-700",
+        warn: "bg-amber-600/95 text-white border-amber-500",
+        danger: "bg-rose-600/95 text-white border-rose-500",
+        info: "bg-sky-600/95 text-white border-sky-500"
+      };
+      toast.className = `pointer-events-auto px-4 py-2.5 rounded-2xl border shadow-xl text-xs sm:text-sm font-bold flex items-center gap-2 animate-toastSlideIn ${styles[tone] || styles.success}`;
+      toast.textContent = message;
+
+      // 最多同時顯示 3 則，避免擋住畫面
+      while (els.toastContainer.children.length >= 3) {
+        els.toastContainer.firstElementChild.remove();
+      }
+      els.toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(8px) scale(0.96)";
+        setTimeout(() => toast.remove(), 260);
+      }, 2200);
+    }
+
+    /** 觸發卡片數字彈跳與 +1 / -1 浮動粒子 */
+    function triggerCardFeedback(category, delta) {
+      const countEl = document.getElementById(`count-${category}`);
+      const anchorEl = document.getElementById(`floatAnchor-${category}`);
+
+      if (countEl) {
+        countEl.classList.remove("animate-popBump");
+        void countEl.offsetWidth; // 強制重新觸發動畫
+        countEl.classList.add("animate-popBump");
+      }
+
+      if (anchorEl) {
+        const badge = document.createElement("span");
+        badge.textContent = delta > 0 ? "+1" : "-1";
+        badge.className = `absolute left-0 top-0 text-xl font-black animate-floatUpFade whitespace-nowrap ${
+          delta > 0 ? CATEGORIES[category].textColor : "text-rose-500"
+        }`;
+        anchorEl.appendChild(badge);
+        setTimeout(() => badge.remove(), 780);
+      }
+    }
+
+    // =========================================================
+    // 6. Firebase 初始化與即時同步監聽
+    // =========================================================
+    function updateSyncBadge(status, text) {
+      if (status === "cloud") {
+        els.syncDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+        els.syncStatusBtn.className = "flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs sm:text-sm font-bold transition hover:bg-emerald-100 cursor-pointer";
+      } else if (status === "demo") {
+        els.syncDot.className = "w-2.5 h-2.5 rounded-full bg-sky-500";
+        els.syncStatusBtn.className = "flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 text-xs sm:text-sm font-bold transition hover:bg-sky-100 cursor-pointer";
+      } else {
+        els.syncDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+        els.syncStatusBtn.className = "flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs sm:text-sm font-bold transition cursor-pointer";
+      }
+      els.syncText.textContent = text;
+    }
+
+    async function initFirebaseSync() {
+      try {
+        if (typeof __firebase_config === "undefined" || !__firebase_config) {
+          // 環境未提供雲端設定時，啟用本機單次展示模式（不崩潰、不使用 localStorage）
+          state.isCloudMode = false;
+          state.isFirebaseReady = true;
+          els.footerUserId.textContent = "本機展示模式（尚未連結雲端資料庫）";
+          updateSyncBadge("demo", "本機展示中");
+          renderAll();
+          return;
+        }
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // RULE 3: 優先使用 Custom Token，否則匿名登入，並等待完成後才存取 Firestore
+        if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+          if (!user) return;
+          state.currentUser = user;
+          state.isCloudMode = true;
+          state.isFirebaseReady = true;
+          els.footerUserId.textContent = user.uid;
+          updateSyncBadge("cloud", "雲端同步中");
+
+          // RULE 1: 嚴格遵守公開多人共享路徑 /artifacts/{appId}/public/data/{collectionName}
+          membersColRef = collection(db, "artifacts", appId, "public", "data", "team_members");
+          logsColRef = collection(db, "artifacts", appId, "public", "data", "ledger_logs");
+
+          subscribeToCollections();
+        });
+      } catch (err) {
+        console.error("Firebase 初始化失敗:", err);
+        state.isCloudMode = false;
+        state.isFirebaseReady = true;
+        els.footerUserId.textContent = "離線備援模式";
+        updateSyncBadge("demo", "離線模式");
+        showToast("雲端連線異常，已切換為本機暫存模式", "warn");
+        renderAll();
+      }
+    }
+
+    /** 訂閱團隊成員與流水帳的即時變動（RULE 2: 不使用複雜查詢，於記憶體排序） */
+    function subscribeToCollections() {
+      if (!state.currentUser || !membersColRef || !logsColRef) return;
+
+      // 1. 監聽團隊成員名單
+      onSnapshot(
+        membersColRef,
+        async (snapshot) => {
+          if (snapshot.empty && !state.hasSeededDefaults) {
+            state.hasSeededDefaults = true;
+            // 使用固定 ID 寫入預設成員，避免多人同時開啟產生重複項目
+            try {
+              await Promise.all(
+                DEFAULT_MEMBERS.map((m) =>
+                  setDoc(doc(membersColRef, m.id), {
+                    name: m.name,
+                    emoji: m.emoji,
+                    color: m.color,
+                    order: m.order,
+                    createdAt: Date.now()
+                  })
+                )
+              );
+            } catch (seedErr) {
+              console.error("寫入預設成員失敗:", seedErr);
+            }
+            return;
+          }
+
+          const loadedMembers = [];
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data && data.name) {
+              loadedMembers.push({
+                id: docSnap.id,
+                name: data.name,
+                emoji: data.emoji || "⭐",
+                color: data.color || "sky",
+                order: typeof data.order === "number" ? data.order : 999,
+                createdAt: data.createdAt || 0
+              });
+            }
+          });
+
+          // 在記憶體中排序：預設成員依 order，新增夥伴依建立時間
+          loadedMembers.sort((a, b) => {
+            if (a.order !== b.order) return a.order - b.order;
+            return a.createdAt - b.createdAt;
+          });
+
+          if (loadedMembers.length > 0) {
+            state.members = loadedMembers;
+            // 若目前選取的夥伴不在清單中，自動選取第一位
+            const exists = state.members.some((m) => m.name === state.activeMemberName);
+            if (!exists) {
+              state.activeMemberName = state.members[0].name;
+            }
+          }
+          renderMembers();
+          renderLeaderboard();
+        },
+        (error) => {
+          console.error("監聽團隊成員失敗:", error);
+          showToast("同步夥伴名單時發生錯誤", "danger");
+        }
+      );
+
+      // 2. 監聽流水帳紀錄
+      onSnapshot(
+        logsColRef,
+        (snapshot) => {
+          const loadedLogs = [];
+          snapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            if (d && d.category && typeof d.delta === "number") {
+              loadedLogs.push({
+                id: docSnap.id,
+                date: d.date || state.todayStr,
+                time: d.time || "00:00:00",
+                timestamp: d.timestamp || 0,
+                memberName: d.memberName || "夥伴",
+                memberEmoji: d.memberEmoji || "⭐",
+                category: d.category,
+                delta: d.delta,
+                createdByUid: d.createdByUid || ""
+              });
+            }
+          });
+
+          // 在記憶體中依最新時間排序（由新到舊）
+          loadedLogs.sort((a, b) => b.timestamp - a.timestamp);
+          state.logs = loadedLogs;
+          renderAll();
+        },
+        (error) => {
+          console.error("監聽流水帳失敗:", error);
+          showToast("同步流水帳時發生錯誤", "danger");
+        }
+      );
+    }
+
+    // =========================================================
+    // 7. 資料操作函式（新增紀錄、新增夥伴、刪除紀錄）
+    // =========================================================
+    async function recordAction(category, delta) {
+      // 確保今天日期保持最新（跨午夜自動更新）
+      state.todayStr = getLocalTodayStr();
+
+      const member = state.members.find((m) => m.name === state.activeMemberName) || state.members[0];
+      const newLog = {
+        date: state.selectedDate,
+        time: getLocalTimeStr(),
+        timestamp: Date.now(),
+        memberName: member.name,
+        memberEmoji: member.emoji,
+        category,
+        delta,
+        createdByUid: state.currentUser ? state.currentUser.uid : "local-demo"
+      };
+
+      // 立即給予視覺與聲音回饋
+      triggerCardFeedback(category, delta);
+
+      // 檢查是否達成今日團隊每 10 筆里程碑
+      const todayActionsBefore = state.logs.filter((l) => l.date === state.todayStr).length;
+      const isMilestone = newLog.date === state.todayStr && (todayActionsBefore + 1) % 10 === 0;
+
+      if (isMilestone) {
+        playClickSound("celebrate");
+        showToast(`🎉 太神啦！全體今日已合力突破 ${todayActionsBefore + 1} 筆動作！`, "info");
+      } else {
+        playClickSound(delta > 0 ? "plus" : "minus");
+        const catInfo = CATEGORIES[category];
+        const msgPool = delta > 0 ? CHEER_MESSAGES_PLUS : CHEER_MESSAGES_MINUS;
+        const cheer = msgPool[Math.floor(Math.random() * msgPool.length)];
+        const signText = delta > 0 ? "+1" : "-1";
+        showToast(`${member.emoji} ${member.name} ${catInfo.label} ${signText}！${cheer}`, delta > 0 ? "success" : "warn");
+      }
+
+      if (state.isCloudMode && state.currentUser && logsColRef) {
+        try {
+          await addDoc(logsColRef, newLog);
+        } catch (err) {
+          console.error("寫入流水帳失敗:", err);
+          showToast("寫入雲端失敗，請稍後再試", "danger");
+        }
+      } else {
+        // 本機展示模式直接更新記憶體
+        state.logs.unshift({ id: `local_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, ...newLog });
+        renderAll();
+      }
+    }
+
+    async function addNewMember(name, emoji) {
+      const trimmed = name.trim();
+      if (!trimmed) {
+        return { ok: false, error: "請輸入夥伴名稱喔！" };
+      }
+      if (state.members.some((m) => m.name === trimmed)) {
+        return { ok: false, error: "這位夥伴已經在名單裡囉！" };
+      }
+
+      const color = MEMBER_COLORS[state.members.length % MEMBER_COLORS.length];
+      const memberData = {
+        name: trimmed,
+        emoji: emoji || "🚀",
+        color,
+        order: 100 + state.members.length,
+        createdAt: Date.now()
+      };
+
+      if (state.isCloudMode && state.currentUser && membersColRef) {
+        try {
+          await addDoc(membersColRef, memberData);
+        } catch (err) {
+          console.error("新增夥伴失敗:", err);
+          return { ok: false, error: "雲端儲存失敗，請再試一次" };
+        }
+      } else {
+        state.members.push({ id: `local_m_${Date.now()}`, ...memberData });
+      }
+
+      state.activeMemberName = trimmed;
+      renderMembers();
+      renderLeaderboard();
+      playClickSound("celebrate");
+      showToast(`歡迎新夥伴 ${emoji} ${trimmed} 加入！一起動起來！`, "info");
+      return { ok: true };
+    }
+
+    async function deleteLogEntry(logId) {
+      if (!logId) return;
+
+      if (state.isCloudMode && state.currentUser && logsColRef) {
+        try {
+          await deleteDoc(doc(logsColRef, logId));
+          showToast("已復原並刪除該筆紀錄", "info");
+        } catch (err) {
+          console.error("刪除紀錄失敗:", err);
+          showToast("刪除失敗，請稍後再試", "danger");
+        }
+      } else {
+        state.logs = state.logs.filter((l) => l.id !== logId);
+        renderAll();
+        showToast("已復原並刪除該筆紀錄", "info");
+      }
+    }
+
+    // =========================================================
+    // 8. 畫面渲染函式 (Renderers)
+    // =========================================================
+    function renderAll() {
+      renderDateUI();
+      renderMembers();
+      renderCountersAndOverview();
+      renderLeaderboard();
+      renderFilterButtons();
+      renderLedger();
+    }
+
+    /** 渲染日期選擇器與補登提醒 */
+    function renderDateUI() {
+      const isToday = state.selectedDate === state.todayStr;
+      els.todayDateSubtitle.textContent = `今天是 ${formatSlashDate(state.todayStr)}（週${getWeekdayZh(state.todayStr)}）`;
+      els.recordDateInput.value = state.selectedDate;
+
+      if (isToday) {
+        els.resetTodayBtn.classList.add("hidden");
+        els.backfillBanner.classList.add("hidden");
+        els.backfillBanner.classList.remove("flex");
+        els.actionDateHint.textContent = `計數顯示：今日 (${formatSlashDate(state.todayStr)})`;
+        els.actionDateHint.className = "text-xs sm:text-sm font-bold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200";
+        els.filterSelectedDateBtn.classList.add("hidden");
+        if (state.filterDateScope === "selected") {
+          state.filterDateScope = "today";
+        }
+      } else {
+        els.resetTodayBtn.classList.remove("hidden");
+        els.backfillBanner.classList.remove("hidden");
+        els.backfillBanner.classList.add("flex");
+        els.backfillDateText.textContent = `${formatSlashDate(state.selectedDate)}（週${getWeekdayZh(state.selectedDate)}）`;
+        els.actionDateHint.textContent = `📌 補登日計數：${formatSlashDate(state.selectedDate)}`;
+        els.actionDateHint.className = "text-xs sm:text-sm font-extrabold text-amber-800 bg-amber-100 px-3 py-1 rounded-full border border-amber-300";
+        els.filterSelectedDateBtn.classList.remove("hidden");
+        els.filterSelectedDateBtn.textContent = `僅看 ${formatSlashDate(state.selectedDate).slice(5)}`;
+      }
+
+      document.querySelectorAll(".date-card-label").forEach((el) => {
+        el.textContent = isToday ? "今日累計" : `${formatSlashDate(state.selectedDate).slice(5)} 累計`;
+      });
+    }
+
+    /** 渲染「現在是誰在紀錄？」頭像切換按鈕 */
+    function renderMembers() {
+      const activeMember = state.members.find((m) => m.name === state.activeMemberName) || state.members[0];
+      if (activeMember) {
+        els.currentMemberPill.textContent = `目前紀錄者：${activeMember.emoji} ${activeMember.name}`;
+      }
+
+      els.memberListContainer.innerHTML = "";
+      state.members.forEach((m) => {
+        const isActive = m.name === state.activeMemberName;
+        const theme = COLOR_STYLES[m.color] || COLOR_STYLES.sky;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 text-sm sm:text-base font-extrabold transition active:scale-95 cursor-pointer ${
+          isActive ? `${theme.active} shadow-md ring-2 ring-offset-2 ring-amber-300` : theme.idle
+        }`;
+        btn.innerHTML = `
+          <span class="text-lg leading-none">${escapeHtml(m.emoji)}</span>
+          <span>${escapeHtml(m.name)}</span>
+          ${isActive ? '<span class="text-xs bg-white/25 px-1.5 py-0.5 rounded-full ml-0.5">✓</span>' : ""}
+        `;
+        btn.addEventListener("click", () => {
+          state.activeMemberName = m.name;
+          renderMembers();
+          playClickSound("plus");
+          showToast(`已切換為 ${m.emoji} ${m.name} 紀錄中！`, "info");
+        });
+        els.memberListContainer.appendChild(btn);
+      });
+    }
+
+    /** 渲染今日戰況總覽與三大項目卡片計數 */
+    function renderCountersAndOverview() {
+      const todaySums = { inbound: 0, outbound: 0, trash: 0 };
+      const selectedSums = { inbound: 0, outbound: 0, trash: 0 };
+      const allTimeSums = { inbound: 0, outbound: 0, trash: 0 };
+
+      state.logs.forEach((log) => {
+        if (allTimeSums[log.category] !== undefined) {
+          allTimeSums[log.category] += log.delta;
+        }
+        if (log.date === state.todayStr && todaySums[log.category] !== undefined) {
+          todaySums[log.category] += log.delta;
+        }
+        if (log.date === state.selectedDate && selectedSums[log.category] !== undefined) {
+          selectedSums[log.category] += log.delta;
+        }
+      });
+
+      // 更新今日戰況總覽
+      els.overviewTodayInbound.textContent = todaySums.inbound;
+      els.overviewTodayOutbound.textContent = todaySums.outbound;
+      els.overviewTodayTrash.textContent = todaySums.trash;
+
+      const todayDiff = todaySums.inbound - todaySums.outbound;
+      const totalDiff = allTimeSums.inbound - allTimeSums.outbound;
+      els.overviewTodayDiff.textContent = todayDiff > 0 ? `+${todayDiff}` : `${todayDiff}`;
+      els.overviewTotalDiff.textContent = totalDiff > 0 ? `+${totalDiff}` : `${totalDiff}`;
+
+      // 更新三大操作卡片（選定日累計 + 歷史累計）
+      ["inbound", "outbound", "trash"].forEach((cat) => {
+        const countEl = document.getElementById(`count-${cat}`);
+        const allTimeEl = document.getElementById(`allTime-${cat}`);
+        if (countEl) countEl.textContent = selectedSums[cat];
+        if (allTimeEl) allTimeEl.textContent = allTimeSums[cat];
+      });
+    }
+
+    /** 渲染「今日全員動起來排行榜 / 團隊總動力」 */
+    function renderLeaderboard() {
+      const todayLogs = state.logs.filter((l) => l.date === state.todayStr);
+      const totalActions = todayLogs.length;
+      els.teamTodayTotalActions.textContent = totalActions;
+
+      // 動態團隊激勵小語
+      let cheer = "新的一天開始囉！快按下第一個 ＋ 啟動團隊動力！";
+      if (totalActions >= 1 && totalActions <= 5) {
+        cheer = `好開始！今天大家已合力完成 ${totalActions} 筆動作，熱身完成！`;
+      } else if (totalActions >= 6 && totalActions <= 15) {
+        cheer = `大家太棒了！今天已合力完成 ${totalActions} 筆動作，節奏超讚！`;
+      } else if (totalActions >= 16 && totalActions <= 30) {
+        cheer = `全員火力全開！今天已聯手完成 ${totalActions} 筆動作，默契滿分！`;
+      } else if (totalActions > 30) {
+        cheer = `無敵夢幻團隊！今天狂飆 ${totalActions} 筆動作，大家辛苦了！🏆`;
+      }
+      els.teamCheerText.textContent = cheer;
+
+      // 統計每位夥伴今日貢獻次數（包含名單內與曾出現在今日紀錄中的人）
+      const statsMap = new Map();
+      state.members.forEach((m) => {
+        statsMap.set(m.name, {
+          name: m.name,
+          emoji: m.emoji,
+          color: m.color,
+          count: 0,
+          inbound: 0,
+          outbound: 0,
+          trash: 0
+        });
+      });
+
+      todayLogs.forEach((log) => {
+        if (!statsMap.has(log.memberName)) {
+          statsMap.set(log.memberName, {
+            name: log.memberName,
+            emoji: log.memberEmoji || "⭐",
+            color: "indigo",
+            count: 0,
+            inbound: 0,
+            outbound: 0,
+            trash: 0
+          });
+        }
+        const entry = statsMap.get(log.memberName);
+        entry.count += 1;
+        if (entry[log.category] !== undefined) {
+          entry[log.category] += 1;
+        }
+      });
+
+      const ranked = Array.from(statsMap.values()).sort((a, b) => b.count - a.count);
+      const maxCount = Math.max(...ranked.map((r) => r.count), 1);
+
+      els.leaderboardContainer.innerHTML = "";
+      ranked.forEach((person, idx) => {
+        const pct = person.count === 0 ? 0 : Math.max(8, Math.round((person.count / maxCount) * 100));
+        const theme = COLOR_STYLES[person.color] || COLOR_STYLES.sky;
+        const rankIcon = person.count > 0
+          ? (idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`)
+          : "—";
+
+        const card = document.createElement("div");
+        card.className = "rounded-2xl bg-slate-50/90 border border-slate-200/70 p-3.5 space-y-2";
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-6 text-center text-sm font-black text-slate-500 shrink-0">${rankIcon}</span>
+              <span class="text-lg leading-none">${escapeHtml(person.emoji)}</span>
+              <span class="font-extrabold text-slate-800 truncate">${escapeHtml(person.name)}</span>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-base font-black text-slate-900 tabular-nums">${person.count}</span>
+              <span class="text-xs font-bold text-slate-500">次</span>
+            </div>
+          </div>
+          <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-500 ${theme.bar}" style="width: ${pct}%"></div>
+          </div>
+          <div class="flex items-center gap-2.5 text-[11px] font-bold text-slate-500">
+            <span>📦 ${person.inbound}</span>
+            <span>🚚 ${person.outbound}</span>
+            <span>🗑️ ${person.trash}</span>
+          </div>
+        `;
+        els.leaderboardContainer.appendChild(card);
+      });
+    }
+
+    /** 渲染篩選按鈕選中狀態 */
+    function renderFilterButtons() {
+      document.querySelectorAll(".filter-cat-btn").forEach((btn) => {
+        const active = btn.dataset.filterCat === state.filterCategory;
+        btn.className = `filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
+          active
+            ? "bg-slate-900 text-white shadow-sm"
+            : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+        }`;
+      });
+
+      document.querySelectorAll(".filter-date-btn").forEach((btn) => {
+        const isHidden = btn.id === "filterSelectedDateBtn" && state.selectedDate === state.todayStr;
+        const active = btn.dataset.filterDate === state.filterDateScope;
+        btn.className = `${isHidden ? "hidden" : ""} filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
+          active
+            ? "bg-amber-500 text-white shadow-sm"
+            : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+        }`;
+      });
+    }
+
+    /** 取得目前篩選後的流水帳陣列 */
+    function getFilteredLogs() {
+      return state.logs.filter((log) => {
+        if (state.filterCategory !== "all" && log.category !== state.filterCategory) {
+          return false;
+        }
+        if (state.filterDateScope === "today" && log.date !== state.todayStr) {
+          return false;
+        }
+        if (state.filterDateScope === "selected" && log.date !== state.selectedDate) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    /** 渲染流水帳表格（電腦版）與卡片列表（手機版） */
+    function renderLedger() {
+      const filtered = getFilteredLogs();
+      els.visibleLogCount.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        els.ledgerTableBody.innerHTML = "";
+        els.ledgerMobileList.innerHTML = "";
+        els.emptyLedgerState.classList.remove("hidden");
+        return;
+      }
+
+      els.emptyLedgerState.classList.add("hidden");
+
+      // 電腦版 Table Rows
+      els.ledgerTableBody.innerHTML = filtered
+        .map((log) => {
+          const cat = CATEGORIES[log.category] || CATEGORIES.inbound;
+          const isPlus = log.delta > 0;
+          const deltaBadge = isPlus
+            ? `<span class="inline-block px-3 py-1 rounded-xl bg-emerald-100 text-emerald-700 font-black tabular-nums">+1</span>`
+            : `<span class="inline-block px-3 py-1 rounded-xl bg-rose-100 text-rose-700 font-black tabular-nums">-1</span>`;
+
+          return `
+            <tr class="hover:bg-slate-50/90 transition">
+              <td class="py-3 px-4 font-bold text-slate-800 tabular-nums">${escapeHtml(formatSlashDate(log.date))}</td>
+              <td class="py-3 px-4 font-medium text-slate-500 tabular-nums">${escapeHtml(log.time)}</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1.5 font-bold text-slate-800">
+                  <span>${escapeHtml(log.memberEmoji)}</span>
+                  <span>${escapeHtml(log.memberName)}</span>
+                </span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-extrabold ${cat.pillClass}">
+                  <span>${cat.emoji}</span>
+                  <span>${cat.label}</span>
+                </span>
+              </td>
+              <td class="py-3 px-4 text-center">${deltaBadge}</td>
+              <td class="py-3 px-4 text-right">
+                <button
+                  type="button"
+                  data-delete-id="${escapeHtml(log.id)}"
+                  class="delete-log-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                >
+                  刪除復原
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+
+      // 手機版 Card Items
+      els.ledgerMobileList.innerHTML = filtered
+        .map((log) => {
+          const cat = CATEGORIES[log.category] || CATEGORIES.inbound;
+          const isPlus = log.delta > 0;
+          const deltaClass = isPlus
+            ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+            : "bg-rose-100 text-rose-700 border-rose-200";
+
+          return `
+            <div class="rounded-2xl bg-slate-50/80 border border-slate-200/80 p-3.5 flex items-center justify-between gap-3">
+              <div class="space-y-1.5 min-w-0">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-extrabold ${cat.pillClass}">
+                    <span>${cat.emoji}</span>
+                    <span>${cat.label}</span>
+                  </span>
+                  <span class="inline-flex items-center gap-1 text-sm font-extrabold text-slate-800">
+                    <span>${escapeHtml(log.memberEmoji)}</span>
+                    <span>${escapeHtml(log.memberName)}</span>
+                  </span>
+                </div>
+                <div class="text-xs font-semibold text-slate-500 tabular-nums">
+                  📅 ${escapeHtml(formatSlashDate(log.date))}　🕒 ${escapeHtml(log.time)}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="w-11 h-10 rounded-xl border font-black text-base flex items-center justify-center tabular-nums ${deltaClass}">
+                  ${isPlus ? "+1" : "-1"}
+                </span>
+                <button
+                  type="button"
+                  data-delete-id="${escapeHtml(log.id)}"
+                  aria-label="刪除此筆紀錄"
+                  class="delete-log-btn w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 flex items-center justify-center text-sm font-bold transition cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    // =========================================================
+    // 9. CSV 匯出功能（支援 Excel 繁體中文 UTF-8 BOM）
+    // =========================================================
+    function exportLogsToCsv() {
+      const targetLogs = getFilteredLogs();
+      if (targetLogs.length === 0) {
+        showToast("目前篩選條件下沒有紀錄可以匯出喔！", "warn");
+        return;
+      }
+
+      const headers = ["登記日期", "紀錄時間", "執行夥伴", "項目分類", "動作變動"];
+      const rows = targetLogs.map((log) => {
+        const cat = CATEGORIES[log.category] || { label: log.category };
+        return [
+          formatSlashDate(log.date),
+          log.time,
+          log.memberName,
+          cat.label,
+          log.delta > 0 ? "+1" : "-1"
+        ].map((field) => `"${String(field).replaceAll('"', '""')}"`).join(",");
+      });
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      const scopeTag = state.filterDateScope === "all" ? "全部日期" : state.selectedDate;
+      link.download = `全員動起來流水帳_${scopeTag}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      playClickSound("celebrate");
+      showToast(`已成功匯出 ${targetLogs.length} 筆紀錄表 (CSV)！`, "success");
+    }
+
+    // =========================================================
+    // 10. 自訂彈窗控制（新增夥伴 & 刪除確認）
+    // =========================================================
+    function renderEmojiPicker() {
+      els.emojiPicker.innerHTML = "";
+      AVATAR_EMOJIS.forEach((emo) => {
+        const isSelected = emo === state.selectedNewEmoji;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = emo;
+        btn.className = `h-10 rounded-xl text-xl flex items-center justify-center border-2 transition cursor-pointer ${
+          isSelected
+            ? "bg-amber-100 border-amber-400 scale-105"
+            : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+        }`;
+        btn.addEventListener("click", () => {
+          state.selectedNewEmoji = emo;
+          renderEmojiPicker();
+        });
+        els.emojiPicker.appendChild(btn);
+      });
+    }
+
+    function openAddMemberModal() {
+      els.newMemberNameInput.value = "";
+      els.addMemberError.classList.add("hidden");
+      state.selectedNewEmoji = AVATAR_EMOJIS[Math.floor(Math.random() * AVATAR_EMOJIS.length)];
+      renderEmojiPicker();
+      els.addMemberModal.classList.remove("hidden");
+      els.addMemberModal.classList.add("flex");
+      setTimeout(() => els.newMemberNameInput.focus(), 60);
+    }
+
+    function closeAddMemberModal() {
+      els.addMemberModal.classList.add("hidden");
+      els.addMemberModal.classList.remove("flex");
+    }
+
+    function openDeleteModal(logId) {
+      const log = state.logs.find((l) => l.id === logId);
+      if (!log) return;
+      state.pendingDeleteLogId = logId;
+      const cat = CATEGORIES[log.category] || CATEGORIES.inbound;
+      const deltaStr = log.delta > 0 ? "+1" : "-1";
+
+      els.deleteLogPreview.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span>${escapeHtml(log.memberEmoji)} ${escapeHtml(log.memberName)}</span>
+          <span class="px-2 py-0.5 rounded-lg text-xs ${cat.pillClass}">${cat.emoji} ${cat.label} (${deltaStr})</span>
+        </div>
+        <div class="text-xs text-slate-500 font-semibold">
+          登記日期：${escapeHtml(formatSlashDate(log.date))}　時間：${escapeHtml(log.time)}
+        </div>
+      `;
+
+      els.deleteConfirmModal.classList.remove("hidden");
+      els.deleteConfirmModal.classList.add("flex");
+    }
+
+    function closeDeleteModal() {
+      state.pendingDeleteLogId = null;
+      els.deleteConfirmModal.classList.add("hidden");
+      els.deleteConfirmModal.classList.remove("flex");
+    }
+
+    /** 簡易 HTML 跳脫防 XSS */
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    // =========================================================
+    // 11. 綁定事件監聽器
+    // =========================================================
+    function bindEvents() {
+      // 三大項目 ＋ / － 按鈕
+      document.querySelectorAll(".action-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const category = btn.dataset.category;
+          const delta = Number(btn.dataset.delta);
+          recordAction(category, delta);
+        });
+      });
+
+      // 音效開關
+      els.soundToggleBtn.addEventListener("click", () => {
+        state.soundEnabled = !state.soundEnabled;
+        els.soundIcon.textContent = state.soundEnabled ? "🔊" : "🔇";
+        els.soundLabel.textContent = state.soundEnabled ? "音效開" : "靜音";
+        if (state.soundEnabled) playClickSound("plus");
+        showToast(state.soundEnabled ? "已開啟點擊提示音 🔊" : "已切換為靜音模式 🔇", "info");
+      });
+
+      // 點擊同步狀態顯示提示
+      els.syncStatusBtn.addEventListener("click", () => {
+        if (state.isCloudMode) {
+          showToast("🟢 雲端即時同步中！所有夥伴都能立刻看到最新進度", "success");
+        } else {
+          showToast("目前為本機展示模式，重新整理後資料不會保留", "info");
+        }
+      });
+
+      // 登記日期變更
+      els.recordDateInput.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (!val) return;
+        state.selectedDate = val;
+        if (state.selectedDate !== state.todayStr) {
+          state.filterDateScope = "selected";
+          showToast(`已切換登記日期為 ${formatSlashDate(val)}（補登模式）`, "warn");
+        } else {
+          state.filterDateScope = "today";
+        }
+        renderAll();
+      });
+
+      // 回到今天按鈕（兩處）
+      const goBackToday = () => {
+        state.todayStr = getLocalTodayStr();
+        state.selectedDate = state.todayStr;
+        state.filterDateScope = "today";
+        renderAll();
+        showToast(`已切回今日 (${formatSlashDate(state.todayStr)})！`, "info");
+      };
+      els.resetTodayBtn.addEventListener("click", goBackToday);
+      els.bannerBackTodayBtn.addEventListener("click", goBackToday);
+
+      // 分類篩選按鈕
+      document.querySelectorAll(".filter-cat-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.filterCategory = btn.dataset.filterCat;
+          renderFilterButtons();
+          renderLedger();
+        });
+      });
+
+      // 日期篩選按鈕
+      document.querySelectorAll(".filter-date-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.filterDateScope = btn.dataset.filterDate;
+          renderFilterButtons();
+          renderLedger();
+        });
+      });
+
+      // 匯出 CSV
+      els.exportCsvBtn.addEventListener("click", exportLogsToCsv);
+
+      // 流水帳單筆刪除事件委派（電腦表格 + 手機卡片）
+      const handleDeleteClick = (e) => {
+        const btn = e.target.closest(".delete-log-btn");
+        if (!btn) return;
+        openDeleteModal(btn.dataset.deleteId);
+      };
+      els.ledgerTableBody.addEventListener("click", handleDeleteClick);
+      els.ledgerMobileList.addEventListener("click", handleDeleteClick);
+
+      // 新增夥伴 Modal 事件
+      els.openAddMemberBtn.addEventListener("click", openAddMemberModal);
+      els.closeAddMemberModalBtn.addEventListener("click", closeAddMemberModal);
+      els.cancelAddMemberBtn.addEventListener("click", closeAddMemberModal);
+      els.addMemberModal.addEventListener("click", (e) => {
+        if (e.target === els.addMemberModal) closeAddMemberModal();
+      });
+
+      els.addMemberForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const result = await addNewMember(els.newMemberNameInput.value, state.selectedNewEmoji);
+        if (result.ok) {
+          closeAddMemberModal();
+        } else {
+          els.addMemberError.textContent = result.error;
+          els.addMemberError.classList.remove("hidden");
+        }
+      });
+
+      // 刪除確認 Modal 事件
+      els.cancelDeleteBtn.addEventListener("click", closeDeleteModal);
+      els.deleteConfirmModal.addEventListener("click", (e) => {
+        if (e.target === els.deleteConfirmModal) closeDeleteModal();
+      });
+      els.confirmDeleteBtn.addEventListener("click", async () => {
+        const idToDelete = state.pendingDeleteLogId;
+        closeDeleteModal();
+        await deleteLogEntry(idToDelete);
+      });
+    }
+
+    // =========================================================
+    // 12. 啟動應用程式
+    // =========================================================
+    window.addEventListener("DOMContentLoaded", () => {
+      bindEvents();
+      renderAll();
+      initFirebaseSync();
+    });
+  </script>
+</body>
+</html>
