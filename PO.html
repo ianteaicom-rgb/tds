@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>全員動起來！簡易流水帳紀錄</title>
+  <title>全員降庫存動起來！KG 流水帳紀錄網頁</title>
 
   <!-- Google Fonts: Inter & Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,60 +22,60 @@
           keyframes: {
             popBump: {
               '0%': { transform: 'scale(1)' },
-              '40%': { transform: 'scale(1.22)' },
+              '40%': { transform: 'scale(1.16)' },
               '100%': { transform: 'scale(1)' },
             },
             floatUpFade: {
               '0%': { opacity: '1', transform: 'translate(-50%, 0) scale(0.85)' },
-              '40%': { opacity: '1', transform: 'translate(-50%, -24px) scale(1.15)' },
+              '35%': { opacity: '1', transform: 'translate(-50%, -22px) scale(1.12)' },
               '100%': { opacity: '0', transform: 'translate(-50%, -48px) scale(0.95)' },
             },
             toastSlideIn: {
               '0%': { opacity: '0', transform: 'translateY(16px) scale(0.95)' },
               '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
             },
-            wiggle: {
-              '0%, 100%': { transform: 'rotate(-3deg)' },
-              '50%': { transform: 'rotate(3deg)' },
+            subtleBounce: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-3px)' },
             }
           },
           animation: {
             popBump: 'popBump 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            floatUpFade: 'floatUpFade 0.75s ease-out forwards',
+            floatUpFade: 'floatUpFade 0.8s ease-out forwards',
             toastSlideIn: 'toastSlideIn 0.25s ease-out forwards',
-            wiggle: 'wiggle 1.8s ease-in-out infinite',
+            subtleBounce: 'subtleBounce 1.8s ease-in-out infinite',
           }
         }
       }
     };
   </script>
 
-  <!-- Tone.js for subtle tactile click audio feedback -->
+  <!-- Tone.js 用於輕快點擊音效 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-amber-50/70 via-slate-50 to-sky-50/80 text-slate-800 antialiased selection:bg-amber-200 selection:text-slate-900 pb-12">
+<body class="min-h-screen bg-gradient-to-br from-emerald-50/70 via-slate-50 to-sky-50/80 text-slate-800 antialiased selection:bg-emerald-200 selection:text-slate-900 pb-14">
 
   <!-- =========================================================
-       頂部導覽與即時狀態列 (Header)
+       頂部導覽列 (Header)
        ========================================================= -->
-  <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
     <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-2">
-      <!-- 品牌標題 -->
+      <!-- 網站標題 -->
       <div class="flex items-center gap-2.5 min-w-0">
-        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-amber-400 via-orange-400 to-rose-400 text-white flex items-center justify-center shadow-md shadow-orange-200 shrink-0 text-xl animate-wiggle">
-          🚀
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-sky-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 shrink-0 text-xl animate-subtleBounce">
+          📉
         </div>
         <div class="min-w-0">
-          <h1 class="text-lg sm:text-xl font-black tracking-tight text-slate-900 truncate">
-            全員動起來！簡易流水帳
+          <h1 class="text-base sm:text-xl font-black tracking-tight text-slate-900 truncate">
+            全員降庫存動起來！KG 流水帳
           </h1>
-          <p class="text-xs text-slate-500 font-medium hidden sm:block">
-            零打字負擔・點一下即刻紀錄・團隊即時同步
+          <p class="text-xs text-slate-500 font-semibold hidden sm:block">
+            減少 2 ： 新增 1・單位 KG・點一下即刻同步
           </p>
         </div>
       </div>
 
-      <!-- 右側工具按鈕：音效開關 + 同步狀態 -->
+      <!-- 右側工具按鈕：音效開關 + 雲端同步狀態 -->
       <div class="flex items-center gap-2 shrink-0">
         <button
           id="soundToggleBtn"
@@ -90,7 +90,7 @@
         <button
           id="syncStatusBtn"
           type="button"
-          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs sm:text-sm font-bold transition hover:bg-emerald-100 cursor-pointer"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs sm:text-sm font-bold transition hover:opacity-90 cursor-pointer"
         >
           <span id="syncDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
           <span id="syncText">連線中...</span>
@@ -103,280 +103,426 @@
   <main class="max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
 
     <!-- =========================================================
-         區塊 1：現在是誰在紀錄？（快速頭像切換列）
+         區塊 1：降庫存 2:1 核心目標儀表板
          ========================================================= -->
-    <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">👋</span>
-          <h2 class="text-sm sm:text-base font-extrabold text-slate-800">
-            現在是誰在紀錄？
-          </h2>
-          <span id="currentMemberPill" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-            載入中...
-          </span>
-        </div>
-        <button
-          id="openAddMemberBtn"
-          type="button"
-          class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
-        >
-          <span>＋</span>
-          <span>新增夥伴</span>
-        </button>
-      </div>
-
-      <!-- 成員按鈕列 -->
-      <div id="memberListContainer" class="flex flex-wrap gap-2 sm:gap-2.5">
-        <!-- 由 JS 動態渲染夥伴按鈕 -->
-      </div>
-    </section>
-
-    <!-- =========================================================
-         區塊 2：今日戰況總覽 + 登記日期選擇列
-         ========================================================= -->
-    <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 space-y-4">
-      <!-- 標題與登記日期選擇器 -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">📊</span>
+    <section class="bg-white rounded-3xl p-4 sm:p-6 shadow-md shadow-slate-200/60 border border-slate-200/90 space-y-4">
+      <!-- 儀表板標題與時間範圍切換 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-xl flex items-center justify-center shadow-sm shrink-0">
+            🎯
+          </div>
           <div>
-            <h2 class="text-base sm:text-lg font-black text-slate-900">今日戰況總覽</h2>
-            <p class="text-xs text-slate-500 font-medium" id="todayDateSubtitle">今天日期載入中...</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black text-slate-900">降庫存 2:1 目標儀表板</h2>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">
+                目標：減少 2 ： 新增 1
+              </span>
+            </div>
+            <p id="dashboardPeriodSubtitle" class="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">
+              今日戰況統計載入中...
+            </p>
           </div>
         </div>
 
-        <!-- 登記日期選擇器（支援補登） -->
-        <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200/90">
-          <label for="recordDateInput" class="text-xs sm:text-sm font-bold text-slate-700 pl-1.5 flex items-center gap-1">
-            <span>📅</span>
-            <span>登記日期：</span>
-          </label>
-          <input
-            type="date"
-            id="recordDateInput"
-            class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 cursor-pointer"
-          />
-          <button
-            id="resetTodayBtn"
-            type="button"
-            class="hidden px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-bold shadow-sm transition cursor-pointer"
-          >
-            回到今天
+        <!-- 時間範圍切換器（今日 / 本月 / 全部累計） -->
+        <div class="inline-flex p-1 rounded-2xl bg-slate-100 border border-slate-200 self-start sm:self-auto" role="tablist" aria-label="檢視統計範圍">
+          <button type="button" data-scope="today" class="scope-tab-btn px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer">
+            今日
+          </button>
+          <button type="button" data-scope="month" class="scope-tab-btn px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer">
+            本月
+          </button>
+          <button type="button" data-scope="all" class="scope-tab-btn px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer">
+            全部累計
           </button>
         </div>
       </div>
 
-      <!-- 補登日期提醒橫幅（當選定日期不是今天時顯示） -->
-      <div id="backfillBanner" class="hidden items-center justify-between gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs sm:text-sm font-bold">
-        <div class="flex items-center gap-2">
-          <span class="text-base">📌</span>
-          <span>目前為補登模式！下方按鈕將登記在 <span id="backfillDateText" class="underline decoration-2"></span></span>
+      <!-- 三大關鍵數字卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <!-- 卡片 A：總減少量（出貨 + 排除垃圾） -->
+        <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50/70 border-2 border-emerald-200 p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-extrabold text-emerald-800 flex items-center gap-1.5">
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              總減少量（出貨＋排除垃圾）
+            </span>
+            <span class="text-xl">📉</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1.5">
+            <span id="dashTotalReduced" class="text-3xl sm:text-4xl font-black text-emerald-700 tabular-nums">0</span>
+            <span class="text-sm sm:text-base font-extrabold text-emerald-600">KG</span>
+          </div>
+          <p id="dashReducedBreakdown" class="text-xs font-bold text-emerald-700/80 mt-2">
+            出貨 0 KG ＋ 排除垃圾 0 KG
+          </p>
         </div>
-        <button type="button" id="bannerBackTodayBtn" class="underline font-extrabold hover:text-amber-700 shrink-0 cursor-pointer">
-          切回今日
+
+        <!-- 卡片 B：總新增量（進貨） -->
+        <div class="rounded-2xl bg-gradient-to-br from-orange-50 to-rose-50/70 border-2 border-rose-200 p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-extrabold text-rose-800 flex items-center gap-1.5">
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              總新增量（進貨）
+            </span>
+            <span class="text-xl">📦</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1.5">
+            <span id="dashTotalAdded" class="text-3xl sm:text-4xl font-black text-rose-600 tabular-nums">0</span>
+            <span class="text-sm sm:text-base font-extrabold text-rose-500">KG</span>
+          </div>
+          <p id="dashTargetNeedHint" class="text-xs font-bold text-rose-700/80 mt-2">
+            2:1 目標需減少：0 KG
+          </p>
+        </div>
+
+        <!-- 卡片 C：淨庫存變化（新增 − 減少） -->
+        <div id="dashNetCard" class="rounded-2xl bg-slate-50 border-2 border-slate-200 p-4 flex flex-col justify-between transition-colors">
+          <div class="flex items-center justify-between gap-2">
+            <span id="dashNetLabel" class="text-xs sm:text-sm font-extrabold text-slate-700">
+              淨庫存變化（新增 − 減少）
+            </span>
+            <span id="dashNetIcon" class="text-xl">⚖️</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1.5">
+            <span id="dashNetValue" class="text-3xl sm:text-4xl font-black text-slate-800 tabular-nums">0</span>
+            <span id="dashNetUnit" class="text-sm sm:text-base font-extrabold text-slate-600">KG</span>
+          </div>
+          <p id="dashNetStatusText" class="text-xs sm:text-sm font-extrabold text-slate-600 mt-2">
+            庫存持平 0 KG
+          </p>
+        </div>
+      </div>
+
+      <!-- 視覺化「減少 2 ： 新增 1」進度條與白話狀態提示 -->
+      <div class="rounded-2xl bg-slate-50/90 border border-slate-200/90 p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-black text-slate-800">2:1 降庫存進度</span>
+            <span id="dashRatioBadge" class="px-3 py-1 rounded-full text-xs sm:text-sm font-extrabold bg-slate-200 text-slate-700">
+              目前比例：尚無紀錄
+            </span>
+          </div>
+          <span id="dashProgressPercentText" class="text-sm font-black text-emerald-700 tabular-nums">0%</span>
+        </div>
+
+        <!-- 進度條軌道（標示 1:1 打平線 與 2:1 達標線） -->
+        <div class="relative pt-1 pb-5">
+          <div class="w-full h-4 sm:h-5 bg-slate-200 rounded-full overflow-hidden shadow-inner relative">
+            <div
+              id="dashProgressBar"
+              class="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-amber-400 to-emerald-500"
+              style="width: 0%"
+            ></div>
+            <!-- 50% 中間標線：代表 1:1 打平 -->
+            <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-slate-400/80 z-10 pointer-events-none"></div>
+          </div>
+          <!-- 刻度標籤 -->
+          <div class="flex justify-between text-[11px] font-bold text-slate-500 mt-1.5 px-0.5">
+            <span>0% 起點</span>
+            <span class="text-amber-700">▲ 1:1 打平 (50%)</span>
+            <span class="text-emerald-700 font-extrabold">🔥 2:1 達標 (100%)</span>
+          </div>
+        </div>
+
+        <!-- 白話達標 / 差距提示橫幅 -->
+        <div id="dashGoalBanner" class="rounded-2xl px-4 py-3 text-sm sm:text-base font-extrabold flex items-center gap-2.5 bg-slate-100 text-slate-700 border border-slate-200 transition-colors">
+          <span id="dashGoalBannerIcon" class="text-xl shrink-0">🚀</span>
+          <span id="dashGoalBannerText">開始點擊下方按鈕紀錄進貨、出貨或排除垃圾，一起達成「減少 2 ： 新增 1」！</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         區塊 2：人員切換與管理（可新增，也可管理移除）
+         ========================================================= -->
+    <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-lg">👋</span>
+          <h2 class="text-sm sm:text-base font-black text-slate-900">現在是誰在紀錄？</h2>
+          <span id="currentMemberPill" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">
+            載入中...
+          </span>
+        </div>
+
+        <!-- 新增人員 + 管理/減少人員 按鈕 -->
+        <div class="flex items-center gap-2">
+          <button
+            id="toggleManageMembersBtn"
+            type="button"
+            class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-bold border border-slate-200 transition cursor-pointer"
+          >
+            <span id="manageMembersIcon">⚙️</span>
+            <span id="manageMembersText">管理 / 減少人員</span>
+          </button>
+
+          <button
+            id="openAddMemberBtn"
+            type="button"
+            class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
+          >
+            <span>＋</span>
+            <span>新增人員</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 管理模式說明橫幅 -->
+      <div id="manageMembersBanner" class="hidden items-center justify-between gap-2 px-3.5 py-2 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm font-bold">
+        <span>🛠️ 人員管理模式已開啟：點選人員旁的「✕」即可移除（已登記的歷史流水帳不受影響，至少保留 1 位人員）</span>
+        <button type="button" id="finishManageBannerBtn" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-xs font-extrabold shrink-0 cursor-pointer">
+          完成
         </button>
       </div>
 
-      <!-- 今日四大戰況指標卡片 -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <!-- 今日進貨 -->
-        <div class="rounded-2xl bg-emerald-50/80 border border-emerald-200/80 p-3.5 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-emerald-700">今日進貨</p>
-            <p id="overviewTodayInbound" class="text-2xl sm:text-3xl font-black text-emerald-900 mt-0.5 tabular-nums">0</p>
-          </div>
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-xl flex items-center justify-center">📦</div>
-        </div>
-
-        <!-- 今日出貨 -->
-        <div class="rounded-2xl bg-sky-50/80 border border-sky-200/80 p-3.5 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-sky-700">今日出貨</p>
-            <p id="overviewTodayOutbound" class="text-2xl sm:text-3xl font-black text-sky-900 mt-0.5 tabular-nums">0</p>
-          </div>
-          <div class="w-10 h-10 rounded-xl bg-sky-100 text-xl flex items-center justify-center">🚚</div>
-        </div>
-
-        <!-- 今日排除垃圾 -->
-        <div class="rounded-2xl bg-amber-50/80 border border-amber-200/80 p-3.5 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-amber-700">今日排除垃圾</p>
-            <p id="overviewTodayTrash" class="text-2xl sm:text-3xl font-black text-amber-900 mt-0.5 tabular-nums">0</p>
-          </div>
-          <div class="w-10 h-10 rounded-xl bg-amber-100 text-xl flex items-center justify-center">🗑️</div>
-        </div>
-
-        <!-- 簡易參考差額（總進貨 - 總出貨） -->
-        <div class="rounded-2xl bg-violet-50/80 border border-violet-200/80 p-3.5 flex items-center justify-between">
-          <div class="min-w-0">
-            <p class="text-xs font-bold text-violet-700 truncate">今日進貨－出貨</p>
-            <p id="overviewTodayDiff" class="text-2xl sm:text-3xl font-black text-violet-900 mt-0.5 tabular-nums">0</p>
-            <p class="text-[11px] font-semibold text-violet-600/90 mt-0.5">
-              總累計差額：<span id="overviewTotalDiff" class="font-bold">0</span>
-            </p>
-          </div>
-          <div class="w-10 h-10 rounded-xl bg-violet-100 text-xl flex items-center justify-center shrink-0">⚖️</div>
-        </div>
+      <!-- 人員按鈕列 -->
+      <div id="memberListContainer" class="flex flex-wrap gap-2 sm:gap-2.5">
+        <!-- JS 動態渲染 -->
       </div>
     </section>
 
     <!-- =========================================================
-         區塊 3：三大項目極簡操作區（只有超好按的 － 跟 ＋）
+         區塊 3：登記日期 + 每次點擊公斤數 (KG) 設定 + 三大項目大按鈕區
          ========================================================= -->
-    <section aria-label="三大項目紀錄操作區">
-      <div class="flex items-center justify-between mb-3 px-1">
-        <h2 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-          <span>⚡</span>
-          <span>快速打卡紀錄</span>
-        </h2>
-        <span id="actionDateHint" class="text-xs sm:text-sm font-bold text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200">
-          計數顯示：今日
-        </span>
+    <section class="space-y-4">
+      <!-- 控制設定條：登記日期 + 每次點擊公斤數 -->
+      <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 space-y-4">
+        <!-- 上半部：登記日期（支援補登） -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">⚡</span>
+            <div>
+              <h2 class="text-base sm:text-lg font-black text-slate-900">快速打卡紀錄 (單位：KG)</h2>
+              <p id="todayDateSubtitle" class="text-xs text-slate-500 font-semibold">今天日期載入中...</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200">
+            <label for="recordDateInput" class="text-xs sm:text-sm font-extrabold text-slate-700 pl-1.5 flex items-center gap-1">
+              <span>📅</span>
+              <span>登記日期：</span>
+            </label>
+            <input
+              type="date"
+              id="recordDateInput"
+              class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 cursor-pointer"
+            />
+            <button
+              id="resetTodayBtn"
+              type="button"
+              class="hidden px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-extrabold shadow-sm transition cursor-pointer"
+            >
+              回到今天
+            </button>
+          </div>
+        </div>
+
+        <!-- 補登日期提醒橫幅 -->
+        <div id="backfillBanner" class="hidden items-center justify-between gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs sm:text-sm font-bold">
+          <div class="flex items-center gap-2">
+            <span class="text-base">📌</span>
+            <span>目前為補登模式！下方按鈕將登記在 <span id="backfillDateText" class="underline decoration-2"></span></span>
+          </div>
+          <button type="button" id="bannerBackTodayBtn" class="underline font-extrabold hover:text-amber-700 shrink-0 cursor-pointer">
+            切回今日
+          </button>
+        </div>
+
+        <!-- 下半部：每次點擊的公斤數 (KG) 快選 + 自訂大輸入框 -->
+        <div class="space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label for="stepKgInput" class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+              <span>⚖️</span>
+              <span>每次點擊的公斤數 (KG)：</span>
+            </label>
+            <span class="text-xs font-bold text-slate-500">點選快選按鈕，或直接輸入任意數字</span>
+          </div>
+
+          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+            <!-- 快選按鈕列 -->
+            <div id="kgPresetGroup" class="flex flex-wrap gap-1.5 sm:gap-2 flex-1">
+              <!-- JS 動態生成 1, 10, 25, 50, 100, 500, 1000 KG -->
+            </div>
+
+            <!-- 自訂大字體數字輸入框 -->
+            <div class="flex items-center gap-2 bg-emerald-50/80 border-2 border-emerald-300 rounded-2xl px-3.5 py-2 shrink-0 self-start lg:self-auto">
+              <span class="text-xs font-extrabold text-emerald-800 whitespace-nowrap">自訂重量</span>
+              <input
+                type="number"
+                id="stepKgInput"
+                inputmode="decimal"
+                step="any"
+                min="0.1"
+                value="50"
+                aria-label="自訂每次點擊的公斤數"
+                class="w-24 sm:w-28 bg-white rounded-xl border border-emerald-300 px-2.5 py-1.5 text-center text-xl sm:text-2xl font-black text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums"
+              />
+              <span class="text-base font-black text-emerald-800">KG</span>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- 三大項目大按鈕卡片 -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
 
-        <!-- 卡片 1：進貨（綠色系） -->
-        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-emerald-200 transition overflow-hidden">
-          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-100/60 pointer-events-none"></div>
-          <div class="relative flex items-center justify-between mb-5">
+        <!-- 卡片 1：進貨（庫存新增 ▲，琥珀/紅色系強調控管） -->
+        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-rose-200 transition overflow-hidden flex flex-col justify-between">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-rose-100/60 pointer-events-none"></div>
+
+          <div class="relative flex items-start justify-between gap-2 mb-4">
             <div class="flex items-center gap-2.5">
-              <span class="w-11 h-11 rounded-2xl bg-emerald-100 text-2xl flex items-center justify-center shadow-inner">📦</span>
+              <span class="w-12 h-12 rounded-2xl bg-rose-100 text-2xl flex items-center justify-center shadow-inner shrink-0">📦</span>
               <div>
-                <h3 class="text-xl font-black text-emerald-950">進貨</h3>
-                <p class="text-xs font-bold text-emerald-600">入庫・補貨點這裡</p>
+                <h3 class="text-xl font-black text-rose-950">進貨</h3>
+                <span class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[11px] font-extrabold">
+                  庫存新增 ▲ 注意控管
+                </span>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-extrabold border border-emerald-200/70">
-              歷史累計 <span id="allTime-inbound" class="tabular-nums">0</span>
+            <span class="scope-badge-label px-2.5 py-1 rounded-xl bg-rose-50 text-rose-700 text-xs font-extrabold border border-rose-200/80 shrink-0">
+              今日累計
             </span>
           </div>
 
-          <!-- 極簡操作列：－ 數字 ＋ -->
-          <div class="relative flex items-center justify-between gap-3">
+          <!-- 累計重量顯示 -->
+          <div class="relative text-center py-3 my-1 rounded-2xl bg-rose-50/50 border border-rose-100">
+            <div id="floatAnchor-inbound" class="absolute left-1/2 top-1 pointer-events-none"></div>
+            <div class="flex items-baseline justify-center gap-1.5">
+              <span id="sumKg-inbound" class="text-4xl sm:text-5xl font-black text-rose-600 tabular-nums leading-none">0</span>
+              <span class="text-lg font-black text-rose-500">KG</span>
+            </div>
+            <p id="selectedDateMini-inbound" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
+          </div>
+
+          <!-- 兩顆超大按鈕：－ XX KG 與 ＋ XX KG -->
+          <div class="relative grid grid-cols-2 gap-3 mt-4">
             <button
               type="button"
               data-category="inbound"
-              data-delta="-1"
-              aria-label="進貨減一"
-              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-90 border-2 border-emerald-200 text-emerald-700 text-4xl font-black flex items-center justify-center shadow-sm transition select-none cursor-pointer"
+              data-sign="-1"
+              class="action-kg-btn py-4 px-2 rounded-2xl bg-rose-50 hover:bg-rose-100 active:scale-95 border-2 border-rose-200 text-rose-700 flex flex-col items-center justify-center shadow-sm transition select-none cursor-pointer"
             >
-              －
+              <span class="text-2xl sm:text-3xl font-black leading-none">－</span>
+              <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
             </button>
 
-            <div class="relative flex-1 text-center py-2">
-              <div id="floatAnchor-inbound" class="absolute left-1/2 top-0 pointer-events-none"></div>
-              <div id="count-inbound" class="text-5xl sm:text-6xl font-black text-emerald-700 tabular-nums leading-none">
-                0
-              </div>
-              <div class="text-xs font-bold text-slate-400 mt-2 date-card-label">選定日累計</div>
-            </div>
-
             <button
               type="button"
               data-category="inbound"
-              data-delta="1"
-              aria-label="進貨加一"
-              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-500 hover:to-emerald-700 active:scale-90 text-white text-4xl font-black flex items-center justify-center shadow-lg shadow-emerald-200 transition select-none cursor-pointer"
+              data-sign="1"
+              class="action-kg-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-orange-500 to-rose-600 hover:from-orange-600 hover:to-rose-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-rose-200 transition select-none cursor-pointer"
             >
-              ＋
+              <span class="text-2xl sm:text-3xl font-black leading-none">＋</span>
+              <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
             </button>
           </div>
         </article>
 
-        <!-- 卡片 2：出貨（藍色系） -->
-        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-sky-200 transition overflow-hidden">
-          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-sky-100/60 pointer-events-none"></div>
-          <div class="relative flex items-center justify-between mb-5">
+        <!-- 卡片 2：出貨（庫存減少 ▼ 算入 2:1 目標，藍色系） -->
+        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-sky-200 transition overflow-hidden flex flex-col justify-between">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-sky-100/70 pointer-events-none"></div>
+
+          <div class="relative flex items-start justify-between gap-2 mb-4">
             <div class="flex items-center gap-2.5">
-              <span class="w-11 h-11 rounded-2xl bg-sky-100 text-2xl flex items-center justify-center shadow-inner">🚚</span>
+              <span class="w-12 h-12 rounded-2xl bg-sky-100 text-2xl flex items-center justify-center shadow-inner shrink-0">🚚</span>
               <div>
                 <h3 class="text-xl font-black text-sky-950">出貨</h3>
-                <p class="text-xs font-bold text-sky-600">寄件・配送點這裡</p>
+                <span class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-lg bg-sky-100 text-sky-800 text-[11px] font-extrabold">
+                  庫存減少 ▼ 算入2:1目標
+                </span>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-xl bg-sky-50 text-sky-700 text-xs font-extrabold border border-sky-200/70">
-              歷史累計 <span id="allTime-outbound" class="tabular-nums">0</span>
+            <span class="scope-badge-label px-2.5 py-1 rounded-xl bg-sky-50 text-sky-700 text-xs font-extrabold border border-sky-200/80 shrink-0">
+              今日累計
             </span>
           </div>
 
-          <!-- 極簡操作列：－ 數字 ＋ -->
-          <div class="relative flex items-center justify-between gap-3">
+          <!-- 累計重量顯示 -->
+          <div class="relative text-center py-3 my-1 rounded-2xl bg-sky-50/50 border border-sky-100">
+            <div id="floatAnchor-outbound" class="absolute left-1/2 top-1 pointer-events-none"></div>
+            <div class="flex items-baseline justify-center gap-1.5">
+              <span id="sumKg-outbound" class="text-4xl sm:text-5xl font-black text-sky-600 tabular-nums leading-none">0</span>
+              <span class="text-lg font-black text-sky-500">KG</span>
+            </div>
+            <p id="selectedDateMini-outbound" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
+          </div>
+
+          <!-- 兩顆超大按鈕：－ XX KG 與 ＋ XX KG -->
+          <div class="relative grid grid-cols-2 gap-3 mt-4">
             <button
               type="button"
               data-category="outbound"
-              data-delta="-1"
-              aria-label="出貨減一"
-              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-90 border-2 border-sky-200 text-sky-700 text-4xl font-black flex items-center justify-center shadow-sm transition select-none cursor-pointer"
+              data-sign="-1"
+              class="action-kg-btn py-4 px-2 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-95 border-2 border-sky-200 text-sky-700 flex flex-col items-center justify-center shadow-sm transition select-none cursor-pointer"
             >
-              －
+              <span class="text-2xl sm:text-3xl font-black leading-none">－</span>
+              <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
             </button>
 
-            <div class="relative flex-1 text-center py-2">
-              <div id="floatAnchor-outbound" class="absolute left-1/2 top-0 pointer-events-none"></div>
-              <div id="count-outbound" class="text-5xl sm:text-6xl font-black text-sky-600 tabular-nums leading-none">
-                0
-              </div>
-              <div class="text-xs font-bold text-slate-400 mt-2 date-card-label">選定日累計</div>
-            </div>
-
             <button
               type="button"
               data-category="outbound"
-              data-delta="1"
-              aria-label="出貨加一"
-              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 active:scale-90 text-white text-4xl font-black flex items-center justify-center shadow-lg shadow-sky-200 transition select-none cursor-pointer"
+              data-sign="1"
+              class="action-kg-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-sky-200 transition select-none cursor-pointer"
             >
-              ＋
+              <span class="text-2xl sm:text-3xl font-black leading-none">＋</span>
+              <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
             </button>
           </div>
         </article>
 
-        <!-- 卡片 3：排除垃圾（橘色/琥珀色系） -->
-        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-amber-200 transition overflow-hidden">
-          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-amber-100/70 pointer-events-none"></div>
-          <div class="relative flex items-center justify-between mb-5">
+        <!-- 卡片 3：排除垃圾（庫存減少 ▼ 算入 2:1 目標，綠色系） -->
+        <article class="relative bg-white rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md border-2 border-emerald-200 transition overflow-hidden flex flex-col justify-between">
+          <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-100/70 pointer-events-none"></div>
+
+          <div class="relative flex items-start justify-between gap-2 mb-4">
             <div class="flex items-center gap-2.5">
-              <span class="w-11 h-11 rounded-2xl bg-amber-100 text-2xl flex items-center justify-center shadow-inner">🗑️</span>
+              <span class="w-12 h-12 rounded-2xl bg-emerald-100 text-2xl flex items-center justify-center shadow-inner shrink-0">🗑️</span>
               <div>
-                <h3 class="text-xl font-black text-amber-950">排除垃圾</h3>
-                <p class="text-xs font-bold text-amber-600">清運・整理點這裡</p>
+                <h3 class="text-xl font-black text-emerald-950">排除垃圾</h3>
+                <span class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">
+                  庫存減少 ▼ 算入2:1目標
+                </span>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-700 text-xs font-extrabold border border-amber-200/70">
-              歷史累計 <span id="allTime-trash" class="tabular-nums">0</span>
+            <span class="scope-badge-label px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-extrabold border border-emerald-200/80 shrink-0">
+              今日累計
             </span>
           </div>
 
-          <!-- 極簡操作列：－ 數字 ＋ -->
-          <div class="relative flex items-center justify-between gap-3">
+          <!-- 累計重量顯示 -->
+          <div class="relative text-center py-3 my-1 rounded-2xl bg-emerald-50/50 border border-emerald-100">
+            <div id="floatAnchor-trash" class="absolute left-1/2 top-1 pointer-events-none"></div>
+            <div class="flex items-baseline justify-center gap-1.5">
+              <span id="sumKg-trash" class="text-4xl sm:text-5xl font-black text-emerald-600 tabular-nums leading-none">0</span>
+              <span class="text-lg font-black text-emerald-500">KG</span>
+            </div>
+            <p id="selectedDateMini-trash" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
+          </div>
+
+          <!-- 兩顆超大按鈕：－ XX KG 與 ＋ XX KG -->
+          <div class="relative grid grid-cols-2 gap-3 mt-4">
             <button
               type="button"
               data-category="trash"
-              data-delta="-1"
-              aria-label="排除垃圾減一"
-              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-amber-50 hover:bg-amber-100 active:scale-90 border-2 border-amber-200 text-amber-700 text-4xl font-black flex items-center justify-center shadow-sm transition select-none cursor-pointer"
+              data-sign="-1"
+              class="action-kg-btn py-4 px-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-95 border-2 border-emerald-200 text-emerald-700 flex flex-col items-center justify-center shadow-sm transition select-none cursor-pointer"
             >
-              －
+              <span class="text-2xl sm:text-3xl font-black leading-none">－</span>
+              <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
             </button>
 
-            <div class="relative flex-1 text-center py-2">
-              <div id="floatAnchor-trash" class="absolute left-1/2 top-0 pointer-events-none"></div>
-              <div id="count-trash" class="text-5xl sm:text-6xl font-black text-amber-600 tabular-nums leading-none">
-                0
-              </div>
-              <div class="text-xs font-bold text-slate-400 mt-2 date-card-label">選定日累計</div>
-            </div>
-
             <button
               type="button"
               data-category="trash"
-              data-delta="1"
-              aria-label="排除垃圾加一"
-              class="action-btn w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-b from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 active:scale-90 text-white text-4xl font-black flex items-center justify-center shadow-lg shadow-amber-200 transition select-none cursor-pointer"
+              data-sign="1"
+              class="action-kg-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-emerald-400 to-teal-600 hover:from-emerald-500 hover:to-teal-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-emerald-200 transition select-none cursor-pointer"
             >
-              ＋
+              <span class="text-2xl sm:text-3xl font-black leading-none">＋</span>
+              <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
             </button>
           </div>
         </article>
@@ -385,104 +531,133 @@
     </section>
 
     <!-- =========================================================
-         區塊 4：今日全員動起來排行榜 / 團隊總動力
+         區塊 4：全員降庫存排行榜
          ========================================================= -->
-    <section class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+    <section class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-400 to-amber-400 text-white text-xl flex items-center justify-center shadow-sm">
-            🔥
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-500 text-white text-xl flex items-center justify-center shadow-sm shrink-0">
+            🏆
           </div>
           <div>
-            <h2 class="text-base sm:text-lg font-black text-slate-900">今日全員動起來排行榜</h2>
-            <p id="teamCheerText" class="text-xs sm:text-sm font-bold text-orange-600">
-              新的一天開始囉！快按下第一個 ＋ 啟動團隊動力！
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-base sm:text-lg font-black text-slate-900">全員降庫存排行榜</h2>
+              <span id="leaderboardScopePill" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">
+                今日榜單
+              </span>
+            </div>
+            <p id="teamCheerText" class="text-xs sm:text-sm font-bold text-emerald-700 mt-0.5">
+              一起把庫存清起來！出貨或排除垃圾都會累積降庫存戰績喔！
             </p>
           </div>
         </div>
 
-        <!-- 今日團隊總動作徽章 -->
-        <div class="flex items-center gap-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200 px-4 py-2.5 rounded-2xl self-start md:self-auto">
-          <span class="text-xs font-bold text-amber-800">今日團隊總動力</span>
-          <span id="teamTodayTotalActions" class="text-2xl font-black text-orange-600 tabular-nums">0</span>
-          <span class="text-xs font-bold text-amber-800">筆動作</span>
+        <div class="flex items-center gap-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 px-4 py-2.5 rounded-2xl self-start md:self-auto">
+          <span class="text-xs font-bold text-emerald-800">團隊合力減少</span>
+          <span id="teamReducedSummary" class="text-2xl font-black text-emerald-700 tabular-nums">0</span>
+          <span class="text-xs font-extrabold text-emerald-800">KG</span>
         </div>
       </div>
 
-      <!-- 夥伴進度條排行清單 -->
-      <div id="leaderboardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <!-- 由 JS 動態生成 -->
+      <!-- 夥伴排行榜卡片清單 -->
+      <div id="leaderboardContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- JS 動態生成 -->
       </div>
     </section>
 
     <!-- =========================================================
-         區塊 5：登記日期流水帳（即時同步紀錄表）
+         區塊 5：登記日期流水帳與匯出功能
          ========================================================= -->
     <section class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-2">
-          <span class="text-xl">📝</span>
+          <span class="text-xl">📋</span>
           <div>
-            <h2 class="text-base sm:text-lg font-black text-slate-900">即時流水帳紀錄</h2>
-            <p class="text-xs text-slate-500 font-medium">
-              共顯示 <span id="visibleLogCount" class="font-bold text-slate-700">0</span> 筆紀錄（最新在最上方）
+            <h2 class="text-base sm:text-lg font-black text-slate-900">登記日期流水帳紀錄</h2>
+            <p class="text-xs text-slate-500 font-semibold">
+              共顯示 <span id="visibleLogCount" class="font-extrabold text-slate-800">0</span> 筆紀錄（最新在最上方）
             </p>
           </div>
         </div>
 
-        <!-- 匯出 CSV 按鈕 -->
+        <!-- 匯出 Excel 表格 (.csv) -->
         <button
           id="exportCsvBtn"
           type="button"
-          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
+          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer"
         >
           <span>📥</span>
-          <span>匯出紀錄表 (CSV)</span>
+          <span>匯出 Excel 表格 (.csv)</span>
         </button>
       </div>
 
-      <!-- 篩選列：項目分類 + 日期範圍 -->
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200/70">
-        <!-- 項目分類篩選 -->
-        <div class="flex flex-wrap items-center gap-1.5" id="categoryFilterGroup">
-          <button type="button" data-filter-cat="all" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
-            全部項目
-          </button>
-          <button type="button" data-filter-cat="inbound" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
-            📦 進貨
-          </button>
-          <button type="button" data-filter-cat="outbound" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
-            🚚 出貨
-          </button>
-          <button type="button" data-filter-cat="trash" class="filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
-            🗑️ 排除垃圾
-          </button>
+      <!-- 多條件篩選列：依項目 + 依人員 + 依日期 -->
+      <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <!-- 依項目篩選 -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-xs font-extrabold text-slate-500 mr-1">項目：</span>
+            <button type="button" data-filter-cat="all" class="filter-cat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+              全部項目
+            </button>
+            <button type="button" data-filter-cat="inbound" class="filter-cat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+              📦 進貨
+            </button>
+            <button type="button" data-filter-cat="outbound" class="filter-cat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+              🚚 出貨
+            </button>
+            <button type="button" data-filter-cat="trash" class="filter-cat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+              🗑️ 排除垃圾
+            </button>
+          </div>
+
+          <!-- 依人員篩選 -->
+          <div class="flex items-center gap-2">
+            <label for="filterMemberSelect" class="text-xs font-extrabold text-slate-500 whitespace-nowrap">人員：</label>
+            <select
+              id="filterMemberSelect"
+              class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer"
+            >
+              <option value="all">全部人員</option>
+            </select>
+          </div>
         </div>
 
-        <!-- 日期範圍篩選 -->
-        <div class="flex flex-wrap items-center gap-1.5" id="dateFilterGroup">
-          <button type="button" data-filter-date="today" class="filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
-            僅看今日
+        <!-- 依日期篩選 -->
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/70">
+          <span class="text-xs font-extrabold text-slate-500 mr-0.5">日期：</span>
+          <button type="button" data-filter-date="today" class="filter-date-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            今日
           </button>
-          <button type="button" data-filter-date="selected" id="filterSelectedDateBtn" class="hidden filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
-            僅看選定日
+          <button type="button" data-filter-date="month" class="filter-date-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            本月
           </button>
-          <button type="button" data-filter-date="all" class="filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
-            查看全部日期
+          <button type="button" data-filter-date="all" class="filter-date-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+            全部日期
           </button>
+
+          <div class="flex items-center gap-1.5 ml-0 sm:ml-2">
+            <label for="filterSpecificDateInput" class="text-xs font-bold text-slate-500">指定某一天：</label>
+            <input
+              type="date"
+              id="filterSpecificDateInput"
+              class="px-2.5 py-1 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer"
+            />
+          </div>
         </div>
       </div>
 
-      <!-- 電腦版表格顯示 (md 以上) -->
+      <!-- 電腦版流水帳表格 (md 以上) -->
       <div class="hidden md:block overflow-x-auto rounded-2xl border border-slate-200/80">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-slate-50 text-slate-600 text-xs font-extrabold border-b border-slate-200">
               <th class="py-3 px-4">登記日期</th>
               <th class="py-3 px-4">紀錄時間</th>
-              <th class="py-3 px-4">執行夥伴</th>
-              <th class="py-3 px-4">項目分類</th>
-              <th class="py-3 px-4 text-center">動作變動</th>
+              <th class="py-3 px-4">人員</th>
+              <th class="py-3 px-4">項目</th>
+              <th class="py-3 px-4 text-right">變動重量 (KG)</th>
+              <th class="py-3 px-4 text-center">庫存影響</th>
               <th class="py-3 px-4 text-right">操作</th>
             </tr>
           </thead>
@@ -492,37 +667,37 @@
         </table>
       </div>
 
-      <!-- 手機版卡片清單顯示 (md 以下，無橫向捲動) -->
+      <!-- 手機版卡片清單 (md 以下，完全無橫向捲動) -->
       <div id="ledgerMobileList" class="md:hidden space-y-2.5">
         <!-- JS 動態渲染 -->
       </div>
 
-      <!-- 無資料空狀態 -->
+      <!-- 空狀態提示 -->
       <div id="emptyLedgerState" class="hidden py-10 text-center space-y-2">
         <div class="text-4xl">🌱</div>
-        <p class="text-sm font-bold text-slate-600">目前還沒有符合條件的流水帳紀錄</p>
-        <p class="text-xs text-slate-400">點一下上方的「＋」按鈕，馬上新增第一筆吧！</p>
+        <p class="text-sm font-extrabold text-slate-600">目前沒有符合篩選條件的流水帳紀錄</p>
+        <p class="text-xs text-slate-400">點一下上方的「＋ XX KG」按鈕，立刻記下第一筆吧！</p>
       </div>
     </section>
 
-    <!-- 頁尾資訊（顯示同步連線與完整裝置識別碼） -->
+    <!-- 頁尾同步資訊 -->
     <footer class="text-center text-xs text-slate-400 pt-2 space-y-1">
-      <p>全員動起來！簡易流水帳紀錄網頁・所有團隊成員即時同步</p>
+      <p>全員降庫存動起來！KG 流水帳紀錄網頁・所有團隊夥伴即時同步</p>
       <p class="font-mono text-[11px] break-all px-4">
-        裝置同步 ID：<span id="footerUserId">連線中...</span>
+        裝置同步編號：<span id="footerUserId">連線中...</span>
       </p>
     </footer>
   </main>
 
   <!-- =========================================================
-       自訂彈窗 1：新增團隊夥伴 Modal
+       自訂彈窗 1：新增人員 Modal
        ========================================================= -->
   <div id="addMemberModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
     <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 space-y-4">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
           <span>✨</span>
-          <span>新增團隊夥伴</span>
+          <span>新增團隊人員</span>
         </h3>
         <button type="button" id="closeAddMemberModalBtn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center cursor-pointer">
           ✕
@@ -532,7 +707,7 @@
       <form id="addMemberForm" class="space-y-4">
         <div>
           <label for="newMemberNameInput" class="block text-xs font-bold text-slate-600 mb-1.5">
-            夥伴名稱（例如：小華、阿明、早班）
+            人員名字（例如：小華、阿豪、早班）
           </label>
           <input
             type="text"
@@ -540,16 +715,16 @@
             maxlength="12"
             placeholder="請輸入姓名或暱稱..."
             autocomplete="off"
-            class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-base font-bold text-slate-800"
+            class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-emerald-400 focus:outline-none text-base font-bold text-slate-800"
           />
           <p id="addMemberError" class="hidden text-xs font-bold text-rose-500 mt-1.5"></p>
         </div>
 
-        <!-- 頭像表情快速挑選 -->
+        <!-- 圖示選擇器 -->
         <div>
-          <span class="block text-xs font-bold text-slate-600 mb-1.5">選一個專屬小圖示</span>
+          <span class="block text-xs font-bold text-slate-600 mb-1.5">挑一個代表小圖示</span>
           <div id="emojiPicker" class="grid grid-cols-6 gap-2">
-            <!-- 由 JS 渲染 -->
+            <!-- JS 渲染 -->
           </div>
         </div>
 
@@ -563,7 +738,7 @@
           </button>
           <button
             type="submit"
-            class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-extrabold shadow-md shadow-orange-200 transition cursor-pointer"
+            class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-extrabold shadow-md shadow-emerald-200 transition cursor-pointer"
           >
             加入團隊！
           </button>
@@ -573,9 +748,47 @@
   </div>
 
   <!-- =========================================================
-       自訂彈窗 2：刪除/復原誤按確認 Modal（取代 confirm()）
+       自訂彈窗 2：移除人員確認 Modal
        ========================================================= -->
-  <div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+  <div id="deleteMemberModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 text-2xl flex items-center justify-center shrink-0">
+          👤
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-slate-900">確定要移除這位人員？</h3>
+          <p class="text-xs font-semibold text-slate-500">已登記過的歷史流水帳仍會保留原名字</p>
+        </div>
+      </div>
+
+      <div id="deleteMemberPreview" class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-center text-base font-black text-rose-900">
+        <!-- JS 填入人員名稱 -->
+      </div>
+
+      <div class="flex items-center gap-2.5 pt-1">
+        <button
+          type="button"
+          id="cancelDeleteMemberBtn"
+          class="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition cursor-pointer"
+        >
+          先不要
+        </button>
+        <button
+          type="button"
+          id="confirmDeleteMemberBtn"
+          class="flex-1 py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-sm font-extrabold shadow-md shadow-rose-200 transition cursor-pointer"
+        >
+          確認移除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       自訂彈窗 3：刪除單筆流水帳確認 Modal
+       ========================================================= -->
+  <div id="deleteLogModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
     <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 space-y-4">
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 text-2xl flex items-center justify-center shrink-0">
@@ -583,25 +796,25 @@
         </div>
         <div>
           <h3 class="text-lg font-black text-slate-900">復原 / 刪除這筆紀錄？</h3>
-          <p class="text-xs font-medium text-slate-500">刪除後會立刻同步更新全員的統計數字</p>
+          <p class="text-xs font-semibold text-slate-500">刪除後會立刻重新計算全員的 2:1 目標</p>
         </div>
       </div>
 
       <div id="deleteLogPreview" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-700 space-y-1">
-        <!-- 由 JS 填入待刪除紀錄摘要 -->
+        <!-- JS 填入待刪除紀錄摘要 -->
       </div>
 
       <div class="flex items-center gap-2.5 pt-1">
         <button
           type="button"
-          id="cancelDeleteBtn"
+          id="cancelDeleteLogBtn"
           class="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition cursor-pointer"
         >
           先不要
         </button>
         <button
           type="button"
-          id="confirmDeleteBtn"
+          id="confirmDeleteLogBtn"
           class="flex-1 py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-sm font-extrabold shadow-md shadow-rose-200 transition cursor-pointer"
         >
           確認刪除
@@ -611,14 +824,14 @@
   </div>
 
   <!-- =========================================================
-       即時鼓勵 Toast 提示容器（底部置中浮動）
+       底部浮動鼓勵提示區 (Toast)
        ========================================================= -->
   <div id="toastContainer" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 w-[92%] max-w-md pointer-events-none">
-    <!-- JS 動態插入鼓勵提示 -->
+    <!-- JS 動態插入 -->
   </div>
 
   <!-- =========================================================
-       主要應用程式邏輯 (ES Module + Firebase Firestore 即時同步)
+       主要應用程式邏輯 (多人雲端即時同步 + 2:1 降庫存引擎)
        ========================================================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -639,40 +852,42 @@
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // =========================================================
-    // 1. 常數設定與台灣本地時間工具
+    // 1. 常數定義與數值／日期工具函式
     // =========================================================
+    const KG_PRESETS = [1, 10, 25, 50, 100, 500, 1000];
+
     const CATEGORIES = {
       inbound: {
         key: "inbound",
         label: "進貨",
         emoji: "📦",
-        pillClass: "bg-emerald-100 text-emerald-800 border border-emerald-200",
-        textColor: "text-emerald-600"
+        pillClass: "bg-rose-100 text-rose-800 border border-rose-200",
+        floatColor: "text-rose-600"
       },
       outbound: {
         key: "outbound",
         label: "出貨",
         emoji: "🚚",
         pillClass: "bg-sky-100 text-sky-800 border border-sky-200",
-        textColor: "text-sky-600"
+        floatColor: "text-sky-600"
       },
       trash: {
         key: "trash",
         label: "排除垃圾",
         emoji: "🗑️",
-        pillClass: "bg-amber-100 text-amber-800 border border-amber-200",
-        textColor: "text-amber-600"
+        pillClass: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+        floatColor: "text-emerald-600"
       }
     };
 
     const DEFAULT_MEMBERS = [
-      { id: "default_xiaoming", name: "小明", emoji: "⚡", color: "sky", order: 1 },
-      { id: "default_xiaomei", name: "小美", emoji: "🌟", color: "rose", order: 2 },
-      { id: "default_aqiang", name: "阿強", emoji: "💪", color: "emerald", order: 3 },
-      { id: "default_manager", name: "店長", emoji: "👑", color: "amber", order: 4 }
+      { id: "seed_xiaoming", name: "小明", emoji: "⚡", color: "sky", order: 1 },
+      { id: "seed_xiaomei",  name: "小美", emoji: "🌟", color: "rose", order: 2 },
+      { id: "seed_aqiang",   name: "阿強", emoji: "💪", color: "emerald", order: 3 },
+      { id: "seed_chief",    name: "廠長", emoji: "👑", color: "amber", order: 4 }
     ];
 
-    const AVATAR_EMOJIS = ["🚀", "🔥", "🍀", "🎯", "🦁", "🐱", "🐼", "🦊", "🌈", "⭐", "💎", "🎵"];
+    const AVATAR_EMOJIS = ["🚀", "🔥", "🍀", "🎯", "🦁", "🐱", "🐼", "🦊", "🌈", "⭐", "💎", "🛠️"];
     const MEMBER_COLORS = ["emerald", "sky", "amber", "rose", "violet", "indigo", "orange", "teal"];
 
     const COLOR_STYLES = {
@@ -686,20 +901,31 @@
       teal:    { active: "bg-teal-500 text-white border-teal-600 shadow-teal-200",          idle: "bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100",         bar: "bg-teal-500" }
     };
 
-    const CHEER_MESSAGES_PLUS = [
-      "讚喔！動作超俐落 👏",
-      "水啦！又推進一步 🚀",
-      "神隊友就是你 ⚡",
-      "太給力了！繼續保持 🔥",
-      "完美紀錄！團隊士氣 UP 🌟",
-      "辛苦了！效率滿分 💯"
+    const CHEER_REDUCE = [
+      "讚喔！庫存又往下降囉 📉",
+      "神隊友就是你！清庫存超給力 🔥",
+      "水啦！離 2:1 目標更近一步 🚀",
+      "動作超俐落！繼續衝刺 💪"
     ];
 
-    const CHEER_MESSAGES_MINUS = [
-      "已修正 －1，紀錄準確最棒 👍",
-      "沒問題！已幫你微調 －1 ✨",
-      "細心核對！已完成 －1 紀錄 👌"
+    const CHEER_INBOUND = [
+      "已記下進貨重量，記得多出貨或清垃圾達 2:1 喔 🎯",
+      "進貨登記完成！一起把減少量拉起來 💪"
     ];
+
+    /** 消除浮點誤差（保留最多小數點後兩位） */
+    function roundKg(num) {
+      return Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+    }
+
+    /** 格式化公斤數顯示（加上千分位，自動去除多餘小數點 0） */
+    function formatKg(num) {
+      const cleaned = roundKg(num);
+      return cleaned.toLocaleString("zh-TW", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+    }
 
     /** 取得台灣本地 YYYY-MM-DD */
     function getLocalTodayStr() {
@@ -708,6 +934,11 @@
       const m = String(now.getMonth() + 1).padStart(2, "0");
       const d = String(now.getDate()).padStart(2, "0");
       return `${y}-${m}-${d}`;
+    }
+
+    /** 取得台灣本地 YYYY-MM */
+    function getLocalMonthStr(isoDate = getLocalTodayStr()) {
+      return isoDate.slice(0, 7);
     }
 
     /** 取得台灣本地 HH:mm:ss */
@@ -719,17 +950,31 @@
       return `${hh}:${mm}:${ss}`;
     }
 
-    /** 將 YYYY-MM-DD 轉為 YYYY/MM/DD 顯示格式 */
+    /** 將 YYYY-MM-DD 轉為 YYYY/MM/DD */
     function formatSlashDate(isoDate) {
-      if (!isoDate) return "";
-      return isoDate.replaceAll("-", "/");
+      return isoDate ? isoDate.replaceAll("-", "/") : "";
     }
 
-    /** 取得今日星期幾中文 */
+    /** 取得中文星期 */
     function getWeekdayZh(isoDate) {
       const [y, m, d] = isoDate.split("-").map(Number);
       const day = new Date(y, m - 1, d).getDay();
       return ["日", "一", "二", "三", "四", "五", "六"][day];
+    }
+
+    /** 計算單筆紀錄對庫存的淨影響 KG（正數代表庫存增加，負數代表庫存減少） */
+    function getInventoryDelta(log) {
+      return log.category === "inbound" ? roundKg(log.weightKg) : roundKg(-log.weightKg);
+    }
+
+    /** HTML 字串安全跳脫 */
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
     }
 
     // =========================================================
@@ -738,29 +983,40 @@
     const state = {
       todayStr: getLocalTodayStr(),
       selectedDate: getLocalTodayStr(),
+      dashboardScope: "today",       // 'today' | 'month' | 'all'
+      stepKg: 50,                    // 每次點擊的公斤數
       members: [...DEFAULT_MEMBERS],
       activeMemberName: DEFAULT_MEMBERS[0].name,
+      isManagingMembers: false,
       logs: [],
-      filterCategory: "all",       // 'all' | 'inbound' | 'outbound' | 'trash'
-      filterDateScope: "today",    // 'today' | 'selected' | 'all'
+
+      // 流水帳篩選條件
+      filterCategory: "all",         // 'all' | 'inbound' | 'outbound' | 'trash'
+      filterMember: "all",           // 'all' 或特定人員名字
+      filterDateScope: "today",      // 'today' | 'month' | 'all' | 'specific'
+      filterSpecificDate: "",
+
+      // 互動與視窗狀態
       soundEnabled: true,
       selectedNewEmoji: AVATAR_EMOJIS[0],
+      pendingDeleteMember: null,
       pendingDeleteLogId: null,
-      isFirebaseReady: false,
+
+      // 雲端同步狀態
       isCloudMode: false,
       currentUser: null,
       hasSeededDefaults: false
     };
 
-    // Firebase 實例參考
+    // 雲端資料庫參考
     let db = null;
     let auth = null;
-    let appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
+    const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
     let membersColRef = null;
     let logsColRef = null;
 
     // =========================================================
-    // 3. 音效系統 (Tone.js 輕快回饋音效)
+    // 3. 輕快點擊音效 (Tone.js)
     // =========================================================
     let synth = null;
     function playClickSound(type) {
@@ -776,23 +1032,26 @@
           }).toDestination();
           synth.volume.value = -10;
         }
-        if (type === "plus") {
-          synth.triggerAttackRelease("G5", "16n");
+        const now = Tone.now();
+        if (type === "reduce") {
+          synth.triggerAttackRelease("G5", "16n", now);
+        } else if (type === "add") {
+          synth.triggerAttackRelease("E5", "16n", now);
         } else if (type === "minus") {
-          synth.triggerAttackRelease("D4", "16n");
+          synth.triggerAttackRelease("C4", "16n", now);
         } else if (type === "celebrate") {
-          const now = Tone.now();
           synth.triggerAttackRelease("C5", "16n", now);
           synth.triggerAttackRelease("E5", "16n", now + 0.07);
           synth.triggerAttackRelease("G5", "16n", now + 0.14);
+          synth.triggerAttackRelease("C6", "12n", now + 0.21);
         }
       } catch (err) {
-        // 忽略瀏覽器音訊自動播放限制錯誤
+        // 靜默處理音訊播放限制
       }
     }
 
     // =========================================================
-    // 4. DOM 節點快取
+    // 4. DOM 元素快取
     // =========================================================
     const els = {
       soundToggleBtn: document.getElementById("soundToggleBtn"),
@@ -803,35 +1062,61 @@
       syncStatusBtn: document.getElementById("syncStatusBtn"),
       footerUserId: document.getElementById("footerUserId"),
 
-      currentMemberPill: document.getElementById("currentMemberPill"),
-      memberListContainer: document.getElementById("memberListContainer"),
-      openAddMemberBtn: document.getElementById("openAddMemberBtn"),
+      // 儀表板
+      dashboardPeriodSubtitle: document.getElementById("dashboardPeriodSubtitle"),
+      dashTotalReduced: document.getElementById("dashTotalReduced"),
+      dashReducedBreakdown: document.getElementById("dashReducedBreakdown"),
+      dashTotalAdded: document.getElementById("dashTotalAdded"),
+      dashTargetNeedHint: document.getElementById("dashTargetNeedHint"),
+      dashNetCard: document.getElementById("dashNetCard"),
+      dashNetLabel: document.getElementById("dashNetLabel"),
+      dashNetIcon: document.getElementById("dashNetIcon"),
+      dashNetValue: document.getElementById("dashNetValue"),
+      dashNetUnit: document.getElementById("dashNetUnit"),
+      dashNetStatusText: document.getElementById("dashNetStatusText"),
+      dashRatioBadge: document.getElementById("dashRatioBadge"),
+      dashProgressPercentText: document.getElementById("dashProgressPercentText"),
+      dashProgressBar: document.getElementById("dashProgressBar"),
+      dashGoalBanner: document.getElementById("dashGoalBanner"),
+      dashGoalBannerIcon: document.getElementById("dashGoalBannerIcon"),
+      dashGoalBannerText: document.getElementById("dashGoalBannerText"),
 
+      // 人員區
+      currentMemberPill: document.getElementById("currentMemberPill"),
+      toggleManageMembersBtn: document.getElementById("toggleManageMembersBtn"),
+      manageMembersIcon: document.getElementById("manageMembersIcon"),
+      manageMembersText: document.getElementById("manageMembersText"),
+      manageMembersBanner: document.getElementById("manageMembersBanner"),
+      finishManageBannerBtn: document.getElementById("finishManageBannerBtn"),
+      openAddMemberBtn: document.getElementById("openAddMemberBtn"),
+      memberListContainer: document.getElementById("memberListContainer"),
+
+      // 日期與 KG 設定
       todayDateSubtitle: document.getElementById("todayDateSubtitle"),
       recordDateInput: document.getElementById("recordDateInput"),
       resetTodayBtn: document.getElementById("resetTodayBtn"),
       backfillBanner: document.getElementById("backfillBanner"),
       backfillDateText: document.getElementById("backfillDateText"),
       bannerBackTodayBtn: document.getElementById("bannerBackTodayBtn"),
-      actionDateHint: document.getElementById("actionDateHint"),
+      kgPresetGroup: document.getElementById("kgPresetGroup"),
+      stepKgInput: document.getElementById("stepKgInput"),
 
-      overviewTodayInbound: document.getElementById("overviewTodayInbound"),
-      overviewTodayOutbound: document.getElementById("overviewTodayOutbound"),
-      overviewTodayTrash: document.getElementById("overviewTodayTrash"),
-      overviewTodayDiff: document.getElementById("overviewTodayDiff"),
-      overviewTotalDiff: document.getElementById("overviewTotalDiff"),
-
+      // 排行榜
+      leaderboardScopePill: document.getElementById("leaderboardScopePill"),
       teamCheerText: document.getElementById("teamCheerText"),
-      teamTodayTotalActions: document.getElementById("teamTodayTotalActions"),
+      teamReducedSummary: document.getElementById("teamReducedSummary"),
       leaderboardContainer: document.getElementById("leaderboardContainer"),
 
+      // 流水帳
       visibleLogCount: document.getElementById("visibleLogCount"),
-      filterSelectedDateBtn: document.getElementById("filterSelectedDateBtn"),
+      exportCsvBtn: document.getElementById("exportCsvBtn"),
+      filterMemberSelect: document.getElementById("filterMemberSelect"),
+      filterSpecificDateInput: document.getElementById("filterSpecificDateInput"),
       ledgerTableBody: document.getElementById("ledgerTableBody"),
       ledgerMobileList: document.getElementById("ledgerMobileList"),
       emptyLedgerState: document.getElementById("emptyLedgerState"),
-      exportCsvBtn: document.getElementById("exportCsvBtn"),
 
+      // 新增人員彈窗
       addMemberModal: document.getElementById("addMemberModal"),
       closeAddMemberModalBtn: document.getElementById("closeAddMemberModalBtn"),
       cancelAddMemberBtn: document.getElementById("cancelAddMemberBtn"),
@@ -840,29 +1125,37 @@
       addMemberError: document.getElementById("addMemberError"),
       emojiPicker: document.getElementById("emojiPicker"),
 
-      deleteConfirmModal: document.getElementById("deleteConfirmModal"),
-      deleteLogPreview: document.getElementById("deleteLogPreview"),
-      cancelDeleteBtn: document.getElementById("cancelDeleteBtn"),
-      confirmDeleteBtn: document.getElementById("confirmDeleteBtn"),
+      // 移除人員彈窗
+      deleteMemberModal: document.getElementById("deleteMemberModal"),
+      deleteMemberPreview: document.getElementById("deleteMemberPreview"),
+      cancelDeleteMemberBtn: document.getElementById("cancelDeleteMemberBtn"),
+      confirmDeleteMemberBtn: document.getElementById("confirmDeleteMemberBtn"),
 
+      // 刪除流水帳彈窗
+      deleteLogModal: document.getElementById("deleteLogModal"),
+      deleteLogPreview: document.getElementById("deleteLogPreview"),
+      cancelDeleteLogBtn: document.getElementById("cancelDeleteLogBtn"),
+      confirmDeleteLogBtn: document.getElementById("confirmDeleteLogBtn"),
+
+      // Toast 容器
       toastContainer: document.getElementById("toastContainer")
     };
 
     // =========================================================
-    // 5. Toast 提示與視覺彈跳特效
+    // 5. 視覺回饋（Toast 鼓勵提示 & 卡片浮動 KG 特效）
     // =========================================================
     function showToast(message, tone = "success") {
       const toast = document.createElement("div");
       const styles = {
         success: "bg-slate-900/95 text-white border-slate-700",
+        celebrate: "bg-emerald-600/95 text-white border-emerald-400",
         warn: "bg-amber-600/95 text-white border-amber-500",
         danger: "bg-rose-600/95 text-white border-rose-500",
         info: "bg-sky-600/95 text-white border-sky-500"
       };
-      toast.className = `pointer-events-auto px-4 py-2.5 rounded-2xl border shadow-xl text-xs sm:text-sm font-bold flex items-center gap-2 animate-toastSlideIn ${styles[tone] || styles.success}`;
+      toast.className = `pointer-events-auto px-4 py-2.5 rounded-2xl border shadow-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 animate-toastSlideIn ${styles[tone] || styles.success}`;
       toast.textContent = message;
 
-      // 最多同時顯示 3 則，避免擋住畫面
       while (els.toastContainer.children.length >= 3) {
         els.toastContainer.firstElementChild.remove();
       }
@@ -873,33 +1166,33 @@
         toast.style.opacity = "0";
         toast.style.transform = "translateY(8px) scale(0.96)";
         setTimeout(() => toast.remove(), 260);
-      }, 2200);
+      }, 2400);
     }
 
-    /** 觸發卡片數字彈跳與 +1 / -1 浮動粒子 */
-    function triggerCardFeedback(category, delta) {
-      const countEl = document.getElementById(`count-${category}`);
+    function triggerCardFeedback(category, signedKg) {
+      const sumEl = document.getElementById(`sumKg-${category}`);
       const anchorEl = document.getElementById(`floatAnchor-${category}`);
 
-      if (countEl) {
-        countEl.classList.remove("animate-popBump");
-        void countEl.offsetWidth; // 強制重新觸發動畫
-        countEl.classList.add("animate-popBump");
+      if (sumEl) {
+        sumEl.classList.remove("animate-popBump");
+        void sumEl.offsetWidth;
+        sumEl.classList.add("animate-popBump");
       }
 
       if (anchorEl) {
         const badge = document.createElement("span");
-        badge.textContent = delta > 0 ? "+1" : "-1";
-        badge.className = `absolute left-0 top-0 text-xl font-black animate-floatUpFade whitespace-nowrap ${
-          delta > 0 ? CATEGORIES[category].textColor : "text-rose-500"
+        const prefix = signedKg > 0 ? "+" : "-";
+        badge.textContent = `${prefix}${formatKg(Math.abs(signedKg))} KG`;
+        badge.className = `absolute left-0 top-0 text-lg sm:text-xl font-black animate-floatUpFade whitespace-nowrap ${
+          signedKg > 0 ? CATEGORIES[category].floatColor : "text-slate-500"
         }`;
         anchorEl.appendChild(badge);
-        setTimeout(() => badge.remove(), 780);
+        setTimeout(() => badge.remove(), 820);
       }
     }
 
     // =========================================================
-    // 6. Firebase 初始化與即時同步監聽
+    // 6. 多人即時雲端同步初始化
     // =========================================================
     function updateSyncBadge(status, text) {
       if (status === "cloud") {
@@ -915,14 +1208,12 @@
       els.syncText.textContent = text;
     }
 
-    async function initFirebaseSync() {
+    async function initCloudSync() {
       try {
         if (typeof __firebase_config === "undefined" || !__firebase_config) {
-          // 環境未提供雲端設定時，啟用本機單次展示模式（不崩潰、不使用 localStorage）
           state.isCloudMode = false;
-          state.isFirebaseReady = true;
-          els.footerUserId.textContent = "本機展示模式（尚未連結雲端資料庫）";
-          updateSyncBadge("demo", "本機展示中");
+          els.footerUserId.textContent = "本機預覽模式";
+          updateSyncBadge("demo", "單機預覽中");
           renderAll();
           return;
         }
@@ -932,49 +1223,45 @@
         db = getFirestore(app);
         auth = getAuth(app);
 
-        // RULE 3: 優先使用 Custom Token，否則匿名登入，並等待完成後才存取 Firestore
+        // 先完成身分驗證，再存取雲端資料
         if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
         } else {
           await signInAnonymously(auth);
         }
 
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
           if (!user) return;
           state.currentUser = user;
           state.isCloudMode = true;
-          state.isFirebaseReady = true;
           els.footerUserId.textContent = user.uid;
           updateSyncBadge("cloud", "雲端同步中");
 
-          // RULE 1: 嚴格遵守公開多人共享路徑 /artifacts/{appId}/public/data/{collectionName}
-          membersColRef = collection(db, "artifacts", appId, "public", "data", "team_members");
-          logsColRef = collection(db, "artifacts", appId, "public", "data", "ledger_logs");
+          // 嚴格使用公開團隊共享路徑
+          membersColRef = collection(db, "artifacts", appId, "public", "data", "kg_team_members");
+          logsColRef = collection(db, "artifacts", appId, "public", "data", "kg_ledger_logs");
 
-          subscribeToCollections();
+          subscribeToCloudData();
         });
       } catch (err) {
-        console.error("Firebase 初始化失敗:", err);
+        console.error("雲端初始化失敗:", err);
         state.isCloudMode = false;
-        state.isFirebaseReady = true;
         els.footerUserId.textContent = "離線備援模式";
         updateSyncBadge("demo", "離線模式");
-        showToast("雲端連線異常，已切換為本機暫存模式", "warn");
+        showToast("暫時無法連上雲端，已切換為本機暫存模式", "warn");
         renderAll();
       }
     }
 
-    /** 訂閱團隊成員與流水帳的即時變動（RULE 2: 不使用複雜查詢，於記憶體排序） */
-    function subscribeToCollections() {
+    function subscribeToCloudData() {
       if (!state.currentUser || !membersColRef || !logsColRef) return;
 
-      // 1. 監聽團隊成員名單
+      // 1. 即時監聽人員名單
       onSnapshot(
         membersColRef,
         async (snapshot) => {
           if (snapshot.empty && !state.hasSeededDefaults) {
             state.hasSeededDefaults = true;
-            // 使用固定 ID 寫入預設成員，避免多人同時開啟產生重複項目
             try {
               await Promise.all(
                 DEFAULT_MEMBERS.map((m) =>
@@ -988,57 +1275,56 @@
                 )
               );
             } catch (seedErr) {
-              console.error("寫入預設成員失敗:", seedErr);
+              console.error("初始化預設人員失敗:", seedErr);
             }
             return;
           }
 
-          const loadedMembers = [];
+          const loaded = [];
           snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            if (data && data.name) {
-              loadedMembers.push({
+            const d = docSnap.data();
+            if (d && d.name) {
+              loaded.push({
                 id: docSnap.id,
-                name: data.name,
-                emoji: data.emoji || "⭐",
-                color: data.color || "sky",
-                order: typeof data.order === "number" ? data.order : 999,
-                createdAt: data.createdAt || 0
+                name: d.name,
+                emoji: d.emoji || "⭐",
+                color: d.color || "sky",
+                order: typeof d.order === "number" ? d.order : 999,
+                createdAt: d.createdAt || 0
               });
             }
           });
 
-          // 在記憶體中排序：預設成員依 order，新增夥伴依建立時間
-          loadedMembers.sort((a, b) => {
+          // 於記憶體排序
+          loaded.sort((a, b) => {
             if (a.order !== b.order) return a.order - b.order;
             return a.createdAt - b.createdAt;
           });
 
-          if (loadedMembers.length > 0) {
-            state.members = loadedMembers;
-            // 若目前選取的夥伴不在清單中，自動選取第一位
-            const exists = state.members.some((m) => m.name === state.activeMemberName);
-            if (!exists) {
+          if (loaded.length > 0) {
+            state.members = loaded;
+            if (!state.members.some((m) => m.name === state.activeMemberName)) {
               state.activeMemberName = state.members[0].name;
             }
           }
           renderMembers();
+          renderMemberFilterOptions();
           renderLeaderboard();
         },
         (error) => {
-          console.error("監聽團隊成員失敗:", error);
-          showToast("同步夥伴名單時發生錯誤", "danger");
+          console.error("同步人員名單失敗:", error);
+          showToast("同步人員名單時發生問題", "danger");
         }
       );
 
-      // 2. 監聽流水帳紀錄
+      // 2. 即時監聽 KG 流水帳紀錄
       onSnapshot(
         logsColRef,
         (snapshot) => {
           const loadedLogs = [];
           snapshot.forEach((docSnap) => {
             const d = docSnap.data();
-            if (d && d.category && typeof d.delta === "number") {
+            if (d && d.category && typeof d.weightKg === "number") {
               loadedLogs.push({
                 id: docSnap.id,
                 date: d.date || state.todayStr,
@@ -1047,72 +1333,161 @@
                 memberName: d.memberName || "夥伴",
                 memberEmoji: d.memberEmoji || "⭐",
                 category: d.category,
-                delta: d.delta,
+                weightKg: roundKg(d.weightKg),
                 createdByUid: d.createdByUid || ""
               });
             }
           });
 
-          // 在記憶體中依最新時間排序（由新到舊）
+          // 最新紀錄排在最上方
           loadedLogs.sort((a, b) => b.timestamp - a.timestamp);
           state.logs = loadedLogs;
           renderAll();
         },
         (error) => {
-          console.error("監聽流水帳失敗:", error);
-          showToast("同步流水帳時發生錯誤", "danger");
+          console.error("同步流水帳失敗:", error);
+          showToast("同步流水帳時發生問題", "danger");
         }
       );
     }
 
     // =========================================================
-    // 7. 資料操作函式（新增紀錄、新增夥伴、刪除紀錄）
+    // 7. 統計與核心 2:1 計算邏輯
     // =========================================================
-    async function recordAction(category, delta) {
-      // 確保今天日期保持最新（跨午夜自動更新）
+    /** 依儀表板區間（今日 / 本月 / 全部）過濾紀錄 */
+    function getLogsInScope(scope = state.dashboardScope) {
+      const today = state.todayStr;
+      const month = getLocalMonthStr(today);
+      return state.logs.filter((log) => {
+        if (scope === "today") return log.date === today;
+        if (scope === "month") return log.date.startsWith(month);
+        return true;
+      });
+    }
+
+    /** 計算指定紀錄清單的 KG 彙總與 2:1 達標狀態 */
+    function computeStats(logList) {
+      let inbound = 0;
+      let outbound = 0;
+      let trash = 0;
+
+      logList.forEach((l) => {
+        if (l.category === "inbound") inbound += l.weightKg;
+        else if (l.category === "outbound") outbound += l.weightKg;
+        else if (l.category === "trash") trash += l.weightKg;
+      });
+
+      inbound = roundKg(inbound);
+      outbound = roundKg(outbound);
+      trash = roundKg(trash);
+
+      const totalReduced = roundKg(outbound + trash);
+      const totalAdded = inbound;
+      const netChange = roundKg(totalAdded - totalReduced); // 負數代表庫存下降
+      const targetReduceNeeded = roundKg(Math.max(0, totalAdded * 2));
+      const gapToGoal = roundKg(Math.max(0, targetReduceNeeded - totalReduced));
+
+      const isGoalAchieved =
+        (totalAdded > 0 && totalReduced >= targetReduceNeeded) ||
+        (totalAdded <= 0 && totalReduced > 0);
+
+      let progressPct = 0;
+      if (totalAdded > 0) {
+        progressPct = Math.min(100, Math.max(0, Math.round((totalReduced / (totalAdded * 2)) * 100)));
+      } else if (totalReduced > 0) {
+        progressPct = 100;
+      }
+
+      return {
+        inbound,
+        outbound,
+        trash,
+        totalReduced,
+        totalAdded,
+        netChange,
+        targetReduceNeeded,
+        gapToGoal,
+        isGoalAchieved,
+        progressPct
+      };
+    }
+
+    // =========================================================
+    // 8. 資料操作：新增 KG 紀錄、新增人員、移除人員、刪除紀錄
+    // =========================================================
+    async function recordKgAction(category, sign) {
+      // 驗證目前輸入的公斤數
+      const rawStep = parseFloat(els.stepKgInput.value);
+      if (isNaN(rawStep) || rawStep <= 0) {
+        showToast("請先設定大於 0 的公斤數 (KG) 喔！", "warn");
+        els.stepKgInput.focus();
+        return;
+      }
+
+      state.stepKg = roundKg(rawStep);
       state.todayStr = getLocalTodayStr();
 
-      const member = state.members.find((m) => m.name === state.activeMemberName) || state.members[0];
+      const signedKg = roundKg(state.stepKg * sign);
+      const activeMember = state.members.find((m) => m.name === state.activeMemberName) || state.members[0];
+
+      // 紀錄前先檢查原本是否已達 2:1 目標，若這一下剛好達標就放慶祝音效！
+      const beforeStats = computeStats(getLogsInScope(state.dashboardScope));
+
       const newLog = {
         date: state.selectedDate,
         time: getLocalTimeStr(),
         timestamp: Date.now(),
-        memberName: member.name,
-        memberEmoji: member.emoji,
+        memberName: activeMember ? activeMember.name : "夥伴",
+        memberEmoji: activeMember ? activeMember.emoji : "⭐",
         category,
-        delta,
-        createdByUid: state.currentUser ? state.currentUser.uid : "local-demo"
+        weightKg: signedKg,
+        createdByUid: state.currentUser ? state.currentUser.uid : "local-preview"
       };
 
-      // 立即給予視覺與聲音回饋
-      triggerCardFeedback(category, delta);
+      // 預估紀錄後狀態
+      const simulatedLogs = [newLog, ...state.logs];
+      const afterScopeLogs = simulatedLogs.filter((l) => {
+        if (state.dashboardScope === "today") return l.date === state.todayStr;
+        if (state.dashboardScope === "month") return l.date.startsWith(getLocalMonthStr(state.todayStr));
+        return true;
+      });
+      const afterStats = computeStats(afterScopeLogs);
+      const justAchievedGoal = !beforeStats.isGoalAchieved && afterStats.isGoalAchieved;
 
-      // 檢查是否達成今日團隊每 10 筆里程碑
-      const todayActionsBefore = state.logs.filter((l) => l.date === state.todayStr).length;
-      const isMilestone = newLog.date === state.todayStr && (todayActionsBefore + 1) % 10 === 0;
+      // 視覺與音效回饋
+      triggerCardFeedback(category, signedKg);
+      const catInfo = CATEGORIES[category];
+      const signText = signedKg > 0 ? `+${formatKg(signedKg)}` : `-${formatKg(Math.abs(signedKg))}`;
 
-      if (isMilestone) {
+      if (justAchievedGoal) {
         playClickSound("celebrate");
-        showToast(`🎉 太神啦！全體今日已合力突破 ${todayActionsBefore + 1} 筆動作！`, "info");
+        showToast(`🔥 恭喜達標 2:1！${activeMember.emoji} ${activeMember.name} ${catInfo.label} ${signText} KG，庫存穩定下降中！`, "celebrate");
+      } else if (signedKg < 0) {
+        playClickSound("minus");
+        showToast(`${activeMember.emoji} ${activeMember.name} 已修正 ${catInfo.label} ${signText} KG`, "warn");
+      } else if (category === "inbound") {
+        playClickSound("add");
+        const msg = CHEER_INBOUND[Math.floor(Math.random() * CHEER_INBOUND.length)];
+        showToast(`${activeMember.emoji} ${activeMember.name} 進貨 ${signText} KG！${msg}`, "info");
       } else {
-        playClickSound(delta > 0 ? "plus" : "minus");
-        const catInfo = CATEGORIES[category];
-        const msgPool = delta > 0 ? CHEER_MESSAGES_PLUS : CHEER_MESSAGES_MINUS;
-        const cheer = msgPool[Math.floor(Math.random() * msgPool.length)];
-        const signText = delta > 0 ? "+1" : "-1";
-        showToast(`${member.emoji} ${member.name} ${catInfo.label} ${signText}！${cheer}`, delta > 0 ? "success" : "warn");
+        playClickSound("reduce");
+        const msg = CHEER_REDUCE[Math.floor(Math.random() * CHEER_REDUCE.length)];
+        showToast(`${activeMember.emoji} ${activeMember.name} ${catInfo.label} ${signText} KG！${msg}`, "success");
       }
 
+      // 寫入雲端或本機暫存
       if (state.isCloudMode && state.currentUser && logsColRef) {
         try {
           await addDoc(logsColRef, newLog);
         } catch (err) {
-          console.error("寫入流水帳失敗:", err);
-          showToast("寫入雲端失敗，請稍後再試", "danger");
+          console.error("寫入紀錄失敗:", err);
+          showToast("儲存至雲端失敗，請稍後再試", "danger");
         }
       } else {
-        // 本機展示模式直接更新記憶體
-        state.logs.unshift({ id: `local_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, ...newLog });
+        state.logs.unshift({
+          id: `local_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          ...newLog
+        });
         renderAll();
       }
     }
@@ -1120,10 +1495,10 @@
     async function addNewMember(name, emoji) {
       const trimmed = name.trim();
       if (!trimmed) {
-        return { ok: false, error: "請輸入夥伴名稱喔！" };
+        return { ok: false, error: "請輸入人員名字喔！" };
       }
       if (state.members.some((m) => m.name === trimmed)) {
-        return { ok: false, error: "這位夥伴已經在名單裡囉！" };
+        return { ok: false, error: "這位人員已經在名單裡囉！" };
       }
 
       const color = MEMBER_COLORS[state.members.length % MEMBER_COLORS.length];
@@ -1139,7 +1514,7 @@
         try {
           await addDoc(membersColRef, memberData);
         } catch (err) {
-          console.error("新增夥伴失敗:", err);
+          console.error("新增人員失敗:", err);
           return { ok: false, error: "雲端儲存失敗，請再試一次" };
         }
       } else {
@@ -1148,10 +1523,36 @@
 
       state.activeMemberName = trimmed;
       renderMembers();
+      renderMemberFilterOptions();
       renderLeaderboard();
       playClickSound("celebrate");
-      showToast(`歡迎新夥伴 ${emoji} ${trimmed} 加入！一起動起來！`, "info");
+      showToast(`歡迎新夥伴 ${emoji} ${trimmed} 加入降庫存行列！`, "celebrate");
       return { ok: true };
+    }
+
+    async function removeMember(member) {
+      if (!member) return;
+      if (state.members.length <= 1) {
+        showToast("至少需要保留 1 位團隊人員喔！", "warn");
+        return;
+      }
+
+      if (state.isCloudMode && state.currentUser && membersColRef) {
+        try {
+          await deleteDoc(doc(membersColRef, member.id));
+          showToast(`已移除人員「${member.name}」（歷史紀錄仍完整保留）`, "info");
+        } catch (err) {
+          console.error("移除人員失敗:", err);
+          showToast("移除失敗，請稍後再試", "danger");
+        }
+      } else {
+        state.members = state.members.filter((m) => m.id !== member.id);
+        if (!state.members.some((m) => m.name === state.activeMemberName) && state.members.length > 0) {
+          state.activeMemberName = state.members[0].name;
+        }
+        renderAll();
+        showToast(`已移除人員「${member.name}」（歷史紀錄仍完整保留）`, "info");
+      }
     }
 
     async function deleteLogEntry(logId) {
@@ -1160,28 +1561,146 @@
       if (state.isCloudMode && state.currentUser && logsColRef) {
         try {
           await deleteDoc(doc(logsColRef, logId));
-          showToast("已復原並刪除該筆紀錄", "info");
+          showToast("已刪除並復原該筆紀錄", "info");
         } catch (err) {
-          console.error("刪除紀錄失敗:", err);
+          console.error("刪除流水帳失敗:", err);
           showToast("刪除失敗，請稍後再試", "danger");
         }
       } else {
         state.logs = state.logs.filter((l) => l.id !== logId);
         renderAll();
-        showToast("已復原並刪除該筆紀錄", "info");
+        showToast("已刪除並復原該筆紀錄", "info");
       }
     }
 
     // =========================================================
-    // 8. 畫面渲染函式 (Renderers)
+    // 9. 畫面渲染函式 (Renderers)
     // =========================================================
     function renderAll() {
+      renderScopeTabs();
+      renderDashboard();
       renderDateUI();
+      renderKgPresetsAndButtons();
       renderMembers();
-      renderCountersAndOverview();
+      renderActionCards();
       renderLeaderboard();
+      renderMemberFilterOptions();
       renderFilterButtons();
       renderLedger();
+    }
+
+    function getScopeLabel(scope = state.dashboardScope) {
+      if (scope === "today") return "今日";
+      if (scope === "month") return "本月";
+      return "全部累計";
+    }
+
+    /** 渲染頂部儀表板範圍頁籤 */
+    function renderScopeTabs() {
+      document.querySelectorAll(".scope-tab-btn").forEach((btn) => {
+        const active = btn.dataset.scope === state.dashboardScope;
+        btn.className = `scope-tab-btn px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer ${
+          active
+            ? "bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-200"
+            : "text-slate-500 hover:text-slate-800"
+        }`;
+      });
+    }
+
+    /** 渲染「降庫存 2:1 目標儀表板」 */
+    function renderDashboard() {
+      const scopeLogs = getLogsInScope(state.dashboardScope);
+      const stats = computeStats(scopeLogs);
+
+      // 副標題顯示目前統計期間
+      if (state.dashboardScope === "today") {
+        els.dashboardPeriodSubtitle.textContent = `目前檢視：今日 ${formatSlashDate(state.todayStr)}（週${getWeekdayZh(state.todayStr)}）`;
+      } else if (state.dashboardScope === "month") {
+        const [y, m] = state.todayStr.split("-");
+        els.dashboardPeriodSubtitle.textContent = `目前檢視：本月（${y} 年 ${Number(m)} 月全部紀錄）`;
+      } else {
+        els.dashboardPeriodSubtitle.textContent = `目前檢視：全部歷史累計紀錄（共 ${state.logs.length} 筆）`;
+      }
+
+      // 1. 總減少量 & 2. 總新增量
+      els.dashTotalReduced.textContent = formatKg(stats.totalReduced);
+      els.dashReducedBreakdown.textContent = `出貨 ${formatKg(stats.outbound)} KG ＋ 排除垃圾 ${formatKg(stats.trash)} KG`;
+      els.dashTotalAdded.textContent = formatKg(stats.totalAdded);
+      els.dashTargetNeedHint.textContent = `要達 2:1 目標，總減少量需達：${formatKg(stats.targetReduceNeeded)} KG`;
+
+      // 3. 淨庫存變化（新增 - 減少）
+      if (stats.netChange < 0) {
+        els.dashNetCard.className = "rounded-2xl bg-gradient-to-br from-emerald-50 to-green-100/70 border-2 border-emerald-300 p-4 flex flex-col justify-between transition-colors";
+        els.dashNetLabel.className = "text-xs sm:text-sm font-extrabold text-emerald-800";
+        els.dashNetIcon.textContent = "✅";
+        els.dashNetValue.textContent = `-${formatKg(Math.abs(stats.netChange))}`;
+        els.dashNetValue.className = "text-3xl sm:text-4xl font-black text-emerald-700 tabular-nums";
+        els.dashNetUnit.className = "text-sm sm:text-base font-extrabold text-emerald-600";
+        els.dashNetStatusText.textContent = `庫存已減少 ${formatKg(Math.abs(stats.netChange))} KG`;
+        els.dashNetStatusText.className = "text-xs sm:text-sm font-black text-emerald-700 mt-2";
+      } else if (stats.netChange > 0) {
+        els.dashNetCard.className = "rounded-2xl bg-gradient-to-br from-rose-50 to-red-100/70 border-2 border-rose-300 p-4 flex flex-col justify-between transition-colors";
+        els.dashNetLabel.className = "text-xs sm:text-sm font-extrabold text-rose-800";
+        els.dashNetIcon.textContent = "⚠️";
+        els.dashNetValue.textContent = `+${formatKg(stats.netChange)}`;
+        els.dashNetValue.className = "text-3xl sm:text-4xl font-black text-rose-600 tabular-nums";
+        els.dashNetUnit.className = "text-sm sm:text-base font-extrabold text-rose-500";
+        els.dashNetStatusText.textContent = `庫存增加 ${formatKg(stats.netChange)} KG`;
+        els.dashNetStatusText.className = "text-xs sm:text-sm font-black text-rose-600 mt-2";
+      } else {
+        els.dashNetCard.className = "rounded-2xl bg-slate-50 border-2 border-slate-200 p-4 flex flex-col justify-between transition-colors";
+        els.dashNetLabel.className = "text-xs sm:text-sm font-extrabold text-slate-700";
+        els.dashNetIcon.textContent = "⚖️";
+        els.dashNetValue.textContent = "0";
+        els.dashNetValue.className = "text-3xl sm:text-4xl font-black text-slate-800 tabular-nums";
+        els.dashNetUnit.className = "text-sm sm:text-base font-extrabold text-slate-600";
+        els.dashNetStatusText.textContent = "庫存持平 0 KG";
+        els.dashNetStatusText.className = "text-xs sm:text-sm font-extrabold text-slate-600 mt-2";
+      }
+
+      // 比例文字與進度條
+      els.dashProgressPercentText.textContent = `${stats.progressPct}%`;
+      els.dashProgressBar.style.width = `${stats.progressPct}%`;
+
+      if (stats.totalAdded > 0) {
+        const ratioVal = stats.totalReduced / stats.totalAdded;
+        const formattedRatio = Math.max(0, ratioVal).toFixed(1).replace(/\.0$/, "");
+        els.dashRatioBadge.textContent = `目前比例：減少 ${formattedRatio} : 新增 1`;
+        els.dashRatioBadge.className = stats.isGoalAchieved
+          ? "px-3 py-1 rounded-full text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300"
+          : "px-3 py-1 rounded-full text-xs sm:text-sm font-extrabold bg-amber-100 text-amber-900 border border-amber-300";
+      } else if (stats.totalReduced > 0) {
+        els.dashRatioBadge.textContent = `目前比例：純降庫存 ${formatKg(stats.totalReduced)} KG（零進貨）`;
+        els.dashRatioBadge.className = "px-3 py-1 rounded-full text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300";
+      } else {
+        els.dashRatioBadge.textContent = "目前比例：尚無紀錄（目標 2 : 1）";
+        els.dashRatioBadge.className = "px-3 py-1 rounded-full text-xs sm:text-sm font-extrabold bg-slate-200 text-slate-700";
+      }
+
+      // 進度條顏色與白話激勵橫幅
+      if (stats.isGoalAchieved) {
+        els.dashProgressBar.className = "h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600";
+        els.dashGoalBanner.className = "rounded-2xl px-4 py-3 text-sm sm:text-base font-black flex items-center gap-2.5 bg-emerald-100/90 text-emerald-900 border-2 border-emerald-300 transition-colors";
+        els.dashGoalBannerIcon.textContent = "🔥";
+        const extraReduced = roundKg(stats.totalReduced - stats.targetReduceNeeded);
+        if (stats.totalAdded > 0 && extraReduced > 0) {
+          els.dashGoalBannerText.textContent = `達標！庫存正在穩定下降中！（已超前 2:1 目標 ${formatKg(extraReduced)} KG，全員太強了！）`;
+        } else {
+          els.dashGoalBannerText.textContent = "達標！庫存正在穩定下降中！大家繼續保持！";
+        }
+      } else if (stats.totalAdded > 0) {
+        els.dashProgressBar.className = stats.progressPct >= 50
+          ? "h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-amber-400 to-sky-500"
+          : "h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-rose-500 to-amber-500";
+        els.dashGoalBanner.className = "rounded-2xl px-4 py-3 text-sm sm:text-base font-extrabold flex items-center gap-2.5 bg-amber-50 text-amber-950 border-2 border-amber-300 transition-colors";
+        els.dashGoalBannerIcon.textContent = "💪";
+        els.dashGoalBannerText.innerHTML = `距離 2:1 目標，還需要再出貨或排除垃圾 <span class="text-rose-600 font-black text-base sm:text-lg underline decoration-2 mx-0.5">${formatKg(stats.gapToGoal)} KG</span>！`;
+      } else {
+        els.dashProgressBar.className = "h-full rounded-full transition-all duration-500 ease-out bg-slate-300";
+        els.dashGoalBanner.className = "rounded-2xl px-4 py-3 text-sm sm:text-base font-bold flex items-center gap-2.5 bg-slate-100 text-slate-700 border border-slate-200 transition-colors";
+        els.dashGoalBannerIcon.textContent = "🚀";
+        els.dashGoalBannerText.textContent = "開始點擊下方按鈕紀錄進貨、出貨或排除垃圾，一起達成「減少 2 ： 新增 1」！";
+      }
     }
 
     /** 渲染日期選擇器與補登提醒 */
@@ -1194,191 +1713,291 @@
         els.resetTodayBtn.classList.add("hidden");
         els.backfillBanner.classList.add("hidden");
         els.backfillBanner.classList.remove("flex");
-        els.actionDateHint.textContent = `計數顯示：今日 (${formatSlashDate(state.todayStr)})`;
-        els.actionDateHint.className = "text-xs sm:text-sm font-bold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200";
-        els.filterSelectedDateBtn.classList.add("hidden");
-        if (state.filterDateScope === "selected") {
-          state.filterDateScope = "today";
-        }
       } else {
         els.resetTodayBtn.classList.remove("hidden");
         els.backfillBanner.classList.remove("hidden");
         els.backfillBanner.classList.add("flex");
         els.backfillDateText.textContent = `${formatSlashDate(state.selectedDate)}（週${getWeekdayZh(state.selectedDate)}）`;
-        els.actionDateHint.textContent = `📌 補登日計數：${formatSlashDate(state.selectedDate)}`;
-        els.actionDateHint.className = "text-xs sm:text-sm font-extrabold text-amber-800 bg-amber-100 px-3 py-1 rounded-full border border-amber-300";
-        els.filterSelectedDateBtn.classList.remove("hidden");
-        els.filterSelectedDateBtn.textContent = `僅看 ${formatSlashDate(state.selectedDate).slice(5)}`;
       }
+    }
 
-      document.querySelectorAll(".date-card-label").forEach((el) => {
-        el.textContent = isToday ? "今日累計" : `${formatSlashDate(state.selectedDate).slice(5)} 累計`;
+    /** 渲染 KG 快選按鈕與三大卡片按鈕上的重量文字 */
+    function renderKgPresetsAndButtons() {
+      els.kgPresetGroup.innerHTML = "";
+      KG_PRESETS.forEach((kg) => {
+        const isSelected = roundKg(state.stepKg) === kg;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = `${kg} KG`;
+        btn.className = `px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold border-2 transition active:scale-95 cursor-pointer tabular-nums ${
+          isSelected
+            ? "bg-emerald-600 text-white border-emerald-700 shadow-md shadow-emerald-200"
+            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-emerald-50 hover:border-emerald-300"
+        }`;
+        btn.addEventListener("click", () => {
+          state.stepKg = kg;
+          els.stepKgInput.value = kg;
+          renderKgPresetsAndButtons();
+          playClickSound("add");
+        });
+        els.kgPresetGroup.appendChild(btn);
+      });
+
+      const displayKg = state.stepKg > 0 ? `${formatKg(state.stepKg)} KG` : "-- KG";
+      document.querySelectorAll(".btn-kg-label").forEach((el) => {
+        el.textContent = displayKg;
       });
     }
 
-    /** 渲染「現在是誰在紀錄？」頭像切換按鈕 */
+    /** 渲染人員切換列與管理（移除）模式 */
     function renderMembers() {
       const activeMember = state.members.find((m) => m.name === state.activeMemberName) || state.members[0];
       if (activeMember) {
         els.currentMemberPill.textContent = `目前紀錄者：${activeMember.emoji} ${activeMember.name}`;
       }
 
+      // 更新管理按鈕與橫幅狀態
+      if (state.isManagingMembers) {
+        els.toggleManageMembersBtn.className = "inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer";
+        els.manageMembersIcon.textContent = "✓";
+        els.manageMembersText.textContent = "完成管理";
+        els.manageMembersBanner.classList.remove("hidden");
+        els.manageMembersBanner.classList.add("flex");
+      } else {
+        els.toggleManageMembersBtn.className = "inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-bold border border-slate-200 transition cursor-pointer";
+        els.manageMembersIcon.textContent = "⚙️";
+        els.manageMembersText.textContent = "管理 / 減少人員";
+        els.manageMembersBanner.classList.add("hidden");
+        els.manageMembersBanner.classList.remove("flex");
+      }
+
       els.memberListContainer.innerHTML = "";
       state.members.forEach((m) => {
         const isActive = m.name === state.activeMemberName;
         const theme = COLOR_STYLES[m.color] || COLOR_STYLES.sky;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "inline-flex items-center";
+
+        // 切換人員主按鈕
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = `flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 text-sm sm:text-base font-extrabold transition active:scale-95 cursor-pointer ${
-          isActive ? `${theme.active} shadow-md ring-2 ring-offset-2 ring-amber-300` : theme.idle
+        btn.className = `flex items-center gap-2 px-4 py-2.5 border-2 text-sm sm:text-base font-extrabold transition active:scale-95 cursor-pointer ${
+          state.isManagingMembers ? "rounded-l-2xl border-r-0" : "rounded-2xl"
+        } ${
+          isActive ? `${theme.active} shadow-md ring-2 ring-offset-1 ring-emerald-300` : theme.idle
         }`;
         btn.innerHTML = `
           <span class="text-lg leading-none">${escapeHtml(m.emoji)}</span>
           <span>${escapeHtml(m.name)}</span>
-          ${isActive ? '<span class="text-xs bg-white/25 px-1.5 py-0.5 rounded-full ml-0.5">✓</span>' : ""}
+          ${isActive && !state.isManagingMembers ? '<span class="text-xs bg-white/25 px-1.5 py-0.5 rounded-full ml-0.5">✓</span>' : ""}
         `;
         btn.addEventListener("click", () => {
           state.activeMemberName = m.name;
           renderMembers();
-          playClickSound("plus");
+          playClickSound("add");
           showToast(`已切換為 ${m.emoji} ${m.name} 紀錄中！`, "info");
         });
-        els.memberListContainer.appendChild(btn);
+        wrapper.appendChild(btn);
+
+        // 管理模式顯示刪除按鈕 (✕)
+        if (state.isManagingMembers) {
+          const delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.setAttribute("aria-label", `移除人員 ${m.name}`);
+          delBtn.className = "px-3 py-2.5 rounded-r-2xl bg-rose-500 hover:bg-rose-600 active:scale-95 text-white border-2 border-rose-600 text-sm sm:text-base font-black transition cursor-pointer";
+          delBtn.textContent = "✕";
+          delBtn.addEventListener("click", () => {
+            if (state.members.length <= 1) {
+              showToast("至少需保留 1 位人員，無法再刪除喔！", "warn");
+              return;
+            }
+            openDeleteMemberModal(m);
+          });
+          wrapper.appendChild(delBtn);
+        }
+
+        els.memberListContainer.appendChild(wrapper);
       });
     }
 
-    /** 渲染今日戰況總覽與三大項目卡片計數 */
-    function renderCountersAndOverview() {
-      const todaySums = { inbound: 0, outbound: 0, trash: 0 };
-      const selectedSums = { inbound: 0, outbound: 0, trash: 0 };
-      const allTimeSums = { inbound: 0, outbound: 0, trash: 0 };
+    /** 渲染三大項目卡片累計 KG */
+    function renderActionCards() {
+      const scopeLogs = getLogsInScope(state.dashboardScope);
+      const stats = computeStats(scopeLogs);
+      const scopeBadgeText = `${getScopeLabel(state.dashboardScope)}累計`;
 
-      state.logs.forEach((log) => {
-        if (allTimeSums[log.category] !== undefined) {
-          allTimeSums[log.category] += log.delta;
-        }
-        if (log.date === state.todayStr && todaySums[log.category] !== undefined) {
-          todaySums[log.category] += log.delta;
-        }
-        if (log.date === state.selectedDate && selectedSums[log.category] !== undefined) {
-          selectedSums[log.category] += log.delta;
-        }
+      document.querySelectorAll(".scope-badge-label").forEach((el) => {
+        el.textContent = scopeBadgeText;
       });
 
-      // 更新今日戰況總覽
-      els.overviewTodayInbound.textContent = todaySums.inbound;
-      els.overviewTodayOutbound.textContent = todaySums.outbound;
-      els.overviewTodayTrash.textContent = todaySums.trash;
+      document.getElementById("sumKg-inbound").textContent = formatKg(stats.inbound);
+      document.getElementById("sumKg-outbound").textContent = formatKg(stats.outbound);
+      document.getElementById("sumKg-trash").textContent = formatKg(stats.trash);
 
-      const todayDiff = todaySums.inbound - todaySums.outbound;
-      const totalDiff = allTimeSums.inbound - allTimeSums.outbound;
-      els.overviewTodayDiff.textContent = todayDiff > 0 ? `+${todayDiff}` : `${todayDiff}`;
-      els.overviewTotalDiff.textContent = totalDiff > 0 ? `+${totalDiff}` : `${totalDiff}`;
+      // 若處於補登其他日期模式，額外顯示該補登日的單日累計方便核對
+      const isBackfill = state.selectedDate !== state.todayStr;
+      const selectedDateStats = isBackfill
+        ? computeStats(state.logs.filter((l) => l.date === state.selectedDate))
+        : null;
 
-      // 更新三大操作卡片（選定日累計 + 歷史累計）
       ["inbound", "outbound", "trash"].forEach((cat) => {
-        const countEl = document.getElementById(`count-${cat}`);
-        const allTimeEl = document.getElementById(`allTime-${cat}`);
-        if (countEl) countEl.textContent = selectedSums[cat];
-        if (allTimeEl) allTimeEl.textContent = allTimeSums[cat];
+        const miniEl = document.getElementById(`selectedDateMini-${cat}`);
+        if (!miniEl) return;
+        if (isBackfill && selectedDateStats) {
+          miniEl.classList.remove("hidden");
+          miniEl.textContent = `📌 ${formatSlashDate(state.selectedDate).slice(5)} 當日：${formatKg(selectedDateStats[cat])} KG`;
+        } else {
+          miniEl.classList.add("hidden");
+        }
       });
     }
 
-    /** 渲染「今日全員動起來排行榜 / 團隊總動力」 */
+    /** 渲染全員降庫存排行榜 */
     function renderLeaderboard() {
-      const todayLogs = state.logs.filter((l) => l.date === state.todayStr);
-      const totalActions = todayLogs.length;
-      els.teamTodayTotalActions.textContent = totalActions;
+      const scopeLabel = getScopeLabel(state.dashboardScope);
+      els.leaderboardScopePill.textContent = `${scopeLabel}榜單`;
 
-      // 動態團隊激勵小語
-      let cheer = "新的一天開始囉！快按下第一個 ＋ 啟動團隊動力！";
-      if (totalActions >= 1 && totalActions <= 5) {
-        cheer = `好開始！今天大家已合力完成 ${totalActions} 筆動作，熱身完成！`;
-      } else if (totalActions >= 6 && totalActions <= 15) {
-        cheer = `大家太棒了！今天已合力完成 ${totalActions} 筆動作，節奏超讚！`;
-      } else if (totalActions >= 16 && totalActions <= 30) {
-        cheer = `全員火力全開！今天已聯手完成 ${totalActions} 筆動作，默契滿分！`;
-      } else if (totalActions > 30) {
-        cheer = `無敵夢幻團隊！今天狂飆 ${totalActions} 筆動作，大家辛苦了！🏆`;
+      const scopeLogs = getLogsInScope(state.dashboardScope);
+      const overallStats = computeStats(scopeLogs);
+      els.teamReducedSummary.textContent = formatKg(overallStats.totalReduced);
+
+      // 團隊激勵語
+      if (overallStats.totalReduced <= 0) {
+        els.teamCheerText.textContent = `${scopeLabel}還沒開張喔！快按下出貨或排除垃圾，搶下第一名寶座！`;
+      } else if (overallStats.isGoalAchieved) {
+        els.teamCheerText.textContent = `🔥 太神啦！${scopeLabel}大家已合力減少 ${formatKg(overallStats.totalReduced)} KG，成功達成 2:1 降庫存目標！`;
+      } else {
+        els.teamCheerText.textContent = `💪 大家加油！${scopeLabel}已減少 ${formatKg(overallStats.totalReduced)} KG，再衝 ${formatKg(overallStats.gapToGoal)} KG 就達標！`;
       }
-      els.teamCheerText.textContent = cheer;
 
-      // 統計每位夥伴今日貢獻次數（包含名單內與曾出現在今日紀錄中的人）
-      const statsMap = new Map();
+      // 彙總每位人員戰績
+      const rosterNames = new Set(state.members.map((m) => m.name));
+      const map = new Map();
+
       state.members.forEach((m) => {
-        statsMap.set(m.name, {
+        map.set(m.name, {
           name: m.name,
           emoji: m.emoji,
           color: m.color,
-          count: 0,
-          inbound: 0,
+          isCurrent: true,
           outbound: 0,
-          trash: 0
+          trash: 0,
+          inbound: 0,
+          reduced: 0
         });
       });
 
-      todayLogs.forEach((log) => {
-        if (!statsMap.has(log.memberName)) {
-          statsMap.set(log.memberName, {
+      scopeLogs.forEach((log) => {
+        if (!map.has(log.memberName)) {
+          map.set(log.memberName, {
             name: log.memberName,
             emoji: log.memberEmoji || "⭐",
             color: "indigo",
-            count: 0,
-            inbound: 0,
+            isCurrent: rosterNames.has(log.memberName),
             outbound: 0,
-            trash: 0
+            trash: 0,
+            inbound: 0,
+            reduced: 0
           });
         }
-        const entry = statsMap.get(log.memberName);
-        entry.count += 1;
-        if (entry[log.category] !== undefined) {
-          entry[log.category] += 1;
-        }
+        const p = map.get(log.memberName);
+        if (log.category === "outbound") p.outbound = roundKg(p.outbound + log.weightKg);
+        else if (log.category === "trash") p.trash = roundKg(p.trash + log.weightKg);
+        else if (log.category === "inbound") p.inbound = roundKg(p.inbound + log.weightKg);
+        p.reduced = roundKg(p.outbound + p.trash);
       });
 
-      const ranked = Array.from(statsMap.values()).sort((a, b) => b.count - a.count);
-      const maxCount = Math.max(...ranked.map((r) => r.count), 1);
+      const ranked = Array.from(map.values()).sort((a, b) => {
+        if (b.reduced !== a.reduced) return b.reduced - a.reduced;
+        return (b.outbound + b.trash + b.inbound) - (a.outbound + a.trash + a.inbound);
+      });
+
+      const maxReduced = Math.max(...ranked.map((r) => r.reduced), 1);
 
       els.leaderboardContainer.innerHTML = "";
       ranked.forEach((person, idx) => {
-        const pct = person.count === 0 ? 0 : Math.max(8, Math.round((person.count / maxCount) * 100));
-        const theme = COLOR_STYLES[person.color] || COLOR_STYLES.sky;
-        const rankIcon = person.count > 0
+        const pct = person.reduced <= 0 ? 0 : Math.max(8, Math.round((person.reduced / maxReduced) * 100));
+        const theme = COLOR_STYLES[person.color] || COLOR_STYLES.emerald;
+        const rankIcon = person.reduced > 0
           ? (idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`)
           : "—";
 
+        // 依貢獻給予鼓勵稱號
+        let titleBadge = "熱身中";
+        let titleStyle = "bg-slate-200 text-slate-600";
+        if (person.reduced > 0 && idx === 0) {
+          titleBadge = "🔥 降庫存王牌";
+          titleStyle = "bg-amber-100 text-amber-800 border border-amber-300";
+        } else if (person.reduced >= 500) {
+          titleBadge = "🏆 清倉戰神";
+          titleStyle = "bg-emerald-100 text-emerald-800 border border-emerald-200";
+        } else if (person.reduced > 0) {
+          titleBadge = "⚡ 降庫存先鋒";
+          titleStyle = "bg-sky-100 text-sky-800 border border-sky-200";
+        }
+
         const card = document.createElement("div");
-        card.className = "rounded-2xl bg-slate-50/90 border border-slate-200/70 p-3.5 space-y-2";
+        card.className = "rounded-2xl bg-slate-50/90 border border-slate-200/80 p-3.5 space-y-2.5";
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-6 text-center text-sm font-black text-slate-500 shrink-0">${rankIcon}</span>
               <span class="text-lg leading-none">${escapeHtml(person.emoji)}</span>
-              <span class="font-extrabold text-slate-800 truncate">${escapeHtml(person.name)}</span>
+              <span class="font-extrabold text-slate-900 truncate">${escapeHtml(person.name)}</span>
+              ${!person.isCurrent ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-bold shrink-0">已移出</span>' : ""}
+              <span class="text-[11px] px-2 py-0.5 rounded-full font-extrabold shrink-0 ${titleStyle}">${titleBadge}</span>
             </div>
             <div class="text-right shrink-0">
-              <span class="text-base font-black text-slate-900 tabular-nums">${person.count}</span>
-              <span class="text-xs font-bold text-slate-500">次</span>
+              <span class="text-xs font-bold text-emerald-700 mr-0.5">減少</span>
+              <span class="text-base sm:text-lg font-black text-emerald-700 tabular-nums">${formatKg(person.reduced)}</span>
+              <span class="text-xs font-extrabold text-emerald-600">KG</span>
             </div>
           </div>
+
           <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
             <div class="h-full rounded-full transition-all duration-500 ${theme.bar}" style="width: ${pct}%"></div>
           </div>
-          <div class="flex items-center gap-2.5 text-[11px] font-bold text-slate-500">
-            <span>📦 ${person.inbound}</span>
-            <span>🚚 ${person.outbound}</span>
-            <span>🗑️ ${person.trash}</span>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold text-slate-600">
+            <span class="text-sky-700">🚚 出貨 ${formatKg(person.outbound)} KG</span>
+            <span class="text-emerald-700">🗑️ 排除垃圾 ${formatKg(person.trash)} KG</span>
+            <span class="text-rose-600">📦 進貨 ${formatKg(person.inbound)} KG</span>
           </div>
         `;
         els.leaderboardContainer.appendChild(card);
       });
     }
 
-    /** 渲染篩選按鈕選中狀態 */
+    /** 渲染流水帳人員篩選下拉選單 */
+    function renderMemberFilterOptions() {
+      const prevVal = state.filterMember;
+      const namesSet = new Set();
+      state.members.forEach((m) => namesSet.add(m.name));
+      state.logs.forEach((l) => namesSet.add(l.memberName));
+
+      const names = Array.from(namesSet);
+      els.filterMemberSelect.innerHTML = `<option value="all">全部人員</option>`;
+      names.forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        els.filterMemberSelect.appendChild(opt);
+      });
+
+      if (prevVal === "all" || namesSet.has(prevVal)) {
+        els.filterMemberSelect.value = prevVal;
+      } else {
+        state.filterMember = "all";
+        els.filterMemberSelect.value = "all";
+      }
+    }
+
+    /** 渲染流水帳篩選按鈕樣式 */
     function renderFilterButtons() {
       document.querySelectorAll(".filter-cat-btn").forEach((btn) => {
         const active = btn.dataset.filterCat === state.filterCategory;
-        btn.className = `filter-cat-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
+        btn.className = `filter-cat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
           active
             ? "bg-slate-900 text-white shadow-sm"
             : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
@@ -1386,33 +2005,36 @@
       });
 
       document.querySelectorAll(".filter-date-btn").forEach((btn) => {
-        const isHidden = btn.id === "filterSelectedDateBtn" && state.selectedDate === state.todayStr;
         const active = btn.dataset.filterDate === state.filterDateScope;
-        btn.className = `${isHidden ? "hidden" : ""} filter-date-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
+        btn.className = `filter-date-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
           active
-            ? "bg-amber-500 text-white shadow-sm"
+            ? "bg-emerald-600 text-white shadow-sm"
             : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
         }`;
       });
+
+      els.filterSpecificDateInput.value = state.filterDateScope === "specific" ? state.filterSpecificDate : "";
     }
 
-    /** 取得目前篩選後的流水帳陣列 */
+    /** 取得篩選後的流水帳資料 */
     function getFilteredLogs() {
+      const today = state.todayStr;
+      const month = getLocalMonthStr(today);
+
       return state.logs.filter((log) => {
-        if (state.filterCategory !== "all" && log.category !== state.filterCategory) {
-          return false;
-        }
-        if (state.filterDateScope === "today" && log.date !== state.todayStr) {
-          return false;
-        }
-        if (state.filterDateScope === "selected" && log.date !== state.selectedDate) {
+        if (state.filterCategory !== "all" && log.category !== state.filterCategory) return false;
+        if (state.filterMember !== "all" && log.memberName !== state.filterMember) return false;
+
+        if (state.filterDateScope === "today" && log.date !== today) return false;
+        if (state.filterDateScope === "month" && !log.date.startsWith(month)) return false;
+        if (state.filterDateScope === "specific" && state.filterSpecificDate && log.date !== state.filterSpecificDate) {
           return false;
         }
         return true;
       });
     }
 
-    /** 渲染流水帳表格（電腦版）與卡片列表（手機版） */
+    /** 渲染流水帳表格（電腦版）與卡片（手機版） */
     function renderLedger() {
       const filtered = getFilteredLogs();
       els.visibleLogCount.textContent = filtered.length;
@@ -1423,17 +2045,19 @@
         els.emptyLedgerState.classList.remove("hidden");
         return;
       }
-
       els.emptyLedgerState.classList.add("hidden");
 
-      // 電腦版 Table Rows
+      // 電腦版 Table
       els.ledgerTableBody.innerHTML = filtered
         .map((log) => {
           const cat = CATEGORIES[log.category] || CATEGORIES.inbound;
-          const isPlus = log.delta > 0;
-          const deltaBadge = isPlus
-            ? `<span class="inline-block px-3 py-1 rounded-xl bg-emerald-100 text-emerald-700 font-black tabular-nums">+1</span>`
-            : `<span class="inline-block px-3 py-1 rounded-xl bg-rose-100 text-rose-700 font-black tabular-nums">-1</span>`;
+          const isWeightPlus = log.weightKg >= 0;
+          const weightText = `${isWeightPlus ? "+" : "-"}${formatKg(Math.abs(log.weightKg))} KG`;
+
+          const invDelta = getInventoryDelta(log);
+          const impactBadge = invDelta < 0
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-black">庫存 −</span>`
+            : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-100 text-rose-700 border border-rose-200 text-xs font-black">庫存 ＋</span>`;
 
           return `
             <tr class="hover:bg-slate-50/90 transition">
@@ -1451,14 +2075,17 @@
                   <span>${cat.label}</span>
                 </span>
               </td>
-              <td class="py-3 px-4 text-center">${deltaBadge}</td>
+              <td class="py-3 px-4 text-right font-black tabular-nums ${isWeightPlus ? "text-slate-900" : "text-slate-500"}">
+                ${escapeHtml(weightText)}
+              </td>
+              <td class="py-3 px-4 text-center">${impactBadge}</td>
               <td class="py-3 px-4 text-right">
                 <button
                   type="button"
                   data-delete-id="${escapeHtml(log.id)}"
                   class="delete-log-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                 >
-                  刪除復原
+                  刪除
                 </button>
               </td>
             </tr>
@@ -1466,26 +2093,32 @@
         })
         .join("");
 
-      // 手機版 Card Items
+      // 手機版卡片清單
       els.ledgerMobileList.innerHTML = filtered
         .map((log) => {
           const cat = CATEGORIES[log.category] || CATEGORIES.inbound;
-          const isPlus = log.delta > 0;
-          const deltaClass = isPlus
-            ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+          const isWeightPlus = log.weightKg >= 0;
+          const weightText = `${isWeightPlus ? "+" : "-"}${formatKg(Math.abs(log.weightKg))} KG`;
+          const invDelta = getInventoryDelta(log);
+          const impactClass = invDelta < 0
+            ? "bg-emerald-100 text-emerald-800 border-emerald-200"
             : "bg-rose-100 text-rose-700 border-rose-200";
+          const impactLabel = invDelta < 0 ? "庫存 −" : "庫存 ＋";
 
           return `
-            <div class="rounded-2xl bg-slate-50/80 border border-slate-200/80 p-3.5 flex items-center justify-between gap-3">
+            <div class="rounded-2xl bg-slate-50/90 border border-slate-200/80 p-3.5 flex items-center justify-between gap-3">
               <div class="space-y-1.5 min-w-0">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-extrabold ${cat.pillClass}">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-extrabold ${cat.pillClass}">
                     <span>${cat.emoji}</span>
                     <span>${cat.label}</span>
                   </span>
                   <span class="inline-flex items-center gap-1 text-sm font-extrabold text-slate-800">
                     <span>${escapeHtml(log.memberEmoji)}</span>
                     <span>${escapeHtml(log.memberName)}</span>
+                  </span>
+                  <span class="px-2 py-0.5 rounded-lg border text-[11px] font-black ${impactClass}">
+                    ${impactLabel}
                   </span>
                 </div>
                 <div class="text-xs font-semibold text-slate-500 tabular-nums">
@@ -1494,14 +2127,16 @@
               </div>
 
               <div class="flex items-center gap-2 shrink-0">
-                <span class="w-11 h-10 rounded-xl border font-black text-base flex items-center justify-center tabular-nums ${deltaClass}">
-                  ${isPlus ? "+1" : "-1"}
-                </span>
+                <div class="text-right">
+                  <span class="text-sm sm:text-base font-black tabular-nums ${invDelta < 0 ? "text-emerald-700" : "text-rose-600"}">
+                    ${escapeHtml(weightText)}
+                  </span>
+                </div>
                 <button
                   type="button"
                   data-delete-id="${escapeHtml(log.id)}"
                   aria-label="刪除此筆紀錄"
-                  class="delete-log-btn w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 flex items-center justify-center text-sm font-bold transition cursor-pointer"
+                  class="delete-log-btn w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 flex items-center justify-center text-sm font-bold transition cursor-pointer"
                 >
                   ✕
                 </button>
@@ -1513,46 +2148,55 @@
     }
 
     // =========================================================
-    // 9. CSV 匯出功能（支援 Excel 繁體中文 UTF-8 BOM）
+    // 10. 匯出 Excel 表格 (.csv)（確保繁體中文不亂碼）
     // =========================================================
     function exportLogsToCsv() {
       const targetLogs = getFilteredLogs();
       if (targetLogs.length === 0) {
-        showToast("目前篩選條件下沒有紀錄可以匯出喔！", "warn");
+        showToast("目前篩選條件下沒有資料可以匯出喔！", "warn");
         return;
       }
 
-      const headers = ["登記日期", "紀錄時間", "執行夥伴", "項目分類", "動作變動"];
+      const headers = ["登記日期", "紀錄時間", "人員", "項目", "變動重量(KG)", "庫存影響", "淨庫存變化(KG)"];
       const rows = targetLogs.map((log) => {
         const cat = CATEGORIES[log.category] || { label: log.category };
+        const invDelta = getInventoryDelta(log);
+        const impactText = invDelta < 0 ? "庫存-" : "庫存+";
         return [
           formatSlashDate(log.date),
           log.time,
           log.memberName,
           cat.label,
-          log.delta > 0 ? "+1" : "-1"
-        ].map((field) => `"${String(field).replaceAll('"', '""')}"`).join(",");
+          log.weightKg,
+          impactText,
+          invDelta
+        ]
+          .map((field) => `"${String(field).replaceAll('"', '""')}"`)
+          .join(",");
       });
 
+      // 加入 UTF-8 BOM (\uFEFF) 讓 Excel 直接開啟不亂碼
       const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
 
       const link = document.createElement("a");
       link.href = url;
-      const scopeTag = state.filterDateScope === "all" ? "全部日期" : state.selectedDate;
-      link.download = `全員動起來流水帳_${scopeTag}.csv`;
+      const scopeTag = state.filterDateScope === "specific" && state.filterSpecificDate
+        ? state.filterSpecificDate
+        : (state.filterDateScope === "today" ? state.todayStr : state.filterDateScope === "month" ? getLocalMonthStr(state.todayStr) : "全部日期");
+      link.download = `全員降庫存KG流水帳_${scopeTag}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
       playClickSound("celebrate");
-      showToast(`已成功匯出 ${targetLogs.length} 筆紀錄表 (CSV)！`, "success");
+      showToast(`已成功匯出 ${targetLogs.length} 筆 KG 紀錄表格！`, "celebrate");
     }
 
     // =========================================================
-    // 10. 自訂彈窗控制（新增夥伴 & 刪除確認）
+    // 11. 自訂彈窗控制（新增人員 / 移除人員 / 刪除流水帳）
     // =========================================================
     function renderEmojiPicker() {
       els.emojiPicker.innerHTML = "";
@@ -1563,7 +2207,7 @@
         btn.textContent = emo;
         btn.className = `h-10 rounded-xl text-xl flex items-center justify-center border-2 transition cursor-pointer ${
           isSelected
-            ? "bg-amber-100 border-amber-400 scale-105"
+            ? "bg-emerald-100 border-emerald-500 scale-105"
             : "bg-slate-50 border-slate-200 hover:bg-slate-100"
         }`;
         btn.addEventListener("click", () => {
@@ -1589,54 +2233,74 @@
       els.addMemberModal.classList.remove("flex");
     }
 
-    function openDeleteModal(logId) {
+    function openDeleteMemberModal(member) {
+      state.pendingDeleteMember = member;
+      els.deleteMemberPreview.textContent = `${member.emoji} ${member.name}`;
+      els.deleteMemberModal.classList.remove("hidden");
+      els.deleteMemberModal.classList.add("flex");
+    }
+
+    function closeDeleteMemberModal() {
+      state.pendingDeleteMember = null;
+      els.deleteMemberModal.classList.add("hidden");
+      els.deleteMemberModal.classList.remove("flex");
+    }
+
+    function openDeleteLogModal(logId) {
       const log = state.logs.find((l) => l.id === logId);
       if (!log) return;
       state.pendingDeleteLogId = logId;
       const cat = CATEGORIES[log.category] || CATEGORIES.inbound;
-      const deltaStr = log.delta > 0 ? "+1" : "-1";
+      const weightText = `${log.weightKg >= 0 ? "+" : "-"}${formatKg(Math.abs(log.weightKg))} KG`;
 
       els.deleteLogPreview.innerHTML = `
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <span>${escapeHtml(log.memberEmoji)} ${escapeHtml(log.memberName)}</span>
-          <span class="px-2 py-0.5 rounded-lg text-xs ${cat.pillClass}">${cat.emoji} ${cat.label} (${deltaStr})</span>
+          <span class="px-2 py-0.5 rounded-lg text-xs ${cat.pillClass}">${cat.emoji} ${cat.label} (${escapeHtml(weightText)})</span>
         </div>
         <div class="text-xs text-slate-500 font-semibold">
           登記日期：${escapeHtml(formatSlashDate(log.date))}　時間：${escapeHtml(log.time)}
         </div>
       `;
 
-      els.deleteConfirmModal.classList.remove("hidden");
-      els.deleteConfirmModal.classList.add("flex");
+      els.deleteLogModal.classList.remove("hidden");
+      els.deleteLogModal.classList.add("flex");
     }
 
-    function closeDeleteModal() {
+    function closeDeleteLogModal() {
       state.pendingDeleteLogId = null;
-      els.deleteConfirmModal.classList.add("hidden");
-      els.deleteConfirmModal.classList.remove("flex");
-    }
-
-    /** 簡易 HTML 跳脫防 XSS */
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
+      els.deleteLogModal.classList.add("hidden");
+      els.deleteLogModal.classList.remove("flex");
     }
 
     // =========================================================
-    // 11. 綁定事件監聽器
+    // 12. 綁定所有互動事件
     // =========================================================
     function bindEvents() {
-      // 三大項目 ＋ / － 按鈕
-      document.querySelectorAll(".action-btn").forEach((btn) => {
+      // 儀表板時間範圍切換（今日 / 本月 / 全部累計）
+      document.querySelectorAll(".scope-tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.dashboardScope = btn.dataset.scope;
+          // 同步更新流水帳日期範圍，讓檢視體驗更連貫
+          state.filterDateScope = state.dashboardScope;
+          renderAll();
+        });
+      });
+
+      // 三大項目 ＋ / － 大按鈕
+      document.querySelectorAll(".action-kg-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           const category = btn.dataset.category;
-          const delta = Number(btn.dataset.delta);
-          recordAction(category, delta);
+          const sign = Number(btn.dataset.sign);
+          recordKgAction(category, sign);
         });
+      });
+
+      // 自訂 KG 輸入框即時同步更新按鈕文字
+      els.stepKgInput.addEventListener("input", () => {
+        const val = parseFloat(els.stepKgInput.value);
+        state.stepKg = !isNaN(val) && val > 0 ? roundKg(val) : 0;
+        renderKgPresetsAndButtons();
       });
 
       // 音效開關
@@ -1644,45 +2308,53 @@
         state.soundEnabled = !state.soundEnabled;
         els.soundIcon.textContent = state.soundEnabled ? "🔊" : "🔇";
         els.soundLabel.textContent = state.soundEnabled ? "音效開" : "靜音";
-        if (state.soundEnabled) playClickSound("plus");
+        if (state.soundEnabled) playClickSound("reduce");
         showToast(state.soundEnabled ? "已開啟點擊提示音 🔊" : "已切換為靜音模式 🔇", "info");
       });
 
-      // 點擊同步狀態顯示提示
+      // 同步狀態按鈕提示
       els.syncStatusBtn.addEventListener("click", () => {
         if (state.isCloudMode) {
-          showToast("🟢 雲端即時同步中！所有夥伴都能立刻看到最新進度", "success");
+          showToast("🟢 雲端即時同步中！所有團隊夥伴都會立刻看到最新進度", "celebrate");
         } else {
-          showToast("目前為本機展示模式，重新整理後資料不會保留", "info");
+          showToast("目前為單機預覽模式，重新整理後暫存資料不會保留", "info");
         }
       });
 
-      // 登記日期變更
+      // 登記日期變更（支援補登）
       els.recordDateInput.addEventListener("change", (e) => {
         const val = e.target.value;
         if (!val) return;
         state.selectedDate = val;
-        if (state.selectedDate !== state.todayStr) {
-          state.filterDateScope = "selected";
+        if (val !== state.todayStr) {
           showToast(`已切換登記日期為 ${formatSlashDate(val)}（補登模式）`, "warn");
-        } else {
-          state.filterDateScope = "today";
         }
-        renderAll();
+        renderDateUI();
+        renderActionCards();
       });
 
-      // 回到今天按鈕（兩處）
+      // 切回今日按鈕
       const goBackToday = () => {
         state.todayStr = getLocalTodayStr();
         state.selectedDate = state.todayStr;
-        state.filterDateScope = "today";
-        renderAll();
+        renderDateUI();
+        renderActionCards();
         showToast(`已切回今日 (${formatSlashDate(state.todayStr)})！`, "info");
       };
       els.resetTodayBtn.addEventListener("click", goBackToday);
       els.bannerBackTodayBtn.addEventListener("click", goBackToday);
 
-      // 分類篩選按鈕
+      // 人員管理（減少人員）模式切換
+      els.toggleManageMembersBtn.addEventListener("click", () => {
+        state.isManagingMembers = !state.isManagingMembers;
+        renderMembers();
+      });
+      els.finishManageBannerBtn.addEventListener("click", () => {
+        state.isManagingMembers = false;
+        renderMembers();
+      });
+
+      // 流水帳分類篩選
       document.querySelectorAll(".filter-cat-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           state.filterCategory = btn.dataset.filterCat;
@@ -1691,65 +2363,96 @@
         });
       });
 
-      // 日期篩選按鈕
+      // 流水帳人員篩選
+      els.filterMemberSelect.addEventListener("change", (e) => {
+        state.filterMember = e.target.value;
+        renderLedger();
+      });
+
+      // 流水帳日期範圍按鈕篩選
       document.querySelectorAll(".filter-date-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           state.filterDateScope = btn.dataset.filterDate;
+          state.filterSpecificDate = "";
           renderFilterButtons();
           renderLedger();
         });
       });
 
-      // 匯出 CSV
+      // 流水帳指定日期篩選
+      els.filterSpecificDateInput.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (val) {
+          state.filterDateScope = "specific";
+          state.filterSpecificDate = val;
+        } else {
+          state.filterDateScope = "all";
+          state.filterSpecificDate = "";
+        }
+        renderFilterButtons();
+        renderLedger();
+      });
+
+      // 匯出 Excel CSV
       els.exportCsvBtn.addEventListener("click", exportLogsToCsv);
 
-      // 流水帳單筆刪除事件委派（電腦表格 + 手機卡片）
-      const handleDeleteClick = (e) => {
+      // 流水帳單筆刪除按鈕（事件委派）
+      const handleLogDeleteClick = (e) => {
         const btn = e.target.closest(".delete-log-btn");
         if (!btn) return;
-        openDeleteModal(btn.dataset.deleteId);
+        openDeleteLogModal(btn.dataset.deleteId);
       };
-      els.ledgerTableBody.addEventListener("click", handleDeleteClick);
-      els.ledgerMobileList.addEventListener("click", handleDeleteClick);
+      els.ledgerTableBody.addEventListener("click", handleLogDeleteClick);
+      els.ledgerMobileList.addEventListener("click", handleLogDeleteClick);
 
-      // 新增夥伴 Modal 事件
+      // 新增人員彈窗事件
       els.openAddMemberBtn.addEventListener("click", openAddMemberModal);
       els.closeAddMemberModalBtn.addEventListener("click", closeAddMemberModal);
       els.cancelAddMemberBtn.addEventListener("click", closeAddMemberModal);
       els.addMemberModal.addEventListener("click", (e) => {
         if (e.target === els.addMemberModal) closeAddMemberModal();
       });
-
       els.addMemberForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const result = await addNewMember(els.newMemberNameInput.value, state.selectedNewEmoji);
-        if (result.ok) {
+        const res = await addNewMember(els.newMemberNameInput.value, state.selectedNewEmoji);
+        if (res.ok) {
           closeAddMemberModal();
         } else {
-          els.addMemberError.textContent = result.error;
+          els.addMemberError.textContent = res.error;
           els.addMemberError.classList.remove("hidden");
         }
       });
 
-      // 刪除確認 Modal 事件
-      els.cancelDeleteBtn.addEventListener("click", closeDeleteModal);
-      els.deleteConfirmModal.addEventListener("click", (e) => {
-        if (e.target === els.deleteConfirmModal) closeDeleteModal();
+      // 移除人員確認彈窗事件
+      els.cancelDeleteMemberBtn.addEventListener("click", closeDeleteMemberModal);
+      els.deleteMemberModal.addEventListener("click", (e) => {
+        if (e.target === els.deleteMemberModal) closeDeleteMemberModal();
       });
-      els.confirmDeleteBtn.addEventListener("click", async () => {
-        const idToDelete = state.pendingDeleteLogId;
-        closeDeleteModal();
-        await deleteLogEntry(idToDelete);
+      els.confirmDeleteMemberBtn.addEventListener("click", async () => {
+        const target = state.pendingDeleteMember;
+        closeDeleteMemberModal();
+        await removeMember(target);
+      });
+
+      // 刪除流水帳確認彈窗事件
+      els.cancelDeleteLogBtn.addEventListener("click", closeDeleteLogModal);
+      els.deleteLogModal.addEventListener("click", (e) => {
+        if (e.target === els.deleteLogModal) closeDeleteLogModal();
+      });
+      els.confirmDeleteLogBtn.addEventListener("click", async () => {
+        const id = state.pendingDeleteLogId;
+        closeDeleteLogModal();
+        await deleteLogEntry(id);
       });
     }
 
     // =========================================================
-    // 12. 啟動應用程式
+    // 13. 啟動網頁
     // =========================================================
     window.addEventListener("DOMContentLoaded", () => {
       bindEvents();
       renderAll();
-      initFirebaseSync();
+      initCloudSync();
     });
   </script>
 </body>
