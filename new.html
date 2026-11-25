@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>一二廠自動化生產排程規劃表</title>
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 載入 Google Fonts：Inter 與思源黑體 Noto Sans TC，確保數字與繁體中文清晰好讀 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans TC"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"Inter"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* 自訂捲軸與表格黏性欄位陰影，提升手機與桌機瀏覽體驗 */
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    .sticky-col-shadow {
+      box-shadow: 2px 0 6px -2px rgba(15, 23, 42, 0.08);
+    }
+    /* 隱藏數字輸入框預設上下微調箭頭，讓版面更俐落 */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- 頂部導覽與主要操作列 -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <!-- 標題與規則摘要 -->
+        <div>
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 text-white font-bold text-lg shadow-sm">
+              排
+            </span>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              一二廠自動化生產排程規劃表
+            </h1>
+          </div>
+          <p class="mt-1 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            規則自動連動：<span class="font-medium text-indigo-700">一廠雙機全開 (10,000kg) 時二廠停機</span>；<span class="font-medium text-teal-700">二廠開機時一廠限開單機 (5,000kg)</span>；<span class="font-medium text-sky-700">每兩週洗防制日僅晚開一廠單機 (2,500kg)</span>。
+          </p>
+        </div>
+
+        <!-- 功能操作按鈕區 -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onclick="exportToCSV()"
+            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-medium shadow-sm transition cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            匯出 Excel 表格 (.csv)
+          </button>
+
+          <button
+            type="button"
+            onclick="saveToLocalStorage()"
+            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-sm font-medium shadow-sm transition cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            儲存目前設定
+          </button>
+
+          <button
+            type="button"
+            onclick="openResetModal()"
+            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-sm font-medium transition cursor-pointer"
+          >
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            恢復預設範例
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容區 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 頂部數據摘要卡片 (KPI Cards) -->
+    <section aria-label="產能與完工日總覽" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- 卡片 1：一廠總覽 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+              一廠｜EPDM（兩套設備）
+            </span>
+            <p class="mt-2.5 text-sm text-slate-500">總訂單量 / 排程內已排產</p>
+            <p id="kpi-p1-volume" class="mt-0.5 text-2xl font-bold text-slate-900 tracking-tight">
+              0 kg
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-sm">
+          <span class="text-slate-500">預計全數完工日：</span>
+          <span id="kpi-p1-finish" class="font-bold text-indigo-700">--</span>
+        </div>
+      </div>
+
+      <!-- 卡片 2：二廠總覽 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-100">
+              二廠｜SBR / NBR / BR（一套設備）
+            </span>
+            <p class="mt-2.5 text-sm text-slate-500">總訂單量 / 排程內已排產</p>
+            <p id="kpi-p2-volume" class="mt-0.5 text-2xl font-bold text-slate-900 tracking-tight">
+              0 kg
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-sm">
+          <span class="text-slate-500">預計全數完工日：</span>
+          <span id="kpi-p2-finish" class="font-bold text-teal-700">--</span>
+        </div>
+      </div>
+
+      <!-- 卡片 3：環保設備清洗週期 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-100">
+              環保設備定期保養（每 14 天循環）
+            </span>
+            <p class="mt-2.5 text-sm text-slate-500">排程內洗防制日期</p>
+            <p id="kpi-clean-dates" class="mt-0.5 text-lg font-bold text-slate-900 leading-snug">
+              --
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm">
+          <span class="text-slate-500">清洗日產能規則：</span>
+          <span class="font-semibold text-sky-700">二廠停機 / 一廠晚開一機 2,500 kg</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 可折疊控制面板：基本參數 + 一二廠訂單管理 -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- 控制面板標題列（點擊可展開/收合） -->
+      <div
+        onclick="toggleControlPanel()"
+        class="px-5 py-4 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between cursor-pointer select-none hover:bg-slate-100/70 transition"
+      >
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800">
+            排程基本參數與一、二廠訂單管理
+          </h2>
+          <span class="hidden sm:inline-block text-xs text-slate-500 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
+            修改後下方排程表立即自動重算
+          </span>
+        </div>
+        <button
+          type="button"
+          id="toggle-panel-btn"
+          class="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800"
+        >
+          <span id="toggle-panel-text">收合設定區</span>
+          <svg id="toggle-panel-icon" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- 控制面板內容區 -->
+      <div id="control-panel-body" class="p-5 space-y-6">
+        <!-- 第一區塊：基本排程參數 -->
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/80">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <span>📅 基本日期與洗防制週期設定</span>
+            </h3>
+            <button
+              type="button"
+              onclick="clearAllOverrides()"
+              id="clear-overrides-btn"
+              class="text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-lg transition self-start sm:self-auto cursor-pointer"
+            >
+              清除所有單日手動調整（目前已調整 <span id="override-count">0</span> 天）
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- 起始日期 -->
+            <div>
+              <label for="input-start-date" class="block text-xs font-semibold text-slate-600 mb-1">
+                排程起始日期
+              </label>
+              <input
+                type="date"
+                id="input-start-date"
+                onchange="handleParamChange()"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <!-- 顯示天數 -->
+            <div>
+              <label for="input-days" class="block text-xs font-semibold text-slate-600 mb-1">
+                排程顯示天數（天）
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  type="number"
+                  id="input-days"
+                  min="7"
+                  max="120"
+                  onchange="handleParamChange()"
+                  class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <div class="flex gap-1 shrink-0">
+                  <button type="button" onclick="setDaysPreset(14)" class="px-2.5 py-2 text-xs font-medium rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 cursor-pointer">14天</button>
+                  <button type="button" onclick="setDaysPreset(30)" class="px-2.5 py-2 text-xs font-medium rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 cursor-pointer">30天</button>
+                  <button type="button" onclick="setDaysPreset(45)" class="px-2.5 py-2 text-xs font-medium rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 cursor-pointer">45天</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 洗環保設備基準日 -->
+            <div>
+              <label for="input-clean-anchor" class="block text-xs font-semibold text-slate-600 mb-1">
+                洗防制設備基準日（每 14 天自動循環）
+              </label>
+              <input
+                type="date"
+                id="input-clean-anchor"
+                onchange="handleParamChange()"
+                class="w-full rounded-xl border border-sky-300 bg-sky-50/40 px-3.5 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- 第二區塊：一廠與二廠訂單管理（左右雙欄） -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- 左欄：一廠訂單佇列 -->
+          <div class="rounded-2xl border border-indigo-200/80 bg-indigo-50/20 p-4 flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-base font-bold text-indigo-950">
+                    一廠訂單排隊順序（EPDM）
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    雙機全開 10,000 kg/日；二廠開機時限單機 5,000 kg/日
+                  </p>
+                </div>
+                <span id="p1-queue-total-badge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800">
+                  共 0 筆
+                </span>
+              </div>
+
+              <!-- 一廠訂單列表容器 -->
+              <div id="p1-order-list" class="space-y-2.5">
+                <!-- 由 JS 動態產生 -->
+              </div>
+            </div>
+
+            <!-- 新增一廠訂單表單 -->
+            <form onsubmit="addP1Order(event)" class="pt-3 border-t border-indigo-200/70">
+              <p class="text-xs font-bold text-indigo-900 mb-2">+ 新增一廠訂單</p>
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                <input
+                  type="text"
+                  id="new-p1-name"
+                  placeholder="客戶或品名 (如: 602)"
+                  required
+                  class="sm:col-span-5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <div class="sm:col-span-4 relative">
+                  <input
+                    type="number"
+                    id="new-p1-kg"
+                    placeholder="公斤數 (kg)"
+                    min="1"
+                    step="1"
+                    required
+                    class="w-full rounded-xl border border-slate-300 bg-white pl-3 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <span class="absolute right-3 top-2.5 text-xs text-slate-400">kg</span>
+                </div>
+                <button
+                  type="submit"
+                  class="sm:col-span-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-3 shadow-sm transition cursor-pointer"
+                >
+                  加入排程
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 右欄：二廠訂單佇列 -->
+          <div class="rounded-2xl border border-teal-200/80 bg-teal-50/20 p-4 flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-base font-bold text-teal-950">
+                    二廠訂單排隊順序（SBR / NBR / BR）
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    1 箱 = 1,260 kg；日班 3,000 kg、夜班 3,000 kg（雙班共 6,000 kg）
+                  </p>
+                </div>
+                <span id="p2-queue-total-badge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-teal-100 text-teal-800">
+                  共 0 筆
+                </span>
+              </div>
+
+              <!-- 二廠訂單列表容器 -->
+              <div id="p2-order-list" class="space-y-2.5">
+                <!-- 由 JS 動態產生 -->
+              </div>
+            </div>
+
+            <!-- 新增二廠訂單表單 -->
+            <form onsubmit="addP2Order(event)" class="pt-3 border-t border-teal-200/70 space-y-2">
+              <p class="text-xs font-bold text-teal-900">+ 新增二廠訂單（填箱數自動換算公斤）</p>
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                <input
+                  type="text"
+                  id="new-p2-name"
+                  placeholder="客戶或品名 (如: 富鎰BR)"
+                  required
+                  class="sm:col-span-4 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                <div class="sm:col-span-4 relative">
+                  <input
+                    type="number"
+                    id="new-p2-boxes"
+                    placeholder="箱數 (1箱=1260)"
+                    min="0"
+                    step="0.5"
+                    oninput="syncNewP2BoxesToKg()"
+                    class="w-full rounded-xl border border-slate-300 bg-white pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <span class="absolute right-2.5 top-2.5 text-xs text-slate-400">箱</span>
+                </div>
+                <div class="sm:col-span-4 relative">
+                  <input
+                    type="number"
+                    id="new-p2-kg"
+                    placeholder="總公斤數"
+                    min="1"
+                    step="1"
+                    required
+                    oninput="syncNewP2KgToBoxes()"
+                    class="w-full rounded-xl border border-slate-300 bg-white pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <span class="absolute right-2.5 top-2.5 text-xs text-slate-400">kg</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                <div class="sm:col-span-5 flex items-center gap-1.5 bg-white rounded-xl border border-slate-300 px-2.5 py-1.5">
+                  <span class="text-xs text-slate-500 shrink-0">最早開工:</span>
+                  <input
+                    type="date"
+                    id="new-p2-start"
+                    class="w-full text-xs font-medium text-slate-800 focus:outline-none"
+                  />
+                </div>
+                <select
+                  id="new-p2-shift"
+                  class="sm:col-span-4 rounded-xl border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="double">雙班運轉 (6,000 kg/日)</option>
+                  <option value="single">單班運轉 (3,000 kg/日)</option>
+                  <option value="first_single_then_double">首日單班 3,000 / 後續雙班 6,000</option>
+                </select>
+                <button
+                  type="submit"
+                  class="sm:col-span-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 px-3 shadow-sm transition cursor-pointer"
+                >
+                  加入排程
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主排程表格區 -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- 表格上方標題與圖例說明 -->
+      <div class="px-5 py-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">
+            每日生產排程明細表
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            遇到設備故障或臨時調度時，可直接在該日期「生產模式」下拉選單切換，後方天數剩餘量與完工日會立刻自動重算。
+          </p>
+        </div>
+
+        <!-- 色彩圖例 -->
+        <div class="flex flex-wrap items-center gap-3 text-xs font-medium">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 text-sky-800 border border-sky-200">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+            洗防制日（每兩週）
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            設備故障 / 停機調整
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            手動模式切換
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
+            <span class="px-1.5 py-0.2 rounded bg-emerald-600 text-white text-[10px]">完成</span>
+            訂單達標完工
+          </span>
+        </div>
+      </div>
+
+      <!-- 響應式水平捲動表格容器 -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[920px]">
+          <thead>
+            <tr class="bg-slate-100/90 border-b border-slate-200 text-xs sm:text-sm font-bold text-slate-700">
+              <th class="py-3.5 px-3 w-24 sticky left-0 z-20 bg-slate-100 sticky-col-shadow">日期</th>
+              <th class="py-3.5 px-2 w-14 text-center">星期</th>
+              <th class="py-3.5 px-3 w-64">生產模式（可臨時切換）</th>
+              <th class="py-3.5 px-3 w-28 text-right text-indigo-900 bg-indigo-50/60">一廠產能</th>
+              <th class="py-3.5 px-4 text-indigo-950 bg-indigo-50/40">一廠生產明細（EPDM 扣減算式）</th>
+              <th class="py-3.5 px-3 w-28 text-right text-teal-900 bg-teal-50/60">二廠產能</th>
+              <th class="py-3.5 px-4 text-teal-950 bg-teal-50/40">二廠生產明細（SBR / NBR / BR 日夜班算式）</th>
+            </tr>
+          </thead>
+          <tbody id="schedule-tbody" class="divide-y divide-slate-200 text-sm">
+            <!-- 由 JS 動態產生每日排程列 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部資訊列 -->
+  <footer class="bg-white border-t border-slate-200 mt-10 py-4 px-4 text-center text-xs text-slate-500">
+    一二廠自動化生產排程規劃系統｜所有變更皆即時計算，點擊上方「儲存目前設定」可保留於本機瀏覽器中。
+  </footer>
+
+  <!-- 提示訊息框 (Toast Notification，取代 alert) -->
+  <div
+    id="toast-box"
+    class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300"
+  >
+    <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-sm font-medium">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+      <span id="toast-message">操作已完成</span>
+    </div>
+  </div>
+
+  <!-- 恢復預設範例確認視窗 (Custom Modal，取代 confirm) -->
+  <div
+    id="reset-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4"
+  >
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">恢復預設範例資料？</h3>
+          <p class="text-xs text-slate-500 mt-0.5">將會還原為起始日 2026-11-27 的標準現場排程範例</p>
+        </div>
+      </div>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        確定要清除目前所有自訂訂單與單日調整紀錄，並恢復為預設範例（華魏1、華魏2、601 與 富鎰BR、浩維、益碁）嗎？
+      </p>
+      <div class="flex justify-end gap-2.5 pt-2">
+        <button
+          type="button"
+          onclick="closeResetModal()"
+          class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-medium cursor-pointer"
+        >
+          取消
+        </button>
+        <button
+          type="button"
+          onclick="confirmResetDefaults()"
+          class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium shadow-sm cursor-pointer"
+        >
+          確定恢復預設
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * 一二廠自動化生產排程規劃表 - 核心資料結構與演算法邏輯
+     * ============================================================================
+     */
+
+    const STORAGE_KEY = 'factory_p1_p2_scheduler_v1';
+    const KG_PER_BOX = 1260; // 二廠標準每箱重量 1,260 kg
+    const WEEKDAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+
+    // 單日生產模式選項定義（對應現場所有排程與故障調度情境）
+    const DAY_MODE_OPTIONS = [
+      { value: 'auto', label: '自動排程（依訂單與洗防制週期）' },
+      { value: 'p1_double', label: '整日雙機（一廠 10,000 / 二廠停）' },
+      { value: 'both_double', label: '一二廠並開-雙班（一廠 5,000 / 二廠 6,000）' },
+      { value: 'both_single', label: '一二廠並開-單班（一廠 5,000 / 二廠 3,000）' },
+      { value: 'clean', label: '洗防制日-晚開一機（一廠 2,500 / 二廠停）' },
+      { value: 'fault_p1_half', label: '故障：一廠壞一台（一廠單機 5,000 / 二廠停）' },
+      { value: 'fault_p1_all', label: '故障：一廠全停（一廠 0 / 二廠依排程）' },
+      { value: 'fault_p2_stop', label: '故障：二廠停機（一廠雙機 10,000 / 二廠 0）' },
+      { value: 'holiday', label: '全廠休假/停機（0 / 0）' }
+    ];
+
+    // 預載現場標準範例資料
+    function getDefaultState() {
+      return {
+        startDate: '2026-11-27',
+        daysCount: 30,
+        cleanAnchorDate: '2026-11-30',
+        p1Orders: [
+          { id: 'p1-1', name: '華魏1', totalKg: 24000 },
+          { id: 'p1-2', name: '華魏2', totalKg: 24000 },
+          { id: 'p1-3', name: '601', totalKg: 100000 }
+        ],
+        p2Orders: [
+          {
+            id: 'p2-1',
+            name: '富鎰 BR',
+            boxes: 10,
+            totalKg: 12600,
+            earliestStart: '2026-12-03',
+            shiftMode: 'double'
+          },
+          {
+            id: 'p2-2',
+            name: '浩維',
+            boxes: 16,
+            totalKg: 20160,
+            earliestStart: '2026-12-07',
+            shiftMode: 'first_single_then_double'
+          },
+          {
+            id: 'p2-3',
+            name: '益碁',
+            boxes: 20,
+            totalKg: 25200,
+            earliestStart: '2026-12-15',
+            shiftMode: 'double'
+          }
+        ],
+        // 單日手動覆寫狀態紀錄：{ 'YYYY-MM-DD': 'p1_double' | 'fault_p1_half' ... }
+        dayOverrides: {}
+      };
+    }
+
+    // 應用程式全域狀態
+    let appState = loadInitialState();
+    let isPanelOpen = true;
+    let lastComputedRows = []; // 暫存最新計算出的每日資料，供匯出 CSV 使用
+
+    /**
+     * 從 localStorage 載入設定，若無則使用預設範例
+     */
+    function loadInitialState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return {
+            ...getDefaultState(),
+            ...parsed,
+            dayOverrides: parsed.dayOverrides || {}
+          };
+        }
+      } catch (err) {
+        console.error('讀取本機儲存設定失敗：', err);
+      }
+      return getDefaultState();
+    }
+
+    /**
+     * 日期工具函式：避免時區偏差，統一以本地年月日處理 YYYY-MM-DD
+     */
+    function parseLocalDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function formatDateISO(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateShort(dateObj) {
+      return `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
+    }
+
+    function addDays(dateObj, days) {
+      const copy = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+      copy.setDate(copy.getDate() + days);
+      return copy;
+    }
+
+    function diffDays(dateA, dateB) {
+      const utcA = Date.UTC(dateA.getFullYear(), dateA.getMonth(), dateA.getDate());
+      const utcB = Date.UTC(dateB.getFullYear(), dateB.getMonth(), dateB.getDate());
+      return Math.round((utcA - utcB) / (1000 * 60 * 60 * 24));
+    }
+
+    function formatNum(num) {
+      return Math.round(num).toLocaleString('zh-TW');
+    }
+
+    /**
+     * 判斷某日是否為每兩週洗環保設備日（從基準日起算，每 14 天一次）
+     */
+    function isBiweeklyCleanDay(currentDate, anchorDateStr) {
+      if (!anchorDateStr) return false;
+      const anchor = parseLocalDate(anchorDateStr);
+      const delta = diffDays(currentDate, anchor);
+      return delta >= 0 && delta % 14 === 0;
+    }
+
+    /**
+     * ============================================================================
+     * 核心排程演算法：逐日計算一廠與二廠產能、訂單扣減算式、跨日順延
+     * ============================================================================
+     */
+    function computeSchedule() {
+      const startObj = parseLocalDate(appState.startDate);
+      const totalDays = Math.max(1, Math.min(180, Number(appState.daysCount) || 30));
+
+      // 複製一廠與二廠訂單佇列以進行模擬扣減
+      const p1Sim = appState.p1Orders.map(o => ({
+        ...o,
+        remaining: Number(o.totalKg) || 0,
+        completedDate: null
+      }));
+
+      const p2Sim = appState.p2Orders.map(o => ({
+        ...o,
+        remaining: Number(o.totalKg) || 0,
+        hasStarted: false,
+        completedDate: null
+      }));
+
+      const rows = [];
+      const cleanDatesInRange = [];
+
+      for (let i = 0; i < totalDays; i++) {
+        const curDateObj = addDays(startObj, i);
+        const dateISO = formatDateISO(curDateObj);
+        const dateShort = formatDateShort(curDateObj);
+        const weekdayIdx = curDateObj.getDay();
+        const weekdayText = WEEKDAY_NAMES[weekdayIdx];
+        const isWeekend = weekdayIdx === 0 || weekdayIdx === 6;
+
+        const selectedMode = appState.dayOverrides[dateISO] || 'auto';
+        const isManualOverride = selectedMode !== 'auto';
+        const isScheduledClean = isBiweeklyCleanDay(curDateObj, appState.cleanAnchorDate);
+
+        // 找出目前二廠在此日期「可開工且尚未完工」的第一張訂單
+        const nextEligibleP2 = p2Sim.find(
+          o => o.remaining > 0 && (!o.earliestStart || dateISO >= o.earliestStart)
+        );
+
+        let effectiveMode = selectedMode;
+        let p1Cap = 0;
+        let p2Cap = 0;
+        let modeBadgeText = '';
+
+        // 1. 決定當日實際產能組合（嚴格遵守一二廠產能互斥規則）
+        if (selectedMode === 'auto') {
+          if (isScheduledClean) {
+            effectiveMode = 'clean';
+            p1Cap = 2500;
+            p2Cap = 0;
+            modeBadgeText = '洗防制（晚開一機）';
+          } else if (nextEligibleP2) {
+            // 二廠有待產訂單 -> 二廠開機，一廠強制降為單機 5,000 kg
+            const useSingleShift =
+              nextEligibleP2.shiftMode === 'single' ||
+              (nextEligibleP2.shiftMode === 'first_single_then_double' && !nextEligibleP2.hasStarted);
+
+            if (useSingleShift) {
+              effectiveMode = 'both_single';
+              p1Cap = 5000;
+              p2Cap = 3000;
+              modeBadgeText = '一二廠並開（單班）';
+            } else {
+              effectiveMode = 'both_double';
+              p1Cap = 5000;
+              p2Cap = 6000;
+              modeBadgeText = '一二廠並開（雙班）';
+            }
+          } else {
+            // 二廠無待產訂單 -> 一廠雙機全開 10,000 kg
+            effectiveMode = 'p1_double';
+            p1Cap = 10000;
+            p2Cap = 0;
+            modeBadgeText = '整日雙機';
+          }
+        } else {
+          // 使用者手動指定該日模式
+          switch (selectedMode) {
+            case 'p1_double':
+              p1Cap = 10000;
+              p2Cap = 0;
+              modeBadgeText = '整日雙機（手動）';
+              break;
+            case 'both_double':
+              p1Cap = 5000;
+              p2Cap = 6000;
+              modeBadgeText = '一二廠並開-雙班';
+              break;
+            case 'both_single':
+              p1Cap = 5000;
+              p2Cap = 3000;
+              modeBadgeText = '一二廠並開-單班';
+              break;
+            case 'clean':
+              p1Cap = 2500;
+              p2Cap = 0;
+              modeBadgeText = '洗防制日-晚開一機';
+              break;
+            case 'fault_p1_half':
+              p1Cap = 5000;
+              p2Cap = 0;
+              modeBadgeText = '故障：一廠壞一台';
+              break;
+            case 'fault_p1_all':
+              p1Cap = 0;
+              if (nextEligibleP2) {
+                const useSingle =
+                  nextEligibleP2.shiftMode === 'single' ||
+                  (nextEligibleP2.shiftMode === 'first_single_then_double' && !nextEligibleP2.hasStarted);
+                p2Cap = useSingle ? 3000 : 6000;
+              } else {
+                p2Cap = 0;
+              }
+              modeBadgeText = '故障：一廠全停';
+              break;
+            case 'fault_p2_stop':
+              p1Cap = 10000;
+              p2Cap = 0;
+              modeBadgeText = '故障：二廠停機';
+              break;
+            case 'holiday':
+              p1Cap = 0;
+              p2Cap = 0;
+              modeBadgeText = '全廠休假/停機';
+              break;
+          }
+        }
+
+        if (effectiveMode === 'clean') {
+          cleanDatesInRange.push(`${dateShort}(${weekdayText})`);
+        }
+
+        // 2. 分配一廠當日產能（支援同日完工後剩餘產能自動撥給下一張訂單）
+        const p1Details = [];
+        let remP1Cap = p1Cap;
+
+        if (p1Cap > 0) {
+          while (remP1Cap > 0) {
+            const activeOrder = p1Sim.find(o => o.remaining > 0);
+            if (!activeOrder) break;
+
+            const before = activeOrder.remaining;
+            const produced = Math.min(remP1Cap, before);
+            const after = before - produced;
+
+            activeOrder.remaining = after;
+            remP1Cap -= produced;
+
+            if (after === 0) {
+              activeOrder.completedDate = `${dateShort}(${weekdayText})`;
+              p1Details.push({
+                orderName: activeOrder.name,
+                text: `${activeOrder.name}：${formatNum(before)} - ${formatNum(produced)} = 0 kg`,
+                completed: true
+              });
+            } else {
+              p1Details.push({
+                orderName: activeOrder.name,
+                text: `${activeOrder.name}：${formatNum(before)} - ${formatNum(produced)} = ${formatNum(after)} kg`,
+                completed: false
+              });
+            }
+          }
+
+          // 若訂單全數做完仍有剩餘產能，清楚標示閒置餘裕
+          if (remP1Cap > 0 && p1Details.length > 0) {
+            p1Details.push({
+              orderName: '',
+              text: `（所有訂單已完工，剩餘空檔產能 ${formatNum(remP1Cap)} kg）`,
+              isNote: true
+            });
+          } else if (p1Details.length === 0) {
+            p1Details.push({
+              orderName: '',
+              text: '一廠訂單已全數完成（無待產訂單）',
+              isNote: true
+            });
+          }
+        } else {
+          p1Details.push({
+            orderName: '',
+            text: effectiveMode === 'fault_p1_all' ? '設備故障全停（0 kg）' : '停機無產出',
+            isNote: true
+          });
+        }
+
+        // 3. 分配二廠當日產能（以日班 3,000 kg、夜班 3,000 kg 為班次單位扣減）
+        const p2Details = [];
+        if (p2Cap > 0) {
+          const shifts = p2Cap === 6000 ? ['日', '夜'] : ['日'];
+          for (const shiftLabel of shifts) {
+            const activeP2 = p2Sim.find(
+              o => o.remaining > 0 && (!o.earliestStart || dateISO >= o.earliestStart)
+            );
+            if (!activeP2) {
+              p2Details.push({
+                orderName: '',
+                text: `(${shiftLabel}) 無符合開工日之待產訂單`,
+                isNote: true
+              });
+              continue;
+            }
+
+            activeP2.hasStarted = true;
+            const before = activeP2.remaining;
+            const produced = Math.min(3000, before);
+            const after = before - produced;
+            activeP2.remaining = after;
+
+            if (after === 0) {
+              activeP2.completedDate = `${dateShort}(${weekdayText})`;
+              p2Details.push({
+                orderName: activeP2.name,
+                text: `${activeP2.name}：${formatNum(before)} - ${formatNum(produced)} = 0 kg (${shiftLabel})`,
+                completed: true
+              });
+            } else {
+              p2Details.push({
+                orderName: activeP2.name,
+                text: `${activeP2.name}：${formatNum(before)} - ${formatNum(produced)} = ${formatNum(after)} kg (${shiftLabel})`,
+                completed: false
+              });
+            }
+          }
+        } else {
+          let offReason = '停機（一廠雙機運轉）';
+          if (effectiveMode === 'clean') offReason = '洗防制設備停機';
+          else if (effectiveMode === 'fault_p2_stop') offReason = '二廠設備故障停機';
+          else if (effectiveMode === 'fault_p1_half') offReason = '配合一廠單機調度停機';
+          else if (effectiveMode === 'holiday') offReason = '全廠休假停機';
+          else if (effectiveMode === 'fault_p1_all' && !nextEligibleP2) offReason = '無待產訂單';
+
+          p2Details.push({
+            orderName: '',
+            text: offReason,
+            isNote: true
+          });
+        }
+
+        rows.push({
+          dateISO,
+          dateShort,
+          weekdayText,
+          isWeekend,
+          selectedMode,
+          effectiveMode,
+          isManualOverride,
+          modeBadgeText,
+          p1Cap,
+          p1Details,
+          p2Cap,
+          p2Details
+        });
+      }
+
+      lastComputedRows = rows;
+      return { rows, p1Sim, p2Sim, cleanDatesInRange };
+    }
+
+    /**
+     * ============================================================================
+     * 畫面渲染函式
+     * ============================================================================
+     */
+    function renderAll() {
+      // 同步基本輸入欄位數值
+      document.getElementById('input-start-date').value = appState.startDate;
+      document.getElementById('input-days').value = appState.daysCount;
+      document.getElementById('input-clean-anchor').value = appState.cleanAnchorDate;
+
+      const overrideCount = Object.keys(appState.dayOverrides).length;
+      document.getElementById('override-count').textContent = overrideCount;
+
+      // 執行核心排程計算
+      const { rows, p1Sim, p2Sim, cleanDatesInRange } = computeSchedule();
+
+      // 更新頂部 3 張 KPI 卡片
+      renderKPICards(p1Sim, p2Sim, cleanDatesInRange);
+
+      // 更新一廠與二廠訂單佇列（帶入最新計算出的各單預計完工日）
+      renderP1OrderList(p1Sim);
+      renderP2OrderList(p2Sim);
+
+      // 更新主排程表格
+      renderScheduleTable(rows);
+    }
+
+    function renderKPICards(p1Sim, p2Sim, cleanDatesInRange) {
+      // 一廠統計
+      const p1Total = p1Sim.reduce((sum, o) => sum + (Number(o.totalKg) || 0), 0);
+      const p1Rem = p1Sim.reduce((sum, o) => sum + o.remaining, 0);
+      const p1Done = p1Total - p1Rem;
+      document.getElementById('kpi-p1-volume').innerHTML = `
+        ${formatNum(p1Total)} <span class="text-sm font-normal text-slate-500">kg</span>
+        <span class="text-xs font-medium text-indigo-600 ml-1.5">（已排 ${formatNum(p1Done)} kg）</span>
+      `;
+      const p1FinishEl = document.getElementById('kpi-p1-finish');
+      if (p1Sim.length === 0) {
+        p1FinishEl.textContent = '尚未建立訂單';
+      } else if (p1Rem === 0) {
+        const lastOrder = p1Sim[p1Sim.length - 1];
+        p1FinishEl.textContent = `${lastOrder.completedDate} 全數完工`;
+        p1FinishEl.className = 'font-bold text-emerald-600';
+      } else {
+        p1FinishEl.textContent = `尚餘 ${formatNum(p1Rem)} kg（超出目前天數）`;
+        p1FinishEl.className = 'font-bold text-amber-600';
+      }
+
+      // 二廠統計
+      const p2Total = p2Sim.reduce((sum, o) => sum + (Number(o.totalKg) || 0), 0);
+      const p2Rem = p2Sim.reduce((sum, o) => sum + o.remaining, 0);
+      const p2Done = p2Total - p2Rem;
+      document.getElementById('kpi-p2-volume').innerHTML = `
+        ${formatNum(p2Total)} <span class="text-sm font-normal text-slate-500">kg</span>
+        <span class="text-xs font-medium text-teal-600 ml-1.5">（已排 ${formatNum(p2Done)} kg）</span>
+      `;
+      const p2FinishEl = document.getElementById('kpi-p2-finish');
+      if (p2Sim.length === 0) {
+        p2FinishEl.textContent = '尚未建立訂單';
+      } else if (p2Rem === 0) {
+        const lastOrder = p2Sim[p2Sim.length - 1];
+        p2FinishEl.textContent = `${lastOrder.completedDate} 全數完工`;
+        p2FinishEl.className = 'font-bold text-emerald-600';
+      } else {
+        p2FinishEl.textContent = `尚餘 ${formatNum(p2Rem)} kg（超出目前天數）`;
+        p2FinishEl.className = 'font-bold text-amber-600';
+      }
+
+      // 洗防制日期統計
+      const cleanEl = document.getElementById('kpi-clean-dates');
+      if (cleanDatesInRange.length > 0) {
+        cleanEl.textContent = cleanDatesInRange.join('、');
+      } else {
+        cleanEl.textContent = '此區間內無洗防制日';
+      }
+    }
+
+    function renderP1OrderList(p1Sim) {
+      const container = document.getElementById('p1-order-list');
+      document.getElementById('p1-queue-total-badge').textContent = `共 ${appState.p1Orders.length} 筆`;
+
+      if (appState.p1Orders.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-sm text-slate-400 bg-white rounded-xl border border-dashed border-slate-300">目前無一廠訂單，請從下方新增</div>`;
+        return;
+      }
+
+      container.innerHTML = appState.p1Orders
+        .map((order, idx) => {
+          const simInfo = p1Sim[idx];
+          const statusTag = simInfo.completedDate
+            ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800">預計 ${simInfo.completedDate} 完工</span>`
+            : `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-100 text-amber-800">尚餘 ${formatNum(simInfo.remaining)} kg</span>`;
+
+          return `
+            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div class="flex items-center gap-2 flex-1">
+                <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">
+                  ${idx + 1}
+                </span>
+                <input
+                  type="text"
+                  value="${escapeHtml(order.name)}"
+                  onchange="updateP1Order(${idx}, 'name', this.value)"
+                  class="w-28 sm:w-32 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  title="客戶或品名"
+                />
+                <div class="relative flex-1 max-w-[140px]">
+                  <input
+                    type="number"
+                    value="${order.totalKg}"
+                    min="1"
+                    onchange="updateP1Order(${idx}, 'totalKg', this.value)"
+                    class="w-full rounded-lg border border-slate-200 pl-2.5 pr-7 py-1.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <span class="absolute right-2 top-2 text-xs text-slate-400">kg</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between sm:justify-end gap-2">
+                ${statusTag}
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onclick="moveOrder('p1', ${idx}, -1)"
+                    ${idx === 0 ? 'disabled' : ''}
+                    class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                    title="往前排（上移）"
+                  >↑</button>
+                  <button
+                    type="button"
+                    onclick="moveOrder('p1', ${idx}, 1)"
+                    ${idx === appState.p1Orders.length - 1 ? 'disabled' : ''}
+                    class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                    title="往後排（下移）"
+                  >↓</button>
+                  <button
+                    type="button"
+                    onclick="deleteOrder('p1', ${idx})"
+                    class="p-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 cursor-pointer"
+                    title="刪除此筆訂單"
+                  >✕</button>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderP2OrderList(p2Sim) {
+      const container = document.getElementById('p2-order-list');
+      document.getElementById('p2-queue-total-badge').textContent = `共 ${appState.p2Orders.length} 筆`;
+
+      if (appState.p2Orders.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-sm text-slate-400 bg-white rounded-xl border border-dashed border-slate-300">目前無二廠訂單，一廠將自動全開雙機</div>`;
+        return;
+      }
+
+      container.innerHTML = appState.p2Orders
+        .map((order, idx) => {
+          const simInfo = p2Sim[idx];
+          const statusTag = simInfo.completedDate
+            ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800">預計 ${simInfo.completedDate} 完工</span>`
+            : `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-100 text-amber-800">尚餘 ${formatNum(simInfo.remaining)} kg</span>`;
+
+          return `
+            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs space-y-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0">
+                    ${idx + 1}
+                  </span>
+                  <input
+                    type="text"
+                    value="${escapeHtml(order.name)}"
+                    onchange="updateP2Order(${idx}, 'name', this.value)"
+                    class="w-24 sm:w-28 rounded-lg border border-slate-200 px-2.5 py-1 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  <div class="relative w-20">
+                    <input
+                      type="number"
+                      value="${order.boxes !== '' && order.boxes !== null ? order.boxes : ''}"
+                      placeholder="箱"
+                      step="0.5"
+                      min="0"
+                      onchange="updateP2Order(${idx}, 'boxes', this.value)"
+                      class="w-full rounded-lg border border-slate-200 pl-2 pr-6 py-1 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      title="輸入箱數自動乘以 1,260 kg"
+                    />
+                    <span class="absolute right-1.5 top-1.5 text-[11px] text-slate-400">箱</span>
+                  </div>
+                  <div class="relative w-28">
+                    <input
+                      type="number"
+                      value="${order.totalKg}"
+                      min="1"
+                      onchange="updateP2Order(${idx}, 'totalKg', this.value)"
+                      class="w-full rounded-lg border border-slate-200 pl-2 pr-6 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                    <span class="absolute right-1.5 top-1.5 text-[11px] text-slate-400">kg</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onclick="moveOrder('p2', ${idx}, -1)"
+                    ${idx === 0 ? 'disabled' : ''}
+                    class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                    title="往前排"
+                  >↑</button>
+                  <button
+                    type="button"
+                    onclick="moveOrder('p2', ${idx}, 1)"
+                    ${idx === appState.p2Orders.length - 1 ? 'disabled' : ''}
+                    class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                    title="往後排"
+                  >↓</button>
+                  <button
+                    type="button"
+                    onclick="deleteOrder('p2', ${idx})"
+                    class="p-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 cursor-pointer"
+                    title="刪除"
+                  >✕</button>
+                </div>
+              </div>
+
+              <!-- 第二行：最早開工日、班制模式、完工日標籤 -->
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-slate-100 text-xs">
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="inline-flex items-center gap-1 text-slate-500">
+                    <span>最早開工:</span>
+                    <input
+                      type="date"
+                      value="${order.earliestStart || ''}"
+                      onchange="updateP2Order(${idx}, 'earliestStart', this.value)"
+                      class="rounded-md border border-slate-200 px-1.5 py-0.5 text-xs font-medium text-slate-700"
+                    />
+                  </label>
+                  <select
+                    onchange="updateP2Order(${idx}, 'shiftMode', this.value)"
+                    class="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-700"
+                  >
+                    <option value="double" ${order.shiftMode === 'double' ? 'selected' : ''}>雙班 (6,000/日)</option>
+                    <option value="single" ${order.shiftMode === 'single' ? 'selected' : ''}>單班 (3,000/日)</option>
+                    <option value="first_single_then_double" ${order.shiftMode === 'first_single_then_double' ? 'selected' : ''}>首日單班 / 後續雙班</option>
+                  </select>
+                </div>
+                ${statusTag}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderScheduleTable(rows) {
+      const tbody = document.getElementById('schedule-tbody');
+
+      tbody.innerHTML = rows
+        .map(row => {
+          // 決定整列背景色與左側警示邊條
+          let rowClasses = 'hover:bg-slate-50/90 transition-colors';
+          let stickyBg = 'bg-white';
+
+          const isFaultOrHoliday =
+            row.effectiveMode.startsWith('fault_') || row.effectiveMode === 'holiday';
+
+          if (row.effectiveMode === 'clean') {
+            rowClasses = 'bg-sky-50/90 hover:bg-sky-100/70 border-l-4 border-l-sky-500';
+            stickyBg = 'bg-sky-50';
+          } else if (isFaultOrHoliday) {
+            rowClasses = 'bg-rose-50/85 hover:bg-rose-100/60 border-l-4 border-l-rose-500';
+            stickyBg = 'bg-rose-50';
+          } else if (row.isManualOverride) {
+            rowClasses = 'bg-amber-50/80 hover:bg-amber-100/60 border-l-4 border-l-amber-500';
+            stickyBg = 'bg-amber-50';
+          }
+
+          const weekendTextClass = row.isWeekend ? 'text-rose-600 font-bold' : 'text-slate-800 font-semibold';
+
+          // 下拉選單選項 HTML
+          const optionsHtml = DAY_MODE_OPTIONS.map(opt => {
+            const label =
+              opt.value === 'auto'
+                ? `自動：${row.modeBadgeText}`
+                : opt.label;
+            return `<option value="${opt.value}" ${row.selectedMode === opt.value ? 'selected' : ''}>${label}</option>`;
+          }).join('');
+
+          // 一廠明細渲染
+          const p1Html = row.p1Details
+            .map(item => {
+              if (item.isNote) {
+                return `<div class="text-xs text-slate-400 italic">${escapeHtml(item.text)}</div>`;
+              }
+              return `
+                <div class="flex flex-wrap items-center gap-1.5 leading-snug">
+                  <span class="font-medium text-slate-800">${highlightFormula(item.text)}</span>
+                  ${
+                    item.completed
+                      ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-2xs">完成</span>'
+                      : ''
+                  }
+                </div>
+              `;
+            })
+            .join('');
+
+          // 二廠明細渲染
+          const p2Html = row.p2Details
+            .map(item => {
+              if (item.isNote) {
+                return `<div class="text-xs text-slate-400 italic">${escapeHtml(item.text)}</div>`;
+              }
+              return `
+                <div class="flex flex-wrap items-center gap-1.5 leading-snug">
+                  <span class="font-medium text-slate-800">${highlightFormula(item.text)}</span>
+                  ${
+                    item.completed
+                      ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-2xs">完成</span>'
+                      : ''
+                  }
+                </div>
+              `;
+            })
+            .join('');
+
+          return `
+            <tr class="${rowClasses}">
+              <!-- 日期 -->
+              <td class="py-3 px-3 sticky left-0 z-10 ${stickyBg} sticky-col-shadow whitespace-nowrap">
+                <div class="${weekendTextClass} text-sm">${row.dateShort}</div>
+                <div class="text-[11px] text-slate-400">${row.dateISO.slice(0, 4)}</div>
+              </td>
+
+              <!-- 星期 -->
+              <td class="py-3 px-2 text-center whitespace-nowrap">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-sm ${
+                  row.isWeekend ? 'bg-rose-100/80 text-rose-600 font-bold' : 'text-slate-700 font-medium'
+                }">
+                  ${row.weekdayText}
+                </span>
+              </td>
+
+              <!-- 生產模式切換下拉選單 -->
+              <td class="py-3 px-3">
+                <div class="flex flex-col gap-1">
+                  <select
+                    onchange="handleDayModeChange('${row.dateISO}', this.value)"
+                    aria-label="${row.dateShort} 生產模式"
+                    class="w-full rounded-xl border ${
+                      row.isManualOverride
+                        ? 'border-amber-400 bg-white font-semibold text-amber-950'
+                        : row.effectiveMode === 'clean'
+                        ? 'border-sky-300 bg-white font-semibold text-sky-900'
+                        : 'border-slate-300 bg-white text-slate-800'
+                    } px-2.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    ${optionsHtml}
+                  </select>
+                  ${
+                    row.isManualOverride
+                      ? `<div class="flex items-center justify-between px-1">
+                          <span class="text-[11px] font-semibold text-amber-700">● 已手動覆寫</span>
+                          <button type="button" onclick="handleDayModeChange('${row.dateISO}', 'auto')" class="text-[11px] text-indigo-600 hover:underline font-medium cursor-pointer">還原自動</button>
+                        </div>`
+                      : ''
+                  }
+                </div>
+              </td>
+
+              <!-- 一廠產能 -->
+              <td class="py-3 px-3 text-right whitespace-nowrap bg-indigo-50/20">
+                <span class="inline-block px-2.5 py-1 rounded-lg text-xs sm:text-sm font-bold ${
+                  row.p1Cap === 10000
+                    ? 'bg-indigo-100 text-indigo-800'
+                    : row.p1Cap > 0
+                    ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                    : 'bg-slate-100 text-slate-400'
+                }">
+                  ${formatNum(row.p1Cap)} kg
+                </span>
+              </td>
+
+              <!-- 一廠生產明細 -->
+              <td class="py-3 px-4 space-y-1 bg-indigo-50/10">
+                ${p1Html}
+              </td>
+
+              <!-- 二廠產能 -->
+              <td class="py-3 px-3 text-right whitespace-nowrap bg-teal-50/20">
+                <span class="inline-block px-2.5 py-1 rounded-lg text-xs sm:text-sm font-bold ${
+                  row.p2Cap === 6000
+                    ? 'bg-teal-100 text-teal-800'
+                    : row.p2Cap === 3000
+                    ? 'bg-teal-50 text-teal-700 border border-teal-200'
+                    : 'bg-slate-100 text-slate-400'
+                }">
+                  ${formatNum(row.p2Cap)} kg
+                </span>
+              </td>
+
+              <!-- 二廠生產明細 -->
+              <td class="py-3 px-4 space-y-1 bg-teal-50/10">
+                ${p2Html}
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    /**
+     * 強化算式可讀性：將等號後的剩餘公斤數加粗醒目顯示
+     */
+    function highlightFormula(text) {
+      const escaped = escapeHtml(text);
+      return escaped.replace(
+        /=\s*([\d,]+)\s*kg/g,
+        '= <span class="font-bold text-slate-950 underline decoration-slate-300 decoration-2 underline-offset-2">$1 kg</span>'
+      );
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /**
+     * ============================================================================
+     * 使用者互動事件處理
+     * ============================================================================
+     */
+    function handleParamChange() {
+      const startDate = document.getElementById('input-start-date').value;
+      const daysCount = parseInt(document.getElementById('input-days').value, 10);
+      const cleanAnchorDate = document.getElementById('input-clean-anchor').value;
+
+      if (startDate) appState.startDate = startDate;
+      if (!isNaN(daysCount) && daysCount >= 1) appState.daysCount = Math.min(180, daysCount);
+      if (cleanAnchorDate) appState.cleanAnchorDate = cleanAnchorDate;
+
+      renderAll();
+    }
+
+    function setDaysPreset(days) {
+      appState.daysCount = days;
+      renderAll();
+    }
+
+    function handleDayModeChange(dateISO, newMode) {
+      if (newMode === 'auto') {
+        delete appState.dayOverrides[dateISO];
+      } else {
+        appState.dayOverrides[dateISO] = newMode;
+      }
+      renderAll();
+    }
+
+    function clearAllOverrides() {
+      if (Object.keys(appState.dayOverrides).length === 0) {
+        showToast('目前沒有任何單日手動調整紀錄');
+        return;
+      }
+      appState.dayOverrides = {};
+      renderAll();
+      showToast('已清除所有單日手動調整，恢復全自動排程');
+    }
+
+    // 一廠訂單操作
+    function addP1Order(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('new-p1-name');
+      const kgInput = document.getElementById('new-p1-kg');
+      const name = nameInput.value.trim();
+      const totalKg = Number(kgInput.value);
+
+      if (!name || totalKg <= 0) return;
+
+      appState.p1Orders.push({
+        id: 'p1-' + Date.now(),
+        name,
+        totalKg
+      });
+
+      nameInput.value = '';
+      kgInput.value = '';
+      renderAll();
+      showToast(`已新增一廠訂單「${name}」(${formatNum(totalKg)} kg)`);
+    }
+
+    function updateP1Order(index, field, value) {
+      if (!appState.p1Orders[index]) return;
+      if (field === 'totalKg') {
+        const num = Math.max(1, Number(value) || 0);
+        appState.p1Orders[index].totalKg = num;
+      } else {
+        appState.p1Orders[index][field] = value.trim() || '未命名';
+      }
+      renderAll();
+    }
+
+    // 二廠訂單操作（箱數與公斤雙向同步換算）
+    function syncNewP2BoxesToKg() {
+      const boxes = Number(document.getElementById('new-p2-boxes').value);
+      if (boxes > 0) {
+        document.getElementById('new-p2-kg').value = Math.round(boxes * KG_PER_BOX);
+      }
+    }
+
+    function syncNewP2KgToBoxes() {
+      const kg = Number(document.getElementById('new-p2-kg').value);
+      if (kg > 0) {
+        const boxes = +(kg / KG_PER_BOX).toFixed(2);
+        document.getElementById('new-p2-boxes').value = boxes;
+      }
+    }
+
+    function addP2Order(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('new-p2-name');
+      const boxesInput = document.getElementById('new-p2-boxes');
+      const kgInput = document.getElementById('new-p2-kg');
+      const startInput = document.getElementById('new-p2-start');
+      const shiftInput = document.getElementById('new-p2-shift');
+
+      const name = nameInput.value.trim();
+      const totalKg = Number(kgInput.value);
+      const boxes = boxesInput.value !== '' ? Number(boxesInput.value) : +(totalKg / KG_PER_BOX).toFixed(2);
+
+      if (!name || totalKg <= 0) return;
+
+      appState.p2Orders.push({
+        id: 'p2-' + Date.now(),
+        name,
+        boxes,
+        totalKg,
+        earliestStart: startInput.value || '',
+        shiftMode: shiftInput.value || 'double'
+      });
+
+      nameInput.value = '';
+      boxesInput.value = '';
+      kgInput.value = '';
+      startInput.value = '';
+      renderAll();
+      showToast(`已新增二廠訂單「${name}」(${formatNum(totalKg)} kg)`);
+    }
+
+    function updateP2Order(index, field, value) {
+      const order = appState.p2Orders[index];
+      if (!order) return;
+
+      if (field === 'boxes') {
+        const boxes = Math.max(0, Number(value) || 0);
+        order.boxes = boxes;
+        if (boxes > 0) {
+          order.totalKg = Math.round(boxes * KG_PER_BOX);
+        }
+      } else if (field === 'totalKg') {
+        const kg = Math.max(1, Number(value) || 0);
+        order.totalKg = kg;
+        order.boxes = +(kg / KG_PER_BOX).toFixed(2);
+      } else {
+        order[field] = value;
+      }
+      renderAll();
+    }
+
+    // 訂單上下調整順序與刪除
+    function moveOrder(plant, index, direction) {
+      const list = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
+      const targetIdx = index + direction;
+      if (targetIdx < 0 || targetIdx >= list.length) return;
+
+      const temp = list[index];
+      list[index] = list[targetIdx];
+      list[targetIdx] = temp;
+      renderAll();
+    }
+
+    function deleteOrder(plant, index) {
+      const list = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
+      const removed = list.splice(index, 1)[0];
+      renderAll();
+      if (removed) {
+        showToast(`已移除訂單「${removed.name}」`);
+      }
+    }
+
+    // 折疊控制面板
+    function toggleControlPanel() {
+      isPanelOpen = !isPanelOpen;
+      const body = document.getElementById('control-panel-body');
+      const text = document.getElementById('toggle-panel-text');
+      const icon = document.getElementById('toggle-panel-icon');
+
+      if (isPanelOpen) {
+        body.classList.remove('hidden');
+        text.textContent = '收合設定區';
+        icon.style.transform = 'rotate(0deg)';
+      } else {
+        body.classList.add('hidden');
+        text.textContent = '展開設定與訂單管理';
+        icon.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 儲存、重置與 Excel (.csv) 匯出功能
+     * ============================================================================
+     */
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        showToast('已將目前排程與訂單設定儲存至瀏覽器！');
+      } catch (err) {
+        console.error(err);
+        showToast('儲存失敗，請確認瀏覽器是否允許本機儲存空間');
+      }
+    }
+
+    function openResetModal() {
+      const modal = document.getElementById('reset-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeResetModal() {
+      const modal = document.getElementById('reset-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function confirmResetDefaults() {
+      localStorage.removeItem(STORAGE_KEY);
+      appState = getDefaultState();
+      closeResetModal();
+      renderAll();
+      showToast('已恢復為預設現場範例排程');
+    }
+
+    /**
+     * 匯出含 UTF-8 BOM 的 CSV 檔案，確保 Microsoft Excel 開啟繁體中文完全不亂碼
+     */
+    function exportToCSV() {
+      if (!lastComputedRows || lastComputedRows.length === 0) {
+        showToast('目前無排程資料可匯出');
+        return;
+      }
+
+      const headers = [
+        '日期',
+        '星期',
+        '生產模式',
+        '調整狀態',
+        '一廠產能(kg)',
+        '一廠生產明細(EPDM)',
+        '二廠產能(kg)',
+        '二廠生產明細(SBR/NBR/BR)'
+      ];
+
+      const csvLines = [headers.join(',')];
+
+      lastComputedRows.forEach(row => {
+        const p1Text = row.p1Details
+          .map(d => d.text + (d.completed ? ' [完成]' : ''))
+          .join('；');
+
+        const p2Text = row.p2Details
+          .map(d => d.text + (d.completed ? ' [完成]' : ''))
+          .join('；');
+
+        const cols = [
+          row.dateISO,
+          `週${row.weekdayText}`,
+          row.modeBadgeText,
+          row.isManualOverride ? '手動調整' : '自動排程',
+          row.p1Cap,
+          p1Text,
+          row.p2Cap,
+          p2Text
+        ].map(val => `"${String(val).replace(/"/g, '""')}"`);
+
+        csvLines.push(cols.join(','));
+      });
+
+      // 加上 \uFEFF UTF-8 BOM 標記
+      const csvContent = '\uFEFF' + csvLines.join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `一二廠生產排程表_${appState.startDate}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('已匯出 Excel 表格 (.csv)，可直接用 Excel 開啟！');
+    }
+
+    /**
+     * 顯示底部柔和提示訊息 (Toast)
+     */
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      const msgEl = document.getElementById('toast-message');
+      msgEl.textContent = msg;
+
+      box.classList.remove('translate-y-20', 'opacity-0');
+      box.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        box.classList.remove('translate-y-0', 'opacity-100');
+        box.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // 頁面載入完成後立即初始化排程表
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>
