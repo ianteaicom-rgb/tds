@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統</title>
-  <!-- 載入 Tailwind CSS 進行響應式介面排版 -->
+  <title>彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統（315 HP 契約電力防呆版）</title>
+  <!-- 載入 Tailwind CSS 建構響應式製造業戰情室介面 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -13,7 +13,7 @@
       color: #0f172a;
     }
 
-    /* 細緻捲軸樣式，提升寬表與圖表捲動體驗 */
+    /* 細緻捲軸樣式，優化寬表與長天數圖表瀏覽體驗 */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -30,7 +30,7 @@
       background: #64748b;
     }
 
-    /* 浮動提示框動畫過渡 */
+    /* SVG 浮動提示框過渡動畫 */
     #svg-floating-tooltip {
       transition: opacity 0.12s ease, transform 0.08s ease;
     }
@@ -42,25 +42,28 @@
       body {
         background-color: #ffffff !important;
       }
+      section {
+        break-inside: avoid;
+      }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- 頂部品牌導覽列 -->
+  <!-- 頂部深藍戰情室導覽列 -->
   <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
         <div class="flex flex-wrap items-center gap-2">
-          <span class="px-2.5 py-0.5 rounded-md bg-indigo-500 text-white text-xs font-extrabold tracking-wider shadow-xs">
-            彥泰企業 SMART MES
+          <span class="px-2.5 py-0.5 rounded-md bg-emerald-600 text-white text-xs font-extrabold tracking-wider shadow-xs">
+            315 HP 契約電力防呆版
           </span>
           <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white">
-            一二廠智慧連動生產規劃與視覺化排程系統
+            彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統
           </h1>
         </div>
         <p class="text-xs text-slate-300 mt-1">
-          一廠 EPDM（整日雙機 10,000kg / 日雙夜單 8,000kg / 整日單機 5,000kg）× 二廠 SBR·NBR·BR（日夜雙班 6,000kg）全連動引擎
+          單班契約上限 315 HP（一廠雙機 300HP / 一廠單機 150HP / 二廠 150HP）· 嚴格防呆互斥 · 模式 A/B/C/D/E 全自動連動
         </p>
       </div>
 
@@ -84,10 +87,10 @@
 
         <button
           type="button"
-          onclick="saveToLocalStorage()"
+          onclick="window.print()"
           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold shadow-xs transition cursor-pointer"
         >
-          <span>💾 儲存</span>
+          <span>🖨️ 列印報表</span>
         </button>
 
         <button
@@ -103,85 +106,93 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5 space-y-5">
 
-    <!-- 一、頂部 5 張 KPI 摘要卡片 -->
-    <section aria-label="排程關鍵指標" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    <!-- 一、頂部 5 張 KPI 儀表板 -->
+    <section aria-label="契約電力與排程關鍵指標" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <!-- KPI 1: 契約電力上限狀態 -->
+      <div id="kpi-power-card" class="bg-white rounded-2xl border-2 border-emerald-400 p-4 shadow-xs col-span-2 sm:col-span-1">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-emerald-800">契約電力上限狀態</span>
+          <span id="kpi-power-badge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
+            ✅ 0 次超約
+          </span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpi-peak-hp" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">300</span>
+          <span class="text-xs font-bold text-slate-500">/ <span id="kpi-contract-hp">315</span> HP 峰值</span>
+        </div>
+        <div id="kpi-power-sub" class="mt-1 text-[11px] font-bold text-emerald-700">日夜單班皆嚴格 ≤ 315 HP</div>
+      </div>
+
+      <!-- KPI 2: 排程總天數與全數完工日 -->
+      <div class="bg-white rounded-2xl border border-slate-300 p-4 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-slate-700">排程天數 / 全數完工</span>
+          <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold" id="kpi-date-span">30天</span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpi-all-done-date" class="text-xl sm:text-2xl font-extrabold text-slate-900">—</span>
+        </div>
+        <div id="kpi-all-done-sub" class="mt-1 text-[11px] font-semibold text-slate-500">雙廠合計 0 kg</div>
+      </div>
+
+      <!-- KPI 3: 一廠 EPDM 總排產量（翡翠綠/青色主題） -->
+      <div class="bg-white rounded-2xl border border-emerald-200 p-4 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-emerald-800">一廠 EPDM 總排產量</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1">
+          <span id="kpi-p1-total" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</span>
+          <span class="text-xs font-bold text-emerald-600">kg</span>
+        </div>
+        <div id="kpi-p1-sub" class="mt-1 text-[11px] font-semibold text-slate-500">約 0 噸｜雙機 0 班 / 單機 0 班</div>
+      </div>
+
+      <!-- KPI 4: 二廠 SBR・NBR・BR 總排產量（靛藍/琥珀主題） -->
       <div class="bg-white rounded-2xl border border-indigo-200 p-4 shadow-xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-indigo-700">一廠總排產量 (EPDM)</span>
+          <span class="text-xs font-extrabold text-indigo-800">二廠 SBR/NBR/BR 總量</span>
           <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
         </div>
         <div class="mt-1.5 flex items-baseline gap-1">
-          <span id="kpi-p1-total" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">0</span>
-          <span class="text-xs font-bold text-indigo-500">kg</span>
+          <span id="kpi-p2-total" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">0</span>
+          <span class="text-xs font-bold text-indigo-600">kg</span>
         </div>
-        <div id="kpi-p1-sub" class="mt-1 text-[11px] font-semibold text-slate-500">約 0 噸｜日雙夜單 0 天</div>
+        <div id="kpi-p2-sub" class="mt-1 text-[11px] font-semibold text-slate-500">約 0 噸｜開工 0 班</div>
       </div>
 
-      <div class="bg-white rounded-2xl border border-emerald-200 p-4 shadow-xs">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-emerald-700">二廠總排產量 (SBR/BR)</span>
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-        </div>
-        <div class="mt-1.5 flex items-baseline gap-1">
-          <span id="kpi-p2-total" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</span>
-          <span class="text-xs font-bold text-emerald-500">kg</span>
-        </div>
-        <div id="kpi-p2-sub" class="mt-1 text-[11px] font-semibold text-slate-500">約 0 噸｜開工 0 天</div>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-300 p-4 shadow-xs">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-slate-700">雙廠合計總產出</span>
-          <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-bold" id="kpi-date-span">30天</span>
-        </div>
-        <div class="mt-1.5 flex items-baseline gap-1">
-          <span id="kpi-combined-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</span>
-          <span class="text-xs font-bold text-slate-500">kg</span>
-        </div>
-        <div id="kpi-combined-sub" class="mt-1 text-[11px] font-semibold text-slate-500">日均產出 0 kg</div>
-      </div>
-
+      <!-- KPI 5: 洗防制日數與設備保養日數統計 -->
       <div class="bg-white rounded-2xl border border-sky-200 p-4 shadow-xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-sky-800">洗防制 / 保養天數</span>
+          <span class="text-xs font-extrabold text-sky-900">洗防制 / 保養日數</span>
           <span class="text-xs">💧🔧</span>
         </div>
         <div class="mt-1.5 flex items-baseline gap-1.5">
           <span id="kpi-wash-days" class="text-2xl font-extrabold text-sky-600">0</span>
-          <span class="text-xs font-bold text-sky-600">洗</span>
+          <span class="text-xs font-bold text-sky-600">天洗</span>
           <span class="text-slate-300 font-bold">/</span>
           <span id="kpi-maint-days" class="text-2xl font-extrabold text-orange-600">0</span>
-          <span class="text-xs font-bold text-orange-600">保</span>
+          <span class="text-xs font-bold text-orange-600">天保</span>
         </div>
-        <div id="kpi-maint-sub" class="mt-1 text-[11px] font-semibold text-slate-500">每 14 天洗防制</div>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-amber-300 bg-gradient-to-br from-white to-amber-50/50 p-4 shadow-xs col-span-2 sm:col-span-1">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-amber-800">高產能併行天數</span>
-          <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-extrabold">雙廠齊開</span>
-        </div>
-        <div class="mt-1.5 flex items-baseline gap-1">
-          <span id="kpi-parallel-days" class="text-2xl sm:text-3xl font-extrabold text-amber-600">0</span>
-          <span class="text-xs font-bold text-amber-700">天</span>
-        </div>
-        <div id="kpi-parallel-sub" class="mt-1 text-[11px] font-semibold text-slate-500">雙廠同時開工併行日數</div>
+        <div id="kpi-maint-sub" class="mt-1 text-[11px] font-semibold text-slate-500">模式 A 運行 0 天</div>
       </div>
     </section>
 
-    <!-- 二、全局排程策略切換器 + 洗防制與固定保養設定區 -->
+    <!-- 二、315 HP 契約電力物理規則總覽 & 互動防呆測試器 -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-      <!-- 左側 6 欄：全局排程策略切換器（核心生產模式組合） -->
-      <div class="lg:col-span-6 bg-white rounded-2xl border border-indigo-200 p-4 sm:p-5 shadow-xs space-y-3">
+      <!-- 左側 7 欄：合法生產模式（A / B / C / D / E）說明與產能參數微調 -->
+      <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div>
             <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
-              <span>⚡ 全局一二廠連動生產策略切換器</span>
+              <span>⚡ 315 HP 契約電力合法生產模式與產能參數</span>
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">切換策略後立即重算所有天數、SVG 圖表與訂單完工交期</p>
+            <p class="text-xs text-slate-500 mt-0.5">
+              任一單班只要一廠雙機（300 HP），二廠必須停機（否則 300+150=450 HP 超約）
+            </p>
           </div>
-          <div class="flex items-center gap-2 text-xs">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
             <label class="font-bold text-slate-600">起始日:</label>
             <input
               type="date"
@@ -201,215 +212,321 @@
           </div>
         </div>
 
-        <!-- 三大策略選項卡片 -->
-        <div class="space-y-2">
-          <label
-            id="strategy-card-A"
-            onclick="selectGlobalStrategy('A')"
-            class="block rounded-xl border-2 p-3 cursor-pointer transition select-none"
-          >
-            <div class="flex items-start gap-2.5">
-              <input type="radio" name="globalStrategy" value="A" class="mt-1 accent-indigo-600" />
-              <div class="flex-1">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="text-xs sm:text-sm font-extrabold text-slate-900">策略 A（推薦高產能併行）</span>
-                  <span class="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold">最高 14,000 kg/日</span>
-                </div>
-                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-                  二廠有待產訂單時：<strong>一廠日雙 5,000 + 夜單 3,000 (8,000 kg) ＋ 二廠日夜雙班 (6,000 kg) ＝ 14,000 kg/日</strong>；二廠無待產訂單時，一廠自動轉為<strong>整日雙機 (10,000 kg)</strong>。
-                </p>
-              </div>
-            </div>
-          </label>
+        <!-- 單班產能與馬力基準微調列 -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600">契約容量 (HP)</label>
+            <input
+              type="number"
+              id="cfg-contract-hp"
+              min="150"
+              max="1000"
+              onchange="onGlobalConfigChange()"
+              class="mt-0.5 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 font-extrabold text-slate-900"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-emerald-800">一廠雙機/班 (300HP)</label>
+            <input
+              type="number"
+              id="cfg-f1-dual-kg"
+              min="500"
+              step="100"
+              onchange="onGlobalConfigChange()"
+              class="mt-0.5 w-full rounded-lg border border-emerald-300 bg-white px-2 py-1 font-extrabold text-emerald-900"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-cyan-800">一廠單機/班 (150HP)</label>
+            <input
+              type="number"
+              id="cfg-f1-single-kg"
+              min="500"
+              step="100"
+              onchange="onGlobalConfigChange()"
+              class="mt-0.5 w-full rounded-lg border border-cyan-300 bg-white px-2 py-1 font-extrabold text-cyan-900"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-indigo-800">二廠開機/班 (150HP)</label>
+            <input
+              type="number"
+              id="cfg-f2-on-kg"
+              min="500"
+              step="100"
+              onchange="onGlobalConfigChange()"
+              class="mt-0.5 w-full rounded-lg border border-indigo-300 bg-white px-2 py-1 font-extrabold text-indigo-900"
+            />
+          </div>
+        </div>
 
-          <label
-            id="strategy-card-B"
-            onclick="selectGlobalStrategy('B')"
-            class="block rounded-xl border-2 p-3 cursor-pointer transition select-none"
-          >
-            <div class="flex items-start gap-2.5">
-              <input type="radio" name="globalStrategy" value="B" class="mt-1 accent-indigo-600" />
-              <div class="flex-1">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="text-xs sm:text-sm font-extrabold text-slate-900">策略 B（固定雙廠最大併行）</span>
-                  <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">固定日雙夜單班制</span>
-                </div>
-                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-                  一般生產日皆固定排定：<strong>一廠日雙 5,000 + 夜單 3,000 (8,000 kg) ＋ 二廠日夜雙班 (6,000 kg)</strong>，保持人員排班節奏穩定不頻繁調班。
-                </p>
-              </div>
+        <!-- 合法生產模式 A / B / C 說明卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div class="rounded-xl border border-amber-300 bg-amber-50/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-amber-950">【模式 A】標準互補</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-extrabold">300 HP</span>
             </div>
-          </label>
+            <p class="text-[11px] text-slate-700 leading-snug">
+              <strong>日：</strong>一單 2,500 + 二開 3,000 (300HP)<br />
+              <strong>夜：</strong>一雙 5,000 + 二停 0 (300HP)<br />
+              <span class="text-amber-900 font-bold">全日：一廠 7,500 + 二廠 3,000 = 10,500 kg</span>
+            </p>
+          </div>
 
-          <label
-            id="strategy-card-C"
-            onclick="selectGlobalStrategy('C')"
-            class="block rounded-xl border-2 p-3 cursor-pointer transition select-none"
-          >
-            <div class="flex items-start gap-2.5">
-              <input type="radio" name="globalStrategy" value="C" class="mt-1 accent-indigo-600" />
-              <div class="flex-1">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="text-xs sm:text-sm font-extrabold text-slate-900">策略 C（保守電力 / 雙單機模式）</span>
-                  <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-extrabold">合計 11,000 kg/日</span>
-                </div>
-                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-                  二廠有待產訂單時：<strong>一廠整日單機 (日 2,500 + 夜 2,500 = 5,000 kg) ＋ 二廠日夜雙班 (6,000 kg) ＝ 11,000 kg/日</strong>；二廠無單時一廠<strong>整日雙機 (10,000 kg)</strong>。
-                </p>
-              </div>
+          <div class="rounded-xl border border-indigo-300 bg-indigo-50/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-indigo-950">【模式 B】二廠急單</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-extrabold">300 HP</span>
             </div>
-          </label>
+            <p class="text-[11px] text-slate-700 leading-snug">
+              <strong>日：</strong>一單 2,500 + 二開 3,000 (300HP)<br />
+              <strong>夜：</strong>一單 2,500 + 二開 3,000 (300HP)<br />
+              <span class="text-indigo-900 font-bold">全日：一廠 5,000 + 二廠 6,000 = 11,000 kg</span>
+            </p>
+          </div>
+
+          <div class="rounded-xl border border-emerald-300 bg-emerald-50/60 p-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-emerald-950">【模式 C】一廠全速</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-extrabold">300 HP</span>
+            </div>
+            <p class="text-[11px] text-slate-700 leading-snug">
+              <strong>日：</strong>一雙 5,000 + 二停 0 (300HP)<br />
+              <strong>夜：</strong>一雙 5,000 + 二停 0 (300HP)<br />
+              <span class="text-emerald-900 font-bold">全日：一廠 10,000 + 二廠 0 = 10,000 kg</span>
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- 右側 6 欄：環保設備清洗（洗防制）與固定預防性設備保養 -->
-      <div class="lg:col-span-6 space-y-4">
-
-        <!-- 環保設備清洗（洗防制） -->
-        <div class="bg-white rounded-2xl border border-sky-200 p-4 shadow-xs space-y-3">
-          <div class="flex items-center justify-between border-b border-sky-100 pb-2">
-            <h3 class="text-sm font-extrabold text-sky-950 flex items-center gap-1.5">
-              <span>💧 環保設備清洗（洗防制）自動排程</span>
+      <!-- 右側 5 欄：315 HP 契約電力防呆測試器 -->
+      <div class="lg:col-span-5 bg-white rounded-2xl border-2 border-slate-300 p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-3">
+        <div>
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <span>🛡️ 315 HP 契約電力防呆測試器</span>
             </h3>
-            <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[11px] font-bold">日班停機清洗 · 夜班恢復</span>
+            <span class="text-[11px] font-bold text-slate-500">即時驗證任意日夜組合</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-            <div class="sm:col-span-4">
-              <label class="block text-xs font-bold text-slate-600 mb-1">起始洗防制日</label>
-              <input
-                type="date"
-                id="cfg-wash-anchor"
-                onchange="onGlobalConfigChange()"
-                class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs font-bold text-slate-800"
-              />
+          <div class="grid grid-cols-2 gap-2.5 mt-3 text-xs">
+            <!-- 日班設備選擇 -->
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-2.5 space-y-2">
+              <div class="font-extrabold text-slate-800 flex items-center justify-between">
+                <span>☀️ 日班設備組合</span>
+                <span id="tester-day-hp-badge" class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">300 HP</span>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500">一廠 (EPDM)</label>
+                <select id="tester-day-f1" onchange="evaluatePowerTester()" class="mt-0.5 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 font-bold text-slate-800">
+                  <option value="single" selected>單機 (150 HP)</option>
+                  <option value="dual">雙機 (300 HP)</option>
+                  <option value="off">停機 (0 HP)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500">二廠 (SBR/BR)</label>
+                <select id="tester-day-f2" onchange="evaluatePowerTester()" class="mt-0.5 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 font-bold text-slate-800">
+                  <option value="on" selected>開機 (150 HP)</option>
+                  <option value="off">停機 (0 HP)</option>
+                </select>
+              </div>
             </div>
-            <div class="sm:col-span-3">
-              <label class="block text-xs font-bold text-slate-600 mb-1">清洗週期 (天)</label>
-              <input
-                type="number"
-                id="cfg-wash-interval"
-                min="1"
-                max="60"
-                onchange="onGlobalConfigChange()"
-                class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs font-bold text-slate-800"
-              />
-            </div>
-            <div class="sm:col-span-5">
-              <label class="block text-xs font-bold text-slate-600 mb-1">洗防制夜班產能設定</label>
-              <select
-                id="cfg-wash-mode"
-                onchange="onGlobalConfigChange()"
-                class="w-full rounded-lg border border-sky-300 bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-950"
-              >
-                <option value="wash_both_3000">一廠夜單 3,000 + 二廠夜 3,000</option>
-                <option value="wash_both_2500">一廠夜單 2,500 + 二廠夜 3,000</option>
-                <option value="wash_p1_3000">僅一廠夜單 3,000（二廠停機）</option>
-                <option value="wash_p1_2500">僅一廠夜單 2,500（二廠停機）</option>
-              </select>
+
+            <!-- 夜班設備選擇 -->
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-2.5 space-y-2">
+              <div class="font-extrabold text-slate-800 flex items-center justify-between">
+                <span>🌙 夜班設備組合</span>
+                <span id="tester-night-hp-badge" class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">300 HP</span>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500">一廠 (EPDM)</label>
+                <select id="tester-night-f1" onchange="evaluatePowerTester()" class="mt-0.5 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 font-bold text-slate-800">
+                  <option value="dual" selected>雙機 (300 HP)</option>
+                  <option value="single">單機 (150 HP)</option>
+                  <option value="off">停機 (0 HP)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500">二廠 (SBR/BR)</label>
+                <select id="tester-night-f2" onchange="evaluatePowerTester()" class="mt-0.5 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 font-bold text-slate-800">
+                  <option value="off" selected>停機 (0 HP)</option>
+                  <option value="on">開機 (150 HP)</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 固定預防性設備保養 -->
-        <div class="bg-white rounded-2xl border border-orange-200 p-4 shadow-xs space-y-3">
-          <div class="flex items-center justify-between border-b border-orange-100 pb-2">
-            <h3 class="text-sm font-extrabold text-orange-950 flex items-center gap-1.5">
-              <span>🔧 固定預防性設備保養設定</span>
-            </h3>
-            <span class="px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[11px] font-bold">週期保養 + 自訂區間</span>
+        <!-- 防呆判定結果橫幅 -->
+        <div id="tester-result-box" class="rounded-xl border-2 border-emerald-400 bg-emerald-50 p-2.5 text-xs space-y-1.5">
+          <div id="tester-status-title" class="font-extrabold text-emerald-900">
+            ✅ 合法安全組合（最高峰值 300 HP ≤ 315 HP 契約容量）
           </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-12 gap-2">
-            <div class="col-span-1 sm:col-span-4">
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">週期保養方式</label>
-              <select
-                id="cfg-maint-cycle-type"
-                onchange="onGlobalConfigChange()"
-                class="w-full rounded-lg border border-orange-300 bg-orange-50/40 px-2 py-1.5 text-xs font-bold"
-              >
-                <option value="none">僅使用下方自訂區間</option>
-                <option value="interval">每 N 天週期保養</option>
-                <option value="monthly">每月固定幾號保養</option>
-              </select>
-            </div>
-            <div class="col-span-1 sm:col-span-3">
-              <label id="lbl-maint-param" class="block text-[11px] font-bold text-slate-600 mb-1">週期天數 / 日號</label>
-              <input
-                type="number"
-                id="cfg-maint-cycle-param"
-                min="1"
-                max="60"
-                onchange="onGlobalConfigChange()"
-                class="w-full rounded-lg border border-orange-300 px-2 py-1.5 text-xs font-bold"
-              />
-            </div>
-            <div class="col-span-2 sm:col-span-5">
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">週期保養產能模式</label>
-              <select
-                id="cfg-maint-cycle-mode"
-                onchange="onGlobalConfigChange()"
-                class="w-full rounded-lg border border-orange-300 bg-orange-50 px-2 py-1.5 text-xs font-bold text-orange-950"
-              >
-                <option value="maint_all">全廠停機保養（0 kg）</option>
-                <option value="maint_p2_p1_8k">二廠保養／一廠日雙夜單（8,000 kg）</option>
-                <option value="maint_p2_p1_10k">二廠保養／一廠整日雙機（10,000 kg）</option>
-                <option value="maint_p1_p2_6k">一廠保養／二廠日夜（6,000 kg）</option>
-              </select>
-            </div>
+          <div id="tester-status-detail" class="text-[11px] text-emerald-800">
+            日班 300 HP · 夜班 300 HP ｜ 預估全日產能：一廠 7,500 kg + 二廠 3,000 kg = 10,500 kg
           </div>
-
-          <!-- 新增自訂保養區間 -->
-          <div class="pt-2 border-t border-slate-100 space-y-2">
-            <div class="grid grid-cols-12 gap-1.5">
-              <input
-                type="date"
-                id="new-maint-date"
-                class="col-span-4 rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold"
-              />
-              <input
-                type="number"
-                id="new-maint-days"
-                min="1"
-                max="10"
-                value="1"
-                title="連續保養天數"
-                class="col-span-2 rounded-lg border border-slate-300 px-1.5 py-1 text-xs font-bold text-center"
-              />
-              <select
-                id="new-maint-mode"
-                class="col-span-4 rounded-lg border border-slate-300 px-1.5 py-1 text-xs font-semibold"
-              >
-                <option value="maint_all">全廠停機 (0 kg)</option>
-                <option value="maint_p2_p1_8k">二廠保/一廠8,000</option>
-                <option value="maint_p2_p1_10k">二廠保/一廠10,000</option>
-                <option value="maint_p1_p2_6k">一廠保/二廠6,000</option>
-              </select>
-              <button
-                type="button"
-                onclick="addCustomMaintRange()"
-                class="col-span-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold cursor-pointer"
-              >
-                + 新增
-              </button>
-            </div>
-            <div id="custom-maint-list" class="flex flex-wrap gap-1.5"></div>
+          <div class="no-print flex items-center gap-1.5 pt-1">
+            <select id="tester-apply-date" class="flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-bold text-slate-800"></select>
+            <button
+              type="button"
+              id="btn-apply-tester"
+              onclick="applyTesterToSelectedDate()"
+              class="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 disabled:text-slate-500 text-white text-[11px] font-extrabold cursor-pointer"
+            >
+              套用至該日
+            </button>
           </div>
         </div>
-
       </div>
+
     </section>
 
-    <!-- 三、全變化 SVG 視覺化圖表區（堆疊產能長條圖 + 跨日進度甘特圖） -->
+    <!-- 三、環保設備清洗（洗防制）與固定設備保養設定區 -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <!-- 左側 6 欄：【模式 D：環保設備清洗日（洗防制）】 -->
+      <div class="lg:col-span-6 bg-white rounded-2xl border border-sky-200 p-4 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-sky-100 pb-2">
+          <h3 class="text-sm font-extrabold text-sky-950 flex items-center gap-1.5">
+            <span>💧 【模式 D】環保設備清洗（洗防制）自動排程</span>
+          </h3>
+          <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[11px] font-bold">日班 0 HP 停機清洗 · 夜班自動復機</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+          <div class="sm:col-span-4">
+            <label class="block text-xs font-bold text-slate-600 mb-1">起始洗防制日</label>
+            <input
+              type="date"
+              id="cfg-wash-anchor"
+              onchange="onGlobalConfigChange()"
+              class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs font-bold text-slate-800"
+            />
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-bold text-slate-600 mb-1">清洗週期 (天)</label>
+            <input
+              type="number"
+              id="cfg-wash-interval"
+              min="1"
+              max="60"
+              onchange="onGlobalConfigChange()"
+              class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs font-bold text-slate-800"
+            />
+          </div>
+          <div class="sm:col-span-5">
+            <label class="block text-xs font-bold text-slate-600 mb-1">洗防制夜班電力連動行為</label>
+            <select
+              id="cfg-wash-mode"
+              onchange="onGlobalConfigChange()"
+              class="w-full rounded-lg border border-sky-300 bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-950"
+            >
+              <option value="wash_opt1">選項1：連動電力最大化 (有二廠開一單+二開300HP / 無二廠開一雙300HP)</option>
+              <option value="wash_opt2">選項2：固定夜一廠雙機 (5,000kg / 300HP，二廠停)</option>
+              <option value="wash_opt3">選項3：傳統僅夜一廠單機 (2,500kg / 150HP，二廠停)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側 6 欄：【模式 E：固定設備保養日】 -->
+      <div class="lg:col-span-6 bg-white rounded-2xl border border-orange-200 p-4 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-orange-100 pb-2">
+          <h3 class="text-sm font-extrabold text-orange-950 flex items-center gap-1.5">
+            <span>🔧 【模式 E】固定設備保養日設定（週期 + 指定區間）</span>
+          </h3>
+          <span class="px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[11px] font-bold">均符合 ≤ 315 HP 規範</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-12 gap-2">
+          <div class="col-span-1 sm:col-span-4">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">週期保養方式</label>
+            <select
+              id="cfg-maint-cycle-type"
+              onchange="onGlobalConfigChange()"
+              class="w-full rounded-lg border border-orange-300 bg-orange-50/40 px-2 py-1.5 text-xs font-bold"
+            >
+              <option value="none">僅使用下方手動保養區間</option>
+              <option value="interval">每 N 天固定週期保養</option>
+              <option value="monthly">每月固定幾號保養</option>
+            </select>
+          </div>
+          <div class="col-span-1 sm:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">週期天數 / 日號</label>
+            <input
+              type="number"
+              id="cfg-maint-cycle-param"
+              min="1"
+              max="60"
+              onchange="onGlobalConfigChange()"
+              class="w-full rounded-lg border border-orange-300 px-2 py-1.5 text-xs font-bold"
+            />
+          </div>
+          <div class="col-span-2 sm:col-span-5">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">週期保養電力模式</label>
+            <select
+              id="cfg-maint-cycle-mode"
+              onchange="onGlobalConfigChange()"
+              class="w-full rounded-lg border border-orange-300 bg-orange-50 px-2 py-1.5 text-xs font-bold text-orange-950"
+            >
+              <option value="maint_all">全廠停機保養（日 0HP / 夜 0HP）</option>
+              <option value="maint_f1_single">一廠單機輪流保養（一單150HP + 二廠併行 = 300HP）</option>
+              <option value="maint_f2_stop_f1_dual">二廠停機保養・一廠全速雙機（日夜 300HP / 10,000kg）</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 手動新增指定保養區間 -->
+        <div class="pt-2 border-t border-slate-100 space-y-2">
+          <div class="grid grid-cols-12 gap-1.5">
+            <input
+              type="date"
+              id="new-maint-date"
+              class="col-span-4 rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold"
+            />
+            <input
+              type="number"
+              id="new-maint-days"
+              min="1"
+              max="14"
+              value="1"
+              title="連續保養天數"
+              class="col-span-2 rounded-lg border border-slate-300 px-1.5 py-1 text-xs font-bold text-center"
+            />
+            <select
+              id="new-maint-mode"
+              class="col-span-4 rounded-lg border border-slate-300 px-1.5 py-1 text-xs font-semibold"
+            >
+              <option value="maint_all">全廠停機保養 (0 HP)</option>
+              <option value="maint_f1_single">一廠單機輪流保養 (≤300 HP)</option>
+              <option value="maint_f2_stop_f1_dual">二廠保養・一廠雙機 (300 HP)</option>
+            </select>
+            <button
+              type="button"
+              onclick="addCustomMaintRange()"
+              class="col-span-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold cursor-pointer"
+            >
+              + 新增
+            </button>
+          </div>
+          <div id="custom-maint-list" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 四、全變化純原生 SVG 視覺化圖表區 -->
     <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
       <div class="px-4 sm:px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
-            <span>全變化動態排程視覺化圖表</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">SVG 即時互動</span>
+            <span>全變化純原生 SVG 視覺化排程圖表</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">315 HP 負載連動</span>
           </h2>
           <p class="text-xs text-slate-500 mt-0.5">
-            滑鼠懸停圖表任一長條或訂單色塊，即可檢視完整當日產能明細與基準交期推擠變化
+            滑鼠懸停任一長條或訂單甘特條，即時顯示當日班別模式、日/夜馬力算式（≤ 315 HP）及訂單扣減明細
           </p>
         </div>
 
@@ -418,9 +535,9 @@
             type="button"
             id="btn-tab-stacked"
             onclick="switchChartView('stacked')"
-            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-indigo-700 shadow-xs cursor-pointer"
+            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-slate-900 shadow-xs cursor-pointer"
           >
-            📊 每日一二廠日夜班產能堆疊圖
+            📊 每日產能堆疊圖 ＋ 315 HP 負載狀態
           </button>
           <button
             type="button"
@@ -433,47 +550,48 @@
         </div>
       </div>
 
-      <!-- 圖例說明列 -->
+      <!-- 統一色彩圖例列（一廠翡翠綠/青色、二廠靛藍/琥珀色、洗防制天藍、保養橘色、電力安全綠） -->
       <div class="px-4 sm:px-6 py-2.5 bg-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div class="flex flex-wrap items-center gap-3 sm:gap-4 font-bold text-slate-700">
           <span class="inline-flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-xs bg-[#4f46e5] inline-block"></span>一廠日班 (5000/2500)
+            <span class="w-3 h-3 rounded-xs bg-[#10b981] inline-block"></span>一廠 EPDM 日班
           </span>
           <span class="inline-flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-xs bg-[#0ea5e9] inline-block"></span>一廠夜班 (5000/3000/2500)
+            <span class="w-3 h-3 rounded-xs bg-[#06b6d4] inline-block"></span>一廠 EPDM 夜班
           </span>
           <span class="inline-flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-xs bg-[#10b981] inline-block"></span>二廠日班 (3000)
+            <span class="w-3 h-3 rounded-xs bg-[#4f46e5] inline-block"></span>二廠 SBR/BR 日班
           </span>
           <span class="inline-flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-xs bg-[#f59e0b] inline-block"></span>二廠夜班 (3000)
+            <span class="w-3 h-3 rounded-xs bg-[#f59e0b] inline-block"></span>二廠 SBR/BR 夜班
           </span>
         </div>
         <div class="flex flex-wrap items-center gap-3 font-bold text-slate-600">
           <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#0284c7]"></span>洗防制</span>
           <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ea580c]"></span>固定保養</span>
-          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#e11d48]"></span>突發故障/覆寫</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#e11d48]"></span>單日故障/調度</span>
+          <span class="inline-flex items-center gap-1 text-emerald-700"><span class="px-1 rounded bg-emerald-100 text-[10px]">300HP</span>單班峰值安全</span>
         </div>
       </div>
 
-      <!-- 圖表 1 容器：每日一二廠日夜班產能堆疊長條圖 (SVG) -->
+      <!-- 圖表 1 容器：每日一二廠日夜班產能堆疊圖 ＋ 315 HP 電力負載狀態 -->
       <div id="view-stacked-chart" class="p-4 sm:p-5">
         <div class="overflow-x-auto pb-2">
           <div id="svg-stacked-wrapper" class="min-w-full"></div>
         </div>
       </div>
 
-      <!-- 圖表 2 容器：一二廠訂單跨日進度甘特圖 (SVG) -->
+      <!-- 圖表 2 容器：訂單跨日生產進度甘特圖 -->
       <div id="view-gantt-chart" class="hidden p-4 sm:p-5 space-y-2">
         <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
           <div class="flex flex-wrap items-center gap-4 font-bold">
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-indigo-600 inline-block"></span>一廠 EPDM 排產</span>
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-emerald-600 inline-block"></span>二廠 SBR/NBR/BR 排產</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-emerald-600 inline-block"></span>一廠 EPDM 排產區間</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-indigo-600 inline-block"></span>二廠 SBR/NBR/BR 排產區間</span>
             <span class="inline-flex items-center gap-1.5 text-rose-600">
-              <span class="inline-block w-4 border-t-2 border-dashed border-rose-600"></span>原基準完工日虛線
+              <span class="inline-block w-4 border-t-2 border-dashed border-rose-600"></span>原鎖定基準完工日
             </span>
           </div>
-          <span class="text-[11px] text-slate-500">插單後若完工日推擠超過紅虛線，右側將自動標示延後天數</span>
+          <span class="text-[11px] text-slate-500">插單或修改班別後，若完工日推擠超過紅虛線，右側徽章將即時顯示延後天數</span>
         </div>
         <div class="overflow-x-auto pb-2">
           <div id="svg-gantt-wrapper" class="min-w-full"></div>
@@ -481,16 +599,16 @@
       </div>
     </section>
 
-    <!-- 四、訂單管理、緊急插單與基準交期對比區 -->
+    <!-- 五、訂單管理區（一廠 EPDM 佇列 & 二廠 SBR/NBR/BR 佇列） -->
     <section class="space-y-4">
 
       <!-- 新增訂單 / 緊急插單控制面板 -->
       <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div>
-            <h2 class="text-base font-extrabold text-slate-900">新增生產訂單 / 緊急插單（全連動交期影響分析）</h2>
+            <h2 class="text-base font-extrabold text-slate-900">新增生產訂單 / 緊急插單（自動觸發模式 A / B / C 電力連動）</h2>
             <p class="text-xs text-slate-500 mt-0.5">
-              勾選「🔥 緊急插單」將自動置頂最優先排產，並立即在下方訂單卡片對比「原基準完工日 → 新完工日」
+              二廠訂單設為「標準日班」自動觸發【模式 A：日(一單+二開)/夜(一雙+二停)】；設為「急單雙班」自動觸發【模式 B：日夜皆一單+二開】
             </p>
           </div>
           <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-extrabold">
@@ -518,10 +636,11 @@
             <label class="block text-xs font-bold text-slate-700 mb-1">生產廠別</label>
             <select
               id="inp-order-plant"
-              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onchange="onNewOrderPlantChange()"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-800"
             >
-              <option value="p1">一廠（EPDM 兩套設備）</option>
               <option value="p2">二廠（SBR / NBR / BR）</option>
+              <option value="p1">一廠（EPDM 兩套設備）</option>
             </select>
           </div>
 
@@ -530,8 +649,8 @@
             <input
               type="text"
               id="inp-order-name"
-              placeholder="例如：華魏急單 或 富鎰BR-2"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="例如：富鎰急單 或 華魏3"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-slate-800"
             />
           </div>
 
@@ -543,10 +662,10 @@
               min="1"
               step="any"
               oninput="updateOrderBoxHint()"
-              placeholder="例如：12000"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="例如：12600"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-800"
             />
-            <div id="lbl-box-preview" class="hidden text-[11px] font-extrabold text-emerald-700 mt-0.5">= 0 kg</div>
+            <div id="lbl-box-preview" class="hidden text-[11px] font-extrabold text-indigo-700 mt-0.5">= 0 kg</div>
           </div>
 
           <div class="sm:col-span-2">
@@ -559,14 +678,12 @@
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-slate-700 mb-1">班別限制</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">班別需求</label>
             <select
               id="inp-order-shift"
               class="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-2 text-xs font-bold text-slate-800"
             >
-              <option value="both">日夜雙班</option>
-              <option value="day_only">僅日班</option>
-              <option value="night_only">僅夜班</option>
+              <!-- 依廠別動態切換選項 -->
             </select>
           </div>
         </div>
@@ -580,56 +697,56 @@
           <button
             type="button"
             onclick="handleAddOrder()"
-            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer"
+            class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer"
           >
-            ➕ 加入排程並立即重算交期
+            ➕ 加入排程並即時重算交期
           </button>
         </div>
       </div>
 
       <!-- 一廠與二廠訂單佇列雙欄卡片 -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <!-- 一廠 EPDM 訂單佇列 -->
-        <div class="bg-white rounded-2xl border border-indigo-200 p-4 shadow-xs space-y-3">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-            <div>
-              <h3 class="text-sm sm:text-base font-extrabold text-indigo-950 flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
-                <span>一廠 EPDM 訂單佇列</span>
-              </h3>
-              <p class="text-[11px] text-slate-500 mt-0.5">支援整日雙機 (10,000) / 日雙夜單 (8,000) / 整日單機 (5,000)</p>
-            </div>
-            <span id="badge-p1-count" class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">0 筆</span>
-          </div>
-          <div id="list-p1-orders" class="space-y-2.5"></div>
-        </div>
-
-        <!-- 二廠 SBR/NBR/BR 訂單佇列 -->
+        <!-- 一廠 EPDM 訂單佇列（翡翠綠主題） -->
         <div class="bg-white rounded-2xl border border-emerald-200 p-4 shadow-xs space-y-3">
           <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div>
               <h3 class="text-sm sm:text-base font-extrabold text-emerald-950 flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+                <span>一廠 EPDM 訂單佇列</span>
+              </h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">模式 C 雙機 10,000kg/日｜模式 A 日單夜雙 7,500kg/日｜模式 B 雙單 5,000kg/日</p>
+            </div>
+            <span id="badge-p1-count" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">0 筆</span>
+          </div>
+          <div id="list-p1-orders" class="space-y-2.5"></div>
+        </div>
+
+        <!-- 二廠 SBR/NBR/BR 訂單佇列（靛藍主題） -->
+        <div class="bg-white rounded-2xl border border-indigo-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <h3 class="text-sm sm:text-base font-extrabold text-indigo-950 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
                 <span>二廠 SBR / NBR / BR 訂單佇列</span>
               </h3>
-              <p class="text-[11px] text-slate-500 mt-0.5">日班 3,000 kg + 夜班 3,000 kg = 6,000 kg/日（1箱 = 1,260 kg）</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">標準日班 3,000kg/日（夜班讓一廠雙機）｜急單雙班 6,000kg/日（1箱 = 1,260kg）</p>
             </div>
-            <span id="badge-p2-count" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">0 筆</span>
+            <span id="badge-p2-count" class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">0 筆</span>
           </div>
           <div id="list-p2-orders" class="space-y-2.5"></div>
         </div>
       </div>
     </section>
 
-    <!-- 五、每日排程算式明細表與單日突發故障覆寫 -->
+    <!-- 六、每日詳細排程表與單日突發故障覆寫 -->
     <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
       <div class="px-4 sm:px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 class="text-base sm:text-lg font-extrabold text-slate-900">
-            每日排程算式明細表（支援單日突發故障與模式覆寫）
+            每日詳細排程算式表（支援單日突發故障與合法模式覆寫）
           </h2>
           <p class="text-xs text-slate-500 mt-0.5">
-            切換任一單日覆寫選單（如一廠壞一台、二廠故障、臨時切換日雙夜單），後續所有天數與交期瞬間重算
+            每列即時檢核日班 HP 與夜班 HP，確保單班絕不超過 315 HP 契約容量上限
           </p>
         </div>
         <button
@@ -642,14 +759,14 @@
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[920px]">
+        <table class="w-full text-left border-collapse min-w-[1040px]">
           <thead>
             <tr class="bg-slate-100 border-b-2 border-slate-300 text-xs font-extrabold text-slate-700 tracking-wider">
               <th class="py-3 px-3 text-center w-24">日期 / 星期</th>
-              <th class="py-3 px-2.5 text-center w-28">狀態標記</th>
-              <th class="py-3 px-3 w-56">單日生產模式覆寫</th>
-              <th class="py-3 px-3.5">一廠日/夜產能與訂單扣減算式明細</th>
-              <th class="py-3 px-3.5">二廠日/夜產能與訂單扣減算式明細</th>
+              <th class="py-3 px-3 w-64">生產模式（自動連動 / 單日覆寫）</th>
+              <th class="py-3 px-3 text-center w-44">電力負載 (日HP / 夜HP)</th>
+              <th class="py-3 px-3.5">一廠 EPDM 日/夜產能與剩餘公斤算式</th>
+              <th class="py-3 px-3.5">二廠 SBR/NBR/BR 日/夜產能與算式</th>
               <th class="py-3 px-3 text-right w-28">當日總產出</th>
             </tr>
           </thead>
@@ -663,10 +780,10 @@
   </main>
 
   <footer class="no-print py-5 text-center text-xs text-slate-500">
-    彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統 · 純前端即時演算引擎
+    彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統（315 HP 契約電力防呆版）· 純原生 SVG 即時演算引擎
   </footer>
 
-  <!-- SVG 動態互動浮動提示框 (Floating Tooltip) -->
+  <!-- SVG 動態互動浮動提示框 -->
   <div
     id="svg-floating-tooltip"
     class="fixed z-50 pointer-events-none opacity-0 bg-slate-900/95 text-white rounded-xl p-3 shadow-2xl border border-slate-700 max-w-xs sm:max-w-sm text-xs leading-relaxed"
@@ -680,7 +797,7 @@
         <h3 class="text-base font-extrabold text-slate-900">確定重設為彥泰企業預設排程？</h3>
       </div>
       <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-        此操作將還原預設的策略 A（日雙夜單併行）、14 天洗防制週期，以及預設訂單（華魏1、華魏2、601 常規單 與 富鎰 BR、浩維、益碁）。
+        此操作將還原預設的 315 HP 契約電力參數、14 天洗防制週期，以及預載範例訂單（一廠：華魏1 24,000kg、華魏2 15,500kg、601 60,000kg；二廠：富鎰BR 10箱、浩維 16箱、益碁 20箱）。
       </p>
       <div class="flex justify-end gap-2 pt-2">
         <button
@@ -712,45 +829,46 @@
   <script>
     /**
      * ============================================================================
-     * 彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統
-     * 核心模組：
-     *   1. 狀態與基準交期快照管理
-     *   2. 雙廠日夜班互斥與「日雙5000+夜單3000」連動演算引擎
-     *   3. 純原生 SVG 每日產能堆疊圖與跨日甘特圖（含基準虛線與浮動 Tooltip）
-     *   4. 訂單佇列、緊急插單與 CSV 匯出
+     * 彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統（315 HP 契約電力防呆版）
+     * 核心物理規則：
+     *   - 單班契約容量上限 = 315 HP（日班與夜班各自獨立計算）
+     *   - 一廠雙機 = 300 HP (5,000 KG/班)
+     *   - 一廠單機 = 150 HP (2,500 KG/班)
+     *   - 二廠開機 = 150 HP (3,000 KG/班)
+     *   - 互斥鐵律：任一班次只要一廠開雙機 (300 HP)，二廠必須停機 (0 HP)，
+     *     否則 300 + 150 = 450 HP > 315 HP 超約！
      * ============================================================================
      */
 
-    const STORAGE_KEY = 'yantai_smart_scheduler_v4';
+    const STORAGE_KEY = 'yantai_315hp_scheduler_v1';
     const KG_PER_BOX = 1260;
     const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
-    // 單日生產模式覆寫選項清單
+    // 單班設備耗用馬力常數
+    const HP_F1_DUAL = 300;
+    const HP_F1_SINGLE = 150;
+    const HP_F2_ON = 150;
+
+    // 單日合法生產模式覆寫選項清單（所有選項均符合 <= 315 HP，並支援自訂防呆組合）
     const DAY_OVERRIDE_OPTIONS = [
-      { value: 'auto', label: '🤖 依全局策略自動連動' },
-      { value: 'force_p1_8k_p2_6k', label: '⚡ 臨時切換：一廠日雙夜單(8k)+二廠雙班(6k)' },
-      { value: 'force_p1_10k', label: '🏭 臨時切換：一廠整日雙機(10k)／二廠停' },
-      { value: 'wash', label: '💧 洗防制日（依洗防制夜班設定）' },
-      { value: 'maint_all', label: '🔧 固定保養：全廠停機保養 (0 kg)' },
-      { value: 'maint_p2_p1_8k', label: '🔧 固定保養：二廠保／一廠日雙夜單 (8k)' },
-      { value: 'maint_p2_p1_10k', label: '🔧 固定保養：二廠保／一廠整日雙機 (10k)' },
-      { value: 'maint_p1_p2_6k', label: '🔧 固定保養：一廠保／二廠日夜 (6k)' },
-      { value: 'fault_p1_half', label: '⚠️ 突發故障：一廠壞一台 (限整日單機 5k)' },
-      { value: 'fault_p2_stop', label: '⚠️ 突發故障：二廠故障停機 (一廠整日雙機 10k)' },
-      { value: 'holiday', label: '🛑 全廠休假 / 停機 (0 kg)' }
+      { value: 'auto', label: '🤖 自動連動（依訂單與洗防制/保養）' },
+      { value: 'mode_A', label: '⚡ 模式A：日(一單+二開) / 夜(一雙+二停) [300/300HP]' },
+      { value: 'mode_B', label: '🔥 模式B：日(一單+二開) / 夜(一單+二開) [300/300HP]' },
+      { value: 'mode_C', label: '🏭 模式C：日(一雙+二停) / 夜(一雙+二停) [300/300HP]' },
+      { value: 'wash', label: '💧 模式D：洗防制日（日停／夜依洗防制設定）' },
+      { value: 'maint_all', label: '🔧 模式E：全廠停機保養（日 0HP / 夜 0HP）' },
+      { value: 'maint_f1_single', label: '🔧 模式E：一廠單機輪流保養（一單+二廠併行）' },
+      { value: 'maint_f2_stop_f1_dual', label: '🔧 模式E：二廠保養・一廠全速雙機（300/300HP）' },
+      { value: 'fault_f1_half', label: '⚠️ 故障：一廠壞一台（日夜皆一單2,500+二開3,000）' },
+      { value: 'fault_f1_stop', label: '⚠️ 故障：一廠全停（二廠日夜開 6,000kg）' },
+      { value: 'fault_f2_stop', label: '⚠️ 故障：二廠全停（一廠日夜雙 10,000kg）' },
+      { value: 'holiday', label: '🛑 全廠休假停機（0 kg / 0 HP）' }
     ];
 
-    const MAINT_MODE_NAMES = {
-      maint_all: '全廠停機保養 (0 kg)',
-      maint_p2_p1_8k: '二廠保養／一廠日雙夜單 (8,000 kg)',
-      maint_p2_p1_10k: '二廠保養／一廠整日雙機 (10,000 kg)',
-      maint_p1_p2_6k: '一廠保養／二廠日夜 (6,000 kg)'
-    };
-
-    const SHIFT_RULE_LABELS = {
-      both: '日夜雙班',
-      day_only: '僅日班',
-      night_only: '僅夜班'
+    const MAINT_MODE_LABELS = {
+      maint_all: '全廠停機保養 (0 HP)',
+      maint_f1_single: '一廠單機輪流保養 (≤300 HP)',
+      maint_f2_stop_f1_dual: '二廠保養・一廠全速雙機 (300 HP)'
     };
 
     /**
@@ -760,47 +878,52 @@
       return {
         startDate: '2026-11-27',
         daysCount: 30,
-        globalStrategy: 'A', // 'A' | 'B' | 'C'
 
-        // 環保設備清洗（洗防制）設定
+        // 契約電力與單班產能基準（可在設定區微調）
+        contractHp: 315,
+        f1DualKg: 5000,
+        f1SingleKg: 2500,
+        f2OnKg: 3000,
+
+        // 【模式 D：環保設備清洗（洗防制）】設定
         washAnchorDate: '2026-11-30',
         washIntervalDays: 14,
-        washMode: 'wash_both_3000', // 'wash_both_3000' | 'wash_both_2500' | 'wash_p1_3000' | 'wash_p1_2500'
+        washMode: 'wash_opt1', // 'wash_opt1' | 'wash_opt2' | 'wash_opt3'
 
-        // 固定預防性設備保養設定
+        // 【模式 E：固定設備保養日】設定
         maintCycleType: 'none', // 'none' | 'interval' | 'monthly'
         maintCycleParam: 30,
         maintCycleMode: 'maint_all',
         customMaintRanges: [
           {
-            id: 'maint-init-1',
-            startDate: '2026-12-15',
+            id: 'maint-default-1',
+            startDate: '2026-12-16',
             days: 1,
-            mode: 'maint_p2_p1_8k'
+            mode: 'maint_f1_single'
           }
         ],
 
-        // 一廠 EPDM 預設訂單佇列
+        // 一廠 EPDM 預載訂單佇列
         p1Orders: [
           { id: 'p1-1', name: '華魏1', totalKg: 24000, earliestStart: '', shiftRule: 'both' },
-          { id: 'p1-2', name: '華魏2', totalKg: 21500, earliestStart: '', shiftRule: 'both' },
-          { id: 'p1-3', name: '601 常規單', totalKg: 80000, earliestStart: '', shiftRule: 'both' }
+          { id: 'p1-2', name: '華魏2', totalKg: 15500, earliestStart: '', shiftRule: 'both' },
+          { id: 'p1-3', name: '601', totalKg: 60000, earliestStart: '', shiftRule: 'both' }
         ],
 
-        // 二廠 SBR / NBR / BR 預設訂單佇列
+        // 二廠 SBR / NBR / BR 預載訂單佇列（預設標準日班 3,000kg/日，自動觸發模式 A）
         p2Orders: [
-          { id: 'p2-1', name: '富鎰 BR', boxes: 10, totalKg: 12600, earliestStart: '2026-12-03', shiftRule: 'both' },
-          { id: 'p2-2', name: '浩維', boxes: 16, totalKg: 20160, earliestStart: '2026-12-07', shiftRule: 'both' },
-          { id: 'p2-3', name: '益碁', boxes: 20, totalKg: 25200, earliestStart: '2026-12-11', shiftRule: 'both' }
+          { id: 'p2-1', name: '富鎰BR', boxes: 10, totalKg: 12600, earliestStart: '2026-12-03', shiftRule: 'day_standard' },
+          { id: 'p2-2', name: '浩維', boxes: 16, totalKg: 20160, earliestStart: '2026-12-07', shiftRule: 'day_standard' },
+          { id: 'p2-3', name: '益碁', boxes: 20, totalKg: 25200, earliestStart: '2026-12-11', shiftRule: 'day_standard' }
         ],
 
-        // 單日手動覆寫表 { 'YYYY-MM-DD': modeValue }
+        // 單日手動覆寫表 { 'YYYY-MM-DD': modeString | { type: 'custom_tester', dayF1, dayF2, nightF1, nightF2 } }
         dayOverrides: {}
       };
     }
 
     let appState = loadInitialState();
-    let baselineOrderDates = {}; // { orderId: { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD', endIndex: number } }
+    let baselineOrderDates = {}; // { orderId: { start, end, endIndex } }
     let latestSimResult = null;
     let activeChartView = 'stacked'; // 'stacked' | 'gantt'
     let orderInputUnit = 'kg'; // 'kg' | 'box'
@@ -824,7 +947,7 @@
     }
 
     // ============================================================================
-    // 日期計算工具函式（純本地日期計算，無時區誤差）
+    // 日期計算工具函式（純本地日期運算，無時區誤差）
     // ============================================================================
     function parseYMD(ymd) {
       const [y, m, d] = ymd.split('-').map(Number);
@@ -863,11 +986,16 @@
     }
 
     // ============================================================================
-    // 核心排程連動演算引擎
+    // 核心 315 HP 契約電力連動演算引擎
     // ============================================================================
     function runScheduleSimulation() {
       const startObj = parseYMD(appState.startDate);
       const totalDays = Math.max(7, Math.min(90, Number(appState.daysCount) || 30));
+
+      const contractHp = Number(appState.contractHp) || 315;
+      const f1DualKg = Number(appState.f1DualKg) || 5000;
+      const f1SingleKg = Number(appState.f1SingleKg) || 2500;
+      const f2OnKg = Number(appState.f2OnKg) || 3000;
 
       const p1OrdersSim = appState.p1Orders.map(o => ({
         ...o,
@@ -896,11 +1024,14 @@
       const days = [];
       let totalP1 = 0;
       let totalP2 = 0;
-      let p1_8kDays = 0;
-      let p2ActiveDays = 0;
+      let peakHpOverall = 0;
+      let overContractCount = 0;
+      let f1DualShifts = 0;
+      let f1SingleShifts = 0;
+      let f2ActiveShifts = 0;
       let washDays = 0;
       let maintDays = 0;
-      let parallelHighDays = 0;
+      let modeADays = 0;
 
       for (let idx = 0; idx < totalDays; idx++) {
         const curDate = addDays(startObj, idx);
@@ -908,30 +1039,30 @@
         const md = formatMD(curDate);
         const weekday = WEEKDAYS[curDate.getDay()];
 
-        // 1. 判斷當日基礎排程狀態（優先序：單日覆寫 > 洗防制週期 > 固定預防性保養 > 正常全局策略）
-        const overrideVal = appState.dayOverrides[ymd] || 'auto';
+        // 1. 判定當日排程來源（單日手動覆寫 > 洗防制週期 > 固定設備保養 > 訂單自動連動）
+        const rawOverride = appState.dayOverrides[ymd];
+        let overrideSelectVal = 'auto';
         let effectiveMode = 'auto';
         let statusType = 'normal'; // 'normal' | 'wash' | 'maint' | 'fault'
-        let statusBadge = '一般排程';
-        let modeDescription = '';
+        let customSpec = null;
 
-        if (overrideVal !== 'auto') {
-          effectiveMode = overrideVal;
-          if (overrideVal === 'wash') {
+        if (rawOverride && typeof rawOverride === 'object' && rawOverride.type === 'custom_tester') {
+          effectiveMode = 'custom_tester';
+          overrideSelectVal = 'custom_tester';
+          statusType = 'fault';
+          customSpec = rawOverride;
+        } else if (typeof rawOverride === 'string' && rawOverride !== 'auto') {
+          effectiveMode = rawOverride;
+          overrideSelectVal = rawOverride;
+          if (rawOverride === 'wash') {
             statusType = 'wash';
-            statusBadge = '洗防制';
-          } else if (overrideVal.startsWith('maint_')) {
+          } else if (rawOverride.startsWith('maint_')) {
             statusType = 'maint';
-            statusBadge = '固定保養';
-          } else if (overrideVal.startsWith('fault_') || overrideVal === 'holiday') {
-            statusType = 'fault';
-            statusBadge = overrideVal === 'holiday' ? '全廠休假' : '突發故障';
           } else {
             statusType = 'fault';
-            statusBadge = '手動調度';
           }
         } else {
-          // 檢查是否為洗防制日
+          // 檢查洗防制週期
           let isWash = false;
           if (appState.washAnchorDate && appState.washIntervalDays > 0) {
             const dDiff = diffDays(curDate, parseYMD(appState.washAnchorDate));
@@ -943,15 +1074,12 @@
           if (isWash) {
             effectiveMode = 'wash';
             statusType = 'wash';
-            statusBadge = '洗防制';
           } else {
-            // 檢查固定預防性設備保養
+            // 檢查固定設備保養
             const maintHit = checkMaintenanceHit(curDate);
             if (maintHit) {
               effectiveMode = maintHit.mode;
               statusType = 'maint';
-              statusBadge = '固定保養';
-              modeDescription = maintHit.label;
             }
           }
         }
@@ -959,140 +1087,202 @@
         if (statusType === 'wash') washDays++;
         if (statusType === 'maint') maintDays++;
 
-        // 2. 檢查二廠當日是否有可排產之待產訂單
+        // 2. 檢查二廠當日日班與夜班的待產訂單需求
         const hasEligibleP2Day = p2OrdersSim.some(
           o =>
             o.remaining > 0 &&
             (!o.earliestStart || ymd >= o.earliestStart) &&
-            (o.shiftRule === 'both' || o.shiftRule === 'day_only')
+            (o.shiftRule === 'day_standard' || o.shiftRule === 'both_urgent')
         );
-        const hasEligibleP2Night = p2OrdersSim.some(
+        const hasEligibleP2NightUrgent = p2OrdersSim.some(
           o =>
             o.remaining > 0 &&
             (!o.earliestStart || ymd >= o.earliestStart) &&
-            (o.shiftRule === 'both' || o.shiftRule === 'night_only')
+            o.shiftRule === 'both_urgent'
         );
-        const hasEligibleP2Any = hasEligibleP2Day || hasEligibleP2Night;
+        const hasAnyEligibleP2Pending = p2OrdersSim.some(
+          o => o.remaining > 0 && (!o.earliestStart || ymd >= o.earliestStart)
+        );
 
-        // 3. 依據 effectiveMode 与 globalStrategy 決定四個班別產能上限 (kg)
-        let p1DayCap = 0;
-        let p1NightCap = 0;
-        let p2DayCap = 0;
-        let p2NightCap = 0;
+        // 3. 決定當日日班與夜班設備狀態 ('off' | 'single' | 'dual' for F1; 'off' | 'on' for F2)
+        let dayF1 = 'off';
+        let dayF2 = 'off';
+        let nightF1 = 'off';
+        let nightF2 = 'off';
+        let modeCode = '';
+        let modeTitle = '';
+        let allowP2NightOnDayStandard = false; // 洗防制夜班補產時允許標準日班單於夜班生產
 
         if (effectiveMode === 'auto') {
-          if (appState.globalStrategy === 'A') {
-            // 策略 A（推薦高產能併行）：二廠有單 -> 一廠日雙5000+夜單3000 + 二廠日夜6000；二廠無單 -> 一廠整日雙機10000
-            if (hasEligibleP2Any) {
-              p1DayCap = 5000;
-              p1NightCap = 3000;
-              p2DayCap = hasEligibleP2Day ? 3000 : 0;
-              p2NightCap = hasEligibleP2Night ? 3000 : 0;
-              modeDescription = '策略A：一廠日雙夜單(8k)＋二廠併行';
-            } else {
-              p1DayCap = 5000;
-              p1NightCap = 5000;
-              p2DayCap = 0;
-              p2NightCap = 0;
-              modeDescription = '策略A：二廠無單／一廠整日雙機(10k)';
-            }
-          } else if (appState.globalStrategy === 'B') {
-            // 策略 B（固定雙廠最大併行）：每日皆排定一廠日雙5000+夜單3000 + 二廠日夜6000
-            p1DayCap = 5000;
-            p1NightCap = 3000;
-            p2DayCap = hasEligibleP2Day ? 3000 : 0;
-            p2NightCap = hasEligibleP2Night ? 3000 : 0;
-            modeDescription = '策略B：固定一廠日雙夜單(8k)＋二廠併行';
+          if (hasEligibleP2Day && hasEligibleP2NightUrgent) {
+            // 【模式 B：日(一單+二開) / 夜(一單+二開)】
+            dayF1 = 'single';
+            dayF2 = 'on';
+            nightF1 = 'single';
+            nightF2 = 'on';
+            modeCode = 'B';
+            modeTitle = '模式B：日(一單+二開) / 夜(一單+二開)';
+          } else if (hasEligibleP2Day && !hasEligibleP2NightUrgent) {
+            // 【模式 A：日(一單+二開) / 夜(一雙+二停)】（本次核心補齊班別！）
+            dayF1 = 'single';
+            dayF2 = 'on';
+            nightF1 = 'dual';
+            nightF2 = 'off';
+            modeCode = 'A';
+            modeTitle = '模式A：日(一單+二開) / 夜(一雙+二停)';
+          } else if (!hasEligibleP2Day && hasEligibleP2NightUrgent) {
+            // 僅夜班有二廠急單：日一雙 / 夜一單+二開
+            dayF1 = 'dual';
+            dayF2 = 'off';
+            nightF1 = 'single';
+            nightF2 = 'on';
+            modeCode = 'A-Night';
+            modeTitle = '日(一雙+二停) / 夜(一單+二開)';
           } else {
-            // 策略 C（保守電力/雙單機模式）：二廠有單 -> 一廠整日單機5000 + 二廠6000；二廠無單 -> 一廠整日雙機10000
-            if (hasEligibleP2Any) {
-              p1DayCap = 2500;
-              p1NightCap = 2500;
-              p2DayCap = hasEligibleP2Day ? 3000 : 0;
-              p2NightCap = hasEligibleP2Night ? 3000 : 0;
-              modeDescription = '策略C：一廠整日單機(5k)＋二廠併行';
-            } else {
-              p1DayCap = 5000;
-              p1NightCap = 5000;
-              p2DayCap = 0;
-              p2NightCap = 0;
-              modeDescription = '策略C：二廠無單／一廠整日雙機(10k)';
-            }
+            // 【模式 C：日(一雙+二停) / 夜(一雙+二停)】
+            dayF1 = 'dual';
+            dayF2 = 'off';
+            nightF1 = 'dual';
+            nightF2 = 'off';
+            modeCode = 'C';
+            modeTitle = '模式C：日(一雙+二停) / 夜(一雙+二停)';
           }
-        } else if (effectiveMode === 'force_p1_8k_p2_6k') {
-          p1DayCap = 5000;
-          p1NightCap = 3000;
-          p2DayCap = hasEligibleP2Day ? 3000 : 0;
-          p2NightCap = hasEligibleP2Night ? 3000 : 0;
-          modeDescription = '手動：一廠日雙夜單(8k)＋二廠雙班(6k)';
-        } else if (effectiveMode === 'force_p1_10k') {
-          p1DayCap = 5000;
-          p1NightCap = 5000;
-          p2DayCap = 0;
-          p2NightCap = 0;
-          modeDescription = '手動：一廠整日雙機(10k)／二廠停';
+        } else if (effectiveMode === 'mode_A') {
+          dayF1 = 'single';
+          dayF2 = 'on';
+          nightF1 = 'dual';
+          nightF2 = 'off';
+          modeCode = 'A';
+          modeTitle = '手動模式A：日(一單+二開) / 夜(一雙+二停)';
+        } else if (effectiveMode === 'mode_B') {
+          dayF1 = 'single';
+          dayF2 = 'on';
+          nightF1 = 'single';
+          nightF2 = 'on';
+          modeCode = 'B';
+          modeTitle = '手動模式B：日(一單+二開) / 夜(一單+二開)';
+        } else if (effectiveMode === 'mode_C') {
+          dayF1 = 'dual';
+          dayF2 = 'off';
+          nightF1 = 'dual';
+          nightF2 = 'off';
+          modeCode = 'C';
+          modeTitle = '手動模式C：日(一雙+二停) / 夜(一雙+二停)';
         } else if (effectiveMode === 'wash') {
-          // 環保設備清洗（洗防制）：兩廠日班停機清洗 (0 kg)，夜班依設定恢復
-          p1DayCap = 0;
-          p2DayCap = 0;
-          if (appState.washMode === 'wash_both_3000') {
-            p1NightCap = 3000;
-            p2NightCap = hasEligibleP2Night ? 3000 : 0;
-            modeDescription = '洗防制：日停／一廠夜單3,000＋二廠夜3,000';
-          } else if (appState.washMode === 'wash_both_2500') {
-            p1NightCap = 2500;
-            p2NightCap = hasEligibleP2Night ? 3000 : 0;
-            modeDescription = '洗防制：日停／一廠夜單2,500＋二廠夜3,000';
-          } else if (appState.washMode === 'wash_p1_3000') {
-            p1NightCap = 3000;
-            p2NightCap = 0;
-            modeDescription = '洗防制：日停／僅一廠夜單3,000';
+          // 【模式 D：環保設備清洗日（洗防制）】日班 0 HP 全停，夜班依選項
+          dayF1 = 'off';
+          dayF2 = 'off';
+          modeCode = 'D';
+          if (appState.washMode === 'wash_opt1') {
+            if (hasAnyEligibleP2Pending) {
+              nightF1 = 'single';
+              nightF2 = 'on';
+              allowP2NightOnDayStandard = true;
+              modeTitle = '模式D(洗防制)：日停 / 夜(一單+二開 300HP)';
+            } else {
+              nightF1 = 'dual';
+              nightF2 = 'off';
+              modeTitle = '模式D(洗防制)：日停 / 夜(一雙+二停 300HP)';
+            }
+          } else if (appState.washMode === 'wash_opt2') {
+            nightF1 = 'dual';
+            nightF2 = 'off';
+            modeTitle = '模式D(洗防制)：日停 / 夜(一雙+二停 300HP)';
           } else {
-            p1NightCap = 2500;
-            p2NightCap = 0;
-            modeDescription = '洗防制：日停／僅一廠夜單2,500';
+            nightF1 = 'single';
+            nightF2 = 'off';
+            modeTitle = '模式D(洗防制)：日停 / 夜(僅一單 150HP)';
           }
         } else if (effectiveMode === 'maint_all' || effectiveMode === 'holiday') {
-          p1DayCap = 0;
-          p1NightCap = 0;
-          p2DayCap = 0;
-          p2NightCap = 0;
-          modeDescription = effectiveMode === 'holiday' ? '全廠休假停機 (0 kg)' : '全廠停機保養 (0 kg)';
-        } else if (effectiveMode === 'maint_p2_p1_8k') {
-          p1DayCap = 5000;
-          p1NightCap = 3000;
-          p2DayCap = 0;
-          p2NightCap = 0;
-          modeDescription = modeDescription || '二廠保養／一廠日雙夜單 (8,000 kg)';
-        } else if (effectiveMode === 'maint_p2_p1_10k') {
-          p1DayCap = 5000;
-          p1NightCap = 5000;
-          p2DayCap = 0;
-          p2NightCap = 0;
-          modeDescription = modeDescription || '二廠保養／一廠整日雙機 (10,000 kg)';
-        } else if (effectiveMode === 'maint_p1_p2_6k') {
-          p1DayCap = 0;
-          p1NightCap = 0;
-          p2DayCap = hasEligibleP2Day ? 3000 : 0;
-          p2NightCap = hasEligibleP2Night ? 3000 : 0;
-          modeDescription = modeDescription || '一廠保養／二廠日夜 (6,000 kg)';
-        } else if (effectiveMode === 'fault_p1_half') {
-          p1DayCap = 2500;
-          p1NightCap = 2500;
-          p2DayCap = hasEligibleP2Day ? 3000 : 0;
-          p2NightCap = hasEligibleP2Night ? 3000 : 0;
-          modeDescription = '故障：一廠壞一台(日2500+夜2500)＋二廠正常';
-        } else if (effectiveMode === 'fault_p2_stop') {
-          p1DayCap = 5000;
-          p1NightCap = 5000;
-          p2DayCap = 0;
-          p2NightCap = 0;
-          modeDescription = '故障：二廠故障停機／一廠整日雙機(10k)';
+          dayF1 = 'off';
+          dayF2 = 'off';
+          nightF1 = 'off';
+          nightF2 = 'off';
+          modeCode = effectiveMode === 'holiday' ? '休假' : 'E';
+          modeTitle = effectiveMode === 'holiday' ? '全廠休假停機 (0 HP)' : '模式E(保養)：全廠停機保養 (0 HP)';
+        } else if (effectiveMode === 'maint_f1_single') {
+          dayF1 = 'single';
+          dayF2 = hasEligibleP2Day ? 'on' : 'off';
+          nightF1 = 'single';
+          nightF2 = hasEligibleP2NightUrgent ? 'on' : 'off';
+          modeCode = 'E';
+          modeTitle = '模式E(保養)：一廠單機輪流保養 + 二廠併行';
+        } else if (effectiveMode === 'maint_f2_stop_f1_dual') {
+          dayF1 = 'dual';
+          dayF2 = 'off';
+          nightF1 = 'dual';
+          nightF2 = 'off';
+          modeCode = 'E';
+          modeTitle = '模式E(保養)：二廠保養・一廠全速雙機 (300HP)';
+        } else if (effectiveMode === 'fault_f1_half') {
+          dayF1 = 'single';
+          dayF2 = 'on';
+          nightF1 = 'single';
+          nightF2 = 'on';
+          modeCode = '故障';
+          modeTitle = '故障：一廠壞一台（日夜皆一單+二開）';
+        } else if (effectiveMode === 'fault_f1_stop') {
+          dayF1 = 'off';
+          dayF2 = 'on';
+          nightF1 = 'off';
+          nightF2 = 'on';
+          modeCode = '故障';
+          modeTitle = '故障：一廠全停（二廠日夜開 6,000kg）';
+        } else if (effectiveMode === 'fault_f2_stop') {
+          dayF1 = 'dual';
+          dayF2 = 'off';
+          nightF1 = 'dual';
+          nightF2 = 'off';
+          modeCode = '故障';
+          modeTitle = '故障：二廠全停（一廠日夜雙 10,000kg）';
+        } else if (effectiveMode === 'custom_tester' && customSpec) {
+          dayF1 = customSpec.dayF1;
+          dayF2 = customSpec.dayF2;
+          nightF1 = customSpec.nightF1;
+          nightF2 = customSpec.nightF2;
+          allowP2NightOnDayStandard = true;
+          modeCode = '自訂';
+          modeTitle = `自訂電力組合：日(${f1LabelShort(dayF1)}+${f2LabelShort(dayF2)}) / 夜(${f1LabelShort(nightF1)}+${f2LabelShort(nightF2)})`;
         }
 
-        // 4. 分配一廠（EPDM）日班與夜班訂單產能（支援同日完工自動滾動撥給下一單）
-        const p1Alloc = allocatePlantShiftOrders(p1OrdersSim, ymd, idx, p1DayCap, p1NightCap);
-        const p2Alloc = allocatePlantShiftOrders(p2OrdersSim, ymd, idx, p2DayCap, p2NightCap);
+        if (modeCode === 'A') modeADays++;
+
+        // 4. 計算日班與夜班馬力負載及單班產能上限
+        const dayF1Hp = dayF1 === 'dual' ? HP_F1_DUAL : dayF1 === 'single' ? HP_F1_SINGLE : 0;
+        const dayF2Hp = dayF2 === 'on' ? HP_F2_ON : 0;
+        const dayTotalHp = dayF1Hp + dayF2Hp;
+
+        const nightF1Hp = nightF1 === 'dual' ? HP_F1_DUAL : nightF1 === 'single' ? HP_F1_SINGLE : 0;
+        const nightF2Hp = nightF2 === 'on' ? HP_F2_ON : 0;
+        const nightTotalHp = nightF1Hp + nightF2Hp;
+
+        const maxDayHp = Math.max(dayTotalHp, nightTotalHp);
+        if (maxDayHp > peakHpOverall) peakHpOverall = maxDayHp;
+        if (dayTotalHp > contractHp || nightTotalHp > contractHp) overContractCount++;
+
+        const p1DayCap = dayF1 === 'dual' ? f1DualKg : dayF1 === 'single' ? f1SingleKg : 0;
+        const p1NightCap = nightF1 === 'dual' ? f1DualKg : nightF1 === 'single' ? f1SingleKg : 0;
+        const p2DayCap = dayF2 === 'on' ? f2OnKg : 0;
+        const p2NightCap = nightF2 === 'on' ? f2OnKg : 0;
+
+        if (dayF1 === 'dual') f1DualShifts++;
+        if (nightF1 === 'dual') f1DualShifts++;
+        if (dayF1 === 'single') f1SingleShifts++;
+        if (nightF1 === 'single') f1SingleShifts++;
+        if (dayF2 === 'on') f2ActiveShifts++;
+        if (nightF2 === 'on') f2ActiveShifts++;
+
+        // 5. 分配一廠與二廠訂單產能
+        const p1Alloc = allocatePlantShiftOrders(p1OrdersSim, ymd, idx, p1DayCap, p1NightCap, 'p1', false);
+        const p2Alloc = allocatePlantShiftOrders(
+          p2OrdersSim,
+          ymd,
+          idx,
+          p2DayCap,
+          p2NightCap,
+          'p2',
+          allowP2NightOnDayStandard
+        );
 
         const p1DayProd = p1Alloc.dayProduced;
         const p1NightProd = p1Alloc.nightProduced;
@@ -1105,20 +1295,29 @@
 
         totalP1 += p1TotalDay;
         totalP2 += p2TotalDay;
-        if (p1DayCap === 5000 && p1NightCap === 3000) p1_8kDays++;
-        if (p2TotalDay > 0) p2ActiveDays++;
-        if (p1TotalDay > 0 && p2TotalDay > 0) parallelHighDays++;
 
         days.push({
           index: idx,
           ymd,
           md,
           weekday,
-          overrideVal,
+          overrideSelectVal,
           effectiveMode,
           statusType,
-          statusBadge,
-          modeDescription,
+          modeCode,
+          modeTitle,
+          dayF1,
+          dayF2,
+          nightF1,
+          nightF2,
+          dayF1Hp,
+          dayF2Hp,
+          dayTotalHp,
+          nightF1Hp,
+          nightF2Hp,
+          nightTotalHp,
+          maxDayHp,
+          isPowerSafe: dayTotalHp <= contractHp && nightTotalHp <= contractHp,
           p1DayCap,
           p1NightCap,
           p2DayCap,
@@ -1135,7 +1334,7 @@
         });
       }
 
-      // 5. 計算每張訂單與基準快照的完工日差異（提前 X 天 / 延後 X 天）
+      // 6. 計算每張訂單與基準快照的完工日差異
       const attachBaselineComparison = order => {
         const base = baselineOrderDates[order.id];
         if (!base) {
@@ -1180,43 +1379,82 @@
       p1OrdersSim.forEach(attachBaselineComparison);
       p2OrdersSim.forEach(attachBaselineComparison);
 
+      // 7. 計算全數訂單預計完工日
+      const allSimOrders = [...p1OrdersSim, ...p2OrdersSim];
+      const anyUnfinished = allSimOrders.some(o => o.remaining > 0);
+      let allDoneDateText = '無訂單';
+      if (allSimOrders.length > 0) {
+        if (anyUnfinished) {
+          allDoneDateText = '跨出排程末日';
+        } else {
+          const maxEnd = allSimOrders.reduce((acc, o) => (o.scheduledEnd && o.scheduledEnd > acc ? o.scheduledEnd : acc), '');
+          allDoneDateText = maxEnd ? maxEnd.slice(5).replace('-', '/') : '—';
+        }
+      }
+
       latestSimResult = {
         days,
         p1OrdersSim,
         p2OrdersSim,
         kpis: {
+          contractHp,
+          peakHpOverall,
+          overContractCount,
           totalDays,
+          allDoneDateText,
+          anyUnfinished,
           totalP1,
           totalP2,
           combinedTotal: totalP1 + totalP2,
-          p1_8kDays,
-          p2ActiveDays,
+          f1DualShifts,
+          f1SingleShifts,
+          f2ActiveShifts,
           washDays,
           maintDays,
-          parallelHighDays
+          modeADays
         }
       };
 
       return latestSimResult;
     }
 
+    function f1LabelShort(state) {
+      return state === 'dual' ? '一雙' : state === 'single' ? '一單' : '一停';
+    }
+
+    function f2LabelShort(state) {
+      return state === 'on' ? '二開' : '二停';
+    }
+
     /**
-     * 針對單一廠別執行當日「日班」與「夜班」的訂單產能分配與扣減算式生成
+     * 分配單一廠別當日日班與夜班產能至訂單佇列，並產生剩餘公斤扣減算式
      */
-    function allocatePlantShiftOrders(ordersSim, ymd, dayIndex, dayCap, nightCap) {
+    function allocatePlantShiftOrders(ordersSim, ymd, dayIndex, dayCap, nightCap, plant, allowP2NightOnDayStandard) {
       const allocMap = new Map();
       let dayProduced = 0;
       let nightProduced = 0;
 
-      // 1. 分配日班產能
+      const isOrderEligibleForShift = (o, shift) => {
+        if (o.remaining <= 0) return false;
+        if (o.earliestStart && ymd < o.earliestStart) return false;
+        if (plant === 'p1') {
+          if (o.shiftRule === 'day_only') return shift === 'day';
+          if (o.shiftRule === 'night_only') return shift === 'night';
+          return true; // 'both'
+        } else {
+          // plant === 'p2'
+          if (o.shiftRule === 'both_urgent') return true;
+          if (o.shiftRule === 'day_standard') {
+            return shift === 'day' || (shift === 'night' && allowP2NightOnDayStandard);
+          }
+          return true;
+        }
+      };
+
+      // 1. 日班分配
       let remDay = dayCap;
       while (remDay > 0) {
-        const cur = ordersSim.find(
-          o =>
-            o.remaining > 0 &&
-            (!o.earliestStart || ymd >= o.earliestStart) &&
-            (o.shiftRule === 'both' || o.shiftRule === 'day_only')
-        );
+        const cur = ordersSim.find(o => isOrderEligibleForShift(o, 'day'));
         if (!cur) break;
         if (cur.scheduledStart === null) {
           cur.scheduledStart = ymd;
@@ -1249,15 +1487,10 @@
         rec.completed = cur.remaining === 0;
       }
 
-      // 2. 分配夜班產能
+      // 2. 夜班分配
       let remNight = nightCap;
       while (remNight > 0) {
-        const cur = ordersSim.find(
-          o =>
-            o.remaining > 0 &&
-            (!o.earliestStart || ymd >= o.earliestStart) &&
-            (o.shiftRule === 'both' || o.shiftRule === 'night_only')
-        );
+        const cur = ordersSim.find(o => isOrderEligibleForShift(o, 'night'));
         if (!cur) break;
         if (cur.scheduledStart === null) {
           cur.scheduledStart = ymd;
@@ -1303,17 +1536,17 @@
           completed: rec.completed
         });
 
-        let shiftBreakdown = '';
+        let shiftTag = '';
         if (rec.dayKg > 0 && rec.nightKg > 0) {
-          shiftBreakdown = `日${rec.dayKg.toLocaleString()}+夜${rec.nightKg.toLocaleString()}`;
+          shiftTag = `日${rec.dayKg.toLocaleString()}+夜${rec.nightKg.toLocaleString()}`;
         } else if (rec.dayKg > 0) {
-          shiftBreakdown = `日${rec.dayKg.toLocaleString()}`;
+          shiftTag = `日${rec.dayKg.toLocaleString()}`;
         } else {
-          shiftBreakdown = `夜${rec.nightKg.toLocaleString()}`;
+          shiftTag = `夜${rec.nightKg.toLocaleString()}`;
         }
 
         lines.push({
-          text: `${rec.order.name}：${rec.before.toLocaleString()} - ${totalTake.toLocaleString()} (${shiftBreakdown}) = ${rec.after.toLocaleString()} kg`,
+          text: `${rec.order.name}：${rec.before.toLocaleString()} - ${totalTake.toLocaleString()} (${shiftTag}) = ${rec.after.toLocaleString()} kg`,
           completed: rec.completed,
           muted: false
         });
@@ -1322,7 +1555,7 @@
       if (lines.length === 0) {
         const totalCap = dayCap + nightCap;
         lines.push({
-          text: totalCap === 0 ? '停機無排產 (0 kg)' : `無可排訂單（可用產能 日${dayCap}+夜${nightCap} kg）`,
+          text: totalCap === 0 ? '停機無排產 (0 kg)' : `無待排訂單（可用產能 日${dayCap}+夜${nightCap} kg）`,
           completed: false,
           muted: true
         });
@@ -1332,24 +1565,19 @@
     }
 
     /**
-     * 檢查指定日期是否命中固定預防性保養（自訂區間 或 週期保養）
+     * 檢查是否命中固定設備保養（指定區間或週期保養）
      */
     function checkMaintenanceHit(curDate) {
-      // 1. 自訂保養區間
       for (const rng of appState.customMaintRanges) {
         if (!rng.startDate) continue;
         const s = parseYMD(rng.startDate);
         const dur = Math.max(1, Number(rng.days) || 1);
         const diff = diffDays(curDate, s);
         if (diff >= 0 && diff < dur) {
-          return {
-            mode: rng.mode || 'maint_all',
-            label: `${MAINT_MODE_NAMES[rng.mode] || '固定保養'} (第${diff + 1}/${dur}天)`
-          };
+          return { mode: rng.mode || 'maint_all' };
         }
       }
 
-      // 2. 週期保養
       const cType = appState.maintCycleType;
       if (cType === 'none') return null;
 
@@ -1358,17 +1586,11 @@
         const anchor = parseYMD(appState.startDate);
         const diff = diffDays(curDate, anchor);
         if (diff > 0 && diff % param === 0) {
-          return {
-            mode: appState.maintCycleMode || 'maint_all',
-            label: `每${param}天週期保養`
-          };
+          return { mode: appState.maintCycleMode || 'maint_all' };
         }
       } else if (cType === 'monthly') {
         if (curDate.getDate() === param) {
-          return {
-            mode: appState.maintCycleMode || 'maint_all',
-            label: `每月${param}號固定保養`
-          };
+          return { mode: appState.maintCycleMode || 'maint_all' };
         }
       }
 
@@ -1395,10 +1617,10 @@
     }
 
     // ============================================================================
-    // 畫面總渲染控制器
+    // 總渲染控制器
     // ============================================================================
     function renderAll(isFirstBoot = false) {
-      const sim = runScheduleSimulation();
+      runScheduleSimulation();
 
       if (isFirstBoot) {
         lockCurrentBaseline(true);
@@ -1406,6 +1628,7 @@
       }
 
       syncControlsUI();
+      evaluatePowerTester();
       renderKPICards(latestSimResult);
       renderStackedBarChartSVG(latestSimResult);
       renderGanttChartSVG(latestSimResult);
@@ -1416,6 +1639,11 @@
     function syncControlsUI() {
       document.getElementById('cfg-start-date').value = appState.startDate;
       document.getElementById('cfg-days-count').value = appState.daysCount;
+      document.getElementById('cfg-contract-hp').value = appState.contractHp;
+      document.getElementById('cfg-f1-dual-kg').value = appState.f1DualKg;
+      document.getElementById('cfg-f1-single-kg').value = appState.f1SingleKg;
+      document.getElementById('cfg-f2-on-kg').value = appState.f2OnKg;
+
       document.getElementById('cfg-wash-anchor').value = appState.washAnchorDate;
       document.getElementById('cfg-wash-interval').value = appState.washIntervalDays;
       document.getElementById('cfg-wash-mode').value = appState.washMode;
@@ -1424,18 +1652,17 @@
       document.getElementById('cfg-maint-cycle-param').value = appState.maintCycleParam;
       document.getElementById('cfg-maint-cycle-mode').value = appState.maintCycleMode;
 
-      // 策略卡片選中外觀
-      ['A', 'B', 'C'].forEach(code => {
-        const card = document.getElementById(`strategy-card-${code}`);
-        const radio = card.querySelector('input[type="radio"]');
-        if (appState.globalStrategy === code) {
-          radio.checked = true;
-          card.className = 'block rounded-xl border-2 border-indigo-600 bg-indigo-50/50 p-3 cursor-pointer transition select-none shadow-2xs';
-        } else {
-          radio.checked = false;
-          card.className = 'block rounded-xl border-2 border-slate-200 hover:border-slate-300 bg-white p-3 cursor-pointer transition select-none';
+      // 填充防呆測試器的套用日期下拉選單
+      const applyDateSel = document.getElementById('tester-apply-date');
+      const prevVal = applyDateSel.value;
+      if (latestSimResult) {
+        applyDateSel.innerHTML = latestSimResult.days
+          .map(d => `<option value="${d.ymd}">${d.md} (週${d.weekday})</option>`)
+          .join('');
+        if (prevVal && latestSimResult.days.some(d => d.ymd === prevVal)) {
+          applyDateSel.value = prevVal;
         }
-      });
+      }
 
       // 自訂保養區間標籤
       const maintListEl = document.getElementById('custom-maint-list');
@@ -1443,7 +1670,7 @@
         .map(
           (r, i) => `
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 border border-orange-200 text-orange-950 text-xs font-bold">
-            🔧 ${r.startDate.slice(5).replace('-', '/')} 起 ${r.days} 天（${MAINT_MODE_NAMES[r.mode]}）
+            🔧 ${r.startDate.slice(5).replace('-', '/')} 起 ${r.days} 天（${MAINT_MODE_LABELS[r.mode]}）
             <button type="button" onclick="removeCustomMaintRange(${i})" class="text-rose-600 hover:text-rose-800 font-extrabold cursor-pointer">✕</button>
           </span>
         `
@@ -1451,75 +1678,179 @@
         .join('');
     }
 
+    /**
+     * 315 HP 契約電力防呆測試器即時運算與防呆阻擋邏輯
+     */
+    function evaluatePowerTester() {
+      const contractHp = Number(appState.contractHp) || 315;
+      const f1DualKg = Number(appState.f1DualKg) || 5000;
+      const f1SingleKg = Number(appState.f1SingleKg) || 2500;
+      const f2OnKg = Number(appState.f2OnKg) || 3000;
+
+      const dayF1 = document.getElementById('tester-day-f1').value;
+      const dayF2 = document.getElementById('tester-day-f2').value;
+      const nightF1 = document.getElementById('tester-night-f1').value;
+      const nightF2 = document.getElementById('tester-night-f2').value;
+
+      const dayHp = (dayF1 === 'dual' ? 300 : dayF1 === 'single' ? 150 : 0) + (dayF2 === 'on' ? 150 : 0);
+      const nightHp = (nightF1 === 'dual' ? 300 : nightF1 === 'single' ? 150 : 0) + (nightF2 === 'on' ? 150 : 0);
+      const peakHp = Math.max(dayHp, nightHp);
+
+      const p1Est =
+        (dayF1 === 'dual' ? f1DualKg : dayF1 === 'single' ? f1SingleKg : 0) +
+        (nightF1 === 'dual' ? f1DualKg : nightF1 === 'single' ? f1SingleKg : 0);
+      const p2Est = (dayF2 === 'on' ? f2OnKg : 0) + (nightF2 === 'on' ? f2OnKg : 0);
+
+      const dayBadge = document.getElementById('tester-day-hp-badge');
+      const nightBadge = document.getElementById('tester-night-hp-badge');
+      const box = document.getElementById('tester-result-box');
+      const title = document.getElementById('tester-status-title');
+      const detail = document.getElementById('tester-status-detail');
+      const applyBtn = document.getElementById('btn-apply-tester');
+
+      const daySafe = dayHp <= contractHp;
+      const nightSafe = nightHp <= contractHp;
+      const allSafe = daySafe && nightSafe;
+
+      dayBadge.textContent = `${dayHp} HP`;
+      dayBadge.className = daySafe
+        ? 'px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold'
+        : 'px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-extrabold';
+
+      nightBadge.textContent = `${nightHp} HP`;
+      nightBadge.className = nightSafe
+        ? 'px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold'
+        : 'px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-extrabold';
+
+      if (allSafe) {
+        box.className = 'rounded-xl border-2 border-emerald-400 bg-emerald-50 p-2.5 text-xs space-y-1.5';
+        title.className = 'font-extrabold text-emerald-900';
+        title.textContent = `✅ 合法安全組合（最高峰值 ${peakHp} HP ≤ ${contractHp} HP 契約容量）`;
+        detail.className = 'text-[11px] text-emerald-800';
+        detail.textContent = `日班 ${dayHp} HP · 夜班 ${nightHp} HP ｜ 預估全日產能：一廠 ${p1Est.toLocaleString()} kg + 二廠 ${p2Est.toLocaleString()} kg = ${(p1Est + p2Est).toLocaleString()} kg`;
+        applyBtn.disabled = false;
+      } else {
+        box.className = 'rounded-xl border-2 border-rose-500 bg-rose-50 p-2.5 text-xs space-y-1.5';
+        title.className = 'font-extrabold text-rose-800';
+        title.textContent = `🚨 超約警報！最高峰值 ${peakHp} HP 超過 ${contractHp} HP 契約容量！`;
+        detail.className = 'text-[11px] font-bold text-rose-700';
+        detail.textContent = `違規原因：一廠雙機 (300HP) 與二廠開機 (150HP) 同班同時開啟會達 450 HP，已自動鎖定禁止套用至排程表！`;
+        applyBtn.disabled = true;
+      }
+    }
+
+    function applyTesterToSelectedDate() {
+      const ymd = document.getElementById('tester-apply-date').value;
+      if (!ymd) return;
+
+      const dayF1 = document.getElementById('tester-day-f1').value;
+      const dayF2 = document.getElementById('tester-day-f2').value;
+      const nightF1 = document.getElementById('tester-night-f1').value;
+      const nightF2 = document.getElementById('tester-night-f2').value;
+
+      const contractHp = Number(appState.contractHp) || 315;
+      const dayHp = (dayF1 === 'dual' ? 300 : dayF1 === 'single' ? 150 : 0) + (dayF2 === 'on' ? 150 : 0);
+      const nightHp = (nightF1 === 'dual' ? 300 : nightF1 === 'single' ? 150 : 0) + (nightF2 === 'on' ? 150 : 0);
+      if (dayHp > contractHp || nightHp > contractHp) {
+        showToast('🚨 超過 315 HP 契約電力上限，系統已攔截此操作！');
+        return;
+      }
+
+      appState.dayOverrides[ymd] = {
+        type: 'custom_tester',
+        dayF1,
+        dayF2,
+        nightF1,
+        nightF2
+      };
+
+      renderAll(false);
+      showToast(`✅ 已將合法電力組合套用至 ${ymd.slice(5).replace('-', '/')}！`);
+    }
+
     function renderKPICards(sim) {
       const { kpis, days } = sim;
-      document.getElementById('kpi-p1-total').textContent = kpis.totalP1.toLocaleString();
-      document.getElementById('kpi-p1-sub').textContent = `約 ${(kpis.totalP1 / 1000).toFixed(1)} 噸｜日雙夜單 ${kpis.p1_8kDays} 天`;
 
-      document.getElementById('kpi-p2-total').textContent = kpis.totalP2.toLocaleString();
-      document.getElementById('kpi-p2-sub').textContent = `約 ${(kpis.totalP2 / 1000).toFixed(1)} 噸｜開工 ${kpis.p2ActiveDays} 天`;
+      document.getElementById('kpi-peak-hp').textContent = kpis.peakHpOverall;
+      document.getElementById('kpi-contract-hp').textContent = kpis.contractHp;
+      const powerCard = document.getElementById('kpi-power-card');
+      const powerBadge = document.getElementById('kpi-power-badge');
+      const powerSub = document.getElementById('kpi-power-sub');
+      if (kpis.overContractCount === 0) {
+        powerCard.className = 'bg-white rounded-2xl border-2 border-emerald-400 p-4 shadow-xs col-span-2 sm:col-span-1';
+        powerBadge.className = 'px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold';
+        powerBadge.textContent = '✅ 0 次超約';
+        powerSub.textContent = `日夜單班皆嚴格 ≤ ${kpis.contractHp} HP`;
+      } else {
+        powerCard.className = 'bg-white rounded-2xl border-2 border-rose-500 p-4 shadow-xs col-span-2 sm:col-span-1';
+        powerBadge.className = 'px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold';
+        powerBadge.textContent = `🚨 ${kpis.overContractCount} 天超約`;
+        powerSub.textContent = `請檢查超出 ${kpis.contractHp} HP 之班次`;
+      }
 
-      document.getElementById('kpi-combined-total').textContent = kpis.combinedTotal.toLocaleString();
       document.getElementById('kpi-date-span').textContent =
         days.length > 0 ? `${days[0].md}~${days[days.length - 1].md}` : `${kpis.totalDays}天`;
-      document.getElementById('kpi-combined-sub').textContent =
-        `日均產出 ${Math.round(kpis.combinedTotal / kpis.totalDays).toLocaleString()} kg`;
+      document.getElementById('kpi-all-done-date').textContent = kpis.allDoneDateText;
+      document.getElementById('kpi-all-done-sub').textContent = `雙廠合計 ${kpis.combinedTotal.toLocaleString()} kg`;
+
+      document.getElementById('kpi-p1-total').textContent = kpis.totalP1.toLocaleString();
+      document.getElementById('kpi-p1-sub').textContent = `約 ${(kpis.totalP1 / 1000).toFixed(1)} 噸｜雙機 ${kpis.f1DualShifts} 班 / 單機 ${kpis.f1SingleShifts} 班`;
+
+      document.getElementById('kpi-p2-total').textContent = kpis.totalP2.toLocaleString();
+      document.getElementById('kpi-p2-sub').textContent = `約 ${(kpis.totalP2 / 1000).toFixed(1)} 噸｜開工 ${kpis.f2ActiveShifts} 班`;
 
       document.getElementById('kpi-wash-days').textContent = kpis.washDays;
       document.getElementById('kpi-maint-days').textContent = kpis.maintDays;
-      document.getElementById('kpi-maint-sub').textContent = `每 ${appState.washIntervalDays} 天洗防制`;
-
-      document.getElementById('kpi-parallel-days').textContent = kpis.parallelHighDays;
-      document.getElementById('kpi-parallel-sub').textContent = `雙廠同時開工併行日數`;
+      document.getElementById('kpi-maint-sub').textContent = `模式 A 互補運行 ${kpis.modeADays} 天`;
     }
 
     // ============================================================================
-    // 圖表 1：純 SVG 每日一二廠日夜班產能堆疊長條圖
+    // 圖表 1：純原生 SVG 每日產能堆疊圖 ＋ 315 HP 電力負載狀態
     // ============================================================================
     function renderStackedBarChartSVG(sim) {
       const wrapper = document.getElementById('svg-stacked-wrapper');
-      const { days } = sim;
+      const { days, kpis } = sim;
 
-      const colStep = 40;
+      const colStep = 44;
       const padLeft = 52;
       const padRight = 24;
       const padTop = 36;
-      const padBottom = 54;
-      const plotHeight = 230;
-      const svgWidth = Math.max(840, padLeft + padRight + days.length * colStep);
+      const padBottom = 68;
+      const plotHeight = 225;
+      const svgWidth = Math.max(880, padLeft + padRight + days.length * colStep);
       const svgHeight = padTop + plotHeight + padBottom;
 
-      const yMax = 16000;
-      const yTicks = [0, 2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000];
+      const yMax = 12000;
+      const yTicks = [0, 2000, 4000, 6000, 8000, 10000, 12000];
 
       let gridSvg = '';
       yTicks.forEach(val => {
         const y = padTop + plotHeight - (val / yMax) * plotHeight;
-        const isHighlight = val === 14000 || val === 10000;
+        const isRef = val === 10500 || val === 10000;
         gridSvg += `
           <line x1="${padLeft}" y1="${y}" x2="${svgWidth - padRight}" y2="${y}"
-                stroke="${val === 0 ? '#64748b' : isHighlight ? '#cbd5e1' : '#e2e8f0'}"
+                stroke="${val === 0 ? '#64748b' : isRef ? '#cbd5e1' : '#e2e8f0'}"
                 stroke-width="${val === 0 ? 1.5 : 1}"
-                ${isHighlight ? 'stroke-dasharray="4 3"' : ''} />
+                ${isRef ? 'stroke-dasharray="4 3"' : ''} />
           <text x="${padLeft - 8}" y="${y + 4}" text-anchor="end" fill="#64748b" font-size="11" font-weight="700">
             ${val === 0 ? '0' : val / 1000 + 'k'}
           </text>
         `;
       });
 
-      const barW = 24;
+      const barW = 26;
       let barsSvg = '';
 
       days.forEach((d, idx) => {
         const cx = padLeft + idx * colStep + colStep / 2;
         const bx = cx - barW / 2;
 
-        // 狀態底色與日期圓點標記（洗防制藍點、保養橘點、突發故障紅點）
+        // 狀態底色與標記
         let dotColor = '';
         let colBg = 'transparent';
         if (d.statusType === 'wash') {
           dotColor = '#0284c7';
-          colBg = 'rgba(14, 165, 233, 0.10)';
+          colBg = 'rgba(14, 165, 233, 0.11)';
         } else if (d.statusType === 'maint') {
           dotColor = '#ea580c';
           colBg = 'rgba(249, 115, 22, 0.12)';
@@ -1535,11 +1866,11 @@
           `;
         }
 
-        // 由下而上堆疊：一廠日班 -> 一廠夜班 -> 二廠日班 -> 二廠夜班
+        // 由下而上堆疊：一廠日班(翡翠綠) -> 一廠夜班(青色) -> 二廠日班(靛藍) -> 二廠夜班(琥珀)
         const segs = [
-          { val: d.p1DayProd, color: '#4f46e5' },
-          { val: d.p1NightProd, color: '#0ea5e9' },
-          { val: d.p2DayProd, color: '#10b981' },
+          { val: d.p1DayProd, color: '#10b981' },
+          { val: d.p1NightProd, color: '#06b6d4' },
+          { val: d.p2DayProd, color: '#4f46e5' },
           { val: d.p2NightProd, color: '#f59e0b' }
         ];
 
@@ -1555,35 +1886,41 @@
           curBottom = yTop;
         });
 
-        // 長條頂端總產出標籤
+        // 長條頂端總產出與模式標籤
         if (d.combinedDay > 0) {
           const kText = (d.combinedDay / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
           barsSvg += `
             <text x="${cx}" y="${Math.max(padTop - 4, curBottom - 4)}" text-anchor="middle"
-                  fill="${d.combinedDay >= 14000 ? '#b45309' : '#0f172a'}" font-size="10" font-weight="800">
+                  fill="${d.modeCode === 'A' ? '#b45309' : '#0f172a'}" font-size="10" font-weight="800">
               ${kText}
             </text>
           `;
         }
 
-        // X 軸日期、星期與事件色點
+        // X 軸：日期、星期、事件色點、以及每日最高馬力安全綠標
         const isWeekend = d.weekday === '六' || d.weekday === '日';
+        const hpPillBg = !d.isPowerSafe ? '#dc2626' : d.maxDayHp > 0 ? '#dcfce7' : '#f1f5f9';
+        const hpPillTxt = !d.isPowerSafe ? '#ffffff' : d.maxDayHp > 0 ? '#166534' : '#64748b';
+
         barsSvg += `
-          <text x="${cx}" y="${padTop + plotHeight + 16}" text-anchor="middle"
-                fill="${isWeekend ? '#e11d48' : '#334155'}" font-size="11" font-weight="800">${d.md}</text>
-          <text x="${cx}" y="${padTop + plotHeight + 30}" text-anchor="middle"
-                fill="${isWeekend ? '#e11d48' : '#64748b'}" font-size="10" font-weight="700">(${d.weekday})</text>
+          <text x="${cx}" y="${padTop + plotHeight + 15}" text-anchor="middle"
+                fill="${isWeekend ? '#e11d48' : '#334155'}" font-size="10.5" font-weight="800">${d.md}</text>
+          <text x="${cx}" y="${padTop + plotHeight + 28}" text-anchor="middle"
+                fill="${isWeekend ? '#e11d48' : '#64748b'}" font-size="9.5" font-weight="700">(${d.weekday})</text>
+          <rect x="${cx - 17}" y="${padTop + plotHeight + 33}" width="34" height="14" rx="4" fill="${hpPillBg}" />
+          <text x="${cx}" y="${padTop + plotHeight + 43}" text-anchor="middle"
+                fill="${hpPillTxt}" font-size="8.5" font-weight="800">${d.maxDayHp}HP</text>
         `;
 
         if (dotColor) {
           barsSvg += `
-            <circle cx="${cx}" cy="${padTop + plotHeight + 41}" r="4" fill="${dotColor}" />
+            <circle cx="${cx}" cy="${padTop + plotHeight + 55}" r="3.5" fill="${dotColor}" />
           `;
         }
 
-        // 透明互動熱區（滑鼠懸停與點擊觸發浮動 Tooltip）
+        // 透明互動熱區
         barsSvg += `
-          <rect x="${cx - colStep / 2}" y="${padTop - 18}" width="${colStep}" height="${plotHeight + 68}"
+          <rect x="${cx - colStep / 2}" y="${padTop - 18}" width="${colStep}" height="${plotHeight + 82}"
                 fill="transparent" style="cursor: pointer;"
                 onmouseenter="showDayTooltip(event, ${idx})"
                 onmousemove="moveFloatingTooltip(event)"
@@ -1601,7 +1938,7 @@
     }
 
     // ============================================================================
-    // 圖表 2：純 SVG 一二廠訂單跨日進度甘特圖（含原基準完工日垂直虛線）
+    // 圖表 2：純原生 SVG 訂單跨日生產進度甘特圖（Gantt Chart）
     // ============================================================================
     function renderGanttChartSVG(sim) {
       const wrapper = document.getElementById('svg-gantt-wrapper');
@@ -1613,17 +1950,16 @@
         return;
       }
 
-      const leftLabelW = 205;
-      const colStep = 38;
+      const leftLabelW = 215;
+      const colStep = 40;
       const padRight = 24;
       const headerH = 44;
       const rowH = 42;
-      const svgWidth = Math.max(840, leftLabelW + days.length * colStep + padRight);
+      const svgWidth = Math.max(880, leftLabelW + days.length * colStep + padRight);
       const svgHeight = headerH + allOrders.length * rowH + 12;
 
       let svgContent = '';
 
-      // 1. 繪製表頭日期與垂直網格背景
       days.forEach((d, idx) => {
         const x = leftLabelW + idx * colStep;
         const cx = x + colStep / 2;
@@ -1657,16 +1993,14 @@
         <line x1="0" y1="${headerH}" x2="${svgWidth}" y2="${headerH}" stroke="#cbd5e1" stroke-width="1.5" />
       `;
 
-      // 2. 逐列繪製每張訂單的排產區間色塊與「原基準完工日垂直虛線」
       allOrders.forEach((order, rIdx) => {
         const yTop = headerH + rIdx * rowH;
-        const yMid = yTop + rowH / 2;
         const isP1 = order.plant === 'p1';
 
         svgContent += `
           <line x1="0" y1="${yTop + rowH}" x2="${svgWidth}" y2="${yTop + rowH}" stroke="#e2e8f0" stroke-width="1" />
-          <rect x="8" y="${yTop + 8}" width="32" height="16" rx="4" fill="${isP1 ? '#e0e7ff' : '#d1fae5'}" />
-          <text x="24" y="${yTop + 19}" text-anchor="middle" fill="${isP1 ? '#3730a3' : '#065f46'}" font-size="9.5" font-weight="800">
+          <rect x="8" y="${yTop + 8}" width="32" height="16" rx="4" fill="${isP1 ? '#d1fae5' : '#e0e7ff'}" />
+          <text x="24" y="${yTop + 19}" text-anchor="middle" fill="${isP1 ? '#065f46' : '#3730a3'}" font-size="9.5" font-weight="800">
             ${isP1 ? '一廠' : '二廠'}
           </text>
           <text x="46" y="${yTop + 20}" fill="#0f172a" font-size="11.5" font-weight="800">${escapeHtml(order.name)}</text>
@@ -1677,15 +2011,14 @@
           </text>
         `;
 
-        // 繪製每日產出甘特條（分上下層呈現日夜班強度）
         order.dailySlices.forEach((slice, sIdx) => {
           const bx = leftLabelW + slice.dayIndex * colStep + 3;
           const bw = colStep - 6;
           const by = yTop + 7;
           const bh = rowH - 14;
 
-          const baseFill = isP1 ? '#4f46e5' : '#10b981';
-          const nightFill = isP1 ? '#0ea5e9' : '#f59e0b';
+          const baseFill = isP1 ? '#10b981' : '#4f46e5';
+          const nightFill = isP1 ? '#06b6d4' : '#f59e0b';
           const kLabel = (slice.kg / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
 
           svgContent += `
@@ -1706,8 +2039,13 @@
           `;
         });
 
-        // 繪製「原基準完工日」垂直虛線標記
-        if (order.baselineEndIndex !== null && order.baselineEndIndex !== undefined && order.baselineEndIndex >= 0 && order.baselineEndIndex < days.length) {
+        // 垂直紅色虛線標示「原鎖定基準完工日」
+        if (
+          order.baselineEndIndex !== null &&
+          order.baselineEndIndex !== undefined &&
+          order.baselineEndIndex >= 0 &&
+          order.baselineEndIndex < days.length
+        ) {
           const baseLineX = leftLabelW + (order.baselineEndIndex + 1) * colStep - 1;
           svgContent += `
             <line x1="${baseLineX}" y1="${yTop + 2}" x2="${baseLineX}" y2="${yTop + rowH - 2}"
@@ -1725,7 +2063,7 @@
     }
 
     // ============================================================================
-    // SVG 浮動提示框互動控制
+    // SVG 互動浮動提示框 (Tooltip)
     // ============================================================================
     function showDayTooltip(evt, dayIdx) {
       if (!latestSimResult || !latestSimResult.days[dayIdx]) return;
@@ -1737,14 +2075,17 @@
 
       tip.innerHTML = `
         <div class="font-extrabold text-sm text-amber-300 border-b border-slate-700 pb-1 mb-1.5 flex items-center justify-between gap-2">
-          <span>${d.md} (週${d.weekday}) · ${escapeHtml(d.statusBadge)}</span>
+          <span>${d.md} (週${d.weekday})</span>
           <span class="text-white">合計 ${d.combinedDay.toLocaleString()} kg</span>
         </div>
-        <div class="text-[11px] text-slate-300 mb-1.5">${escapeHtml(d.modeDescription)}</div>
+        <div class="text-[11px] font-bold text-slate-200 mb-1">${escapeHtml(d.modeTitle)}</div>
+        <div class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-[11px] font-mono text-emerald-300 mb-1.5">
+          日: ${d.dayF1Hp}+${d.dayF2Hp}=${d.dayTotalHp}HP / 夜: ${d.nightF1Hp}+${d.nightF2Hp}=${d.nightTotalHp}HP
+        </div>
         <div class="space-y-1 text-[11px]">
-          <div class="text-indigo-300 font-bold">一廠 (日${d.p1DayProd.toLocaleString()} + 夜${d.p1NightProd.toLocaleString()})：</div>
+          <div class="text-emerald-300 font-bold">一廠 EPDM (日${d.p1DayProd.toLocaleString()} + 夜${d.p1NightProd.toLocaleString()})：</div>
           <div class="text-slate-100 pl-1">${p1Detail}</div>
-          <div class="text-emerald-300 font-bold pt-1">二廠 (日${d.p2DayProd.toLocaleString()} + 夜${d.p2NightProd.toLocaleString()})：</div>
+          <div class="text-indigo-300 font-bold pt-1">二廠 SBR/BR (日${d.p2DayProd.toLocaleString()} + 夜${d.p2NightProd.toLocaleString()})：</div>
           <div class="text-slate-100 pl-1">${p2Detail}</div>
         </div>
       `;
@@ -1767,7 +2108,7 @@
 
       tip.innerHTML = `
         <div class="font-extrabold text-sm text-white border-b border-slate-700 pb-1 mb-1.5">
-          ${plant === 'p1' ? '一廠' : '二廠'} · ${escapeHtml(order.name)}（${s.md}）
+          ${plant === 'p1' ? '一廠 EPDM' : '二廠 SBR/BR'} · ${escapeHtml(order.name)}（${s.md}）
         </div>
         <div class="space-y-1 text-[11px]">
           <div>當日產出：<strong class="text-amber-300">${s.kg.toLocaleString()} kg</strong>（日班 ${s.dayKg.toLocaleString()} + 夜班 ${s.nightKg.toLocaleString()}）</div>
@@ -1810,7 +2151,7 @@
     }
 
     // ============================================================================
-    // 一廠與二廠訂單佇列卡片渲染（含基準交期對比與一鍵置頂插單）
+    // 五、訂單佇列卡片渲染
     // ============================================================================
     function renderOrderQueues(sim) {
       document.getElementById('badge-p1-count').textContent = `${sim.p1OrdersSim.length} 筆`;
@@ -1835,11 +2176,22 @@
         const newEnd = o.scheduledEnd ? o.scheduledEnd.slice(5).replace('-', '/') : `餘 ${o.remaining.toLocaleString()}kg`;
         const newStart = o.scheduledStart ? o.scheduledStart.slice(5).replace('-', '/') : '未開工';
 
+        const shiftSelectHtml = isP1
+          ? `<select onchange="updateOrderField('p1', ${idx}, 'shiftRule', this.value)" class="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] font-bold text-slate-700">
+               <option value="both" ${o.shiftRule === 'both' ? 'selected' : ''}>日夜雙班</option>
+               <option value="day_only" ${o.shiftRule === 'day_only' ? 'selected' : ''}>僅日班</option>
+               <option value="night_only" ${o.shiftRule === 'night_only' ? 'selected' : ''}>僅夜班</option>
+             </select>`
+          : `<select onchange="updateOrderField('p2', ${idx}, 'shiftRule', this.value)" class="rounded border border-indigo-300 bg-indigo-50/60 px-1.5 py-0.5 text-[11px] font-extrabold text-indigo-900">
+               <option value="day_standard" ${o.shiftRule === 'day_standard' ? 'selected' : ''}>標準日班 (3,000kg/日 · 觸發模式A)</option>
+               <option value="both_urgent" ${o.shiftRule === 'both_urgent' ? 'selected' : ''}>急單雙班 (6,000kg/日 · 觸發模式B)</option>
+             </select>`;
+
         return `
           <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-2">
             <div class="flex flex-wrap items-center justify-between gap-1.5">
               <div class="flex flex-wrap items-center gap-1.5">
-                <span class="w-5 h-5 rounded-md ${isP1 ? 'bg-indigo-600' : 'bg-emerald-600'} text-white text-xs font-extrabold flex items-center justify-center">
+                <span class="w-5 h-5 rounded-md ${isP1 ? 'bg-emerald-600' : 'bg-indigo-600'} text-white text-xs font-extrabold flex items-center justify-center">
                   ${idx + 1}
                 </span>
                 <input
@@ -1853,7 +2205,7 @@
                     ? `<input type="number" value="${o.boxes ?? ''}" step="0.5" min="0"
                          onchange="updateOrderField('${plant}', ${idx}, 'boxes', this.value)"
                          class="w-12 rounded-lg border border-slate-300 bg-white px-1 py-0.5 text-xs font-bold text-center"
-                         title="箱數 (×1260)" /><span class="text-[11px] text-slate-500">箱</span>`
+                         title="箱數 (×1,260 kg)" /><span class="text-[11px] text-slate-500">箱</span>`
                     : ''
                 }
                 <input
@@ -1861,7 +2213,7 @@
                   value="${o.totalKg}"
                   min="1"
                   onchange="updateOrderField('${plant}', ${idx}, 'totalKg', this.value)"
-                  class="w-20 sm:w-24 rounded-lg border border-slate-300 bg-white px-2 py-0.5 text-xs font-extrabold ${isP1 ? 'text-indigo-900' : 'text-emerald-900'}"
+                  class="w-20 sm:w-24 rounded-lg border border-slate-300 bg-white px-2 py-0.5 text-xs font-extrabold ${isP1 ? 'text-emerald-900' : 'text-indigo-900'}"
                 />
                 <span class="text-[11px] text-slate-500">kg</span>
               </div>
@@ -1879,7 +2231,7 @@
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-2 text-[11px]">
-              <div class="flex items-center gap-1.5">
+              <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-slate-500">最早開工:</span>
                 <input
                   type="date"
@@ -1887,14 +2239,7 @@
                   onchange="updateOrderField('${plant}', ${idx}, 'earliestStart', this.value)"
                   class="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] font-semibold"
                 />
-                <select
-                  onchange="updateOrderField('${plant}', ${idx}, 'shiftRule', this.value)"
-                  class="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] font-bold text-slate-700"
-                >
-                  <option value="both" ${o.shiftRule === 'both' ? 'selected' : ''}>日夜雙班</option>
-                  <option value="day_only" ${o.shiftRule === 'day_only' ? 'selected' : ''}>僅日班</option>
-                  <option value="night_only" ${o.shiftRule === 'night_only' ? 'selected' : ''}>僅夜班</option>
-                </select>
+                ${shiftSelectHtml}
               </div>
               <div class="text-slate-500 font-semibold">開工 ${newStart}</div>
             </div>
@@ -1926,7 +2271,7 @@
     }
 
     // ============================================================================
-    // 五、每日排程算式明細表渲染
+    // 六、每日詳細排程表渲染
     // ============================================================================
     function renderDailyTable(sim) {
       const tbody = document.getElementById('tbody-daily-schedule');
@@ -1934,36 +2279,39 @@
       tbody.innerHTML = sim.days
         .map(d => {
           let rowBg = 'bg-white hover:bg-slate-50';
-          let badgeCls = 'bg-slate-100 text-slate-700 border-slate-200';
           if (d.statusType === 'wash') {
-            rowBg = 'bg-sky-50/75 hover:bg-sky-100/60';
-            badgeCls = 'bg-sky-100 text-sky-900 border-sky-300';
+            rowBg = 'bg-sky-50/80 hover:bg-sky-100/60';
           } else if (d.statusType === 'maint') {
-            rowBg = 'bg-orange-50/75 hover:bg-orange-100/60';
-            badgeCls = 'bg-orange-100 text-orange-900 border-orange-300';
+            rowBg = 'bg-orange-50/80 hover:bg-orange-100/60';
           } else if (d.statusType === 'fault') {
-            rowBg = 'bg-rose-50/75 hover:bg-rose-100/60';
-            badgeCls = 'bg-rose-100 text-rose-900 border-rose-300';
+            rowBg = 'bg-rose-50/80 hover:bg-rose-100/60';
+          } else if (d.modeCode === 'A') {
+            rowBg = 'bg-amber-50/35 hover:bg-amber-50/70';
           }
 
           const isWeekend = d.weekday === '六' || d.weekday === '日';
 
-          const selectOpts = DAY_OVERRIDE_OPTIONS.map(
-            opt => `<option value="${opt.value}" ${d.overrideVal === opt.value ? 'selected' : ''}>${opt.label}</option>`
-          ).join('');
+          const optionsList = [...DAY_OVERRIDE_OPTIONS];
+          if (d.overrideSelectVal === 'custom_tester') {
+            optionsList.unshift({
+              value: 'custom_tester',
+              label: `🛡️ 防呆測試器套用：日(${f1LabelShort(d.dayF1)}+${f2LabelShort(d.dayF2)})/夜(${f1LabelShort(d.nightF1)}+${f2LabelShort(d.nightF2)})`
+            });
+          }
 
-          const p1LinesHtml = d.p1Lines
-            .map(l =>
-              l.muted
-                ? `<div class="text-xs text-slate-400 italic">${escapeHtml(l.text)}</div>`
-                : `<div class="text-xs sm:text-sm font-bold text-indigo-950">
-                     ${escapeHtml(l.text)}
-                     ${l.completed ? '<span class="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-extrabold">完成</span>' : ''}
-                   </div>`
-            )
+          const selectOpts = optionsList
+            .map(opt => `<option value="${opt.value}" ${d.overrideSelectVal === opt.value ? 'selected' : ''}>${opt.label}</option>`)
             .join('');
 
-          const p2LinesHtml = d.p2Lines
+          const hpBadgeHtml = d.isPowerSafe
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-extrabold">
+                 ✅ 日${d.dayTotalHp} / 夜${d.nightTotalHp} HP
+               </span>`
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-600 text-white text-[11px] font-extrabold">
+                 🚨 日${d.dayTotalHp} / 夜${d.nightTotalHp} HP
+               </span>`;
+
+          const p1LinesHtml = d.p1Lines
             .map(l =>
               l.muted
                 ? `<div class="text-xs text-slate-400 italic">${escapeHtml(l.text)}</div>`
@@ -1974,43 +2322,61 @@
             )
             .join('');
 
+          const p2LinesHtml = d.p2Lines
+            .map(l =>
+              l.muted
+                ? `<div class="text-xs text-slate-400 italic">${escapeHtml(l.text)}</div>`
+                : `<div class="text-xs sm:text-sm font-bold text-indigo-950">
+                     ${escapeHtml(l.text)}
+                     ${l.completed ? '<span class="ml-1.5 px-1.5 py-0.5 rounded bg-indigo-600 text-white text-[11px] font-extrabold">完成</span>' : ''}
+                   </div>`
+            )
+            .join('');
+
           return `
             <tr class="${rowBg} transition-colors">
               <td class="py-2.5 px-3 text-center whitespace-nowrap">
                 <span class="font-extrabold ${isWeekend ? 'text-rose-600' : 'text-slate-900'}">${d.md}</span>
                 <span class="ml-1 text-xs font-bold ${isWeekend ? 'text-rose-600' : 'text-slate-500'}">(${d.weekday})</span>
               </td>
-              <td class="py-2.5 px-2.5 text-center whitespace-nowrap">
-                <span class="inline-block px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${badgeCls}">
-                  ${escapeHtml(d.statusBadge)}
-                </span>
-              </td>
               <td class="py-2.5 px-3">
                 <select
                   onchange="onDayOverrideSelect('${d.ymd}', this.value)"
                   class="w-full rounded-lg border ${
-                    d.overrideVal !== 'auto'
+                    d.overrideSelectVal !== 'auto'
                       ? 'border-rose-400 bg-rose-50 text-rose-900 font-extrabold'
                       : 'border-slate-300 bg-white text-slate-800 font-semibold'
-                  } px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  } px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-800 cursor-pointer"
                 >
                   ${selectOpts}
                 </select>
-                <div class="text-[11px] text-slate-500 font-semibold mt-0.5 truncate" title="${escapeHtml(d.modeDescription)}">
-                  ${escapeHtml(d.modeDescription)}
+                <div class="text-[11px] font-bold mt-1 ${
+                  d.statusType === 'wash'
+                    ? 'text-sky-800'
+                    : d.statusType === 'maint'
+                    ? 'text-orange-800'
+                    : d.modeCode === 'A'
+                    ? 'text-amber-800'
+                    : 'text-slate-600'
+                }">
+                  ${escapeHtml(d.modeTitle)}
+                </div>
+              </td>
+              <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                ${hpBadgeHtml}
+                <div class="text-[10px] text-slate-500 font-mono mt-0.5">
+                  日(${d.dayF1Hp}+${d.dayF2Hp}) / 夜(${d.nightF1Hp}+${d.nightF2Hp})
                 </div>
               </td>
               <td class="py-2.5 px-3.5 space-y-1">${p1LinesHtml}</td>
               <td class="py-2.5 px-3.5 space-y-1">${p2LinesHtml}</td>
               <td class="py-2.5 px-3 text-right whitespace-nowrap">
-                <div class="font-extrabold text-sm ${d.combinedDay >= 14000 ? 'text-amber-700' : 'text-slate-900'}">
+                <div class="font-extrabold text-sm ${d.modeCode === 'A' ? 'text-amber-700' : 'text-slate-900'}">
                   ${d.combinedDay.toLocaleString()} kg
                 </div>
-                ${
-                  d.combinedDay >= 14000
-                    ? '<span class="inline-block px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 text-[10px] font-extrabold">高產能併行</span>'
-                    : ''
-                }
+                <div class="text-[10px] text-slate-500 font-semibold">
+                  一${d.p1TotalDay.toLocaleString()} + 二${d.p2TotalDay.toLocaleString()}
+                </div>
               </td>
             </tr>
           `;
@@ -2021,20 +2387,14 @@
     // ============================================================================
     // 使用者互動事件控制
     // ============================================================================
-    function selectGlobalStrategy(code) {
-      appState.globalStrategy = code;
-      renderAll(false);
-      const names = {
-        A: '策略 A（推薦高產能併行：一廠日雙夜單8k＋二廠6k＝14k）',
-        B: '策略 B（固定雙廠最大併行）',
-        C: '策略 C（保守電力/雙單機模式）'
-      };
-      showToast(`已切換為 ${names[code]}`);
-    }
-
     function onGlobalConfigChange() {
       appState.startDate = document.getElementById('cfg-start-date').value || appState.startDate;
       appState.daysCount = Math.max(7, Math.min(90, Number(document.getElementById('cfg-days-count').value) || 30));
+      appState.contractHp = Math.max(150, Number(document.getElementById('cfg-contract-hp').value) || 315);
+      appState.f1DualKg = Math.max(100, Number(document.getElementById('cfg-f1-dual-kg').value) || 5000);
+      appState.f1SingleKg = Math.max(100, Number(document.getElementById('cfg-f1-single-kg').value) || 2500);
+      appState.f2OnKg = Math.max(100, Number(document.getElementById('cfg-f2-on-kg').value) || 3000);
+
       appState.washAnchorDate = document.getElementById('cfg-wash-anchor').value || appState.washAnchorDate;
       appState.washIntervalDays = Math.max(1, Number(document.getElementById('cfg-wash-interval').value) || 14);
       appState.washMode = document.getElementById('cfg-wash-mode').value;
@@ -2044,7 +2404,7 @@
       appState.maintCycleMode = document.getElementById('cfg-maint-cycle-mode').value;
 
       renderAll(false);
-      showToast('排程參數已更新，圖表與交期已即時連動重算');
+      showToast('⚡ 315 HP 排程參數已更新，圖表與交期已即時重算');
     }
 
     function addCustomMaintRange() {
@@ -2081,15 +2441,32 @@
       const viewGantt = document.getElementById('view-gantt-chart');
 
       if (view === 'stacked') {
-        btnStacked.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-indigo-700 shadow-xs cursor-pointer';
+        btnStacked.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-slate-900 shadow-xs cursor-pointer';
         btnGantt.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition text-slate-600 hover:text-slate-900 cursor-pointer';
         viewStacked.classList.remove('hidden');
         viewGantt.classList.add('hidden');
       } else {
-        btnGantt.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-indigo-700 shadow-xs cursor-pointer';
+        btnGantt.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-slate-900 shadow-xs cursor-pointer';
         btnStacked.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition text-slate-600 hover:text-slate-900 cursor-pointer';
         viewGantt.classList.remove('hidden');
         viewStacked.classList.add('hidden');
+      }
+    }
+
+    function onNewOrderPlantChange() {
+      const plant = document.getElementById('inp-order-plant').value;
+      const shiftSel = document.getElementById('inp-order-shift');
+      if (plant === 'p2') {
+        shiftSel.innerHTML = `
+          <option value="day_standard">標準日班 (3,000kg/日 · 觸發模式A)</option>
+          <option value="both_urgent">急單雙班 (6,000kg/日 · 觸發模式B)</option>
+        `;
+      } else {
+        shiftSel.innerHTML = `
+          <option value="both">日夜雙班 (自動搭配)</option>
+          <option value="day_only">僅日班</option>
+          <option value="night_only">僅夜班</option>
+        `;
       }
     }
 
@@ -2105,7 +2482,7 @@
         btnKg.className = 'px-3 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer';
         btnBox.className = 'px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer';
         lblQty.textContent = '數量 (kg)';
-        inpQty.placeholder = '例如：12000';
+        inpQty.placeholder = '例如：12600';
         preview.classList.add('hidden');
       } else {
         btnBox.className = 'px-3 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer';
@@ -2174,7 +2551,7 @@
       renderAll(false);
       showToast(
         isUrgent
-          ? `🔥 已緊急插單置頂：「${name}」(${totalKg.toLocaleString()} kg)，交期變化已更新！`
+          ? `🔥 已緊急插單置頂：「${name}」(${totalKg.toLocaleString()} kg)，交期推擠變化已更新！`
           : `➕ 已新增訂單：「${name}」(${totalKg.toLocaleString()} kg)`
       );
     }
@@ -2199,7 +2576,7 @@
       }
 
       renderAll(false);
-      showToast(`已更新「${o.name}」並重算交期`);
+      showToast(`已更新「${o.name}」並重算交期與電力模式`);
     }
 
     function pinOrderTop(plant, idx) {
@@ -2247,7 +2624,7 @@
     }
 
     // ============================================================================
-    // 匯出 Excel (.csv)、儲存與重設
+    // 匯出 Excel (.csv) 與重設
     // ============================================================================
     function exportScheduleCSV() {
       if (!latestSimResult) return;
@@ -2255,15 +2632,17 @@
       const headers = [
         '日期',
         '星期',
-        '狀態標記',
-        '排程模式說明',
+        '排程模式',
+        '日班馬力(HP)',
+        '夜班馬力(HP)',
+        '電力安全狀態',
         '一廠日班(kg)',
         '一廠夜班(kg)',
         '一廠生產算式明細',
         '二廠日班(kg)',
         '二廠夜班(kg)',
         '二廠生產算式明細',
-        '當日雙廠總產出(kg)'
+        '當日全廠總產出(kg)'
       ];
 
       const rows = [headers.join(',')];
@@ -2276,8 +2655,10 @@
           [
             `"${d.ymd}"`,
             `"${d.weekday}"`,
-            `"${d.statusBadge}"`,
-            `"${d.modeDescription.replace(/"/g, '""')}"`,
+            `"${d.modeTitle.replace(/"/g, '""')}"`,
+            d.dayTotalHp,
+            d.nightTotalHp,
+            `"${d.isPowerSafe ? '安全(<=315HP)' : '超約警示'}"`,
             d.p1DayProd,
             d.p1NightProd,
             `"${p1Str.replace(/"/g, '""')}"`,
@@ -2294,22 +2675,13 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `彥泰企業_一二廠智慧生產排程表_${appState.startDate}.csv`;
+      a.download = `彥泰企業_315HP契約電力智慧排程表_${appState.startDate}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showToast('📥 已成功匯出 Excel (.csv) 排程明細表！');
-    }
-
-    function saveToLocalStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-        showToast('💾 已儲存目前排程設定與訂單至本機瀏覽器');
-      } catch (e) {
-        showToast('儲存失敗，請確認瀏覽器儲存權限');
-      }
+      showToast('📥 已成功匯出帶有 UTF-8 BOM 的 Excel (.csv) 排程表！');
     }
 
     function openResetModal() {
@@ -2330,7 +2702,7 @@
       baselineOrderDates = {};
       closeResetModal();
       renderAll(true);
-      showToast('↺ 已重設為彥泰企業預設排程並重新鎖定基準交期');
+      showToast('↺ 已重設為彥泰企業 315 HP 預設排程並重新鎖定基準交期');
     }
 
     let toastTimer = null;
@@ -2349,7 +2721,17 @@
       }, 3600);
     }
 
+    // 每次狀態變動自動持久化
+    const origRenderAll = renderAll;
+    renderAll = function (isFirstBoot = false) {
+      origRenderAll(isFirstBoot);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
+    };
+
     window.addEventListener('DOMContentLoaded', () => {
+      onNewOrderPlantChange();
       renderAll(true);
     });
   </script>
