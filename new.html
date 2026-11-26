@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>一二廠智慧連動生產規劃與視覺化排程系統</title>
-  <!-- 載入 Tailwind CSS 用於響應式戰情室介面排版 -->
+  <title>彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統</title>
+  <!-- 載入 Tailwind CSS 進行響應式介面排版 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -13,7 +13,7 @@
       color: #0f172a;
     }
 
-    /* 細緻自訂捲軸，提升手機與寬表瀏覽體驗 */
+    /* 細緻捲軸樣式，提升寬表與圖表捲動體驗 */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -30,23 +30,9 @@
       background: #64748b;
     }
 
-    /* 甘特圖左側固定欄位陰影 */
-    .gantt-sticky-col {
-      position: sticky;
-      left: 0;
-      z-index: 10;
-      box-shadow: 2px 0 6px rgba(15, 23, 42, 0.08);
-    }
-
-    /* 甘特圖中斷（洗防制/保養）斜線底紋 */
-    .pattern-pause {
-      background-image: repeating-linear-gradient(
-        -45deg,
-        rgba(148, 163, 184, 0.14),
-        rgba(148, 163, 184, 0.14) 5px,
-        rgba(241, 245, 249, 0.7) 5px,
-        rgba(241, 245, 249, 0.7) 10px
-      );
+    /* 浮動提示框動畫過渡 */
+    #svg-floating-tooltip {
+      transition: opacity 0.12s ease, transform 0.08s ease;
     }
 
     @media print {
@@ -61,28 +47,37 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- 頂部生管戰情室導覽列 -->
+  <!-- 頂部品牌導覽列 -->
   <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div>
         <div class="flex flex-wrap items-center gap-2">
-          <span class="px-2 py-0.5 rounded bg-indigo-500 text-white text-xs font-bold tracking-wider">
-            SMART MES 排程引擎
+          <span class="px-2.5 py-0.5 rounded-md bg-indigo-500 text-white text-xs font-extrabold tracking-wider shadow-xs">
+            彥泰企業 SMART MES
           </span>
-          <h1 class="text-base sm:text-xl font-bold tracking-tight text-white">
+          <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white">
             一二廠智慧連動生產規劃與視覺化排程系統
           </h1>
         </div>
         <p class="text-xs text-slate-300 mt-1">
-          一廠 EPDM（雙機 10,000kg / 單機 5,000kg）× 二廠 SBR/NBR/BR（日夜雙班 6,000kg）× 洗防制與固定保養全自動連動
+          一廠 EPDM（整日雙機 10,000kg / 日雙夜單 8,000kg / 整日單機 5,000kg）× 二廠 SBR·NBR·BR（日夜雙班 6,000kg）全連動引擎
         </p>
       </div>
 
       <div class="no-print flex flex-wrap items-center gap-2">
         <button
           type="button"
+          onclick="lockCurrentBaseline()"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-extrabold shadow-xs transition cursor-pointer"
+          title="將目前所有訂單的預計完工日鎖定為新的基準線"
+        >
+          <span>🔒 鎖定目前交期為基準</span>
+        </button>
+
+        <button
+          type="button"
           onclick="exportScheduleCSV()"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-xs transition cursor-pointer"
         >
           <span>📥 匯出 Excel (.csv)</span>
         </button>
@@ -90,17 +85,17 @@
         <button
           type="button"
           onclick="saveToLocalStorage()"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold shadow-xs transition cursor-pointer"
         >
-          <span>💾 儲存排程</span>
+          <span>💾 儲存</span>
         </button>
 
         <button
           type="button"
           onclick="openResetModal()"
-          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs sm:text-sm font-semibold transition cursor-pointer"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs sm:text-sm font-semibold transition cursor-pointer"
         >
-          <span>↺ 重設預設資料</span>
+          <span>↺ 重設預設</span>
         </button>
       </div>
     </div>
@@ -108,566 +103,558 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5 space-y-5">
 
-    <!-- 一、頂部即時連動 KPI 統計卡片（6 欄響應式） -->
-    <section aria-label="生產排程關鍵指標" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs">
-        <div class="text-xs font-bold text-slate-500">排程總天數</div>
-        <div class="mt-1 flex items-baseline gap-1">
-          <span id="kpi-days" class="text-2xl font-extrabold text-slate-900">30</span>
-          <span class="text-xs font-semibold text-slate-500">天</span>
+    <!-- 一、頂部 5 張 KPI 摘要卡片 -->
+    <section aria-label="排程關鍵指標" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div class="bg-white rounded-2xl border border-indigo-200 p-4 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-indigo-700">一廠總排產量 (EPDM)</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
         </div>
-        <div id="kpi-date-range" class="mt-1 text-[11px] text-slate-400 truncate">11/27 ~ 12/26</div>
+        <div class="mt-1.5 flex items-baseline gap-1">
+          <span id="kpi-p1-total" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">0</span>
+          <span class="text-xs font-bold text-indigo-500">kg</span>
+        </div>
+        <div id="kpi-p1-sub" class="mt-1 text-[11px] font-semibold text-slate-500">約 0 噸｜日雙夜單 0 天</div>
       </div>
 
-      <div class="bg-white rounded-xl border border-indigo-200 p-3.5 shadow-xs">
-        <div class="text-xs font-bold text-indigo-700">一廠總產量 (EPDM)</div>
-        <div class="mt-1 flex items-baseline gap-1">
-          <span id="kpi-p1-total" class="text-2xl font-extrabold text-indigo-600">0</span>
-          <span class="text-xs font-semibold text-indigo-500">kg</span>
+      <div class="bg-white rounded-2xl border border-emerald-200 p-4 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-emerald-700">二廠總排產量 (SBR/BR)</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
         </div>
-        <div id="kpi-p1-tons" class="mt-1 text-[11px] text-slate-500">約 0 噸</div>
+        <div class="mt-1.5 flex items-baseline gap-1">
+          <span id="kpi-p2-total" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</span>
+          <span class="text-xs font-bold text-emerald-500">kg</span>
+        </div>
+        <div id="kpi-p2-sub" class="mt-1 text-[11px] font-semibold text-slate-500">約 0 噸｜開工 0 天</div>
       </div>
 
-      <div class="bg-white rounded-xl border border-emerald-200 p-3.5 shadow-xs">
-        <div class="text-xs font-bold text-emerald-700">二廠總產量 (SBR/BR)</div>
-        <div class="mt-1 flex items-baseline gap-1">
-          <span id="kpi-p2-total" class="text-2xl font-extrabold text-emerald-600">0</span>
-          <span class="text-xs font-semibold text-emerald-500">kg</span>
+      <div class="bg-white rounded-2xl border border-slate-300 p-4 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-slate-700">雙廠合計總產出</span>
+          <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-bold" id="kpi-date-span">30天</span>
         </div>
-        <div id="kpi-p2-tons" class="mt-1 text-[11px] text-slate-500">約 0 噸</div>
+        <div class="mt-1.5 flex items-baseline gap-1">
+          <span id="kpi-combined-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</span>
+          <span class="text-xs font-bold text-slate-500">kg</span>
+        </div>
+        <div id="kpi-combined-sub" class="mt-1 text-[11px] font-semibold text-slate-500">日均產出 0 kg</div>
       </div>
 
-      <div class="bg-white rounded-xl border border-sky-200 p-3.5 shadow-xs">
-        <div class="text-xs font-bold text-sky-700">洗防制次數</div>
-        <div class="mt-1 flex items-baseline gap-1">
-          <span id="kpi-wash-count" class="text-2xl font-extrabold text-sky-600">0</span>
-          <span class="text-xs font-semibold text-sky-500">次</span>
+      <div class="bg-white rounded-2xl border border-sky-200 p-4 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-sky-800">洗防制 / 保養天數</span>
+          <span class="text-xs">💧🔧</span>
         </div>
-        <div id="kpi-wash-sub" class="mt-1 text-[11px] text-slate-500">每 14 天循環</div>
-      </div>
-
-      <div class="bg-white rounded-xl border border-orange-200 p-3.5 shadow-xs">
-        <div class="text-xs font-bold text-orange-700">固定保養天數</div>
-        <div class="mt-1 flex items-baseline gap-1">
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpi-wash-days" class="text-2xl font-extrabold text-sky-600">0</span>
+          <span class="text-xs font-bold text-sky-600">洗</span>
+          <span class="text-slate-300 font-bold">/</span>
           <span id="kpi-maint-days" class="text-2xl font-extrabold text-orange-600">0</span>
-          <span class="text-xs font-semibold text-orange-500">天</span>
+          <span class="text-xs font-bold text-orange-600">保</span>
         </div>
-        <div id="kpi-maint-sub" class="mt-1 text-[11px] text-slate-500">預防性設備保養</div>
+        <div id="kpi-maint-sub" class="mt-1 text-[11px] font-semibold text-slate-500">每 14 天洗防制</div>
       </div>
 
-      <div class="bg-white rounded-xl border border-rose-200 p-3.5 shadow-xs">
-        <div class="text-xs font-bold text-rose-700">未排完待產餘量</div>
-        <div class="mt-1 flex items-baseline gap-1">
-          <span id="kpi-backlog" class="text-2xl font-extrabold text-rose-600">0</span>
-          <span class="text-xs font-semibold text-rose-500">kg</span>
+      <div class="bg-white rounded-2xl border border-amber-300 bg-gradient-to-br from-white to-amber-50/50 p-4 shadow-xs col-span-2 sm:col-span-1">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-amber-800">高產能併行天數</span>
+          <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-extrabold">雙廠齊開</span>
         </div>
-        <div id="kpi-backlog-sub" class="mt-1 text-[11px] text-slate-500">一廠 0 / 二廠 0</div>
-      </div>
-    </section>
-
-    <!-- 二、全廠動態排程視覺圖（SVG 堆疊長條圖 + 跨日進度甘特圖） -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="px-4 sm:px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
-            <span>全廠動態排程視覺圖</span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">即時連動重繪</span>
-          </h2>
-          <p class="text-xs text-slate-500 mt-0.5">
-            新增訂單、緊急插單或調整洗防制與保養天數時，圖表將自動重新計算全線產能與交期軌跡
-          </p>
+        <div class="mt-1.5 flex items-baseline gap-1">
+          <span id="kpi-parallel-days" class="text-2xl sm:text-3xl font-extrabold text-amber-600">0</span>
+          <span class="text-xs font-bold text-amber-700">天</span>
         </div>
-
-        <!-- 視覺化圖表分頁切換 -->
-        <div class="inline-flex rounded-xl bg-slate-200/80 p-1 self-start sm:self-auto">
-          <button
-            type="button"
-            id="tab-btn-stacked"
-            onclick="switchChartTab('stacked')"
-            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition bg-white text-indigo-700 shadow-xs cursor-pointer"
-          >
-            📊 每日產能與日夜班堆疊圖
-          </button>
-          <button
-            type="button"
-            id="tab-btn-gantt"
-            onclick="switchChartTab('gantt')"
-            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 cursor-pointer"
-          >
-            📅 訂單跨日進度甘特圖
-          </button>
-        </div>
-      </div>
-
-      <!-- 圖例與事件標記說明列 -->
-      <div class="px-4 sm:px-6 py-2.5 bg-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
-          <span class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
-            <span class="w-3 h-3 rounded-xs bg-[#4f46e5] inline-block"></span>一廠日班
-          </span>
-          <span class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
-            <span class="w-3 h-3 rounded-xs bg-[#0ea5e9] inline-block"></span>一廠夜班
-          </span>
-          <span class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
-            <span class="w-3 h-3 rounded-xs bg-[#10b981] inline-block"></span>二廠日班
-          </span>
-          <span class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
-            <span class="w-3 h-3 rounded-xs bg-[#f59e0b] inline-block"></span>二廠夜班
-          </span>
-        </div>
-        <div class="flex flex-wrap items-center gap-3 text-slate-600 font-semibold">
-          <span>💧 洗防制日</span>
-          <span>🔧 固定保養</span>
-          <span>⚠️ 故障/手動覆寫</span>
-        </div>
-      </div>
-
-      <!-- 圖表內容區 1：每日產能與日夜班堆疊圖 -->
-      <div id="chart-panel-stacked" class="p-4 sm:p-5 space-y-3">
-        <div class="overflow-x-auto pb-2">
-          <div id="stacked-svg-container" class="min-w-full"></div>
-        </div>
-
-        <!-- 懸停/點擊當日產能明細檢視條 -->
-        <div id="stacked-inspector" class="rounded-xl bg-slate-50 border border-slate-200 p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs">
-          <div class="font-semibold text-slate-700" id="inspector-title">
-            💡 將滑鼠移至長條圖任一天（或點擊長條），可檢視該日一二廠日夜班詳細生產算式
-          </div>
-          <div class="flex flex-wrap items-center gap-2" id="inspector-badges"></div>
-        </div>
-      </div>
-
-      <!-- 圖表內容區 2：訂單跨日進度甘特圖 -->
-      <div id="chart-panel-gantt" class="hidden p-4 sm:p-5 space-y-3">
-        <div id="gantt-container" class="overflow-x-auto border border-slate-200 rounded-xl"></div>
-        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-          <span>提示：色塊數字代表當日產出（k = 千公斤），遇到 💧洗防制 或 🔧固定保養 時自動顯示中斷並向後順延。</span>
-          <span id="gantt-hover-detail" class="font-bold text-indigo-700"></span>
-        </div>
+        <div id="kpi-parallel-sub" class="mt-1 text-[11px] font-semibold text-slate-500">雙廠同時開工併行日數</div>
       </div>
     </section>
 
-    <!-- 三、全連動訂單佇列管理 + 產能/洗防制/固定保養規則設定 -->
-    <section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+    <!-- 二、全局排程策略切換器 + 洗防制與固定保養設定區 -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-      <!-- 左側 7 欄：新增訂單/緊急插單表單 與 一二廠訂單佇列 -->
-      <div class="xl:col-span-7 space-y-5">
-
-        <!-- 新增訂單與緊急插單卡片 -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-            <div>
-              <h2 class="text-base font-extrabold text-slate-900">新增生產訂單 / 緊急插單</h2>
-              <p class="text-xs text-slate-500">支援直接輸入公斤或箱數自動換算（1 箱 = 1,260 kg），插單後立即顯示交期變化</p>
-            </div>
-            <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-bold">
-              <button
-                type="button"
-                id="unit-btn-kg"
-                onclick="switchNewOrderUnit('kg')"
-                class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs cursor-pointer"
-              >
-                輸入公斤 (kg)
-              </button>
-              <button
-                type="button"
-                id="unit-btn-box"
-                onclick="switchNewOrderUnit('box')"
-                class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer"
-              >
-                輸入箱數 (×1260)
-              </button>
-            </div>
+      <!-- 左側 6 欄：全局排程策略切換器（核心生產模式組合） -->
+      <div class="lg:col-span-6 bg-white rounded-2xl border border-indigo-200 p-4 sm:p-5 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <span>⚡ 全局一二廠連動生產策略切換器</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">切換策略後立即重算所有天數、SVG 圖表與訂單完工交期</p>
           </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-            <div class="sm:col-span-4">
-              <label class="block text-xs font-bold text-slate-700 mb-1">生產廠別</label>
-              <select
-                id="new-order-plant"
-                onchange="onNewOrderPlantChange()"
-                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="p1">一廠（EPDM 兩套設備）</option>
-                <option value="p2">二廠（SBR / NBR / BR）</option>
-              </select>
-            </div>
-
-            <div class="sm:col-span-4">
-              <label class="block text-xs font-bold text-slate-700 mb-1">客戶 / 訂單名稱</label>
-              <input
-                type="text"
-                id="new-order-name"
-                placeholder="例如：華魏3 或 富鎰急單"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div class="sm:col-span-4">
-              <label id="new-order-qty-label" class="block text-xs font-bold text-slate-700 mb-1">訂單總公斤數 (kg)</label>
-              <div class="relative">
-                <input
-                  type="number"
-                  id="new-order-qty"
-                  min="1"
-                  step="any"
-                  oninput="updateNewOrderPreviewKg()"
-                  placeholder="例如：15000"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <span id="new-order-calc-hint" class="hidden text-[11px] font-bold text-emerald-700 mt-0.5 block">
-                  = 0 kg
-                </span>
-              </div>
-            </div>
-
-            <div class="sm:col-span-5">
-              <label class="block text-xs font-bold text-slate-700 mb-1">最早可開工日（留白則依序排入）</label>
-              <input
-                type="date"
-                id="new-order-start"
-                class="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-800"
-              />
-            </div>
-
-            <div id="new-order-p2-shift-wrap" class="sm:col-span-7 hidden">
-              <label class="block text-xs font-bold text-emerald-800 mb-1">二廠班別排程模式</label>
-              <select
-                id="new-order-shift"
-                class="w-full rounded-lg border border-emerald-300 bg-emerald-50/50 px-3 py-1.5 text-sm font-bold text-emerald-950"
-              >
-                <option value="double">日 + 夜雙班（每日 6,000 kg）</option>
-                <option value="single">僅日班生產（每日 3,000 kg）</option>
-                <option value="first_single_then_double">首日僅日班、次日起日夜雙班</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-end gap-2.5 pt-1">
-            <button
-              type="button"
-              onclick="submitNewOrder(false)"
-              class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs sm:text-sm font-bold shadow-xs transition cursor-pointer"
-            >
-              <span>➕ 加入排程尾端</span>
-            </button>
-            <button
-              type="button"
-              onclick="submitNewOrder(true)"
-              class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer"
-            >
-              <span>🔥 緊急插單（置頂最優先）</span>
-            </button>
+          <div class="flex items-center gap-2 text-xs">
+            <label class="font-bold text-slate-600">起始日:</label>
+            <input
+              type="date"
+              id="cfg-start-date"
+              onchange="onGlobalConfigChange()"
+              class="rounded-lg border border-slate-300 px-2 py-1 font-bold text-slate-800"
+            />
+            <label class="font-bold text-slate-600">天數:</label>
+            <input
+              type="number"
+              id="cfg-days-count"
+              min="7"
+              max="90"
+              onchange="onGlobalConfigChange()"
+              class="w-14 rounded-lg border border-slate-300 px-2 py-1 font-bold text-center text-slate-800"
+            />
           </div>
         </div>
 
-        <!-- 一廠與二廠訂單佇列雙欄列表 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- 一廠訂單佇列 -->
-          <div class="bg-white rounded-2xl border border-indigo-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
-            <div class="space-y-3">
-              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                <div>
-                  <h3 class="text-sm font-extrabold text-indigo-950 flex items-center gap-1.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
-                    <span>一廠訂單佇列（EPDM）</span>
-                  </h3>
-                  <p class="text-[11px] text-slate-500 mt-0.5">雙機 10,000 kg/日｜二廠開工時降為單機 5,000 kg/日</p>
+        <!-- 三大策略選項卡片 -->
+        <div class="space-y-2">
+          <label
+            id="strategy-card-A"
+            onclick="selectGlobalStrategy('A')"
+            class="block rounded-xl border-2 p-3 cursor-pointer transition select-none"
+          >
+            <div class="flex items-start gap-2.5">
+              <input type="radio" name="globalStrategy" value="A" class="mt-1 accent-indigo-600" />
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-xs sm:text-sm font-extrabold text-slate-900">策略 A（推薦高產能併行）</span>
+                  <span class="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold">最高 14,000 kg/日</span>
                 </div>
-                <span id="p1-order-count" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold">0 筆</span>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  二廠有待產訂單時：<strong>一廠日雙 5,000 + 夜單 3,000 (8,000 kg) ＋ 二廠日夜雙班 (6,000 kg) ＝ 14,000 kg/日</strong>；二廠無待產訂單時，一廠自動轉為<strong>整日雙機 (10,000 kg)</strong>。
+                </p>
               </div>
-              <div id="p1-orders-list" class="space-y-2.5"></div>
             </div>
-          </div>
+          </label>
 
-          <!-- 二廠訂單佇列 -->
-          <div class="bg-white rounded-2xl border border-emerald-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
-            <div class="space-y-3">
-              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                <div>
-                  <h3 class="text-sm font-extrabold text-emerald-950 flex items-center gap-1.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                    <span>二廠訂單佇列（SBR / NBR / BR）</span>
-                  </h3>
-                  <p class="text-[11px] text-slate-500 mt-0.5">單班 3,000 kg｜雙班 6,000 kg（1 箱 = 1,260 kg）</p>
+          <label
+            id="strategy-card-B"
+            onclick="selectGlobalStrategy('B')"
+            class="block rounded-xl border-2 p-3 cursor-pointer transition select-none"
+          >
+            <div class="flex items-start gap-2.5">
+              <input type="radio" name="globalStrategy" value="B" class="mt-1 accent-indigo-600" />
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-xs sm:text-sm font-extrabold text-slate-900">策略 B（固定雙廠最大併行）</span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">固定日雙夜單班制</span>
                 </div>
-                <span id="p2-order-count" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">0 筆</span>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  一般生產日皆固定排定：<strong>一廠日雙 5,000 + 夜單 3,000 (8,000 kg) ＋ 二廠日夜雙班 (6,000 kg)</strong>，保持人員排班節奏穩定不頻繁調班。
+                </p>
               </div>
-              <div id="p2-orders-list" class="space-y-2.5"></div>
             </div>
-          </div>
+          </label>
+
+          <label
+            id="strategy-card-C"
+            onclick="selectGlobalStrategy('C')"
+            class="block rounded-xl border-2 p-3 cursor-pointer transition select-none"
+          >
+            <div class="flex items-start gap-2.5">
+              <input type="radio" name="globalStrategy" value="C" class="mt-1 accent-indigo-600" />
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-xs sm:text-sm font-extrabold text-slate-900">策略 C（保守電力 / 雙單機模式）</span>
+                  <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-extrabold">合計 11,000 kg/日</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  二廠有待產訂單時：<strong>一廠整日單機 (日 2,500 + 夜 2,500 = 5,000 kg) ＋ 二廠日夜雙班 (6,000 kg) ＝ 11,000 kg/日</strong>；二廠無單時一廠<strong>整日雙機 (10,000 kg)</strong>。
+                </p>
+              </div>
+            </div>
+          </label>
         </div>
       </div>
 
-      <!-- 右側 5 欄：基礎產能、環保設備清洗（洗防制）與固定設備保養設定 -->
-      <div class="xl:col-span-5 space-y-4">
+      <!-- 右側 6 欄：環保設備清洗（洗防制）與固定預防性設備保養 -->
+      <div class="lg:col-span-6 space-y-4">
 
-        <!-- 1. 基礎排程日期與標準產能參數 -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
-          <h3 class="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-2 flex items-center justify-between">
-            <span>⚙️ 排程天數與標準單班產能</span>
-            <span id="override-count-pill" class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">單日覆寫: 0 天</span>
-          </h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">排程起始日</label>
-              <input
-                type="date"
-                id="cfg-start-date"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs sm:text-sm font-bold"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">排程顯示天數</label>
-              <div class="flex items-center gap-1">
-                <input
-                  type="number"
-                  id="cfg-days-count"
-                  min="7"
-                  max="90"
-                  onchange="onRuleParamChange()"
-                  class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs sm:text-sm font-bold"
-                />
-                <button type="button" onclick="quickSetDays(24)" class="px-2 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold cursor-pointer">24</button>
-                <button type="button" onclick="quickSetDays(30)" class="px-2 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold cursor-pointer">30</button>
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-indigo-700 mb-1">一廠單機單班產能 (kg)</label>
-              <input
-                type="number"
-                id="cfg-p1-cap"
-                min="500"
-                step="100"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-indigo-200 bg-indigo-50/40 px-2.5 py-1.5 text-xs sm:text-sm font-bold text-indigo-950"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-emerald-700 mb-1">二廠單機單班產能 (kg)</label>
-              <input
-                type="number"
-                id="cfg-p2-cap"
-                min="500"
-                step="100"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-emerald-200 bg-emerald-50/40 px-2.5 py-1.5 text-xs sm:text-sm font-bold text-emerald-950"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. 環保設備清洗（洗防制）設定 -->
-        <div class="bg-white rounded-2xl border border-sky-200 p-4 shadow-sm space-y-3">
+        <!-- 環保設備清洗（洗防制） -->
+        <div class="bg-white rounded-2xl border border-sky-200 p-4 shadow-xs space-y-3">
           <div class="flex items-center justify-between border-b border-sky-100 pb-2">
             <h3 class="text-sm font-extrabold text-sky-950 flex items-center gap-1.5">
-              <span>💧 環保設備清洗（洗防制）規則</span>
+              <span>💧 環保設備清洗（洗防制）自動排程</span>
             </h3>
-            <span class="text-[11px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded">白天清洗停機</span>
+            <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[11px] font-bold">日班停機清洗 · 夜班恢復</span>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">首次洗防制基準日</label>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <div class="sm:col-span-4">
+              <label class="block text-xs font-bold text-slate-600 mb-1">起始洗防制日</label>
               <input
                 type="date"
                 id="cfg-wash-anchor"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs sm:text-sm font-bold"
+                onchange="onGlobalConfigChange()"
+                class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs font-bold text-slate-800"
               />
             </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">清洗循環週期 (天)</label>
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-bold text-slate-600 mb-1">清洗週期 (天)</label>
               <input
                 type="number"
                 id="cfg-wash-interval"
                 min="1"
                 max="60"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs sm:text-sm font-bold"
+                onchange="onGlobalConfigChange()"
+                class="w-full rounded-lg border border-sky-300 bg-sky-50/40 px-2.5 py-1.5 text-xs font-bold text-slate-800"
               />
             </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">洗防制日夜班連動模式</label>
-            <select
-              id="cfg-wash-mode"
-              onchange="onRuleParamChange()"
-              class="w-full rounded-lg border border-sky-300 bg-sky-50 px-2.5 py-1.5 text-xs font-bold text-sky-950"
-            >
-              <option value="wash_both_night">白天清洗、夜班雙廠連動開工（一廠夜一機 2,500 + 二廠夜班 3,000）</option>
-              <option value="wash_p1_only">洗防制日僅一廠夜班開一機（一廠夜一機 2,500、二廠全日停機）</option>
-            </select>
-          </div>
-
-          <!-- 手動新增指定洗防制日 -->
-          <div class="pt-1 border-t border-slate-100 space-y-2">
-            <div class="flex items-center gap-2">
-              <input
-                type="date"
-                id="manual-wash-date-input"
-                class="flex-1 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold"
-              />
-              <button
-                type="button"
-                onclick="addManualWashDate()"
-                class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold cursor-pointer shrink-0"
+            <div class="sm:col-span-5">
+              <label class="block text-xs font-bold text-slate-600 mb-1">洗防制夜班產能設定</label>
+              <select
+                id="cfg-wash-mode"
+                onchange="onGlobalConfigChange()"
+                class="w-full rounded-lg border border-sky-300 bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-950"
               >
-                + 指定清洗日
-              </button>
+                <option value="wash_both_3000">一廠夜單 3,000 + 二廠夜 3,000</option>
+                <option value="wash_both_2500">一廠夜單 2,500 + 二廠夜 3,000</option>
+                <option value="wash_p1_3000">僅一廠夜單 3,000（二廠停機）</option>
+                <option value="wash_p1_2500">僅一廠夜單 2,500（二廠停機）</option>
+              </select>
             </div>
-            <div id="manual-wash-tags" class="flex flex-wrap gap-1.5"></div>
           </div>
         </div>
 
-        <!-- 3. 固定設備保養設定（預防性保養） -->
-        <div class="bg-white rounded-2xl border border-orange-200 p-4 shadow-sm space-y-3">
+        <!-- 固定預防性設備保養 -->
+        <div class="bg-white rounded-2xl border border-orange-200 p-4 shadow-xs space-y-3">
           <div class="flex items-center justify-between border-b border-orange-100 pb-2">
             <h3 class="text-sm font-extrabold text-orange-950 flex items-center gap-1.5">
-              <span>🔧 固定設備保養設定（預防性保養）</span>
+              <span>🔧 固定預防性設備保養設定</span>
             </h3>
-            <span class="text-[11px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded">順暢排產保障</span>
+            <span class="px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[11px] font-bold">週期保養 + 自訂區間</span>
           </div>
 
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">週期性保養模式</label>
+          <div class="grid grid-cols-2 sm:grid-cols-12 gap-2">
+            <div class="col-span-1 sm:col-span-4">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">週期保養方式</label>
               <select
-                id="cfg-maint-type"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-orange-300 bg-orange-50/40 px-2 py-1.5 text-xs font-bold text-slate-800"
+                id="cfg-maint-cycle-type"
+                onchange="onGlobalConfigChange()"
+                class="w-full rounded-lg border border-orange-300 bg-orange-50/40 px-2 py-1.5 text-xs font-bold"
               >
-                <option value="interval">每 N 天固定週期保養</option>
+                <option value="none">僅使用下方自訂區間</option>
+                <option value="interval">每 N 天週期保養</option>
                 <option value="monthly">每月固定幾號保養</option>
-                <option value="none">關閉週期保養（僅用手動區間）</option>
               </select>
             </div>
-
-            <div id="maint-param-wrap">
-              <label id="maint-param-label" class="block text-xs font-bold text-slate-600 mb-1">週期天數 (天)</label>
+            <div class="col-span-1 sm:col-span-3">
+              <label id="lbl-maint-param" class="block text-[11px] font-bold text-slate-600 mb-1">週期天數 / 日號</label>
               <input
                 type="number"
-                id="cfg-maint-param"
+                id="cfg-maint-cycle-param"
                 min="1"
-                max="90"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-orange-300 bg-orange-50/40 px-2.5 py-1.5 text-xs font-bold"
+                max="60"
+                onchange="onGlobalConfigChange()"
+                class="w-full rounded-lg border border-orange-300 px-2 py-1.5 text-xs font-bold"
               />
             </div>
-
-            <div id="maint-anchor-wrap">
-              <label class="block text-xs font-bold text-slate-600 mb-1">週期保養基準起算日</label>
-              <input
-                type="date"
-                id="cfg-maint-anchor"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-bold"
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">每次保養連續天數</label>
-              <input
-                type="number"
-                id="cfg-maint-duration"
-                min="1"
-                max="7"
-                onchange="onRuleParamChange()"
-                class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-bold"
-              />
+            <div class="col-span-2 sm:col-span-5">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">週期保養產能模式</label>
+              <select
+                id="cfg-maint-cycle-mode"
+                onchange="onGlobalConfigChange()"
+                class="w-full rounded-lg border border-orange-300 bg-orange-50 px-2 py-1.5 text-xs font-bold text-orange-950"
+              >
+                <option value="maint_all">全廠停機保養（0 kg）</option>
+                <option value="maint_p2_p1_8k">二廠保養／一廠日雙夜單（8,000 kg）</option>
+                <option value="maint_p2_p1_10k">二廠保養／一廠整日雙機（10,000 kg）</option>
+                <option value="maint_p1_p2_6k">一廠保養／二廠日夜（6,000 kg）</option>
+              </select>
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">週期保養設備範圍</label>
-            <select
-              id="cfg-maint-scope"
-              onchange="onRuleParamChange()"
-              class="w-full rounded-lg border border-orange-300 bg-orange-50 px-2.5 py-1.5 text-xs font-bold text-orange-950"
-            >
-              <option value="maint_all">全廠停機保養（兩廠產能皆 0）</option>
-              <option value="maint_p1_half">一廠單機輪流保養（一廠開一台 5,000kg，二廠正常開日/夜班）</option>
-              <option value="maint_p2_stop">二廠單獨保養（二廠停機，一廠開整日雙機 10,000kg 衝刺）</option>
-            </select>
-          </div>
-
-          <!-- 手動新增指定日期或連續天數保養區間 -->
+          <!-- 新增自訂保養區間 -->
           <div class="pt-2 border-t border-slate-100 space-y-2">
-            <div class="text-xs font-bold text-slate-700">手動新增指定保養區間：</div>
             <div class="grid grid-cols-12 gap-1.5">
               <input
                 type="date"
-                id="manual-maint-start"
-                class="col-span-5 rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold"
+                id="new-maint-date"
+                class="col-span-4 rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold"
               />
               <input
                 type="number"
-                id="manual-maint-days"
+                id="new-maint-days"
                 min="1"
                 max="10"
                 value="1"
-                placeholder="天數"
-                class="col-span-2 rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold text-center"
                 title="連續保養天數"
+                class="col-span-2 rounded-lg border border-slate-300 px-1.5 py-1 text-xs font-bold text-center"
               />
               <select
-                id="manual-maint-scope"
-                class="col-span-5 rounded-lg border border-slate-300 px-1.5 py-1 text-xs font-semibold"
+                id="new-maint-mode"
+                class="col-span-4 rounded-lg border border-slate-300 px-1.5 py-1 text-xs font-semibold"
               >
-                <option value="maint_all">全廠停機保養</option>
-                <option value="maint_p1_half">一廠單機輪修</option>
-                <option value="maint_p2_stop">二廠單獨保養</option>
+                <option value="maint_all">全廠停機 (0 kg)</option>
+                <option value="maint_p2_p1_8k">二廠保/一廠8,000</option>
+                <option value="maint_p2_p1_10k">二廠保/一廠10,000</option>
+                <option value="maint_p1_p2_6k">一廠保/二廠6,000</option>
               </select>
+              <button
+                type="button"
+                onclick="addCustomMaintRange()"
+                class="col-span-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold cursor-pointer"
+              >
+                + 新增
+              </button>
             </div>
-            <button
-              type="button"
-              onclick="addManualMaintRange()"
-              class="w-full py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold cursor-pointer"
-            >
-              + 加入指定保養區間
-            </button>
-            <div id="manual-maint-list" class="space-y-1"></div>
+            <div id="custom-maint-list" class="flex flex-wrap gap-1.5"></div>
           </div>
         </div>
 
       </div>
     </section>
 
-    <!-- 四、每日排程明細表（支援單日突發覆寫與日/夜班扣減算式） -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <!-- 三、全變化 SVG 視覺化圖表區（堆疊產能長條圖 + 跨日進度甘特圖） -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div class="px-4 sm:px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+            <span>全變化動態排程視覺化圖表</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">SVG 即時互動</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            滑鼠懸停圖表任一長條或訂單色塊，即可檢視完整當日產能明細與基準交期推擠變化
+          </p>
+        </div>
+
+        <div class="inline-flex rounded-xl bg-slate-200/80 p-1 self-start sm:self-auto">
+          <button
+            type="button"
+            id="btn-tab-stacked"
+            onclick="switchChartView('stacked')"
+            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-indigo-700 shadow-xs cursor-pointer"
+          >
+            📊 每日一二廠日夜班產能堆疊圖
+          </button>
+          <button
+            type="button"
+            id="btn-tab-gantt"
+            onclick="switchChartView('gantt')"
+            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition text-slate-600 hover:text-slate-900 cursor-pointer"
+          >
+            📅 訂單跨日進度甘特圖（含基準交期線）
+          </button>
+        </div>
+      </div>
+
+      <!-- 圖例說明列 -->
+      <div class="px-4 sm:px-6 py-2.5 bg-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4 font-bold text-slate-700">
+          <span class="inline-flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-xs bg-[#4f46e5] inline-block"></span>一廠日班 (5000/2500)
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-xs bg-[#0ea5e9] inline-block"></span>一廠夜班 (5000/3000/2500)
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-xs bg-[#10b981] inline-block"></span>二廠日班 (3000)
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-xs bg-[#f59e0b] inline-block"></span>二廠夜班 (3000)
+          </span>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 font-bold text-slate-600">
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#0284c7]"></span>洗防制</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ea580c]"></span>固定保養</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#e11d48]"></span>突發故障/覆寫</span>
+        </div>
+      </div>
+
+      <!-- 圖表 1 容器：每日一二廠日夜班產能堆疊長條圖 (SVG) -->
+      <div id="view-stacked-chart" class="p-4 sm:p-5">
+        <div class="overflow-x-auto pb-2">
+          <div id="svg-stacked-wrapper" class="min-w-full"></div>
+        </div>
+      </div>
+
+      <!-- 圖表 2 容器：一二廠訂單跨日進度甘特圖 (SVG) -->
+      <div id="view-gantt-chart" class="hidden p-4 sm:p-5 space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+          <div class="flex flex-wrap items-center gap-4 font-bold">
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-indigo-600 inline-block"></span>一廠 EPDM 排產</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-emerald-600 inline-block"></span>二廠 SBR/NBR/BR 排產</span>
+            <span class="inline-flex items-center gap-1.5 text-rose-600">
+              <span class="inline-block w-4 border-t-2 border-dashed border-rose-600"></span>原基準完工日虛線
+            </span>
+          </div>
+          <span class="text-[11px] text-slate-500">插單後若完工日推擠超過紅虛線，右側將自動標示延後天數</span>
+        </div>
+        <div class="overflow-x-auto pb-2">
+          <div id="svg-gantt-wrapper" class="min-w-full"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 四、訂單管理、緊急插單與基準交期對比區 -->
+    <section class="space-y-4">
+
+      <!-- 新增訂單 / 緊急插單控制面板 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">新增生產訂單 / 緊急插單（全連動交期影響分析）</h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              勾選「🔥 緊急插單」將自動置頂最優先排產，並立即在下方訂單卡片對比「原基準完工日 → 新完工日」
+            </p>
+          </div>
+          <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-extrabold">
+            <button
+              type="button"
+              id="btn-unit-kg"
+              onclick="setOrderInputUnit('kg')"
+              class="px-3 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer"
+            >
+              直接輸入公斤 (kg)
+            </button>
+            <button
+              type="button"
+              id="btn-unit-box"
+              onclick="setOrderInputUnit('box')"
+              class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer"
+            >
+              輸入箱數 (×1,260 kg)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-bold text-slate-700 mb-1">生產廠別</label>
+            <select
+              id="inp-order-plant"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="p1">一廠（EPDM 兩套設備）</option>
+              <option value="p2">二廠（SBR / NBR / BR）</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-bold text-slate-700 mb-1">客戶 / 品名</label>
+            <input
+              type="text"
+              id="inp-order-name"
+              placeholder="例如：華魏急單 或 富鎰BR-2"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div class="sm:col-span-2">
+            <label id="lbl-order-qty" class="block text-xs font-bold text-slate-700 mb-1">數量 (kg)</label>
+            <input
+              type="number"
+              id="inp-order-qty"
+              min="1"
+              step="any"
+              oninput="updateOrderBoxHint()"
+              placeholder="例如：12000"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <div id="lbl-box-preview" class="hidden text-[11px] font-extrabold text-emerald-700 mt-0.5">= 0 kg</div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">最早開工日</label>
+            <input
+              type="date"
+              id="inp-order-start"
+              class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-bold text-slate-800"
+            />
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">班別限制</label>
+            <select
+              id="inp-order-shift"
+              class="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-2 text-xs font-bold text-slate-800"
+            >
+              <option value="both">日夜雙班</option>
+              <option value="day_only">僅日班</option>
+              <option value="night_only">僅夜班</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 cursor-pointer select-none">
+            <input type="checkbox" id="chk-urgent-order" class="w-4 h-4 accent-rose-600 rounded" />
+            <span class="text-xs sm:text-sm font-extrabold text-rose-800">🔥 緊急插單（自動置頂最優先排產）</span>
+          </label>
+
+          <button
+            type="button"
+            onclick="handleAddOrder()"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer"
+          >
+            ➕ 加入排程並立即重算交期
+          </button>
+        </div>
+      </div>
+
+      <!-- 一廠與二廠訂單佇列雙欄卡片 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- 一廠 EPDM 訂單佇列 -->
+        <div class="bg-white rounded-2xl border border-indigo-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <h3 class="text-sm sm:text-base font-extrabold text-indigo-950 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                <span>一廠 EPDM 訂單佇列</span>
+              </h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">支援整日雙機 (10,000) / 日雙夜單 (8,000) / 整日單機 (5,000)</p>
+            </div>
+            <span id="badge-p1-count" class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">0 筆</span>
+          </div>
+          <div id="list-p1-orders" class="space-y-2.5"></div>
+        </div>
+
+        <!-- 二廠 SBR/NBR/BR 訂單佇列 -->
+        <div class="bg-white rounded-2xl border border-emerald-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <h3 class="text-sm sm:text-base font-extrabold text-emerald-950 flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+                <span>二廠 SBR / NBR / BR 訂單佇列</span>
+              </h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">日班 3,000 kg + 夜班 3,000 kg = 6,000 kg/日（1箱 = 1,260 kg）</p>
+            </div>
+            <span id="badge-p2-count" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">0 筆</span>
+          </div>
+          <div id="list-p2-orders" class="space-y-2.5"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 五、每日排程算式明細表與單日突發故障覆寫 -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
       <div class="px-4 sm:px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 class="text-base sm:text-lg font-extrabold text-slate-900">
-            每日生產排程明細表（日 / 夜班自動扣減算式）
+            每日排程算式明細表（支援單日突發故障與模式覆寫）
           </h2>
           <p class="text-xs text-slate-500 mt-0.5">
-            可針對任一單日切換「突發故障」或「臨時調度」，後續所有天數的日夜班產能與訂單完工日將瞬間同步重算
+            切換任一單日覆寫選單（如一廠壞一台、二廠故障、臨時切換日雙夜單），後續所有天數與交期瞬間重算
           </p>
         </div>
         <button
           type="button"
-          onclick="clearAllDayOverrides()"
-          class="no-print px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold transition cursor-pointer"
+          onclick="resetAllDayOverrides()"
+          class="no-print px-3.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-extrabold transition cursor-pointer"
         >
-          清除所有單日手動覆寫
+          重置所有單日手動覆寫
         </button>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[780px]">
+        <table class="w-full text-left border-collapse min-w-[920px]">
           <thead>
-            <tr class="bg-slate-100 border-b-2 border-slate-300 text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              <th class="py-3 px-3 text-center w-20">日期</th>
-              <th class="py-3 px-2 text-center w-14">星期</th>
-              <th class="py-3 px-3 w-56">當日排程模式（單日覆寫）</th>
-              <th class="py-3 px-4">一廠（EPDM）日 / 夜班生產明細</th>
-              <th class="py-3 px-4">二廠（SBR / NBR / BR）日 / 夜班生產明細</th>
+            <tr class="bg-slate-100 border-b-2 border-slate-300 text-xs font-extrabold text-slate-700 tracking-wider">
+              <th class="py-3 px-3 text-center w-24">日期 / 星期</th>
+              <th class="py-3 px-2.5 text-center w-28">狀態標記</th>
+              <th class="py-3 px-3 w-56">單日生產模式覆寫</th>
+              <th class="py-3 px-3.5">一廠日/夜產能與訂單扣減算式明細</th>
+              <th class="py-3 px-3.5">二廠日/夜產能與訂單扣減算式明細</th>
+              <th class="py-3 px-3 text-right w-28">當日總產出</th>
             </tr>
           </thead>
-          <tbody id="schedule-detail-tbody" class="divide-y divide-slate-200 text-sm">
-            <!-- 由 JS 動態生成每日排程列 -->
+          <tbody id="tbody-daily-schedule" class="divide-y divide-slate-200 text-sm">
+            <!-- 由 JavaScript 動態渲染每日排程列 -->
           </tbody>
         </table>
       </div>
@@ -676,18 +663,24 @@
   </main>
 
   <footer class="no-print py-5 text-center text-xs text-slate-500">
-    一二廠智慧連動生產規劃與視覺化排程系統｜純前端即時演算引擎，支援離線操作與 Excel (.csv) 匯出
+    彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統 · 純前端即時演算引擎
   </footer>
 
-  <!-- 重設預設資料確認視窗 -->
-  <div id="reset-modal" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4">
+  <!-- SVG 動態互動浮動提示框 (Floating Tooltip) -->
+  <div
+    id="svg-floating-tooltip"
+    class="fixed z-50 pointer-events-none opacity-0 bg-slate-900/95 text-white rounded-xl p-3 shadow-2xl border border-slate-700 max-w-xs sm:max-w-sm text-xs leading-relaxed"
+  ></div>
+
+  <!-- 重設預設資料確認對話框 -->
+  <div id="modal-reset" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-4">
       <div class="flex items-center gap-2 text-rose-600">
         <span class="text-xl">⚠️</span>
-        <h3 class="text-base font-extrabold text-slate-900">確定要重設為系統預設資料？</h3>
+        <h3 class="text-base font-extrabold text-slate-900">確定重設為彥泰企業預設排程？</h3>
       </div>
       <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-        這將會清除您目前新增的訂單、緊急插單與手動保養/覆寫設定，並還原為內建標準範例（華魏1、華魏2、601備庫 與 富鎰BR、浩維、益碁）。
+        此操作將還原預設的策略 A（日雙夜單併行）、14 天洗防制週期，以及預設訂單（華魏1、華魏2、601 常規單 與 富鎰 BR、浩維、益碁）。
       </p>
       <div class="flex justify-end gap-2 pt-2">
         <button
@@ -700,7 +693,7 @@
         <button
           type="button"
           onclick="confirmResetDefault()"
-          class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold cursor-pointer"
+          class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-extrabold cursor-pointer"
         >
           確定重設
         </button>
@@ -708,139 +701,133 @@
     </div>
   </div>
 
-  <!-- 底部浮動提示通知 (Toast) -->
-  <div id="toast-box" class="no-print fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 pointer-events-none transition-all duration-300">
+  <!-- 底部浮動通知 (Toast) -->
+  <div id="toast-bar" class="no-print fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 pointer-events-none transition-all duration-300">
     <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2.5 text-xs sm:text-sm font-bold">
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span id="toast-message">排程已更新</span>
+      <span id="toast-text">排程已更新</span>
     </div>
   </div>
 
   <script>
     /**
      * ============================================================================
-     * 一二廠智慧連動生產規劃與視覺化排程系統
-     * 核心架構：狀態管理 -> 日夜班互斥演算引擎 -> SVG 堆疊圖/甘特圖繪製 -> 互動控制
+     * 彥泰企業｜一二廠智慧連動生產規劃與視覺化排程系統
+     * 核心模組：
+     *   1. 狀態與基準交期快照管理
+     *   2. 雙廠日夜班互斥與「日雙5000+夜單3000」連動演算引擎
+     *   3. 純原生 SVG 每日產能堆疊圖與跨日甘特圖（含基準虛線與浮動 Tooltip）
+     *   4. 訂單佇列、緊急插單與 CSV 匯出
      * ============================================================================
      */
 
-    const STORAGE_KEY = 'smart_factory_linked_scheduler_v3';
+    const STORAGE_KEY = 'yantai_smart_scheduler_v4';
     const KG_PER_BOX = 1260;
-    const WEEKDAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+    const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
-    // 單日排程覆寫下拉選單定義
-    const DAY_OVERRIDE_MODES = [
-      { value: 'auto', label: '🤖 自動規則連動' },
-      { value: 'wash', label: '💧 洗防制日（依洗防制設定）' },
-      { value: 'maint_all', label: '🔧 固定保養（全廠停機 0）' },
-      { value: 'maint_p1_half', label: '🔧 固定保養（一廠輪修 5,000）' },
-      { value: 'maint_p2_stop', label: '🔧 固定保養（二廠單修/一廠雙機）' },
-      { value: 'fault_p1_half', label: '⚠️ 突發：一廠壞一台（限單機）' },
-      { value: 'fault_p2_stop', label: '⚠️ 突發：二廠故障停機（一廠雙機）' },
-      { value: 'holiday', label: '🛑 全廠休假 / 停機' }
+    // 單日生產模式覆寫選項清單
+    const DAY_OVERRIDE_OPTIONS = [
+      { value: 'auto', label: '🤖 依全局策略自動連動' },
+      { value: 'force_p1_8k_p2_6k', label: '⚡ 臨時切換：一廠日雙夜單(8k)+二廠雙班(6k)' },
+      { value: 'force_p1_10k', label: '🏭 臨時切換：一廠整日雙機(10k)／二廠停' },
+      { value: 'wash', label: '💧 洗防制日（依洗防制夜班設定）' },
+      { value: 'maint_all', label: '🔧 固定保養：全廠停機保養 (0 kg)' },
+      { value: 'maint_p2_p1_8k', label: '🔧 固定保養：二廠保／一廠日雙夜單 (8k)' },
+      { value: 'maint_p2_p1_10k', label: '🔧 固定保養：二廠保／一廠整日雙機 (10k)' },
+      { value: 'maint_p1_p2_6k', label: '🔧 固定保養：一廠保／二廠日夜 (6k)' },
+      { value: 'fault_p1_half', label: '⚠️ 突發故障：一廠壞一台 (限整日單機 5k)' },
+      { value: 'fault_p2_stop', label: '⚠️ 突發故障：二廠故障停機 (一廠整日雙機 10k)' },
+      { value: 'holiday', label: '🛑 全廠休假 / 停機 (0 kg)' }
     ];
 
-    const MAINT_SCOPE_LABELS = {
-      maint_all: '全廠停機保養',
-      maint_p1_half: '一廠單機輪修',
-      maint_p2_stop: '二廠單獨保養'
+    const MAINT_MODE_NAMES = {
+      maint_all: '全廠停機保養 (0 kg)',
+      maint_p2_p1_8k: '二廠保養／一廠日雙夜單 (8,000 kg)',
+      maint_p2_p1_10k: '二廠保養／一廠整日雙機 (10,000 kg)',
+      maint_p1_p2_6k: '一廠保養／二廠日夜 (6,000 kg)'
+    };
+
+    const SHIFT_RULE_LABELS = {
+      both: '日夜雙班',
+      day_only: '僅日班',
+      night_only: '僅夜班'
     };
 
     /**
-     * 建立內建預設範例資料
+     * 建立預載預設資料（起始日 2026-11-27，排程 30 天）
      */
     function createDefaultState() {
       return {
         startDate: '2026-11-27',
         daysCount: 30,
-        p1ShiftCap: 2500, // 一廠單機單班標準產能 (kg)
-        p2ShiftCap: 3000, // 二廠單機單班標準產能 (kg)
+        globalStrategy: 'A', // 'A' | 'B' | 'C'
 
         // 環保設備清洗（洗防制）設定
         washAnchorDate: '2026-11-30',
         washIntervalDays: 14,
-        washMode: 'wash_both_night', // 'wash_both_night' | 'wash_p1_only'
-        manualWashDates: [],
+        washMode: 'wash_both_3000', // 'wash_both_3000' | 'wash_both_2500' | 'wash_p1_3000' | 'wash_p1_2500'
 
-        // 固定設備保養設定（預防性保養）
-        maintCycleType: 'interval', // 'interval' | 'monthly' | 'none'
-        maintCycleParam: 30, // 每 N 天 或 每月幾號
-        maintAnchorDate: '2026-12-16', // 首次週期保養基準日
-        maintDurationDays: 1, // 每次保養連續天數
-        maintScope: 'maint_all', // 'maint_all' | 'maint_p1_half' | 'maint_p2_stop'
-        manualMaintRanges: [],
-
-        // 一廠訂單佇列（EPDM）
-        p1Orders: [
-          { id: 'p1-init-1', name: '華魏1', totalKg: 24000, earliestStart: '' },
-          { id: 'p1-init-2', name: '華魏2', totalKg: 21500, earliestStart: '' },
-          { id: 'p1-init-3', name: '601備庫', totalKg: 150000, earliestStart: '' }
-        ],
-
-        // 二廠訂單佇列（SBR / NBR / BR）
-        p2Orders: [
+        // 固定預防性設備保養設定
+        maintCycleType: 'none', // 'none' | 'interval' | 'monthly'
+        maintCycleParam: 30,
+        maintCycleMode: 'maint_all',
+        customMaintRanges: [
           {
-            id: 'p2-init-1',
-            name: '富鎰BR',
-            boxes: 10,
-            totalKg: 12600,
-            shiftMode: 'double',
-            earliestStart: '2026-12-03'
-          },
-          {
-            id: 'p2-init-2',
-            name: '浩維',
-            boxes: 16,
-            totalKg: 20160,
-            shiftMode: 'first_single_then_double',
-            earliestStart: ''
-          },
-          {
-            id: 'p2-init-3',
-            name: '益碁',
-            boxes: 20,
-            totalKg: 25200,
-            shiftMode: 'double',
-            earliestStart: ''
+            id: 'maint-init-1',
+            startDate: '2026-12-15',
+            days: 1,
+            mode: 'maint_p2_p1_8k'
           }
         ],
 
-        // 單日手動覆寫表
+        // 一廠 EPDM 預設訂單佇列
+        p1Orders: [
+          { id: 'p1-1', name: '華魏1', totalKg: 24000, earliestStart: '', shiftRule: 'both' },
+          { id: 'p1-2', name: '華魏2', totalKg: 21500, earliestStart: '', shiftRule: 'both' },
+          { id: 'p1-3', name: '601 常規單', totalKg: 80000, earliestStart: '', shiftRule: 'both' }
+        ],
+
+        // 二廠 SBR / NBR / BR 預設訂單佇列
+        p2Orders: [
+          { id: 'p2-1', name: '富鎰 BR', boxes: 10, totalKg: 12600, earliestStart: '2026-12-03', shiftRule: 'both' },
+          { id: 'p2-2', name: '浩維', boxes: 16, totalKg: 20160, earliestStart: '2026-12-07', shiftRule: 'both' },
+          { id: 'p2-3', name: '益碁', boxes: 20, totalKg: 25200, earliestStart: '2026-12-11', shiftRule: 'both' }
+        ],
+
+        // 單日手動覆寫表 { 'YYYY-MM-DD': modeValue }
         dayOverrides: {}
       };
     }
 
     let appState = loadInitialState();
-    let activeChartTab = 'stacked'; // 'stacked' | 'gantt'
-    let newOrderUnitMode = 'kg'; // 'kg' | 'box'
-    let previousOrderDatesSnapshot = {}; // 用於比對交期提前/延後天數變化
-    let latestSimulationResult = null;
-    let selectedInspectorDayIndex = 0;
+    let baselineOrderDates = {}; // { orderId: { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD', endIndex: number } }
+    let latestSimResult = null;
+    let activeChartView = 'stacked'; // 'stacked' | 'gantt'
+    let orderInputUnit = 'kg'; // 'kg' | 'box'
 
     function loadInitialState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
           return {
             ...createDefaultState(),
             ...parsed,
-            manualWashDates: parsed.manualWashDates || [],
-            manualMaintRanges: parsed.manualMaintRanges || [],
+            customMaintRanges: parsed.customMaintRanges || [],
             dayOverrides: parsed.dayOverrides || {}
           };
         }
-      } catch (err) {
-        console.error('讀取本機排程狀態失敗:', err);
+      } catch (e) {
+        console.error('讀取本機儲存失敗:', e);
       }
       return createDefaultState();
     }
 
     // ============================================================================
-    // 日期計算工具函式（嚴格使用本地年月日避免時區偏移）
+    // 日期計算工具函式（純本地日期計算，無時區誤差）
     // ============================================================================
-    function parseYMD(ymdStr) {
-      const [y, m, d] = ymdStr.split('-').map(Number);
+    function parseYMD(ymd) {
+      const [y, m, d] = ymd.split('-').map(Number);
       return new Date(y, m - 1, d);
     }
 
@@ -876,374 +863,251 @@
     }
 
     // ============================================================================
-    // 核心排程連動演算引擎（日夜雙班互斥 + 洗防制 + 固定保養 + 交期變化追蹤）
+    // 核心排程連動演算引擎
     // ============================================================================
     function runScheduleSimulation() {
       const startObj = parseYMD(appState.startDate);
-      const totalDays = Math.max(1, Math.min(120, Number(appState.daysCount) || 30));
-      const p1Unit = Math.max(100, Number(appState.p1ShiftCap) || 2500);
-      const p2Unit = Math.max(100, Number(appState.p2ShiftCap) || 3000);
+      const totalDays = Math.max(7, Math.min(90, Number(appState.daysCount) || 30));
 
-      // 深拷貝訂單並建立追蹤欄位
-      const p1SimOrders = appState.p1Orders.map(o => ({
+      const p1OrdersSim = appState.p1Orders.map(o => ({
         ...o,
+        plant: 'p1',
         totalKg: Number(o.totalKg) || 0,
         remaining: Number(o.totalKg) || 0,
         scheduledStart: null,
         scheduledEnd: null,
+        startIndex: null,
+        endIndex: null,
         dailySlices: []
       }));
 
-      const p2SimOrders = appState.p2Orders.map(o => ({
+      const p2OrdersSim = appState.p2Orders.map(o => ({
         ...o,
+        plant: 'p2',
         totalKg: Number(o.totalKg) || 0,
         remaining: Number(o.totalKg) || 0,
-        started: false,
         scheduledStart: null,
         scheduledEnd: null,
+        startIndex: null,
+        endIndex: null,
         dailySlices: []
       }));
 
       const days = [];
-      let totalP1Produced = 0;
-      let totalP2Produced = 0;
-      let washDaysCount = 0;
-      let maintDaysCount = 0;
+      let totalP1 = 0;
+      let totalP2 = 0;
+      let p1_8kDays = 0;
+      let p2ActiveDays = 0;
+      let washDays = 0;
+      let maintDays = 0;
+      let parallelHighDays = 0;
 
       for (let idx = 0; idx < totalDays; idx++) {
         const curDate = addDays(startObj, idx);
         const ymd = formatYMD(curDate);
         const md = formatMD(curDate);
-        const weekday = WEEKDAY_NAMES[curDate.getDay()];
+        const weekday = WEEKDAYS[curDate.getDay()];
 
-        // 1. 判定當日排程模式來源（單日覆寫 > 洗防制 > 固定保養 > 正常排程）
+        // 1. 判斷當日基礎排程狀態（優先序：單日覆寫 > 洗防制週期 > 固定預防性保養 > 正常全局策略）
         const overrideVal = appState.dayOverrides[ymd] || 'auto';
-        let resolvedMode = 'normal';
-        let eventCategory = 'normal'; // 'normal' | 'wash' | 'maint' | 'fault'
-        let modeBadgeText = '';
+        let effectiveMode = 'auto';
+        let statusType = 'normal'; // 'normal' | 'wash' | 'maint' | 'fault'
+        let statusBadge = '一般排程';
+        let modeDescription = '';
 
         if (overrideVal !== 'auto') {
-          resolvedMode = overrideVal;
+          effectiveMode = overrideVal;
           if (overrideVal === 'wash') {
-            eventCategory = 'wash';
-            modeBadgeText = '洗防制（手動）';
+            statusType = 'wash';
+            statusBadge = '洗防制';
           } else if (overrideVal.startsWith('maint_')) {
-            eventCategory = 'maint';
-            modeBadgeText = MAINT_SCOPE_LABELS[overrideVal] || '固定保養';
+            statusType = 'maint';
+            statusBadge = '固定保養';
+          } else if (overrideVal.startsWith('fault_') || overrideVal === 'holiday') {
+            statusType = 'fault';
+            statusBadge = overrideVal === 'holiday' ? '全廠休假' : '突發故障';
           } else {
-            eventCategory = 'fault';
-            const foundOpt = DAY_OVERRIDE_MODES.find(m => m.value === overrideVal);
-            modeBadgeText = foundOpt ? foundOpt.label.replace(/^[^\s]+\s/, '') : '單日調度';
+            statusType = 'fault';
+            statusBadge = '手動調度';
           }
         } else {
-          // 檢查洗防制日
-          const isManualWash = appState.manualWashDates.includes(ymd);
-          let isCycleWash = false;
+          // 檢查是否為洗防制日
+          let isWash = false;
           if (appState.washAnchorDate && appState.washIntervalDays > 0) {
-            const dFromAnchor = diffDays(curDate, parseYMD(appState.washAnchorDate));
-            if (dFromAnchor >= 0 && dFromAnchor % Number(appState.washIntervalDays) === 0) {
-              isCycleWash = true;
+            const dDiff = diffDays(curDate, parseYMD(appState.washAnchorDate));
+            if (dDiff >= 0 && dDiff % Number(appState.washIntervalDays) === 0) {
+              isWash = true;
             }
           }
 
-          if (isManualWash || isCycleWash) {
-            resolvedMode = 'wash';
-            eventCategory = 'wash';
-            modeBadgeText = isManualWash ? '洗防制（指定日）' : '洗防制（每14天週期）';
+          if (isWash) {
+            effectiveMode = 'wash';
+            statusType = 'wash';
+            statusBadge = '洗防制';
           } else {
-            // 檢查固定設備保養
-            const maintInfo = checkDateMaintenance(curDate, ymd);
-            if (maintInfo) {
-              resolvedMode = maintInfo.scope;
-              eventCategory = 'maint';
-              modeBadgeText = maintInfo.label;
+            // 檢查固定預防性設備保養
+            const maintHit = checkMaintenanceHit(curDate);
+            if (maintHit) {
+              effectiveMode = maintHit.mode;
+              statusType = 'maint';
+              statusBadge = '固定保養';
+              modeDescription = maintHit.label;
             }
           }
         }
 
-        if (eventCategory === 'wash') washDaysCount++;
-        if (eventCategory === 'maint') maintDaysCount++;
+        if (statusType === 'wash') washDays++;
+        if (statusType === 'maint') maintDays++;
 
-        // 2. 根據當日模式與二廠待產狀態，計算四個班別可用上限 (p1Day, p1Night, p2Day, p2Night)
-        const eligibleP2 = p2SimOrders.find(
-          o => o.remaining > 0 && (!o.earliestStart || ymd >= o.earliestStart)
+        // 2. 檢查二廠當日是否有可排產之待產訂單
+        const hasEligibleP2Day = p2OrdersSim.some(
+          o =>
+            o.remaining > 0 &&
+            (!o.earliestStart || ymd >= o.earliestStart) &&
+            (o.shiftRule === 'both' || o.shiftRule === 'day_only')
         );
+        const hasEligibleP2Night = p2OrdersSim.some(
+          o =>
+            o.remaining > 0 &&
+            (!o.earliestStart || ymd >= o.earliestStart) &&
+            (o.shiftRule === 'both' || o.shiftRule === 'night_only')
+        );
+        const hasEligibleP2Any = hasEligibleP2Day || hasEligibleP2Night;
 
+        // 3. 依據 effectiveMode 与 globalStrategy 決定四個班別產能上限 (kg)
         let p1DayCap = 0;
         let p1NightCap = 0;
         let p2DayCap = 0;
         let p2NightCap = 0;
 
-        if (resolvedMode === 'normal') {
-          if (eligibleP2) {
-            // 二廠開機 -> 一廠受互斥限制降為整日單機（日1台 + 夜1台）
-            p2DayCap = p2Unit;
-            const p2NightAllowed =
-              eligibleP2.shiftMode === 'double' ||
-              (eligibleP2.shiftMode === 'first_single_then_double' && eligibleP2.started);
-            p2NightCap = p2NightAllowed ? p2Unit : 0;
-
-            p1DayCap = p1Unit;
-            p1NightCap = p1Unit;
-            modeBadgeText = p2NightCap > 0 ? '二廠雙班 / 一廠單機' : '二廠日班 / 一廠單機';
+        if (effectiveMode === 'auto') {
+          if (appState.globalStrategy === 'A') {
+            // 策略 A（推薦高產能併行）：二廠有單 -> 一廠日雙5000+夜單3000 + 二廠日夜6000；二廠無單 -> 一廠整日雙機10000
+            if (hasEligibleP2Any) {
+              p1DayCap = 5000;
+              p1NightCap = 3000;
+              p2DayCap = hasEligibleP2Day ? 3000 : 0;
+              p2NightCap = hasEligibleP2Night ? 3000 : 0;
+              modeDescription = '策略A：一廠日雙夜單(8k)＋二廠併行';
+            } else {
+              p1DayCap = 5000;
+              p1NightCap = 5000;
+              p2DayCap = 0;
+              p2NightCap = 0;
+              modeDescription = '策略A：二廠無單／一廠整日雙機(10k)';
+            }
+          } else if (appState.globalStrategy === 'B') {
+            // 策略 B（固定雙廠最大併行）：每日皆排定一廠日雙5000+夜單3000 + 二廠日夜6000
+            p1DayCap = 5000;
+            p1NightCap = 3000;
+            p2DayCap = hasEligibleP2Day ? 3000 : 0;
+            p2NightCap = hasEligibleP2Night ? 3000 : 0;
+            modeDescription = '策略B：固定一廠日雙夜單(8k)＋二廠併行';
           } else {
-            // 二廠無生產 -> 一廠自動開「整日雙機」（日2台 + 夜2台）
-            p2DayCap = 0;
-            p2NightCap = 0;
-            p1DayCap = p1Unit * 2;
-            p1NightCap = p1Unit * 2;
-            modeBadgeText = '一廠整日雙機（二廠停）';
+            // 策略 C（保守電力/雙單機模式）：二廠有單 -> 一廠整日單機5000 + 二廠6000；二廠無單 -> 一廠整日雙機10000
+            if (hasEligibleP2Any) {
+              p1DayCap = 2500;
+              p1NightCap = 2500;
+              p2DayCap = hasEligibleP2Day ? 3000 : 0;
+              p2NightCap = hasEligibleP2Night ? 3000 : 0;
+              modeDescription = '策略C：一廠整日單機(5k)＋二廠併行';
+            } else {
+              p1DayCap = 5000;
+              p1NightCap = 5000;
+              p2DayCap = 0;
+              p2NightCap = 0;
+              modeDescription = '策略C：二廠無單／一廠整日雙機(10k)';
+            }
           }
-        } else if (resolvedMode === 'wash') {
-          // 洗防制日：白天清洗停機，夜班一廠開一機；若模式允許且二廠有可開夜班訂單則二廠夜班連動開工
+        } else if (effectiveMode === 'force_p1_8k_p2_6k') {
+          p1DayCap = 5000;
+          p1NightCap = 3000;
+          p2DayCap = hasEligibleP2Day ? 3000 : 0;
+          p2NightCap = hasEligibleP2Night ? 3000 : 0;
+          modeDescription = '手動：一廠日雙夜單(8k)＋二廠雙班(6k)';
+        } else if (effectiveMode === 'force_p1_10k') {
+          p1DayCap = 5000;
+          p1NightCap = 5000;
+          p2DayCap = 0;
+          p2NightCap = 0;
+          modeDescription = '手動：一廠整日雙機(10k)／二廠停';
+        } else if (effectiveMode === 'wash') {
+          // 環保設備清洗（洗防制）：兩廠日班停機清洗 (0 kg)，夜班依設定恢復
           p1DayCap = 0;
           p2DayCap = 0;
-          p1NightCap = p1Unit;
-          if (
-            appState.washMode === 'wash_both_night' &&
-            eligibleP2 &&
-            eligibleP2.shiftMode !== 'single'
-          ) {
-            p2NightCap = p2Unit;
-            modeBadgeText = '洗防制（夜班雙廠連動）';
-          } else {
+          if (appState.washMode === 'wash_both_3000') {
+            p1NightCap = 3000;
+            p2NightCap = hasEligibleP2Night ? 3000 : 0;
+            modeDescription = '洗防制：日停／一廠夜單3,000＋二廠夜3,000';
+          } else if (appState.washMode === 'wash_both_2500') {
+            p1NightCap = 2500;
+            p2NightCap = hasEligibleP2Night ? 3000 : 0;
+            modeDescription = '洗防制：日停／一廠夜單2,500＋二廠夜3,000';
+          } else if (appState.washMode === 'wash_p1_3000') {
+            p1NightCap = 3000;
             p2NightCap = 0;
-            modeBadgeText = '洗防制（僅一廠夜開一機）';
+            modeDescription = '洗防制：日停／僅一廠夜單3,000';
+          } else {
+            p1NightCap = 2500;
+            p2NightCap = 0;
+            modeDescription = '洗防制：日停／僅一廠夜單2,500';
           }
-        } else if (resolvedMode === 'maint_all' || resolvedMode === 'holiday') {
+        } else if (effectiveMode === 'maint_all' || effectiveMode === 'holiday') {
           p1DayCap = 0;
           p1NightCap = 0;
           p2DayCap = 0;
           p2NightCap = 0;
-        } else if (resolvedMode === 'maint_p1_half' || resolvedMode === 'fault_p1_half') {
-          // 一廠僅開單機（日1+夜1），二廠可正常開日/夜班
-          p1DayCap = p1Unit;
-          p1NightCap = p1Unit;
-          if (eligibleP2) {
-            p2DayCap = p2Unit;
-            const p2NightAllowed =
-              eligibleP2.shiftMode === 'double' ||
-              (eligibleP2.shiftMode === 'first_single_then_double' && eligibleP2.started);
-            p2NightCap = p2NightAllowed ? p2Unit : 0;
-          }
-        } else if (resolvedMode === 'maint_p2_stop' || resolvedMode === 'fault_p2_stop') {
-          // 二廠停機，一廠自動開整日雙機衝刺
+          modeDescription = effectiveMode === 'holiday' ? '全廠休假停機 (0 kg)' : '全廠停機保養 (0 kg)';
+        } else if (effectiveMode === 'maint_p2_p1_8k') {
+          p1DayCap = 5000;
+          p1NightCap = 3000;
           p2DayCap = 0;
           p2NightCap = 0;
-          p1DayCap = p1Unit * 2;
-          p1NightCap = p1Unit * 2;
+          modeDescription = modeDescription || '二廠保養／一廠日雙夜單 (8,000 kg)';
+        } else if (effectiveMode === 'maint_p2_p1_10k') {
+          p1DayCap = 5000;
+          p1NightCap = 5000;
+          p2DayCap = 0;
+          p2NightCap = 0;
+          modeDescription = modeDescription || '二廠保養／一廠整日雙機 (10,000 kg)';
+        } else if (effectiveMode === 'maint_p1_p2_6k') {
+          p1DayCap = 0;
+          p1NightCap = 0;
+          p2DayCap = hasEligibleP2Day ? 3000 : 0;
+          p2NightCap = hasEligibleP2Night ? 3000 : 0;
+          modeDescription = modeDescription || '一廠保養／二廠日夜 (6,000 kg)';
+        } else if (effectiveMode === 'fault_p1_half') {
+          p1DayCap = 2500;
+          p1NightCap = 2500;
+          p2DayCap = hasEligibleP2Day ? 3000 : 0;
+          p2NightCap = hasEligibleP2Night ? 3000 : 0;
+          modeDescription = '故障：一廠壞一台(日2500+夜2500)＋二廠正常';
+        } else if (effectiveMode === 'fault_p2_stop') {
+          p1DayCap = 5000;
+          p1NightCap = 5000;
+          p2DayCap = 0;
+          p2NightCap = 0;
+          modeDescription = '故障：二廠故障停機／一廠整日雙機(10k)';
         }
 
-        // 3. 執行一廠（EPDM）日班與夜班訂單產能分配
-        const p1AllocationMap = new Map(); // orderId -> { order, before, dayKg, nightKg, after, completed }
-        let p1DayProduced = 0;
-        let p1NightProduced = 0;
+        // 4. 分配一廠（EPDM）日班與夜班訂單產能（支援同日完工自動滾動撥給下一單）
+        const p1Alloc = allocatePlantShiftOrders(p1OrdersSim, ymd, idx, p1DayCap, p1NightCap);
+        const p2Alloc = allocatePlantShiftOrders(p2OrdersSim, ymd, idx, p2DayCap, p2NightCap);
 
-        // 一廠日班
-        let remP1Day = p1DayCap;
-        while (remP1Day > 0) {
-          const cur = p1SimOrders.find(
-            o => o.remaining > 0 && (!o.earliestStart || ymd >= o.earliestStart)
-          );
-          if (!cur) break;
-          if (!cur.scheduledStart) cur.scheduledStart = ymd;
+        const p1DayProd = p1Alloc.dayProduced;
+        const p1NightProd = p1Alloc.nightProduced;
+        const p2DayProd = p2Alloc.dayProduced;
+        const p2NightProd = p2Alloc.nightProduced;
 
-          const before = cur.remaining;
-          const take = Math.min(remP1Day, before);
-          cur.remaining -= take;
-          remP1Day -= take;
-          p1DayProduced += take;
+        const p1TotalDay = p1DayProd + p1NightProd;
+        const p2TotalDay = p2DayProd + p2NightProd;
+        const combinedDay = p1TotalDay + p2TotalDay;
 
-          if (cur.remaining === 0) cur.scheduledEnd = ymd;
-
-          if (!p1AllocationMap.has(cur.id)) {
-            p1AllocationMap.set(cur.id, {
-              order: cur,
-              before,
-              dayKg: 0,
-              nightKg: 0,
-              after: cur.remaining,
-              completed: cur.remaining === 0
-            });
-          }
-          const rec = p1AllocationMap.get(cur.id);
-          rec.dayKg += take;
-          rec.after = cur.remaining;
-          rec.completed = cur.remaining === 0;
-        }
-
-        // 一廠夜班
-        let remP1Night = p1NightCap;
-        while (remP1Night > 0) {
-          const cur = p1SimOrders.find(
-            o => o.remaining > 0 && (!o.earliestStart || ymd >= o.earliestStart)
-          );
-          if (!cur) break;
-          if (!cur.scheduledStart) cur.scheduledStart = ymd;
-
-          const before = cur.remaining;
-          const take = Math.min(remP1Night, before);
-          cur.remaining -= take;
-          remP1Night -= take;
-          p1NightProduced += take;
-
-          if (cur.remaining === 0) cur.scheduledEnd = ymd;
-
-          if (!p1AllocationMap.has(cur.id)) {
-            p1AllocationMap.set(cur.id, {
-              order: cur,
-              before,
-              dayKg: 0,
-              nightKg: 0,
-              after: cur.remaining,
-              completed: cur.remaining === 0
-            });
-          }
-          const rec = p1AllocationMap.get(cur.id);
-          rec.nightKg += take;
-          rec.after = cur.remaining;
-          rec.completed = cur.remaining === 0;
-        }
-
-        const p1Lines = [];
-        p1AllocationMap.forEach(rec => {
-          const totalTake = rec.dayKg + rec.nightKg;
-          rec.order.dailySlices.push({
-            ymd,
-            md,
-            kg: totalTake,
-            dayKg: rec.dayKg,
-            nightKg: rec.nightKg,
-            completed: rec.completed
-          });
-
-          const shiftTag =
-            rec.dayKg > 0 && rec.nightKg > 0
-              ? `日${rec.dayKg.toLocaleString()}+夜${rec.nightKg.toLocaleString()}`
-              : rec.dayKg > 0
-              ? `日${rec.dayKg.toLocaleString()}`
-              : `夜${rec.nightKg.toLocaleString()}`;
-
-          p1Lines.push({
-            text: `${rec.order.name}：${rec.before.toLocaleString()} - ${totalTake.toLocaleString()} = ${rec.after.toLocaleString()} kg (${shiftTag})`,
-            completed: rec.completed
-          });
-        });
-
-        if (p1Lines.length === 0) {
-          if (p1DayCap + p1NightCap === 0) {
-            p1Lines.push({
-              text: resolvedMode === 'wash' ? '白天洗防制停機' : '停機無排產 (0 kg)',
-              completed: false,
-              muted: true
-            });
-          } else {
-            p1Lines.push({
-              text: `待命無訂單（可用產能 ${(p1DayCap + p1NightCap).toLocaleString()} kg）`,
-              completed: false,
-              muted: true
-            });
-          }
-        }
-
-        // 4. 執行二廠（SBR / NBR / BR）日班與夜班訂單產能分配
-        const p2Lines = [];
-        const p2DailyOrderSliceMap = new Map();
-        let p2DayProduced = 0;
-        let p2NightProduced = 0;
-
-        // 二廠日班
-        if (p2DayCap > 0) {
-          const curDayP2 = p2SimOrders.find(
-            o => o.remaining > 0 && (!o.earliestStart || ymd >= o.earliestStart)
-          );
-          if (curDayP2) {
-            if (!curDayP2.scheduledStart) curDayP2.scheduledStart = ymd;
-            curDayP2.started = true;
-            const before = curDayP2.remaining;
-            const take = Math.min(p2DayCap, before);
-            curDayP2.remaining -= take;
-            p2DayProduced += take;
-            if (curDayP2.remaining === 0) curDayP2.scheduledEnd = ymd;
-
-            p2Lines.push({
-              text: `${curDayP2.name}：${before.toLocaleString()} - ${take.toLocaleString()} = ${curDayP2.remaining.toLocaleString()} kg (日)`,
-              completed: curDayP2.remaining === 0
-            });
-
-            p2DailyOrderSliceMap.set(curDayP2.id, {
-              order: curDayP2,
-              dayKg: take,
-              nightKg: 0,
-              completed: curDayP2.remaining === 0
-            });
-          }
-        }
-
-        // 二廠夜班
-        if (p2NightCap > 0) {
-          // 尋找夜班可開工訂單（若日班剛好把前一張單做完，下一張單只要允許夜班即可無縫接手）
-          const curNightP2 = p2SimOrders.find(
-            o =>
-              o.remaining > 0 &&
-              (!o.earliestStart || ymd >= o.earliestStart) &&
-              (o.shiftMode === 'double' ||
-                (o.shiftMode === 'first_single_then_double' && o.started))
-          );
-          if (curNightP2) {
-            if (!curNightP2.scheduledStart) curNightP2.scheduledStart = ymd;
-            curNightP2.started = true;
-            const before = curNightP2.remaining;
-            const take = Math.min(p2NightCap, before);
-            curNightP2.remaining -= take;
-            p2NightProduced += take;
-            if (curNightP2.remaining === 0) curNightP2.scheduledEnd = ymd;
-
-            p2Lines.push({
-              text: `${curNightP2.name}：${before.toLocaleString()} - ${take.toLocaleString()} = ${curNightP2.remaining.toLocaleString()} kg (夜)`,
-              completed: curNightP2.remaining === 0
-            });
-
-            if (!p2DailyOrderSliceMap.has(curNightP2.id)) {
-              p2DailyOrderSliceMap.set(curNightP2.id, {
-                order: curNightP2,
-                dayKg: 0,
-                nightKg: 0,
-                completed: false
-              });
-            }
-            const sRec = p2DailyOrderSliceMap.get(curNightP2.id);
-            sRec.nightKg += take;
-            sRec.completed = curNightP2.remaining === 0;
-          }
-        }
-
-        p2DailyOrderSliceMap.forEach(sRec => {
-          sRec.order.dailySlices.push({
-            ymd,
-            md,
-            kg: sRec.dayKg + sRec.nightKg,
-            dayKg: sRec.dayKg,
-            nightKg: sRec.nightKg,
-            completed: sRec.completed
-          });
-        });
-
-        if (p2Lines.length === 0) {
-          p2Lines.push({
-            text:
-              resolvedMode === 'wash'
-                ? '洗防制日停機 (0 kg)'
-                : resolvedMode.startsWith('maint_')
-                ? '保養停機 (0 kg)'
-                : '二廠未開機（一廠雙機運轉）',
-            completed: false,
-            muted: true
-          });
-        }
-
-        totalP1Produced += p1DayProduced + p1NightProduced;
-        totalP2Produced += p2DayProduced + p2NightProduced;
+        totalP1 += p1TotalDay;
+        totalP2 += p2TotalDay;
+        if (p1DayCap === 5000 && p1NightCap === 3000) p1_8kDays++;
+        if (p2TotalDay > 0) p2ActiveDays++;
+        if (p1TotalDay > 0 && p2TotalDay > 0) parallelHighDays++;
 
         days.push({
           index: idx,
@@ -1251,119 +1115,260 @@
           md,
           weekday,
           overrideVal,
-          resolvedMode,
-          eventCategory,
-          modeBadgeText,
-          p1DayProduced,
-          p1NightProduced,
-          p2DayProduced,
-          p2NightProduced,
-          totalProduced: p1DayProduced + p1NightProduced + p2DayProduced + p2NightProduced,
-          p1Lines,
-          p2Lines
+          effectiveMode,
+          statusType,
+          statusBadge,
+          modeDescription,
+          p1DayCap,
+          p1NightCap,
+          p2DayCap,
+          p2NightCap,
+          p1DayProd,
+          p1NightProd,
+          p2DayProd,
+          p2NightProd,
+          p1TotalDay,
+          p2TotalDay,
+          combinedDay,
+          p1Lines: p1Alloc.lines,
+          p2Lines: p2Alloc.lines
         });
       }
 
-      const p1Backlog = p1SimOrders.reduce((acc, o) => acc + o.remaining, 0);
-      const p2Backlog = p2SimOrders.reduce((acc, o) => acc + o.remaining, 0);
+      // 5. 計算每張訂單與基準快照的完工日差異（提前 X 天 / 延後 X 天）
+      const attachBaselineComparison = order => {
+        const base = baselineOrderDates[order.id];
+        if (!base) {
+          order.deltaStatus = 'new';
+          order.deltaText = order.scheduledEnd
+            ? `✨ 新插單 (預計 ${order.scheduledEnd.slice(5).replace('-', '/')} 完工)`
+            : '✨ 新插單 (跨出排程末日)';
+          return;
+        }
+        order.baselineEnd = base.end;
+        order.baselineEndIndex = base.endIndex;
 
-      // 計算每張訂單與上一次排程快照的交期變化（提前 / 延後幾天）
-      const computeDeltaInfo = order => {
-        const prev = previousOrderDatesSnapshot[order.id];
-        if (!prev) {
-          return { type: 'new', label: '新排入' };
+        if (!base.end && !order.scheduledEnd) {
+          order.deltaStatus = 'same';
+          order.deltaText = '排程範圍外';
+          return;
         }
-        if (!order.scheduledEnd && !prev.end) {
-          return { type: 'same', label: '排程範圍外' };
+        if (base.end && !order.scheduledEnd) {
+          order.deltaStatus = 'delayed';
+          order.deltaText = '推擠超出排程範圍';
+          return;
         }
-        if (!order.scheduledEnd && prev.end) {
-          return { type: 'delayed', label: '順延超出排程表' };
+        if (!base.end && order.scheduledEnd) {
+          order.deltaStatus = 'earlier';
+          order.deltaText = '已提前進入排程區間';
+          return;
         }
-        if (order.scheduledEnd && !prev.end) {
-          return { type: 'earlier', label: '已排入區間內' };
+
+        const diff = diffDays(parseYMD(order.scheduledEnd), parseYMD(base.end));
+        if (diff < 0) {
+          order.deltaStatus = 'earlier';
+          order.deltaText = `提前 ${Math.abs(diff)} 天`;
+        } else if (diff > 0) {
+          order.deltaStatus = 'delayed';
+          order.deltaText = `延後 ${diff} 天`;
+        } else {
+          order.deltaStatus = 'same';
+          order.deltaText = '交期不變';
         }
-        const delta = diffDays(parseYMD(order.scheduledEnd), parseYMD(prev.end));
-        if (delta < 0) {
-          return { type: 'earlier', label: `交期提前 ${Math.abs(delta)} 天` };
-        } else if (delta > 0) {
-          return { type: 'delayed', label: `交期延後 ${delta} 天` };
-        }
-        return { type: 'same', label: '交期不變' };
       };
 
-      p1SimOrders.forEach(o => {
-        o.deltaInfo = computeDeltaInfo(o);
-      });
-      p2SimOrders.forEach(o => {
-        o.deltaInfo = computeDeltaInfo(o);
-      });
+      p1OrdersSim.forEach(attachBaselineComparison);
+      p2OrdersSim.forEach(attachBaselineComparison);
 
-      latestSimulationResult = {
+      latestSimResult = {
         days,
-        p1SimOrders,
-        p2SimOrders,
+        p1OrdersSim,
+        p2OrdersSim,
         kpis: {
           totalDays,
-          totalP1Produced,
-          totalP2Produced,
-          washDaysCount,
-          maintDaysCount,
-          p1Backlog,
-          p2Backlog,
-          totalBacklog: p1Backlog + p2Backlog
+          totalP1,
+          totalP2,
+          combinedTotal: totalP1 + totalP2,
+          p1_8kDays,
+          p2ActiveDays,
+          washDays,
+          maintDays,
+          parallelHighDays
         }
       };
 
-      return latestSimulationResult;
+      return latestSimResult;
     }
 
     /**
-     * 檢查指定日期是否命中「固定設備保養」（手動區間或週期性規則）
+     * 針對單一廠別執行當日「日班」與「夜班」的訂單產能分配與扣減算式生成
      */
-    function checkDateMaintenance(curDate, ymd) {
-      // 1. 先檢查手動新增的保養區間
-      for (const rng of appState.manualMaintRanges) {
+    function allocatePlantShiftOrders(ordersSim, ymd, dayIndex, dayCap, nightCap) {
+      const allocMap = new Map();
+      let dayProduced = 0;
+      let nightProduced = 0;
+
+      // 1. 分配日班產能
+      let remDay = dayCap;
+      while (remDay > 0) {
+        const cur = ordersSim.find(
+          o =>
+            o.remaining > 0 &&
+            (!o.earliestStart || ymd >= o.earliestStart) &&
+            (o.shiftRule === 'both' || o.shiftRule === 'day_only')
+        );
+        if (!cur) break;
+        if (cur.scheduledStart === null) {
+          cur.scheduledStart = ymd;
+          cur.startIndex = dayIndex;
+        }
+        const before = cur.remaining;
+        const take = Math.min(remDay, before);
+        cur.remaining -= take;
+        remDay -= take;
+        dayProduced += take;
+
+        if (cur.remaining === 0) {
+          cur.scheduledEnd = ymd;
+          cur.endIndex = dayIndex;
+        }
+
+        if (!allocMap.has(cur.id)) {
+          allocMap.set(cur.id, {
+            order: cur,
+            before,
+            dayKg: 0,
+            nightKg: 0,
+            after: cur.remaining,
+            completed: cur.remaining === 0
+          });
+        }
+        const rec = allocMap.get(cur.id);
+        rec.dayKg += take;
+        rec.after = cur.remaining;
+        rec.completed = cur.remaining === 0;
+      }
+
+      // 2. 分配夜班產能
+      let remNight = nightCap;
+      while (remNight > 0) {
+        const cur = ordersSim.find(
+          o =>
+            o.remaining > 0 &&
+            (!o.earliestStart || ymd >= o.earliestStart) &&
+            (o.shiftRule === 'both' || o.shiftRule === 'night_only')
+        );
+        if (!cur) break;
+        if (cur.scheduledStart === null) {
+          cur.scheduledStart = ymd;
+          cur.startIndex = dayIndex;
+        }
+        const before = cur.remaining;
+        const take = Math.min(remNight, before);
+        cur.remaining -= take;
+        remNight -= take;
+        nightProduced += take;
+
+        if (cur.remaining === 0) {
+          cur.scheduledEnd = ymd;
+          cur.endIndex = dayIndex;
+        }
+
+        if (!allocMap.has(cur.id)) {
+          allocMap.set(cur.id, {
+            order: cur,
+            before,
+            dayKg: 0,
+            nightKg: 0,
+            after: cur.remaining,
+            completed: cur.remaining === 0
+          });
+        }
+        const rec = allocMap.get(cur.id);
+        rec.nightKg += take;
+        rec.after = cur.remaining;
+        rec.completed = cur.remaining === 0;
+      }
+
+      const lines = [];
+      allocMap.forEach(rec => {
+        const totalTake = rec.dayKg + rec.nightKg;
+        rec.order.dailySlices.push({
+          dayIndex,
+          ymd,
+          md: ymd.slice(5).replace('-', '/'),
+          kg: totalTake,
+          dayKg: rec.dayKg,
+          nightKg: rec.nightKg,
+          completed: rec.completed
+        });
+
+        let shiftBreakdown = '';
+        if (rec.dayKg > 0 && rec.nightKg > 0) {
+          shiftBreakdown = `日${rec.dayKg.toLocaleString()}+夜${rec.nightKg.toLocaleString()}`;
+        } else if (rec.dayKg > 0) {
+          shiftBreakdown = `日${rec.dayKg.toLocaleString()}`;
+        } else {
+          shiftBreakdown = `夜${rec.nightKg.toLocaleString()}`;
+        }
+
+        lines.push({
+          text: `${rec.order.name}：${rec.before.toLocaleString()} - ${totalTake.toLocaleString()} (${shiftBreakdown}) = ${rec.after.toLocaleString()} kg`,
+          completed: rec.completed,
+          muted: false
+        });
+      });
+
+      if (lines.length === 0) {
+        const totalCap = dayCap + nightCap;
+        lines.push({
+          text: totalCap === 0 ? '停機無排產 (0 kg)' : `無可排訂單（可用產能 日${dayCap}+夜${nightCap} kg）`,
+          completed: false,
+          muted: true
+        });
+      }
+
+      return { dayProduced, nightProduced, lines };
+    }
+
+    /**
+     * 檢查指定日期是否命中固定預防性保養（自訂區間 或 週期保養）
+     */
+    function checkMaintenanceHit(curDate) {
+      // 1. 自訂保養區間
+      for (const rng of appState.customMaintRanges) {
         if (!rng.startDate) continue;
         const s = parseYMD(rng.startDate);
         const dur = Math.max(1, Number(rng.days) || 1);
-        const d = diffDays(curDate, s);
-        if (d >= 0 && d < dur) {
+        const diff = diffDays(curDate, s);
+        if (diff >= 0 && diff < dur) {
           return {
-            scope: rng.scope || 'maint_all',
-            label: `${MAINT_SCOPE_LABELS[rng.scope] || '固定保養'} (第${d + 1}/${dur}天)`
+            mode: rng.mode || 'maint_all',
+            label: `${MAINT_MODE_NAMES[rng.mode] || '固定保養'} (第${diff + 1}/${dur}天)`
           };
         }
       }
 
-      // 2. 再檢查週期性保養設定
-      const type = appState.maintCycleType;
-      if (type === 'none') return null;
+      // 2. 週期保養
+      const cType = appState.maintCycleType;
+      if (cType === 'none') return null;
 
-      const dur = Math.max(1, Number(appState.maintDurationDays) || 1);
       const param = Math.max(1, Number(appState.maintCycleParam) || 30);
-
-      if (type === 'interval' && appState.maintAnchorDate) {
-        const anchor = parseYMD(appState.maintAnchorDate);
+      if (cType === 'interval') {
+        const anchor = parseYMD(appState.startDate);
         const diff = diffDays(curDate, anchor);
-        if (diff >= 0) {
-          const mod = diff % param;
-          if (mod < dur) {
-            return {
-              scope: appState.maintScope || 'maint_all',
-              label: `${MAINT_SCOPE_LABELS[appState.maintScope] || '週期保養'} (${mod + 1}/${dur}天)`
-            };
-          }
+        if (diff > 0 && diff % param === 0) {
+          return {
+            mode: appState.maintCycleMode || 'maint_all',
+            label: `每${param}天週期保養`
+          };
         }
-      } else if (type === 'monthly') {
-        // 每月固定幾號起算連續 dur 天
-        for (let offset = 0; offset < dur; offset++) {
-          const candidateStart = addDays(curDate, -offset);
-          if (candidateStart.getDate() === param) {
-            return {
-              scope: appState.maintScope || 'maint_all',
-              label: `每月${param}號保養 (${offset + 1}/${dur}天)`
-            };
-          }
+      } else if (cType === 'monthly') {
+        if (curDate.getDate() === param) {
+          return {
+            mode: appState.maintCycleMode || 'maint_all',
+            label: `每月${param}號固定保養`
+          };
         }
       }
 
@@ -1371,93 +1376,76 @@
     }
 
     /**
-     * 在變更狀態前先拍下目前各訂單交期快照，以計算「提前 X 天 / 延後 X 天」
+     * 鎖定目前模擬結果的完工日作為基準線
      */
-    function captureOrderSnapshot() {
-      if (!latestSimulationResult) return;
+    function lockCurrentBaseline(silent = false) {
+      if (!latestSimResult) return;
       const snap = {};
-      latestSimulationResult.p1SimOrders.forEach(o => {
-        snap[o.id] = { start: o.scheduledStart, end: o.scheduledEnd };
+      latestSimResult.p1OrdersSim.forEach(o => {
+        snap[o.id] = { start: o.scheduledStart, end: o.scheduledEnd, endIndex: o.endIndex };
       });
-      latestSimulationResult.p2SimOrders.forEach(o => {
-        snap[o.id] = { start: o.scheduledStart, end: o.scheduledEnd };
+      latestSimResult.p2OrdersSim.forEach(o => {
+        snap[o.id] = { start: o.scheduledStart, end: o.scheduledEnd, endIndex: o.endIndex };
       });
-      previousOrderDatesSnapshot = snap;
-    }
-
-    // ============================================================================
-    // 全畫面渲染主控函式
-    // ============================================================================
-    function renderAll() {
-      const sim = runScheduleSimulation();
-
-      syncRuleInputs();
-      renderKPICards(sim);
-      renderStackedBarChartSVG(sim);
-      renderGanttChart(sim);
-      renderOrderLists(sim);
-      renderDetailTable(sim);
-
-      // 若是首次初始化，建立基準快照
-      if (Object.keys(previousOrderDatesSnapshot).length === 0) {
-        captureOrderSnapshot();
+      baselineOrderDates = snap;
+      if (!silent) {
+        renderAll(false);
+        showToast('🔒 已重新鎖定目前所有訂單完工日為新的基準線！');
       }
     }
 
-    function syncRuleInputs() {
+    // ============================================================================
+    // 畫面總渲染控制器
+    // ============================================================================
+    function renderAll(isFirstBoot = false) {
+      const sim = runScheduleSimulation();
+
+      if (isFirstBoot) {
+        lockCurrentBaseline(true);
+        runScheduleSimulation();
+      }
+
+      syncControlsUI();
+      renderKPICards(latestSimResult);
+      renderStackedBarChartSVG(latestSimResult);
+      renderGanttChartSVG(latestSimResult);
+      renderOrderQueues(latestSimResult);
+      renderDailyTable(latestSimResult);
+    }
+
+    function syncControlsUI() {
       document.getElementById('cfg-start-date').value = appState.startDate;
       document.getElementById('cfg-days-count').value = appState.daysCount;
-      document.getElementById('cfg-p1-cap').value = appState.p1ShiftCap;
-      document.getElementById('cfg-p2-cap').value = appState.p2ShiftCap;
-
       document.getElementById('cfg-wash-anchor').value = appState.washAnchorDate;
       document.getElementById('cfg-wash-interval').value = appState.washIntervalDays;
       document.getElementById('cfg-wash-mode').value = appState.washMode;
 
-      document.getElementById('cfg-maint-type').value = appState.maintCycleType;
-      document.getElementById('cfg-maint-param').value = appState.maintCycleParam;
-      document.getElementById('cfg-maint-anchor').value = appState.maintAnchorDate;
-      document.getElementById('cfg-maint-duration').value = appState.maintDurationDays;
-      document.getElementById('cfg-maint-scope').value = appState.maintScope;
+      document.getElementById('cfg-maint-cycle-type').value = appState.maintCycleType;
+      document.getElementById('cfg-maint-cycle-param').value = appState.maintCycleParam;
+      document.getElementById('cfg-maint-cycle-mode').value = appState.maintCycleMode;
 
-      const maintParamLabel = document.getElementById('maint-param-label');
-      const maintAnchorWrap = document.getElementById('maint-anchor-wrap');
-      if (appState.maintCycleType === 'monthly') {
-        maintParamLabel.textContent = '每月固定日期 (1~31號)';
-        maintAnchorWrap.classList.add('opacity-40');
-      } else {
-        maintParamLabel.textContent = '保養週期天數 (天)';
-        maintAnchorWrap.classList.remove('opacity-40');
-      }
+      // 策略卡片選中外觀
+      ['A', 'B', 'C'].forEach(code => {
+        const card = document.getElementById(`strategy-card-${code}`);
+        const radio = card.querySelector('input[type="radio"]');
+        if (appState.globalStrategy === code) {
+          radio.checked = true;
+          card.className = 'block rounded-xl border-2 border-indigo-600 bg-indigo-50/50 p-3 cursor-pointer transition select-none shadow-2xs';
+        } else {
+          radio.checked = false;
+          card.className = 'block rounded-xl border-2 border-slate-200 hover:border-slate-300 bg-white p-3 cursor-pointer transition select-none';
+        }
+      });
 
-      document.getElementById('override-count-pill').textContent =
-        `單日覆寫: ${Object.keys(appState.dayOverrides).length} 天`;
-
-      // 手動洗防制日標籤
-      const washTagsEl = document.getElementById('manual-wash-tags');
-      washTagsEl.innerHTML = appState.manualWashDates
-        .sort()
+      // 自訂保養區間標籤
+      const maintListEl = document.getElementById('custom-maint-list');
+      maintListEl.innerHTML = appState.customMaintRanges
         .map(
-          d => `
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-100 text-sky-900 text-xs font-bold border border-sky-200">
-            💧 ${d.slice(5).replace('-', '/')}
-            <button type="button" onclick="removeManualWashDate('${d}')" class="text-sky-600 hover:text-rose-600 ml-0.5 cursor-pointer">✕</button>
+          (r, i) => `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 border border-orange-200 text-orange-950 text-xs font-bold">
+            🔧 ${r.startDate.slice(5).replace('-', '/')} 起 ${r.days} 天（${MAINT_MODE_NAMES[r.mode]}）
+            <button type="button" onclick="removeCustomMaintRange(${i})" class="text-rose-600 hover:text-rose-800 font-extrabold cursor-pointer">✕</button>
           </span>
-        `
-        )
-        .join('');
-
-      // 手動固定保養區間列表
-      const maintListEl = document.getElementById('manual-maint-list');
-      maintListEl.innerHTML = appState.manualMaintRanges
-        .map(
-          (r, idx) => `
-          <div class="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg px-2.5 py-1 text-xs">
-            <span class="font-bold text-orange-950">
-              🔧 ${r.startDate.slice(5).replace('-', '/')} 起 ${r.days} 天（${MAINT_SCOPE_LABELS[r.scope]}）
-            </span>
-            <button type="button" onclick="removeManualMaintRange(${idx})" class="text-rose-600 font-bold hover:underline cursor-pointer">移除</button>
-          </div>
         `
         )
         .join('');
@@ -1465,569 +1453,565 @@
 
     function renderKPICards(sim) {
       const { kpis, days } = sim;
-      document.getElementById('kpi-days').textContent = kpis.totalDays;
-      if (days.length > 0) {
-        document.getElementById('kpi-date-range').textContent = `${days[0].md} ~ ${days[days.length - 1].md}`;
-      }
+      document.getElementById('kpi-p1-total').textContent = kpis.totalP1.toLocaleString();
+      document.getElementById('kpi-p1-sub').textContent = `約 ${(kpis.totalP1 / 1000).toFixed(1)} 噸｜日雙夜單 ${kpis.p1_8kDays} 天`;
 
-      document.getElementById('kpi-p1-total').textContent = kpis.totalP1Produced.toLocaleString();
-      document.getElementById('kpi-p1-tons').textContent = `約 ${(kpis.totalP1Produced / 1000).toFixed(1)} 噸`;
+      document.getElementById('kpi-p2-total').textContent = kpis.totalP2.toLocaleString();
+      document.getElementById('kpi-p2-sub').textContent = `約 ${(kpis.totalP2 / 1000).toFixed(1)} 噸｜開工 ${kpis.p2ActiveDays} 天`;
 
-      document.getElementById('kpi-p2-total').textContent = kpis.totalP2Produced.toLocaleString();
-      document.getElementById('kpi-p2-tons').textContent = `約 ${(kpis.totalP2Produced / 1000).toFixed(1)} 噸`;
+      document.getElementById('kpi-combined-total').textContent = kpis.combinedTotal.toLocaleString();
+      document.getElementById('kpi-date-span').textContent =
+        days.length > 0 ? `${days[0].md}~${days[days.length - 1].md}` : `${kpis.totalDays}天`;
+      document.getElementById('kpi-combined-sub').textContent =
+        `日均產出 ${Math.round(kpis.combinedTotal / kpis.totalDays).toLocaleString()} kg`;
 
-      document.getElementById('kpi-wash-count').textContent = kpis.washDaysCount;
-      document.getElementById('kpi-wash-sub').textContent = `每 ${appState.washIntervalDays} 天循環`;
+      document.getElementById('kpi-wash-days').textContent = kpis.washDays;
+      document.getElementById('kpi-maint-days').textContent = kpis.maintDays;
+      document.getElementById('kpi-maint-sub').textContent = `每 ${appState.washIntervalDays} 天洗防制`;
 
-      document.getElementById('kpi-maint-days').textContent = kpis.maintDaysCount;
-      document.getElementById('kpi-maint-sub').textContent =
-        appState.maintCycleType === 'none' ? '僅手動指定保養' : MAINT_SCOPE_LABELS[appState.maintScope];
-
-      document.getElementById('kpi-backlog').textContent = kpis.totalBacklog.toLocaleString();
-      document.getElementById('kpi-backlog-sub').textContent =
-        `一廠 ${kpis.p1Backlog.toLocaleString()} / 二廠 ${kpis.p2Backlog.toLocaleString()}`;
+      document.getElementById('kpi-parallel-days').textContent = kpis.parallelHighDays;
+      document.getElementById('kpi-parallel-sub').textContent = `雙廠同時開工併行日數`;
     }
 
     // ============================================================================
-    // 視覺圖 1：純 SVG 每日產能與日夜班堆疊長條圖
+    // 圖表 1：純 SVG 每日一二廠日夜班產能堆疊長條圖
     // ============================================================================
     function renderStackedBarChartSVG(sim) {
-      const container = document.getElementById('stacked-svg-container');
+      const wrapper = document.getElementById('svg-stacked-wrapper');
       const { days } = sim;
 
-      const colStep = 42;
-      const padLeft = 56;
+      const colStep = 40;
+      const padLeft = 52;
       const padRight = 24;
-      const padTop = 38;
-      const padBottom = 46;
-      const plotHeight = 220;
-      const svgWidth = Math.max(820, padLeft + padRight + days.length * colStep);
+      const padTop = 36;
+      const padBottom = 54;
+      const plotHeight = 230;
+      const svgWidth = Math.max(840, padLeft + padRight + days.length * colStep);
       const svgHeight = padTop + plotHeight + padBottom;
 
-      // 動態計算 Y 軸最大值（至少 12,000 kg，方便顯示 10,000 與 11,000）
-      const maxDailyCap = Math.max(
-        12000,
-        Number(appState.p1ShiftCap) * 4 + 2000,
-        (Number(appState.p1ShiftCap) + Number(appState.p2ShiftCap)) * 2 + 2000
-      );
-      const yMax = Math.ceil(maxDailyCap / 2000) * 2000;
-      const yStep = 2000;
+      const yMax = 16000;
+      const yTicks = [0, 2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000];
 
-      let gridHtml = '';
-      for (let val = 0; val <= yMax; val += yStep) {
-        const yPos = padTop + plotHeight - (val / yMax) * plotHeight;
-        gridHtml += `
-          <line x1="${padLeft}" y1="${yPos}" x2="${svgWidth - padRight}" y2="${yPos}"
-                stroke="${val === 0 ? '#64748b' : '#e2e8f0'}" stroke-width="${val === 0 ? 1.5 : 1}" />
-          <text x="${padLeft - 8}" y="${yPos + 4}" text-anchor="end" fill="#64748b" font-size="11" font-weight="600">
-            ${val === 0 ? '0' : (val / 1000) + 'k'}
+      let gridSvg = '';
+      yTicks.forEach(val => {
+        const y = padTop + plotHeight - (val / yMax) * plotHeight;
+        const isHighlight = val === 14000 || val === 10000;
+        gridSvg += `
+          <line x1="${padLeft}" y1="${y}" x2="${svgWidth - padRight}" y2="${y}"
+                stroke="${val === 0 ? '#64748b' : isHighlight ? '#cbd5e1' : '#e2e8f0'}"
+                stroke-width="${val === 0 ? 1.5 : 1}"
+                ${isHighlight ? 'stroke-dasharray="4 3"' : ''} />
+          <text x="${padLeft - 8}" y="${y + 4}" text-anchor="end" fill="#64748b" font-size="11" font-weight="700">
+            ${val === 0 ? '0' : val / 1000 + 'k'}
           </text>
-        `;
-      }
-
-      let barsHtml = '';
-      const barWidth = 24;
-
-      days.forEach((d, idx) => {
-        const centerX = padLeft + idx * colStep + colStep / 2;
-        const barX = centerX - barWidth / 2;
-
-        // 特殊事件背景色帶
-        let bgTint = 'transparent';
-        let eventIcon = '';
-        if (d.eventCategory === 'wash') {
-          bgTint = 'rgba(14, 165, 233, 0.12)';
-          eventIcon = '💧';
-        } else if (d.eventCategory === 'maint') {
-          bgTint = 'rgba(249, 115, 22, 0.14)';
-          eventIcon = '🔧';
-        } else if (d.eventCategory === 'fault') {
-          bgTint = 'rgba(244, 63, 94, 0.14)';
-          eventIcon = '⚠️';
-        }
-
-        if (bgTint !== 'transparent') {
-          barsHtml += `
-            <rect x="${centerX - colStep / 2 + 1}" y="${padTop - 24}" width="${colStep - 2}" height="${plotHeight + 24}"
-                  rx="4" fill="${bgTint}" />
-          `;
-        }
-
-        // 堆疊區段（由下而上：一廠日 -> 一廠夜 -> 二廠日 -> 二廠夜）
-        const segments = [
-          { val: d.p1DayProduced, color: '#4f46e5' },
-          { val: d.p1NightProduced, color: '#0ea5e9' },
-          { val: d.p2DayProduced, color: '#10b981' },
-          { val: d.p2NightProduced, color: '#f59e0b' }
-        ];
-
-        let currentBottomY = padTop + plotHeight;
-        segments.forEach(seg => {
-          if (seg.val <= 0) return;
-          const h = (seg.val / yMax) * plotHeight;
-          const yTop = currentBottomY - h;
-          barsHtml += `
-            <rect x="${barX}" y="${yTop}" width="${barWidth}" height="${h}"
-                  fill="${seg.color}" stroke="#ffffff" stroke-width="0.8" />
-          `;
-          currentBottomY = yTop;
-        });
-
-        // 頂端事件圖示與當日總產量標示
-        if (eventIcon) {
-          barsHtml += `
-            <text x="${centerX}" y="${padTop - 10}" text-anchor="middle" font-size="13">${eventIcon}</text>
-          `;
-        }
-
-        if (d.totalProduced > 0) {
-          const kLabel = (d.totalProduced / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-          barsHtml += `
-            <text x="${centerX}" y="${Math.max(padTop + 10, currentBottomY - 4)}" text-anchor="middle"
-                  fill="#0f172a" font-size="10" font-weight="800">${kLabel}</text>
-          `;
-        }
-
-        // X 軸日期與星期
-        const isWeekend = d.weekday === '六' || d.weekday === '日';
-        barsHtml += `
-          <text x="${centerX}" y="${padTop + plotHeight + 16}" text-anchor="middle"
-                fill="${isWeekend ? '#e11d48' : '#334155'}" font-size="11" font-weight="700">${d.md}</text>
-          <text x="${centerX}" y="${padTop + plotHeight + 31}" text-anchor="middle"
-                fill="${isWeekend ? '#e11d48' : '#64748b'}" font-size="10" font-weight="600">(${d.weekday})</text>
-        `;
-
-        // 透明互動熱區（支援滑鼠懸停與點擊檢視詳情）
-        barsHtml += `
-          <rect x="${centerX - colStep / 2}" y="${padTop - 24}" width="${colStep}" height="${plotHeight + 64}"
-                fill="transparent" style="cursor: pointer;"
-                onmouseenter="inspectStackedDay(${idx})"
-                onclick="inspectStackedDay(${idx})" />
         `;
       });
 
-      container.innerHTML = `
+      const barW = 24;
+      let barsSvg = '';
+
+      days.forEach((d, idx) => {
+        const cx = padLeft + idx * colStep + colStep / 2;
+        const bx = cx - barW / 2;
+
+        // 狀態底色與日期圓點標記（洗防制藍點、保養橘點、突發故障紅點）
+        let dotColor = '';
+        let colBg = 'transparent';
+        if (d.statusType === 'wash') {
+          dotColor = '#0284c7';
+          colBg = 'rgba(14, 165, 233, 0.10)';
+        } else if (d.statusType === 'maint') {
+          dotColor = '#ea580c';
+          colBg = 'rgba(249, 115, 22, 0.12)';
+        } else if (d.statusType === 'fault') {
+          dotColor = '#e11d48';
+          colBg = 'rgba(244, 63, 94, 0.12)';
+        }
+
+        if (colBg !== 'transparent') {
+          barsSvg += `
+            <rect x="${cx - colStep / 2 + 1}" y="${padTop - 16}" width="${colStep - 2}" height="${plotHeight + 16}"
+                  rx="4" fill="${colBg}" />
+          `;
+        }
+
+        // 由下而上堆疊：一廠日班 -> 一廠夜班 -> 二廠日班 -> 二廠夜班
+        const segs = [
+          { val: d.p1DayProd, color: '#4f46e5' },
+          { val: d.p1NightProd, color: '#0ea5e9' },
+          { val: d.p2DayProd, color: '#10b981' },
+          { val: d.p2NightProd, color: '#f59e0b' }
+        ];
+
+        let curBottom = padTop + plotHeight;
+        segs.forEach(s => {
+          if (s.val <= 0) return;
+          const h = (s.val / yMax) * plotHeight;
+          const yTop = curBottom - h;
+          barsSvg += `
+            <rect x="${bx}" y="${yTop}" width="${barW}" height="${h}"
+                  fill="${s.color}" stroke="#ffffff" stroke-width="0.8" />
+          `;
+          curBottom = yTop;
+        });
+
+        // 長條頂端總產出標籤
+        if (d.combinedDay > 0) {
+          const kText = (d.combinedDay / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+          barsSvg += `
+            <text x="${cx}" y="${Math.max(padTop - 4, curBottom - 4)}" text-anchor="middle"
+                  fill="${d.combinedDay >= 14000 ? '#b45309' : '#0f172a'}" font-size="10" font-weight="800">
+              ${kText}
+            </text>
+          `;
+        }
+
+        // X 軸日期、星期與事件色點
+        const isWeekend = d.weekday === '六' || d.weekday === '日';
+        barsSvg += `
+          <text x="${cx}" y="${padTop + plotHeight + 16}" text-anchor="middle"
+                fill="${isWeekend ? '#e11d48' : '#334155'}" font-size="11" font-weight="800">${d.md}</text>
+          <text x="${cx}" y="${padTop + plotHeight + 30}" text-anchor="middle"
+                fill="${isWeekend ? '#e11d48' : '#64748b'}" font-size="10" font-weight="700">(${d.weekday})</text>
+        `;
+
+        if (dotColor) {
+          barsSvg += `
+            <circle cx="${cx}" cy="${padTop + plotHeight + 41}" r="4" fill="${dotColor}" />
+          `;
+        }
+
+        // 透明互動熱區（滑鼠懸停與點擊觸發浮動 Tooltip）
+        barsSvg += `
+          <rect x="${cx - colStep / 2}" y="${padTop - 18}" width="${colStep}" height="${plotHeight + 68}"
+                fill="transparent" style="cursor: pointer;"
+                onmouseenter="showDayTooltip(event, ${idx})"
+                onmousemove="moveFloatingTooltip(event)"
+                onmouseleave="hideFloatingTooltip()"
+                onclick="showDayTooltip(event, ${idx})" />
+        `;
+      });
+
+      wrapper.innerHTML = `
         <svg viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" height="${svgHeight}" class="block select-none">
-          ${gridHtml}
-          ${barsHtml}
+          ${gridSvg}
+          ${barsSvg}
         </svg>
       `;
-
-      // 更新預設檢視器內容
-      if (days[selectedInspectorDayIndex]) {
-        inspectStackedDay(selectedInspectorDayIndex);
-      }
-    }
-
-    function inspectStackedDay(idx) {
-      if (!latestSimulationResult || !latestSimulationResult.days[idx]) return;
-      selectedInspectorDayIndex = idx;
-      const d = latestSimulationResult.days[idx];
-
-      const titleEl = document.getElementById('inspector-title');
-      const badgesEl = document.getElementById('inspector-badges');
-
-      titleEl.innerHTML = `
-        <span class="text-indigo-700 font-extrabold">${d.md} (週${d.weekday})</span>
-        <span class="mx-1.5 text-slate-300">|</span>
-        <span class="text-slate-800 font-bold">${escapeHtml(d.modeBadgeText)}</span>
-        <span class="mx-1.5 text-slate-300">|</span>
-        <span class="text-slate-600">當日總產出：<strong class="text-slate-900">${d.totalProduced.toLocaleString()} kg</strong></span>
-      `;
-
-      badgesEl.innerHTML = `
-        <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold">一廠日: ${d.p1DayProduced.toLocaleString()} kg</span>
-        <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">一廠夜: ${d.p1NightProduced.toLocaleString()} kg</span>
-        <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">二廠日: ${d.p2DayProduced.toLocaleString()} kg</span>
-        <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">二廠夜: ${d.p2NightProduced.toLocaleString()} kg</span>
-      `;
     }
 
     // ============================================================================
-    // 視覺圖 2：訂單跨日進度甘特圖（含中斷與順延軌跡標示）
+    // 圖表 2：純 SVG 一二廠訂單跨日進度甘特圖（含原基準完工日垂直虛線）
     // ============================================================================
-    function renderGanttChart(sim) {
-      const container = document.getElementById('gantt-container');
-      const { days, p1SimOrders, p2SimOrders } = sim;
+    function renderGanttChartSVG(sim) {
+      const wrapper = document.getElementById('svg-gantt-wrapper');
+      const { days, p1OrdersSim, p2OrdersSim } = sim;
 
-      const allOrders = [
-        ...p1SimOrders.map(o => ({ ...o, plant: 'p1', plantLabel: '一廠' })),
-        ...p2SimOrders.map(o => ({ ...o, plant: 'p2', plantLabel: '二廠' }))
-      ];
-
+      const allOrders = [...p1OrdersSim, ...p2OrdersSim];
       if (allOrders.length === 0) {
-        container.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">目前無訂單可顯示甘特圖</div>`;
+        wrapper.innerHTML = `<div class="p-8 text-center text-xs text-slate-400">目前無訂單可顯示甘特圖</div>`;
         return;
       }
 
-      // 表頭日期列
-      const headerCols = days
-        .map(d => {
-          const eventMark =
-            d.eventCategory === 'wash'
-              ? '💧'
-              : d.eventCategory === 'maint'
-              ? '🔧'
-              : d.eventCategory === 'fault'
-              ? '⚠️'
-              : '';
-          const bgCls =
-            d.eventCategory === 'wash'
-              ? 'bg-sky-50 text-sky-900'
-              : d.eventCategory === 'maint'
-              ? 'bg-orange-50 text-orange-900'
-              : d.eventCategory === 'fault'
-              ? 'bg-rose-50 text-rose-900'
-              : 'bg-slate-50 text-slate-700';
+      const leftLabelW = 205;
+      const colStep = 38;
+      const padRight = 24;
+      const headerH = 44;
+      const rowH = 42;
+      const svgWidth = Math.max(840, leftLabelW + days.length * colStep + padRight);
+      const svgHeight = headerH + allOrders.length * rowH + 12;
 
-          return `
-            <th class="min-w-[44px] py-2 px-1 text-center border-l border-slate-200 ${bgCls}">
-              <div class="text-[11px] font-extrabold leading-tight">${d.md}</div>
-              <div class="text-[10px] font-semibold opacity-75">${eventMark || d.weekday}</div>
-            </th>
-          `;
-        })
-        .join('');
+      let svgContent = '';
 
-      // 每張訂單橫向時間軸
-      const bodyRows = allOrders
-        .map(o => {
-          const sliceByYmd = new Map();
-          o.dailySlices.forEach(s => sliceByYmd.set(s.ymd, s));
+      // 1. 繪製表頭日期與垂直網格背景
+      days.forEach((d, idx) => {
+        const x = leftLabelW + idx * colStep;
+        const cx = x + colStep / 2;
+        const isWeekend = d.weekday === '六' || d.weekday === '日';
 
-          const cells = days
-            .map(d => {
-              const slice = sliceByYmd.get(d.ymd);
-              if (slice) {
-                const kVal = (slice.kg / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-                const barColor =
-                  o.plant === 'p1'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-emerald-600 text-white';
-                const doneMark = slice.completed ? '✓' : '';
-                const hoverTip = `${o.name} | ${d.md}(${d.weekday}) 產出 ${slice.kg.toLocaleString()} kg（日 ${slice.dayKg.toLocaleString()} / 夜 ${slice.nightKg.toLocaleString()}）${slice.completed ? '【本日完工】' : ''}`;
+        let colTint = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+        let dotColor = '';
+        if (d.statusType === 'wash') {
+          colTint = 'rgba(14, 165, 233, 0.08)';
+          dotColor = '#0284c7';
+        } else if (d.statusType === 'maint') {
+          colTint = 'rgba(249, 115, 22, 0.10)';
+          dotColor = '#ea580c';
+        } else if (d.statusType === 'fault') {
+          colTint = 'rgba(244, 63, 94, 0.10)';
+          dotColor = '#e11d48';
+        }
 
-                return `
-                  <td
-                    class="p-1 border-l border-slate-200 text-center align-middle"
-                    onmouseenter="updateGanttHover('${escapeHtml(hoverTip)}')"
-                  >
-                    <div class="${barColor} rounded-md py-1 px-0.5 text-[10px] font-extrabold shadow-2xs cursor-pointer">
-                      ${kVal}${doneMark}
-                    </div>
-                  </td>
-                `;
+        svgContent += `
+          <rect x="${x}" y="0" width="${colStep}" height="${svgHeight}" fill="${colTint}" />
+          <line x1="${x}" y1="0" x2="${x}" y2="${svgHeight}" stroke="#e2e8f0" stroke-width="1" />
+          <text x="${cx}" y="17" text-anchor="middle" fill="${isWeekend ? '#e11d48' : '#334155'}" font-size="10.5" font-weight="800">${d.md}</text>
+          <text x="${cx}" y="31" text-anchor="middle" fill="${isWeekend ? '#e11d48' : '#64748b'}" font-size="9.5" font-weight="700">${d.weekday}</text>
+          ${dotColor ? `<circle cx="${cx}" cy="38" r="3" fill="${dotColor}" />` : ''}
+        `;
+      });
+
+      svgContent += `
+        <rect x="0" y="0" width="${leftLabelW}" height="${headerH}" fill="#f1f5f9" />
+        <text x="12" y="26" fill="#334155" font-size="12" font-weight="800">廠別 / 訂單名稱（含基準線）</text>
+        <line x1="0" y1="${headerH}" x2="${svgWidth}" y2="${headerH}" stroke="#cbd5e1" stroke-width="1.5" />
+      `;
+
+      // 2. 逐列繪製每張訂單的排產區間色塊與「原基準完工日垂直虛線」
+      allOrders.forEach((order, rIdx) => {
+        const yTop = headerH + rIdx * rowH;
+        const yMid = yTop + rowH / 2;
+        const isP1 = order.plant === 'p1';
+
+        svgContent += `
+          <line x1="0" y1="${yTop + rowH}" x2="${svgWidth}" y2="${yTop + rowH}" stroke="#e2e8f0" stroke-width="1" />
+          <rect x="8" y="${yTop + 8}" width="32" height="16" rx="4" fill="${isP1 ? '#e0e7ff' : '#d1fae5'}" />
+          <text x="24" y="${yTop + 19}" text-anchor="middle" fill="${isP1 ? '#3730a3' : '#065f46'}" font-size="9.5" font-weight="800">
+            ${isP1 ? '一廠' : '二廠'}
+          </text>
+          <text x="46" y="${yTop + 20}" fill="#0f172a" font-size="11.5" font-weight="800">${escapeHtml(order.name)}</text>
+          <text x="46" y="${yTop + 34}" fill="#64748b" font-size="10" font-weight="600">
+            ${order.totalKg.toLocaleString()}kg · ${
+              order.scheduledEnd ? `完 ${order.scheduledEnd.slice(5).replace('-', '/')}` : '跨出末日'
+            }
+          </text>
+        `;
+
+        // 繪製每日產出甘特條（分上下層呈現日夜班強度）
+        order.dailySlices.forEach((slice, sIdx) => {
+          const bx = leftLabelW + slice.dayIndex * colStep + 3;
+          const bw = colStep - 6;
+          const by = yTop + 7;
+          const bh = rowH - 14;
+
+          const baseFill = isP1 ? '#4f46e5' : '#10b981';
+          const nightFill = isP1 ? '#0ea5e9' : '#f59e0b';
+          const kLabel = (slice.kg / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+
+          svgContent += `
+            <g style="cursor: pointer;"
+               onmouseenter="showGanttSliceTooltip(event, '${order.plant}', '${order.id}', ${sIdx})"
+               onmousemove="moveFloatingTooltip(event)"
+               onmouseleave="hideFloatingTooltip()">
+              <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="5" fill="${baseFill}" />
+              ${
+                slice.nightKg > 0
+                  ? `<rect x="${bx}" y="${by + bh - 5}" width="${bw}" height="5" rx="2" fill="${nightFill}" />`
+                  : ''
               }
-
-              // 若落在此訂單開工日至完工日（或排程末日）之間，顯示中斷原因（洗防制 / 固定保養 / 互斥等待）
-              const inActiveSpan =
-                o.scheduledStart &&
-                d.ymd >= o.scheduledStart &&
-                (!o.scheduledEnd || d.ymd <= o.scheduledEnd);
-
-              if (inActiveSpan) {
-                let pauseTag = '順延';
-                let pauseStyle = 'pattern-pause text-slate-500';
-                if (d.eventCategory === 'wash') {
-                  pauseTag = '💧洗';
-                  pauseStyle = 'bg-sky-100/80 text-sky-800';
-                } else if (d.eventCategory === 'maint') {
-                  pauseTag = '🔧保';
-                  pauseStyle = 'bg-orange-100/80 text-orange-800';
-                } else if (d.eventCategory === 'fault') {
-                  pauseTag = '⚠️停';
-                  pauseStyle = 'bg-rose-100/80 text-rose-800';
-                }
-                return `
-                  <td class="p-1 border-l border-slate-200 text-center ${pauseStyle}">
-                    <span class="text-[10px] font-bold">${pauseTag}</span>
-                  </td>
-                `;
-              }
-
-              return `<td class="border-l border-slate-100 bg-white"></td>`;
-            })
-            .join('');
-
-          const plantBadge =
-            o.plant === 'p1'
-              ? 'bg-indigo-100 text-indigo-800'
-              : 'bg-emerald-100 text-emerald-800';
-
-          return `
-            <tr class="border-t border-slate-200 hover:bg-slate-50/70">
-              <td class="gantt-sticky-col bg-white py-2 px-3 min-w-[175px] max-w-[195px]">
-                <div class="flex items-center gap-1.5">
-                  <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold ${plantBadge}">${o.plantLabel}</span>
-                  <span class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(o.name)}</span>
-                </div>
-                <div class="text-[10px] text-slate-500 mt-0.5">
-                  ${o.totalKg.toLocaleString()} kg｜${
-                    o.scheduledEnd
-                      ? `${o.scheduledStart.slice(5).replace('-', '/')}→${o.scheduledEnd.slice(5).replace('-', '/')}`
-                      : '跨出排程末日'
-                  }
-                </div>
-              </td>
-              ${cells}
-            </tr>
+              <text x="${bx + bw / 2}" y="${by + bh / 2 + 3}" text-anchor="middle" fill="#ffffff" font-size="9.5" font-weight="800">
+                ${kLabel}${slice.completed ? '✓' : ''}
+              </text>
+            </g>
           `;
-        })
-        .join('');
+        });
 
-      container.innerHTML = `
-        <table class="border-collapse w-full text-xs">
-          <thead>
-            <tr class="border-b border-slate-300">
-              <th class="gantt-sticky-col bg-slate-100 py-2 px-3 text-left font-extrabold text-slate-700 min-w-[175px]">
-                廠別 / 訂單交期區間
-              </th>
-              ${headerCols}
-            </tr>
-          </thead>
-          <tbody>
-            ${bodyRows}
-          </tbody>
-        </table>
+        // 繪製「原基準完工日」垂直虛線標記
+        if (order.baselineEndIndex !== null && order.baselineEndIndex !== undefined && order.baselineEndIndex >= 0 && order.baselineEndIndex < days.length) {
+          const baseLineX = leftLabelW + (order.baselineEndIndex + 1) * colStep - 1;
+          svgContent += `
+            <line x1="${baseLineX}" y1="${yTop + 2}" x2="${baseLineX}" y2="${yTop + rowH - 2}"
+                  stroke="#e11d48" stroke-width="2" stroke-dasharray="4 3" />
+            <polygon points="${baseLineX - 4},${yTop + 2} ${baseLineX + 4},${yTop + 2} ${baseLineX},${yTop + 7}" fill="#e11d48" />
+          `;
+        }
+      });
+
+      wrapper.innerHTML = `
+        <svg viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" height="${svgHeight}" class="block select-none">
+          ${svgContent}
+        </svg>
       `;
     }
 
-    function updateGanttHover(text) {
-      document.getElementById('gantt-hover-detail').textContent = text;
+    // ============================================================================
+    // SVG 浮動提示框互動控制
+    // ============================================================================
+    function showDayTooltip(evt, dayIdx) {
+      if (!latestSimResult || !latestSimResult.days[dayIdx]) return;
+      const d = latestSimResult.days[dayIdx];
+      const tip = document.getElementById('svg-floating-tooltip');
+
+      const p1Detail = d.p1Lines.map(l => `<div>• ${escapeHtml(l.text)}</div>`).join('');
+      const p2Detail = d.p2Lines.map(l => `<div>• ${escapeHtml(l.text)}</div>`).join('');
+
+      tip.innerHTML = `
+        <div class="font-extrabold text-sm text-amber-300 border-b border-slate-700 pb-1 mb-1.5 flex items-center justify-between gap-2">
+          <span>${d.md} (週${d.weekday}) · ${escapeHtml(d.statusBadge)}</span>
+          <span class="text-white">合計 ${d.combinedDay.toLocaleString()} kg</span>
+        </div>
+        <div class="text-[11px] text-slate-300 mb-1.5">${escapeHtml(d.modeDescription)}</div>
+        <div class="space-y-1 text-[11px]">
+          <div class="text-indigo-300 font-bold">一廠 (日${d.p1DayProd.toLocaleString()} + 夜${d.p1NightProd.toLocaleString()})：</div>
+          <div class="text-slate-100 pl-1">${p1Detail}</div>
+          <div class="text-emerald-300 font-bold pt-1">二廠 (日${d.p2DayProd.toLocaleString()} + 夜${d.p2NightProd.toLocaleString()})：</div>
+          <div class="text-slate-100 pl-1">${p2Detail}</div>
+        </div>
+      `;
+
+      tip.classList.remove('opacity-0');
+      tip.classList.add('opacity-100');
+      moveFloatingTooltip(evt);
+    }
+
+    function showGanttSliceTooltip(evt, plant, orderId, sliceIdx) {
+      if (!latestSimResult) return;
+      const list = plant === 'p1' ? latestSimResult.p1OrdersSim : latestSimResult.p2OrdersSim;
+      const order = list.find(o => o.id === orderId);
+      if (!order || !order.dailySlices[sliceIdx]) return;
+
+      const s = order.dailySlices[sliceIdx];
+      const tip = document.getElementById('svg-floating-tooltip');
+      const baseEndLabel = order.baselineEnd ? order.baselineEnd.slice(5).replace('-', '/') : '無基準';
+      const newEndLabel = order.scheduledEnd ? order.scheduledEnd.slice(5).replace('-', '/') : '跨出末日';
+
+      tip.innerHTML = `
+        <div class="font-extrabold text-sm text-white border-b border-slate-700 pb-1 mb-1.5">
+          ${plant === 'p1' ? '一廠' : '二廠'} · ${escapeHtml(order.name)}（${s.md}）
+        </div>
+        <div class="space-y-1 text-[11px]">
+          <div>當日產出：<strong class="text-amber-300">${s.kg.toLocaleString()} kg</strong>（日班 ${s.dayKg.toLocaleString()} + 夜班 ${s.nightKg.toLocaleString()}）</div>
+          <div>訂單總量：${order.totalKg.toLocaleString()} kg ${s.completed ? '<span class="text-emerald-400 font-extrabold">【本日完工】</span>' : ''}</div>
+          <div class="pt-1 border-t border-slate-700 text-slate-300">
+            交期對比：原基準 <strong>${baseEndLabel}</strong> → 目前 <strong>${newEndLabel}</strong>（<span class="text-amber-300 font-bold">${escapeHtml(order.deltaText)}</span>）
+          </div>
+        </div>
+      `;
+
+      tip.classList.remove('opacity-0');
+      tip.classList.add('opacity-100');
+      moveFloatingTooltip(evt);
+    }
+
+    function moveFloatingTooltip(evt) {
+      const tip = document.getElementById('svg-floating-tooltip');
+      if (!evt || tip.classList.contains('opacity-0')) return;
+
+      const pad = 14;
+      const rect = tip.getBoundingClientRect();
+      let left = evt.clientX + pad;
+      let top = evt.clientY + pad;
+
+      if (left + rect.width > window.innerWidth - 12) {
+        left = Math.max(12, evt.clientX - rect.width - pad);
+      }
+      if (top + rect.height > window.innerHeight - 12) {
+        top = Math.max(12, evt.clientY - rect.height - pad);
+      }
+
+      tip.style.left = `${left}px`;
+      tip.style.top = `${top}px`;
+    }
+
+    function hideFloatingTooltip() {
+      const tip = document.getElementById('svg-floating-tooltip');
+      tip.classList.remove('opacity-100');
+      tip.classList.add('opacity-0');
     }
 
     // ============================================================================
-    // 訂單佇列卡片渲染（含交期提前/延後提示與排序調整）
+    // 一廠與二廠訂單佇列卡片渲染（含基準交期對比與一鍵置頂插單）
     // ============================================================================
-    function renderOrderLists(sim) {
-      const { p1SimOrders, p2SimOrders } = sim;
+    function renderOrderQueues(sim) {
+      document.getElementById('badge-p1-count').textContent = `${sim.p1OrdersSim.length} 筆`;
+      document.getElementById('badge-p2-count').textContent = `${sim.p2OrdersSim.length} 筆`;
 
-      document.getElementById('p1-order-count').textContent = `${p1SimOrders.length} 筆`;
-      document.getElementById('p2-order-count').textContent = `${p2SimOrders.length} 筆`;
-
-      const renderDeltaBadge = deltaInfo => {
-        if (!deltaInfo) return '';
-        if (deltaInfo.type === 'earlier') {
-          return `<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">⬇ ${deltaInfo.label}</span>`;
+      const renderDeltaPill = o => {
+        if (o.deltaStatus === 'earlier') {
+          return `<span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">⬇ ${escapeHtml(o.deltaText)}</span>`;
         }
-        if (deltaInfo.type === 'delayed') {
-          return `<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-extrabold">⬆ ${deltaInfo.label}</span>`;
+        if (o.deltaStatus === 'delayed') {
+          return `<span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 text-[11px] font-extrabold">⬆ ${escapeHtml(o.deltaText)}</span>`;
         }
-        if (deltaInfo.type === 'new') {
-          return `<span class="px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 text-[10px] font-extrabold">✨ ${deltaInfo.label}</span>`;
+        if (o.deltaStatus === 'new') {
+          return `<span class="px-2 py-0.5 rounded-md bg-sky-100 text-sky-900 text-[11px] font-extrabold">${escapeHtml(o.deltaText)}</span>`;
         }
-        return `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-semibold">${deltaInfo.label}</span>`;
+        return `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-bold">${escapeHtml(o.deltaText)}</span>`;
       };
 
-      // 一廠訂單列表
-      const p1ListEl = document.getElementById('p1-orders-list');
-      if (p1SimOrders.length === 0) {
-        p1ListEl.innerHTML = `<div class="text-xs text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-xl">目前無一廠訂單</div>`;
-      } else {
-        p1ListEl.innerHTML = p1SimOrders
-          .map((o, idx) => {
-            const startLabel = o.scheduledStart ? o.scheduledStart.slice(5).replace('-', '/') : '未排入';
-            const endLabel = o.scheduledEnd
-              ? o.scheduledEnd.slice(5).replace('-', '/')
-              : `尚餘 ${o.remaining.toLocaleString()} kg`;
+      const renderCard = (o, idx, totalLen, plant) => {
+        const isP1 = plant === 'p1';
+        const baseEnd = o.baselineEnd ? o.baselineEnd.slice(5).replace('-', '/') : '—';
+        const newEnd = o.scheduledEnd ? o.scheduledEnd.slice(5).replace('-', '/') : `餘 ${o.remaining.toLocaleString()}kg`;
+        const newStart = o.scheduledStart ? o.scheduledStart.slice(5).replace('-', '/') : '未開工';
 
-            return `
-              <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-1.5 min-w-0">
-                    <span class="w-5 h-5 rounded-md bg-indigo-600 text-white text-xs font-extrabold flex items-center justify-center shrink-0">${idx + 1}</span>
-                    <input
-                      type="text"
-                      value="${escapeHtml(o.name)}"
-                      onchange="editOrderField('p1', ${idx}, 'name', this.value)"
-                      class="w-24 sm:w-28 rounded border border-slate-300 bg-white px-2 py-0.5 text-xs font-extrabold text-slate-900"
-                    />
-                    <input
-                      type="number"
-                      value="${o.totalKg}"
-                      min="1"
-                      onchange="editOrderField('p1', ${idx}, 'totalKg', this.value)"
-                      class="w-24 rounded border border-slate-300 bg-white px-2 py-0.5 text-xs font-bold text-indigo-900"
-                    />
-                    <span class="text-[11px] text-slate-500">kg</span>
-                  </div>
-                  <div class="flex items-center gap-1 shrink-0">
-                    <button type="button" onclick="moveOrder('p1', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded border border-slate-300 bg-white text-xs font-bold disabled:opacity-30 cursor-pointer" title="上移優先">↑</button>
-                    <button type="button" onclick="moveOrder('p1', ${idx}, 1)" ${idx === p1SimOrders.length - 1 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded border border-slate-300 bg-white text-xs font-bold disabled:opacity-30 cursor-pointer" title="下移">↓</button>
-                    <button type="button" onclick="deleteOrder('p1', ${idx})" class="px-1.5 py-0.5 rounded border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold cursor-pointer" title="刪除">✕</button>
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-slate-200/80 text-[11px]">
-                  <div class="font-bold text-slate-700">
-                    預計：<span class="text-indigo-700">${startLabel}</span> → <span class="${o.scheduledEnd ? 'text-emerald-700' : 'text-amber-700'}">${endLabel}</span>
-                  </div>
-                  ${renderDeltaBadge(o.deltaInfo)}
-                </div>
+        return `
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-1.5">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="w-5 h-5 rounded-md ${isP1 ? 'bg-indigo-600' : 'bg-emerald-600'} text-white text-xs font-extrabold flex items-center justify-center">
+                  ${idx + 1}
+                </span>
+                <input
+                  type="text"
+                  value="${escapeHtml(o.name)}"
+                  onchange="updateOrderField('${plant}', ${idx}, 'name', this.value)"
+                  class="w-24 sm:w-28 rounded-lg border border-slate-300 bg-white px-2 py-0.5 text-xs font-extrabold text-slate-900"
+                />
+                ${
+                  !isP1
+                    ? `<input type="number" value="${o.boxes ?? ''}" step="0.5" min="0"
+                         onchange="updateOrderField('${plant}', ${idx}, 'boxes', this.value)"
+                         class="w-12 rounded-lg border border-slate-300 bg-white px-1 py-0.5 text-xs font-bold text-center"
+                         title="箱數 (×1260)" /><span class="text-[11px] text-slate-500">箱</span>`
+                    : ''
+                }
+                <input
+                  type="number"
+                  value="${o.totalKg}"
+                  min="1"
+                  onchange="updateOrderField('${plant}', ${idx}, 'totalKg', this.value)"
+                  class="w-20 sm:w-24 rounded-lg border border-slate-300 bg-white px-2 py-0.5 text-xs font-extrabold ${isP1 ? 'text-indigo-900' : 'text-emerald-900'}"
+                />
+                <span class="text-[11px] text-slate-500">kg</span>
               </div>
-            `;
-          })
-          .join('');
-      }
 
-      // 二廠訂單列表
-      const p2ListEl = document.getElementById('p2-orders-list');
-      if (p2SimOrders.length === 0) {
-        p2ListEl.innerHTML = `<div class="text-xs text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-xl">目前無二廠訂單（一廠將全開雙機）</div>`;
-      } else {
-        p2ListEl.innerHTML = p2SimOrders
-          .map((o, idx) => {
-            const startLabel = o.scheduledStart ? o.scheduledStart.slice(5).replace('-', '/') : '未排入';
-            const endLabel = o.scheduledEnd
-              ? o.scheduledEnd.slice(5).replace('-', '/')
-              : `尚餘 ${o.remaining.toLocaleString()} kg`;
-
-            return `
-              <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-2">
-                <div class="flex items-center justify-between gap-1.5">
-                  <div class="flex flex-wrap items-center gap-1 min-w-0">
-                    <span class="w-5 h-5 rounded-md bg-emerald-600 text-white text-xs font-extrabold flex items-center justify-center shrink-0">${idx + 1}</span>
-                    <input
-                      type="text"
-                      value="${escapeHtml(o.name)}"
-                      onchange="editOrderField('p2', ${idx}, 'name', this.value)"
-                      class="w-20 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-xs font-extrabold text-slate-900"
-                    />
-                    <input
-                      type="number"
-                      value="${o.boxes ?? ''}"
-                      step="0.5"
-                      min="0"
-                      onchange="editOrderField('p2', ${idx}, 'boxes', this.value)"
-                      class="w-12 rounded border border-slate-300 bg-white px-1 py-0.5 text-xs font-bold text-center"
-                      title="箱數 (×1260)"
-                    />
-                    <span class="text-[10px] text-slate-500">箱</span>
-                    <input
-                      type="number"
-                      value="${o.totalKg}"
-                      min="1"
-                      onchange="editOrderField('p2', ${idx}, 'totalKg', this.value)"
-                      class="w-20 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-xs font-bold text-emerald-900"
-                    />
-                    <span class="text-[10px] text-slate-500">kg</span>
-                  </div>
-                  <div class="flex items-center gap-1 shrink-0">
-                    <button type="button" onclick="moveOrder('p2', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded border border-slate-300 bg-white text-xs font-bold disabled:opacity-30 cursor-pointer">↑</button>
-                    <button type="button" onclick="moveOrder('p2', ${idx}, 1)" ${idx === p2SimOrders.length - 1 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded border border-slate-300 bg-white text-xs font-bold disabled:opacity-30 cursor-pointer">↓</button>
-                    <button type="button" onclick="deleteOrder('p2', ${idx})" class="px-1.5 py-0.5 rounded border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold cursor-pointer">✕</button>
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
-                  <select
-                    onchange="editOrderField('p2', ${idx}, 'shiftMode', this.value)"
-                    class="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] font-bold text-slate-700"
-                  >
-                    <option value="double" ${o.shiftMode === 'double' ? 'selected' : ''}>日+夜雙班 (6,000)</option>
-                    <option value="single" ${o.shiftMode === 'single' ? 'selected' : ''}>僅日班 (3,000)</option>
-                    <option value="first_single_then_double" ${o.shiftMode === 'first_single_then_double' ? 'selected' : ''}>首日日班/後雙班</option>
-                  </select>
-                  <div class="flex items-center gap-1">
-                    <span class="text-[10px] text-slate-500">開工:</span>
-                    <input
-                      type="date"
-                      value="${o.earliestStart || ''}"
-                      onchange="editOrderField('p2', ${idx}, 'earliestStart', this.value)"
-                      class="rounded border border-slate-300 bg-white px-1 py-0.5 text-[10px] font-semibold"
-                    />
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-slate-200/80 text-[11px]">
-                  <div class="font-bold text-slate-700">
-                    預計：<span class="text-emerald-700">${startLabel}</span> → <span class="${o.scheduledEnd ? 'text-emerald-700' : 'text-amber-700'}">${endLabel}</span>
-                  </div>
-                  ${renderDeltaBadge(o.deltaInfo)}
-                </div>
+              <div class="flex items-center gap-1">
+                ${
+                  idx > 0
+                    ? `<button type="button" onclick="pinOrderTop('${plant}', ${idx})" class="px-2 py-0.5 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold cursor-pointer" title="置頂最優先插單">🔥 置頂插單</button>`
+                    : ''
+                }
+                <button type="button" onclick="moveOrder('${plant}', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded border border-slate-300 bg-white text-xs font-bold disabled:opacity-30 cursor-pointer">↑</button>
+                <button type="button" onclick="moveOrder('${plant}', ${idx}, 1)" ${idx === totalLen - 1 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded border border-slate-300 bg-white text-xs font-bold disabled:opacity-30 cursor-pointer">↓</button>
+                <button type="button" onclick="deleteOrder('${plant}', ${idx})" class="px-1.5 py-0.5 rounded border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold cursor-pointer">✕</button>
               </div>
-            `;
-          })
-          .join('');
-      }
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-500">最早開工:</span>
+                <input
+                  type="date"
+                  value="${o.earliestStart || ''}"
+                  onchange="updateOrderField('${plant}', ${idx}, 'earliestStart', this.value)"
+                  class="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] font-semibold"
+                />
+                <select
+                  onchange="updateOrderField('${plant}', ${idx}, 'shiftRule', this.value)"
+                  class="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] font-bold text-slate-700"
+                >
+                  <option value="both" ${o.shiftRule === 'both' ? 'selected' : ''}>日夜雙班</option>
+                  <option value="day_only" ${o.shiftRule === 'day_only' ? 'selected' : ''}>僅日班</option>
+                  <option value="night_only" ${o.shiftRule === 'night_only' ? 'selected' : ''}>僅夜班</option>
+                </select>
+              </div>
+              <div class="text-slate-500 font-semibold">開工 ${newStart}</div>
+            </div>
+
+            <!-- 基準交期對比列 -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-slate-200/80 text-xs">
+              <div class="font-bold text-slate-700">
+                交期：<span class="text-slate-500">原 ${baseEnd}</span>
+                <span class="mx-1 text-slate-400">→</span>
+                <span class="${o.scheduledEnd ? 'text-slate-900 font-extrabold' : 'text-amber-700 font-extrabold'}">新 ${newEnd}</span>
+              </div>
+              ${renderDeltaPill(o)}
+            </div>
+          </div>
+        `;
+      };
+
+      const p1Container = document.getElementById('list-p1-orders');
+      p1Container.innerHTML =
+        sim.p1OrdersSim.length > 0
+          ? sim.p1OrdersSim.map((o, i) => renderCard(o, i, sim.p1OrdersSim.length, 'p1')).join('')
+          : `<div class="text-xs text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-xl">目前無一廠訂單</div>`;
+
+      const p2Container = document.getElementById('list-p2-orders');
+      p2Container.innerHTML =
+        sim.p2OrdersSim.length > 0
+          ? sim.p2OrdersSim.map((o, i) => renderCard(o, i, sim.p2OrdersSim.length, 'p2')).join('')
+          : `<div class="text-xs text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-xl">目前無二廠訂單</div>`;
     }
 
     // ============================================================================
-    // 每日排程明細表渲染
+    // 五、每日排程算式明細表渲染
     // ============================================================================
-    function renderDetailTable(sim) {
-      const tbody = document.getElementById('schedule-detail-tbody');
+    function renderDailyTable(sim) {
+      const tbody = document.getElementById('tbody-daily-schedule');
 
       tbody.innerHTML = sim.days
         .map(d => {
           let rowBg = 'bg-white hover:bg-slate-50';
-          if (d.eventCategory === 'wash') rowBg = 'bg-sky-50/80 hover:bg-sky-100/70';
-          else if (d.eventCategory === 'maint') rowBg = 'bg-orange-50/80 hover:bg-orange-100/70';
-          else if (d.eventCategory === 'fault') rowBg = 'bg-rose-50/80 hover:bg-rose-100/70';
+          let badgeCls = 'bg-slate-100 text-slate-700 border-slate-200';
+          if (d.statusType === 'wash') {
+            rowBg = 'bg-sky-50/75 hover:bg-sky-100/60';
+            badgeCls = 'bg-sky-100 text-sky-900 border-sky-300';
+          } else if (d.statusType === 'maint') {
+            rowBg = 'bg-orange-50/75 hover:bg-orange-100/60';
+            badgeCls = 'bg-orange-100 text-orange-900 border-orange-300';
+          } else if (d.statusType === 'fault') {
+            rowBg = 'bg-rose-50/75 hover:bg-rose-100/60';
+            badgeCls = 'bg-rose-100 text-rose-900 border-rose-300';
+          }
 
           const isWeekend = d.weekday === '六' || d.weekday === '日';
 
-          const optionsHtml = DAY_OVERRIDE_MODES.map(
+          const selectOpts = DAY_OVERRIDE_OPTIONS.map(
             opt => `<option value="${opt.value}" ${d.overrideVal === opt.value ? 'selected' : ''}>${opt.label}</option>`
           ).join('');
 
-          const p1Html = d.p1Lines
-            .map(l => {
-              if (l.muted) {
-                return `<div class="text-xs text-slate-400 italic">${escapeHtml(l.text)}</div>`;
-              }
-              return `
-                <div class="font-bold text-indigo-950 text-xs sm:text-sm">
-                  ${escapeHtml(l.text)}${
-                    l.completed
-                      ? '<span class="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-extrabold">完成</span>'
-                      : ''
-                  }
-                </div>
-              `;
-            })
+          const p1LinesHtml = d.p1Lines
+            .map(l =>
+              l.muted
+                ? `<div class="text-xs text-slate-400 italic">${escapeHtml(l.text)}</div>`
+                : `<div class="text-xs sm:text-sm font-bold text-indigo-950">
+                     ${escapeHtml(l.text)}
+                     ${l.completed ? '<span class="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-extrabold">完成</span>' : ''}
+                   </div>`
+            )
             .join('');
 
-          const p2Html = d.p2Lines
-            .map(l => {
-              if (l.muted) {
-                return `<div class="text-xs text-slate-400 italic">${escapeHtml(l.text)}</div>`;
-              }
-              return `
-                <div class="font-bold text-emerald-950 text-xs sm:text-sm">
-                  ${escapeHtml(l.text)}${
-                    l.completed
-                      ? '<span class="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-extrabold">完成</span>'
-                      : ''
-                  }
-                </div>
-              `;
-            })
+          const p2LinesHtml = d.p2Lines
+            .map(l =>
+              l.muted
+                ? `<div class="text-xs text-slate-400 italic">${escapeHtml(l.text)}</div>`
+                : `<div class="text-xs sm:text-sm font-bold text-emerald-950">
+                     ${escapeHtml(l.text)}
+                     ${l.completed ? '<span class="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-extrabold">完成</span>' : ''}
+                   </div>`
+            )
             .join('');
 
           return `
             <tr class="${rowBg} transition-colors">
-              <td class="py-2.5 px-3 text-center font-extrabold ${isWeekend ? 'text-rose-600' : 'text-slate-900'} whitespace-nowrap">
-                ${d.md}
+              <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                <span class="font-extrabold ${isWeekend ? 'text-rose-600' : 'text-slate-900'}">${d.md}</span>
+                <span class="ml-1 text-xs font-bold ${isWeekend ? 'text-rose-600' : 'text-slate-500'}">(${d.weekday})</span>
               </td>
-              <td class="py-2.5 px-2 text-center font-bold ${isWeekend ? 'text-rose-600' : 'text-slate-600'} whitespace-nowrap">
-                ${d.weekday}
+              <td class="py-2.5 px-2.5 text-center whitespace-nowrap">
+                <span class="inline-block px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${badgeCls}">
+                  ${escapeHtml(d.statusBadge)}
+                </span>
               </td>
               <td class="py-2.5 px-3">
                 <select
-                  onchange="onDayOverrideChange('${d.ymd}', this.value)"
+                  onchange="onDayOverrideSelect('${d.ymd}', this.value)"
                   class="w-full rounded-lg border ${
                     d.overrideVal !== 'auto'
                       ? 'border-rose-400 bg-rose-50 text-rose-900 font-extrabold'
                       : 'border-slate-300 bg-white text-slate-800 font-semibold'
                   } px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                 >
-                  ${optionsHtml}
+                  ${selectOpts}
                 </select>
-                <div class="mt-1 text-[11px] font-bold text-slate-500">${escapeHtml(d.modeBadgeText)}</div>
+                <div class="text-[11px] text-slate-500 font-semibold mt-0.5 truncate" title="${escapeHtml(d.modeDescription)}">
+                  ${escapeHtml(d.modeDescription)}
+                </div>
               </td>
-              <td class="py-2.5 px-4 space-y-1">${p1Html}</td>
-              <td class="py-2.5 px-4 space-y-1">${p2Html}</td>
+              <td class="py-2.5 px-3.5 space-y-1">${p1LinesHtml}</td>
+              <td class="py-2.5 px-3.5 space-y-1">${p2LinesHtml}</td>
+              <td class="py-2.5 px-3 text-right whitespace-nowrap">
+                <div class="font-extrabold text-sm ${d.combinedDay >= 14000 ? 'text-amber-700' : 'text-slate-900'}">
+                  ${d.combinedDay.toLocaleString()} kg
+                </div>
+                ${
+                  d.combinedDay >= 14000
+                    ? '<span class="inline-block px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 text-[10px] font-extrabold">高產能併行</span>'
+                    : ''
+                }
+              </td>
             </tr>
           `;
         })
@@ -2035,377 +2019,338 @@
     }
 
     // ============================================================================
-    // 使用者互動事件處理
+    // 使用者互動事件控制
     // ============================================================================
-    function switchChartTab(tab) {
-      activeChartTab = tab;
-      const btnStacked = document.getElementById('tab-btn-stacked');
-      const btnGantt = document.getElementById('tab-btn-gantt');
-      const panelStacked = document.getElementById('chart-panel-stacked');
-      const panelGantt = document.getElementById('chart-panel-gantt');
-
-      if (tab === 'stacked') {
-        btnStacked.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition bg-white text-indigo-700 shadow-xs cursor-pointer';
-        btnGantt.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 cursor-pointer';
-        panelStacked.classList.remove('hidden');
-        panelGantt.classList.add('hidden');
-      } else {
-        btnGantt.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition bg-white text-indigo-700 shadow-xs cursor-pointer';
-        btnStacked.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900 cursor-pointer';
-        panelGantt.classList.remove('hidden');
-        panelStacked.classList.add('hidden');
-      }
-    }
-
-    function switchNewOrderUnit(mode) {
-      newOrderUnitMode = mode;
-      const btnKg = document.getElementById('unit-btn-kg');
-      const btnBox = document.getElementById('unit-btn-box');
-      const label = document.getElementById('new-order-qty-label');
-      const input = document.getElementById('new-order-qty');
-      const hint = document.getElementById('new-order-calc-hint');
-
-      if (mode === 'kg') {
-        btnKg.className = 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs cursor-pointer';
-        btnBox.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer';
-        label.textContent = '訂單總公斤數 (kg)';
-        input.placeholder = '例如：15000';
-        hint.classList.add('hidden');
-      } else {
-        btnBox.className = 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs cursor-pointer';
-        btnKg.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer';
-        label.textContent = '訂單箱數 (1箱 = 1,260 kg)';
-        input.placeholder = '例如：12';
-        hint.classList.remove('hidden');
-        updateNewOrderPreviewKg();
-      }
-    }
-
-    function updateNewOrderPreviewKg() {
-      if (newOrderUnitMode !== 'box') return;
-      const boxes = Number(document.getElementById('new-order-qty').value) || 0;
-      const kg = Math.round(boxes * KG_PER_BOX);
-      document.getElementById('new-order-calc-hint').textContent = `= ${kg.toLocaleString()} kg`;
-    }
-
-    function onNewOrderPlantChange() {
-      const plant = document.getElementById('new-order-plant').value;
-      const shiftWrap = document.getElementById('new-order-p2-shift-wrap');
-      if (plant === 'p2') {
-        shiftWrap.classList.remove('hidden');
-      } else {
-        shiftWrap.classList.add('hidden');
-      }
-    }
-
-    function submitNewOrder(isUrgent) {
-      const plant = document.getElementById('new-order-plant').value;
-      const nameInput = document.getElementById('new-order-name');
-      const qtyInput = document.getElementById('new-order-qty');
-      const startInput = document.getElementById('new-order-start');
-      const shiftSelect = document.getElementById('new-order-shift');
-
-      const name = nameInput.value.trim();
-      const rawQty = Number(qtyInput.value);
-
-      if (!name) {
-        showToast('請輸入客戶或訂單名稱');
-        nameInput.focus();
-        return;
-      }
-      if (!rawQty || rawQty <= 0) {
-        showToast('請輸入大於 0 的數量');
-        qtyInput.focus();
-        return;
-      }
-
-      captureOrderSnapshot();
-
-      const totalKg = newOrderUnitMode === 'box' ? Math.round(rawQty * KG_PER_BOX) : Math.round(rawQty);
-      const boxes = newOrderUnitMode === 'box' ? rawQty : +(totalKg / KG_PER_BOX).toFixed(2);
-      const earliestStart = startInput.value || (isUrgent ? appState.startDate : '');
-
-      const newOrderObj = {
-        id: `${plant}-${Date.now()}`,
-        name,
-        boxes,
-        totalKg,
-        earliestStart,
-        shiftMode: plant === 'p2' ? shiftSelect.value : 'double'
+    function selectGlobalStrategy(code) {
+      appState.globalStrategy = code;
+      renderAll(false);
+      const names = {
+        A: '策略 A（推薦高產能併行：一廠日雙夜單8k＋二廠6k＝14k）',
+        B: '策略 B（固定雙廠最大併行）',
+        C: '策略 C（保守電力/雙單機模式）'
       };
-
-      const targetArray = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
-      if (isUrgent) {
-        targetArray.unshift(newOrderObj);
-      } else {
-        targetArray.push(newOrderObj);
-      }
-
-      nameInput.value = '';
-      qtyInput.value = '';
-      startInput.value = '';
-      updateNewOrderPreviewKg();
-
-      renderAll();
-      showToast(
-        isUrgent
-          ? `🔥 已緊急插單置頂：「${name}」(${totalKg.toLocaleString()} kg)，交期已全面重算！`
-          : `➕ 已新增訂單：「${name}」(${totalKg.toLocaleString()} kg)`
-      );
+      showToast(`已切換為 ${names[code]}`);
     }
 
-    function editOrderField(plant, idx, field, val) {
-      const arr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
-      const order = arr[idx];
-      if (!order) return;
-
-      captureOrderSnapshot();
-
-      if (field === 'boxes') {
-        const b = Math.max(0, Number(val) || 0);
-        order.boxes = b;
-        if (b > 0) order.totalKg = Math.round(b * KG_PER_BOX);
-      } else if (field === 'totalKg') {
-        const kg = Math.max(1, Number(val) || 0);
-        order.totalKg = kg;
-        order.boxes = +(kg / KG_PER_BOX).toFixed(2);
-      } else if (field === 'name') {
-        order.name = val.trim() || '未命名訂單';
-      } else {
-        order[field] = val;
-      }
-
-      renderAll();
-      showToast(`已更新「${order.name}」並重算全廠交期`);
-    }
-
-    function moveOrder(plant, idx, direction) {
-      const arr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
-      const target = idx + direction;
-      if (target < 0 || target >= arr.length) return;
-
-      captureOrderSnapshot();
-      [arr[idx], arr[target]] = [arr[target], arr[idx]];
-      renderAll();
-      showToast('已調整訂單生產優先順序');
-    }
-
-    function deleteOrder(plant, idx) {
-      const arr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
-      const removed = arr[idx];
-      if (!removed) return;
-
-      captureOrderSnapshot();
-      arr.splice(idx, 1);
-      renderAll();
-      showToast(`已移除訂單「${removed.name}」`);
-    }
-
-    function onRuleParamChange() {
-      captureOrderSnapshot();
-
+    function onGlobalConfigChange() {
       appState.startDate = document.getElementById('cfg-start-date').value || appState.startDate;
       appState.daysCount = Math.max(7, Math.min(90, Number(document.getElementById('cfg-days-count').value) || 30));
-      appState.p1ShiftCap = Math.max(100, Number(document.getElementById('cfg-p1-cap').value) || 2500);
-      appState.p2ShiftCap = Math.max(100, Number(document.getElementById('cfg-p2-cap').value) || 3000);
-
       appState.washAnchorDate = document.getElementById('cfg-wash-anchor').value || appState.washAnchorDate;
       appState.washIntervalDays = Math.max(1, Number(document.getElementById('cfg-wash-interval').value) || 14);
       appState.washMode = document.getElementById('cfg-wash-mode').value;
 
-      appState.maintCycleType = document.getElementById('cfg-maint-type').value;
-      appState.maintCycleParam = Math.max(1, Number(document.getElementById('cfg-maint-param').value) || 30);
-      appState.maintAnchorDate = document.getElementById('cfg-maint-anchor').value || appState.maintAnchorDate;
-      appState.maintDurationDays = Math.max(1, Number(document.getElementById('cfg-maint-duration').value) || 1);
-      appState.maintScope = document.getElementById('cfg-maint-scope').value;
+      appState.maintCycleType = document.getElementById('cfg-maint-cycle-type').value;
+      appState.maintCycleParam = Math.max(1, Number(document.getElementById('cfg-maint-cycle-param').value) || 30);
+      appState.maintCycleMode = document.getElementById('cfg-maint-cycle-mode').value;
 
-      renderAll();
-      showToast('規則參數已更新並連動重繪排程');
+      renderAll(false);
+      showToast('排程參數已更新，圖表與交期已即時連動重算');
     }
 
-    function quickSetDays(days) {
-      captureOrderSnapshot();
-      appState.daysCount = days;
-      renderAll();
-    }
+    function addCustomMaintRange() {
+      const startDate = document.getElementById('new-maint-date').value;
+      const days = Math.max(1, Number(document.getElementById('new-maint-days').value) || 1);
+      const mode = document.getElementById('new-maint-mode').value;
 
-    function addManualWashDate() {
-      const val = document.getElementById('manual-wash-date-input').value;
-      if (!val) {
-        showToast('請先選擇要指定洗防制的日期');
+      if (!startDate) {
+        showToast('請先選擇保養起始日期');
         return;
       }
-      if (!appState.manualWashDates.includes(val)) {
-        captureOrderSnapshot();
-        appState.manualWashDates.push(val);
-        renderAll();
-        showToast(`已新增指定洗防制日：${val}`);
-      }
-    }
 
-    function removeManualWashDate(ymd) {
-      captureOrderSnapshot();
-      appState.manualWashDates = appState.manualWashDates.filter(d => d !== ymd);
-      renderAll();
-      showToast(`已移除指定洗防制日：${ymd}`);
-    }
-
-    function addManualMaintRange() {
-      const start = document.getElementById('manual-maint-start').value;
-      const days = Math.max(1, Number(document.getElementById('manual-maint-days').value) || 1);
-      const scope = document.getElementById('manual-maint-scope').value;
-      if (!start) {
-        showToast('請先選擇固定保養起始日期');
-        return;
-      }
-      captureOrderSnapshot();
-      appState.manualMaintRanges.push({
+      appState.customMaintRanges.push({
         id: 'maint-' + Date.now(),
-        startDate: start,
+        startDate,
         days,
-        scope
+        mode
       });
-      renderAll();
-      showToast(`已加入固定保養區間：${start} 起 ${days} 天`);
+      renderAll(false);
+      showToast(`🔧 已新增固定保養：${startDate} 起 ${days} 天`);
     }
 
-    function removeManualMaintRange(idx) {
-      captureOrderSnapshot();
-      appState.manualMaintRanges.splice(idx, 1);
-      renderAll();
+    function removeCustomMaintRange(idx) {
+      appState.customMaintRanges.splice(idx, 1);
+      renderAll(false);
       showToast('已移除該固定保養區間');
     }
 
-    function onDayOverrideChange(ymd, modeVal) {
-      captureOrderSnapshot();
+    function switchChartView(view) {
+      activeChartView = view;
+      const btnStacked = document.getElementById('btn-tab-stacked');
+      const btnGantt = document.getElementById('btn-tab-gantt');
+      const viewStacked = document.getElementById('view-stacked-chart');
+      const viewGantt = document.getElementById('view-gantt-chart');
+
+      if (view === 'stacked') {
+        btnStacked.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-indigo-700 shadow-xs cursor-pointer';
+        btnGantt.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition text-slate-600 hover:text-slate-900 cursor-pointer';
+        viewStacked.classList.remove('hidden');
+        viewGantt.classList.add('hidden');
+      } else {
+        btnGantt.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition bg-white text-indigo-700 shadow-xs cursor-pointer';
+        btnStacked.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition text-slate-600 hover:text-slate-900 cursor-pointer';
+        viewGantt.classList.remove('hidden');
+        viewStacked.classList.add('hidden');
+      }
+    }
+
+    function setOrderInputUnit(unit) {
+      orderInputUnit = unit;
+      const btnKg = document.getElementById('btn-unit-kg');
+      const btnBox = document.getElementById('btn-unit-box');
+      const lblQty = document.getElementById('lbl-order-qty');
+      const inpQty = document.getElementById('inp-order-qty');
+      const preview = document.getElementById('lbl-box-preview');
+
+      if (unit === 'kg') {
+        btnKg.className = 'px-3 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer';
+        btnBox.className = 'px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer';
+        lblQty.textContent = '數量 (kg)';
+        inpQty.placeholder = '例如：12000';
+        preview.classList.add('hidden');
+      } else {
+        btnBox.className = 'px-3 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer';
+        btnKg.className = 'px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer';
+        lblQty.textContent = '箱數 (×1,260 kg)';
+        inpQty.placeholder = '例如：10';
+        preview.classList.remove('hidden');
+        updateOrderBoxHint();
+      }
+    }
+
+    function updateOrderBoxHint() {
+      if (orderInputUnit !== 'box') return;
+      const boxes = Number(document.getElementById('inp-order-qty').value) || 0;
+      document.getElementById('lbl-box-preview').textContent = `= ${Math.round(boxes * KG_PER_BOX).toLocaleString()} kg`;
+    }
+
+    function handleAddOrder() {
+      const plant = document.getElementById('inp-order-plant').value;
+      const nameInp = document.getElementById('inp-order-name');
+      const qtyInp = document.getElementById('inp-order-qty');
+      const startInp = document.getElementById('inp-order-start');
+      const shiftSel = document.getElementById('inp-order-shift');
+      const urgentChk = document.getElementById('chk-urgent-order');
+
+      const name = nameInp.value.trim();
+      const rawQty = Number(qtyInp.value);
+
+      if (!name) {
+        showToast('請輸入客戶或品名');
+        nameInp.focus();
+        return;
+      }
+      if (!rawQty || rawQty <= 0) {
+        showToast('請輸入大於 0 的數量');
+        qtyInp.focus();
+        return;
+      }
+
+      const totalKg = orderInputUnit === 'box' ? Math.round(rawQty * KG_PER_BOX) : Math.round(rawQty);
+      const boxes = orderInputUnit === 'box' ? rawQty : +(totalKg / KG_PER_BOX).toFixed(2);
+      const isUrgent = urgentChk.checked;
+
+      const newOrder = {
+        id: `${plant}-${Date.now()}`,
+        name,
+        boxes,
+        totalKg,
+        earliestStart: startInp.value || '',
+        shiftRule: shiftSel.value
+      };
+
+      const targetArr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
+      if (isUrgent) {
+        targetArr.unshift(newOrder);
+      } else {
+        targetArr.push(newOrder);
+      }
+
+      nameInp.value = '';
+      qtyInp.value = '';
+      startInp.value = '';
+      urgentChk.checked = false;
+      updateOrderBoxHint();
+
+      renderAll(false);
+      showToast(
+        isUrgent
+          ? `🔥 已緊急插單置頂：「${name}」(${totalKg.toLocaleString()} kg)，交期變化已更新！`
+          : `➕ 已新增訂單：「${name}」(${totalKg.toLocaleString()} kg)`
+      );
+    }
+
+    function updateOrderField(plant, idx, field, val) {
+      const arr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
+      const o = arr[idx];
+      if (!o) return;
+
+      if (field === 'boxes') {
+        const b = Math.max(0, Number(val) || 0);
+        o.boxes = b;
+        if (b > 0) o.totalKg = Math.round(b * KG_PER_BOX);
+      } else if (field === 'totalKg') {
+        const kg = Math.max(1, Number(val) || 0);
+        o.totalKg = kg;
+        o.boxes = +(kg / KG_PER_BOX).toFixed(2);
+      } else if (field === 'name') {
+        o.name = val.trim() || '未命名訂單';
+      } else {
+        o[field] = val;
+      }
+
+      renderAll(false);
+      showToast(`已更新「${o.name}」並重算交期`);
+    }
+
+    function pinOrderTop(plant, idx) {
+      const arr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
+      if (idx <= 0 || idx >= arr.length) return;
+      const [item] = arr.splice(idx, 1);
+      arr.unshift(item);
+      renderAll(false);
+      showToast(`🔥 已將「${item.name}」置頂最優先排產！`);
+    }
+
+    function moveOrder(plant, idx, dir) {
+      const arr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
+      const target = idx + dir;
+      if (target < 0 || target >= arr.length) return;
+      [arr[idx], arr[target]] = [arr[target], arr[idx]];
+      renderAll(false);
+    }
+
+    function deleteOrder(plant, idx) {
+      const arr = plant === 'p1' ? appState.p1Orders : appState.p2Orders;
+      const [removed] = arr.splice(idx, 1);
+      renderAll(false);
+      if (removed) showToast(`已刪除訂單「${removed.name}」`);
+    }
+
+    function onDayOverrideSelect(ymd, modeVal) {
       if (modeVal === 'auto') {
         delete appState.dayOverrides[ymd];
       } else {
         appState.dayOverrides[ymd] = modeVal;
       }
-      renderAll();
+      renderAll(false);
       showToast(`已更新 ${ymd.slice(5).replace('-', '/')} 單日排程模式`);
     }
 
-    function clearAllDayOverrides() {
+    function resetAllDayOverrides() {
       if (Object.keys(appState.dayOverrides).length === 0) {
-        showToast('目前沒有任何單日手動覆寫');
+        showToast('目前無任何單日手動覆寫');
         return;
       }
-      captureOrderSnapshot();
       appState.dayOverrides = {};
-      renderAll();
-      showToast('已清除所有單日手動覆寫');
+      renderAll(false);
+      showToast('已重置所有單日手動覆寫');
     }
 
     // ============================================================================
-    // 匯出 Excel (.csv)、儲存與重設預設資料
+    // 匯出 Excel (.csv)、儲存與重設
     // ============================================================================
     function exportScheduleCSV() {
-      if (!latestSimulationResult) return;
+      if (!latestSimResult) return;
 
       const headers = [
         '日期',
         '星期',
-        '排程模式',
-        '一廠日班產出(kg)',
-        '一廠夜班產出(kg)',
-        '二廠日班產出(kg)',
-        '二廠夜班產出(kg)',
-        '當日總產出(kg)',
-        '一廠生產明細',
-        '二廠生產明細'
+        '狀態標記',
+        '排程模式說明',
+        '一廠日班(kg)',
+        '一廠夜班(kg)',
+        '一廠生產算式明細',
+        '二廠日班(kg)',
+        '二廠夜班(kg)',
+        '二廠生產算式明細',
+        '當日雙廠總產出(kg)'
       ];
 
-      const csvRows = [headers.join(',')];
+      const rows = [headers.join(',')];
 
-      latestSimulationResult.days.forEach(d => {
-        const p1Detail = d.p1Lines
-          .map(l => l.text + (l.completed ? ' [完成]' : ''))
-          .join(' / ');
-        const p2Detail = d.p2Lines
-          .map(l => l.text + (l.completed ? ' [完成]' : ''))
-          .join(' / ');
+      latestSimResult.days.forEach(d => {
+        const p1Str = d.p1Lines.map(l => l.text + (l.completed ? ' [完成]' : '')).join(' / ');
+        const p2Str = d.p2Lines.map(l => l.text + (l.completed ? ' [完成]' : '')).join(' / ');
 
-        const row = [
-          `"${d.ymd}"`,
-          `"${d.weekday}"`,
-          `"${d.modeBadgeText.replace(/"/g, '""')}"`,
-          d.p1DayProduced,
-          d.p1NightProduced,
-          d.p2DayProduced,
-          d.p2NightProduced,
-          d.totalProduced,
-          `"${p1Detail.replace(/"/g, '""')}"`,
-          `"${p2Detail.replace(/"/g, '""')}"`
-        ];
-        csvRows.push(row.join(','));
+        rows.push(
+          [
+            `"${d.ymd}"`,
+            `"${d.weekday}"`,
+            `"${d.statusBadge}"`,
+            `"${d.modeDescription.replace(/"/g, '""')}"`,
+            d.p1DayProd,
+            d.p1NightProd,
+            `"${p1Str.replace(/"/g, '""')}"`,
+            d.p2DayProd,
+            d.p2NightProd,
+            `"${p2Str.replace(/"/g, '""')}"`,
+            d.combinedDay
+          ].join(',')
+        );
       });
 
-      const csvContent = '\uFEFF' + csvRows.join('\n');
+      const csvContent = '\uFEFF' + rows.join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `一二廠智慧連動生產排程表_${appState.startDate}.csv`;
+      a.download = `彥泰企業_一二廠智慧生產排程表_${appState.startDate}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showToast('已匯出 Excel (.csv) 排程明細表！');
+      showToast('📥 已成功匯出 Excel (.csv) 排程明細表！');
     }
 
     function saveToLocalStorage() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-        showToast('已將目前訂單與保養/洗防制設定儲存於本機瀏覽器');
+        showToast('💾 已儲存目前排程設定與訂單至本機瀏覽器');
       } catch (e) {
-        showToast('儲存失敗，請檢查瀏覽器儲存權限');
+        showToast('儲存失敗，請確認瀏覽器儲存權限');
       }
     }
 
     function openResetModal() {
-      const modal = document.getElementById('reset-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      const m = document.getElementById('modal-reset');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
     }
 
     function closeResetModal() {
-      const modal = document.getElementById('reset-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      const m = document.getElementById('modal-reset');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
     }
 
     function confirmResetDefault() {
       localStorage.removeItem(STORAGE_KEY);
       appState = createDefaultState();
-      previousOrderDatesSnapshot = {};
+      baselineOrderDates = {};
       closeResetModal();
-      renderAll();
-      showToast('已重設為系統內建預設資料');
+      renderAll(true);
+      showToast('↺ 已重設為彥泰企業預設排程並重新鎖定基準交期');
     }
 
-    // 底部提示通知控制
-    let toastTimeout = null;
+    let toastTimer = null;
     function showToast(msg) {
-      const box = document.getElementById('toast-box');
-      const text = document.getElementById('toast-message');
-      text.textContent = msg;
+      const bar = document.getElementById('toast-bar');
+      const txt = document.getElementById('toast-text');
+      txt.textContent = msg;
 
-      box.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
-      box.classList.add('translate-y-0', 'opacity-100');
+      bar.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      bar.classList.add('translate-y-0', 'opacity-100');
 
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        box.classList.remove('translate-y-0', 'opacity-100');
-        box.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        bar.classList.remove('translate-y-0', 'opacity-100');
+        bar.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
       }, 3600);
     }
 
-    // 頁面載入完成後啟動初始化
     window.addEventListener('DOMContentLoaded', () => {
-      renderAll();
+      renderAll(true);
     });
   </script>
 </body>
