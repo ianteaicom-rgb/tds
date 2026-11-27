@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>全員降庫存動起來！KG 流水帳系統</title>
+  <title>全員降庫存動起來！KG 流水帳系統（共用雲端同步版）</title>
 
   <!-- 字體：Inter + Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,48 +26,39 @@
               '100%': { transform: 'scale(1)' },
             },
             floatFade: {
-              '0%': { opacity: '1', transform: 'translate(-50%, 0) scale(0.9)' },
-              '35%': { opacity: '1', transform: 'translate(-50%, -18px) scale(1.08)' },
-              '100%': { opacity: '0', transform: 'translate(-50%, -44px) scale(0.95)' },
+              '0%': { opacity: '1', transform: 'translate(-50%, 0) scale(0.92)' },
+              '35%': { opacity: '1', transform: 'translate(-50%, -20px) scale(1.08)' },
+              '100%': { opacity: '0', transform: 'translate(-50%, -46px) scale(0.96)' },
             },
             toastIn: {
               '0%': { opacity: '0', transform: 'translateY(-12px) scale(0.96)' },
               '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+            },
+            spinOnce: {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' },
             }
           },
           animation: {
-            popBump: 'popBump 0.26s ease-out',
+            popBump: 'popBump 0.25s ease-out',
             floatFade: 'floatFade 0.78s ease-out forwards',
             toastIn: 'toastIn 0.22s ease-out forwards',
+            spinOnce: 'spinOnce 0.6s linear infinite',
           }
         }
       }
     };
   </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/35 to-sky-50/55 text-slate-800 antialiased pb-14">
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/35 to-sky-50/50 text-slate-800 antialiased pb-16">
 
-  <!-- 頂部浮動 Toast 提示區 -->
-  <div id="toastWrap" class="fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex flex-col items-center gap-2 w-[92%] max-w-md pointer-events-none"></div>
-
-  <!-- 管理員模式頂部淡金色提示條 -->
-  <div id="adminBanner" class="hidden bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-b border-amber-300 text-amber-950">
-    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-extrabold">
-      <div class="flex items-center gap-2">
-        <span>👑</span>
-        <span>管理員模式已開啟：可檢視隱藏項目與數量、修改／刪除任意紀錄、增減人員與執行月結算。</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <button type="button" id="bannerSettingsBtn" class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black transition cursor-pointer">⚙️ 管理員設定</button>
-        <button type="button" id="bannerLogoutBtn" class="px-3 py-1 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-xs font-black transition cursor-pointer">登出</button>
-      </div>
-    </div>
-  </div>
+  <!-- 頂部浮動提示區 (Toast) -->
+  <div id="toastWrap" class="fixed top-4 left-1/2 -translate-x-1/2 z-[80] flex flex-col items-center gap-2 w-[92%] max-w-md pointer-events-none"></div>
 
   <!-- 頂部固定導覽列 -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm">
     <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 space-y-3">
-      <!-- 第一列：系統名稱、存檔燈號、管理員控制 -->
+      <!-- 第一列：系統標題、雲端同步燈號、快捷操作 -->
       <div class="flex flex-wrap items-center justify-between gap-2.5">
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-sky-500 text-white flex items-center justify-center shadow-md shadow-emerald-200/70 shrink-0 text-xl">
@@ -78,56 +69,92 @@
               <h1 class="text-base sm:text-xl font-black tracking-tight text-slate-900 truncate">
                 全員降庫存動起來！KG 流水帳
               </h1>
-              <!-- 即時存檔狀態燈號 -->
-              <span id="syncBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-amber-50 border-amber-200 text-amber-800 shrink-0">
-                <span id="syncDot">🟡</span>
-                <span id="syncText">同步中</span>
+              <!-- 雲端同步狀態膠囊 -->
+              <span id="syncPill" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-orange-50 border-orange-200 text-orange-800 shrink-0">
+                <span id="syncPillText">🟠 本機暫存（未綁定雲端）</span>
               </span>
             </div>
             <p class="text-xs text-slate-500 font-semibold hidden sm:block">
-              目標 減少 2 ： 新增 1・雲端永久存檔＋本機快取・管理員專屬細項檢視與修改
+              目標 減少 2 ： 新增 1・全公司共用 Google 試算表即時同步
             </p>
           </div>
         </div>
 
-        <!-- 右側按鈕群組 -->
+        <!-- 右側控制按鈕 -->
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <button type="button" id="soundBtn" title="切換提示音" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs font-extrabold transition cursor-pointer">
+          <button type="button" id="manualSyncBtn" title="立即重新同步最新資料" class="inline-flex items-center gap-1 px-2.5 sm:px-3 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 active:scale-95 border border-sky-200 text-sky-800 text-xs sm:text-sm font-extrabold transition cursor-pointer">
+            <span id="manualSyncIcon">🔄</span>
+            <span class="hidden sm:inline">重新同步</span>
+            <span class="sm:hidden">同步</span>
+          </button>
+
+          <button type="button" id="soundToggleBtn" title="開關提示音" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-extrabold transition cursor-pointer">
             <span id="soundIcon">🔊</span>
           </button>
+
+          <!-- 管理員設定（登入後顯示） -->
           <button type="button" id="headerSettingsBtn" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs sm:text-sm font-extrabold transition cursor-pointer">
             <span>⚙️</span>
-            <span class="hidden sm:inline">管理員設定</span>
+            <span>設定</span>
           </button>
-          <button type="button" id="adminToggleBtn" class="flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer">
+
+          <!-- 管理員登入 / 登出按鈕 -->
+          <button type="button" id="adminToggleBtn" class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer">
             <span id="adminBtnIcon">🔒</span>
             <span id="adminBtnText">管理員登入</span>
           </button>
         </div>
       </div>
 
-      <!-- 第二列：三大主分頁切換 -->
+      <!-- 第二列：三大主分頁 -->
       <nav class="grid grid-cols-3 gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-slate-100 border border-slate-200/80" role="tablist">
         <button type="button" data-tab="daily" class="main-tab py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm md:text-base font-black flex items-center justify-center gap-1.5 transition cursor-pointer">
-          <span>📝</span><span class="truncate">每日登記與目標看板</span>
+          <span>📝</span><span class="truncate">每日登記與看板</span>
         </button>
         <button type="button" data-tab="ledger" class="main-tab py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm md:text-base font-black flex items-center justify-center gap-1.5 transition cursor-pointer">
           <span>📋</span><span class="truncate">流水帳明細</span>
-          <span id="tabLedgerCount" class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-200 text-slate-700">0</span>
+          <span id="tabLedgerCount" class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-200 text-slate-700 tabular-nums">0</span>
         </button>
         <button type="button" data-tab="monthly" class="main-tab py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm md:text-base font-black flex items-center justify-center gap-1.5 transition cursor-pointer">
           <span>📅</span><span class="truncate">每月結算存檔</span>
-          <span id="tabMonthlyCount" class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800">0</span>
+          <span id="tabMonthlyCount" class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 tabular-nums">0</span>
         </button>
       </nav>
     </div>
   </header>
 
-  <!-- 主內容區 -->
+  <!-- 管理員模式淡金色提示橫幅（位於導覽列下方） -->
+  <div id="adminBanner" class="hidden bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-b border-amber-300 text-amber-950">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-extrabold">
+      <div class="flex items-center gap-2">
+        <span>👑</span>
+        <span>管理員模式啟用中：可檢視隱藏項目／數量、修改與刪除紀錄、管理人員、執行月結與設定共用雲端試算表。</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="bannerSettingsBtn" class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black transition cursor-pointer">⚙️ 雲端與系統設定</button>
+        <button type="button" id="bannerLogoutBtn" class="px-3 py-1 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-xs font-black transition cursor-pointer">登出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 未綁定雲端友善引導條（僅未連線時顯示） -->
+  <div id="unboundNotice" class="hidden max-w-6xl mx-auto px-3 sm:px-6 pt-4">
+    <div class="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs sm:text-sm font-bold text-amber-950">
+      <div class="flex items-start sm:items-center gap-2">
+        <span class="text-base shrink-0">💡</span>
+        <span>目前僅存在這台裝置本機。若要讓公司筆電、家裡筆電與員工手機全部同步，請登入管理員並在「⚙️ 設定」貼上共用試算表網址。</span>
+      </div>
+      <button type="button" id="unboundGuideBtn" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black shrink-0 self-start sm:self-auto transition cursor-pointer">
+        前往設定雲端
+      </button>
+    </div>
+  </div>
+
+  <!-- 主內容容器 -->
   <main class="max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
 
     <!-- =========================================================
-         分頁 1：📝 每日登記與目標看板
+         分頁 1：📝 每日登記與看板
          ========================================================= -->
     <section id="panelDaily" class="space-y-5 sm:space-y-6">
 
@@ -153,7 +180,7 @@
           </div>
         </div>
 
-        <!-- 四張重點數據卡 -->
+        <!-- 四大核心數據卡 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <!-- 卡 1：總減少量 -->
           <div class="rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50/70 border-2 border-sky-200 p-4 flex flex-col justify-between">
@@ -194,20 +221,20 @@
             <p id="kpiNetSub" class="text-[11px] font-extrabold text-slate-600 mt-1.5">目前庫存持平</p>
           </div>
 
-          <!-- 卡 4：目前減增比例 -->
+          <!-- 卡 4：減少:新增比率 -->
           <div id="kpiRatioCard" class="rounded-2xl bg-amber-50/70 border-2 border-amber-200 p-4 flex flex-col justify-between transition-colors">
             <div class="flex items-center justify-between">
-              <span id="kpiRatioTitle" class="text-xs font-extrabold text-amber-900">目前減增比例（目標 2:1）</span>
+              <span id="kpiRatioTitle" class="text-xs font-extrabold text-amber-900">減少 : 新增比率</span>
               <span id="kpiRatioIcon" class="text-lg">🔥</span>
             </div>
             <div class="mt-2 flex items-baseline gap-1">
-              <span id="kpiRatioVal" class="text-2xl sm:text-3xl font-black text-amber-800 tabular-nums">--</span>
+              <span id="kpiRatioVal" class="text-2xl sm:text-3xl font-black text-amber-800 tabular-nums">0 : 0</span>
             </div>
-            <p id="kpiRatioSub" class="text-[11px] font-extrabold text-amber-800/90 mt-1.5">尚無紀錄</p>
+            <p id="kpiRatioSub" class="text-[11px] font-extrabold text-amber-800/90 mt-1.5">目標 2 : 1</p>
           </div>
         </div>
 
-        <!-- 視覺化 2:1 進度條 -->
+        <!-- 2:1 目標進度條 -->
         <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
@@ -232,12 +259,12 @@
 
           <div id="dashHintBox" class="rounded-2xl px-4 py-3 text-sm sm:text-base font-extrabold flex items-center gap-2.5 bg-slate-100 text-slate-700 border border-slate-200">
             <span id="dashHintIcon" class="text-xl shrink-0">🚀</span>
-            <span id="dashHintText">開始點下方按鈕紀錄，全員一起降庫存！</span>
+            <span id="dashHintText">開始點下方按鈕紀錄，全員一起把庫存降下來！</span>
           </div>
         </div>
       </div>
 
-      <!-- 2. 人員、登記日期、重量輸入與三大操作卡片 -->
+      <!-- 2. 人員快選、登記日期、重量設定與三大操作區 -->
       <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/90 space-y-5">
         <!-- 人員快選 + 登記日期 -->
         <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 pb-4 border-b border-slate-100">
@@ -245,35 +272,35 @@
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="text-lg">👋</span>
-                <h2 class="text-base sm:text-lg font-black text-slate-900">現在是誰在填寫？</h2>
+                <h2 class="text-base sm:text-lg font-black text-slate-900">現在是誰在登記？</h2>
                 <span id="activeMemberTag" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">載入中...</span>
               </div>
-              <!-- 僅管理員顯示：新增／移除人員 -->
+              <!-- 管理員專屬：管理人員按鈕 -->
               <button type="button" id="openMemberModalBtn" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 active:scale-95 text-amber-950 border border-amber-300 text-xs sm:text-sm font-black transition cursor-pointer">
-                <span>👥</span><span>新增／移除人員</span>
+                <span>👥</span><span>管理人員</span>
               </button>
             </div>
             <div id="memberBtnRow" class="flex flex-wrap gap-2"></div>
           </div>
 
-          <!-- 登記日期選擇器 -->
+          <!-- 登記日期 -->
           <div class="lg:w-auto shrink-0 bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
             <div class="flex items-center justify-between gap-2">
               <label for="recordDateInput" class="text-xs sm:text-sm font-extrabold text-slate-700">📅 登記日期</label>
               <button type="button" id="backTodayBtn" class="hidden px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-black transition cursor-pointer">回到今天</button>
             </div>
             <input type="date" id="recordDateInput" class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer" />
-            <p class="text-[11px] font-bold text-slate-500">預設今日，可選過去日期補登</p>
+            <p class="text-[11px] font-bold text-slate-500">預設今日，點日期可補登過去紀錄</p>
           </div>
         </div>
 
-        <!-- 補登日期提示 -->
+        <!-- 補登模式提醒 -->
         <div id="backfillBar" class="hidden items-center justify-between gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs sm:text-sm font-extrabold">
-          <span>📌 目前為補登模式：紀錄將登記於 <span id="backfillDateText" class="underline decoration-2"></span></span>
+          <span>📌 目前為補登模式：接下來點按鈕會登記在 <span id="backfillDateText" class="underline decoration-2"></span></span>
           <button type="button" id="backfillResetBtn" class="underline hover:text-amber-700 shrink-0 cursor-pointer">切回今日</button>
         </div>
 
-        <!-- 重量 (KG) 輸入區 -->
+        <!-- KG 公斤數選擇與輸入 -->
         <div class="bg-slate-50 rounded-2xl p-3.5 sm:p-4 border border-slate-200 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <label for="kgInput" class="text-sm sm:text-base font-black text-slate-900">⚖️ 本次登記重量 (KG)</label>
@@ -289,9 +316,9 @@
           </div>
         </div>
 
-        <!-- 三大操作卡片（只用 ＋ 與 － 登記） -->
+        <!-- 三大操作卡片 -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
-          <!-- 卡片 1：📦 進貨（綠色） -->
+          <!-- 卡片 1：📦 進貨 (in) -->
           <article class="bg-gradient-to-b from-emerald-50/45 to-white rounded-3xl p-5 border-2 border-emerald-200 shadow-sm flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-2">
@@ -306,32 +333,32 @@
               </div>
 
               <div class="relative text-center py-4 rounded-2xl bg-emerald-50/70 border border-emerald-100">
-                <div id="float-inbound" class="absolute left-1/2 top-1 pointer-events-none"></div>
+                <div id="float-in" class="absolute left-1/2 top-1 pointer-events-none"></div>
                 <div class="flex items-baseline justify-center gap-1.5">
-                  <span id="sum-inbound" class="text-4xl sm:text-5xl font-black text-emerald-600 tabular-nums leading-none">0</span>
+                  <span id="sum-in" class="text-4xl sm:text-5xl font-black text-emerald-600 tabular-nums leading-none">0</span>
                   <span class="text-lg font-black text-emerald-500">KG</span>
                 </div>
-                <p id="bfSum-inbound" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
+                <p id="bfSum-in" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
               </div>
 
               <div class="rounded-2xl bg-emerald-50/50 border border-dashed border-emerald-200 p-3 text-xs font-bold text-emerald-800/80 text-center">
-                💡 選好上方重量後，直接按「＋」或「－」即可快速登記
+                💡 選好上方公斤數後，直接點「＋」登記或「－」更正
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-5">
-              <button type="button" data-cat="inbound" data-sign="-1" class="act-btn py-4 px-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-95 border-2 border-emerald-200 text-emerald-800 flex flex-col items-center justify-center transition select-none cursor-pointer">
+              <button type="button" data-cat="in" data-dir="-1" class="act-btn py-4 px-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-95 border-2 border-emerald-200 text-emerald-800 flex flex-col items-center justify-center transition select-none cursor-pointer">
                 <span class="text-2xl sm:text-3xl font-black leading-none">－</span>
                 <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
               </button>
-              <button type="button" data-cat="inbound" data-sign="1" class="act-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-emerald-400 to-green-600 hover:from-emerald-500 hover:to-green-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-emerald-200/80 transition select-none cursor-pointer">
+              <button type="button" data-cat="in" data-dir="1" class="act-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-emerald-400 to-green-600 hover:from-emerald-500 hover:to-green-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-emerald-200/80 transition select-none cursor-pointer">
                 <span class="text-2xl sm:text-3xl font-black leading-none">＋</span>
                 <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
               </button>
             </div>
           </article>
 
-          <!-- 卡片 2：🚚 出貨（藍色 + 隱藏項目與數量） -->
+          <!-- 卡片 2：🚚 出貨 (out) -->
           <article class="bg-gradient-to-b from-sky-50/45 to-white rounded-3xl p-5 border-2 border-sky-200 shadow-sm flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-2">
@@ -346,43 +373,43 @@
               </div>
 
               <div class="relative text-center py-4 rounded-2xl bg-sky-50/70 border border-sky-100">
-                <div id="float-outbound" class="absolute left-1/2 top-1 pointer-events-none"></div>
+                <div id="float-out" class="absolute left-1/2 top-1 pointer-events-none"></div>
                 <div class="flex items-baseline justify-center gap-1.5">
-                  <span id="sum-outbound" class="text-4xl sm:text-5xl font-black text-sky-600 tabular-nums leading-none">0</span>
+                  <span id="sum-out" class="text-4xl sm:text-5xl font-black text-sky-600 tabular-nums leading-none">0</span>
                   <span class="text-lg font-black text-sky-500">KG</span>
                 </div>
-                <p id="bfSum-outbound" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
+                <p id="bfSum-out" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
               </div>
 
-              <!-- 隱藏欄位輸入：出貨項目與數量 -->
+              <!-- 隱藏欄位：出貨項目與數量 -->
               <div class="rounded-2xl bg-sky-50/60 border border-sky-200 p-3 space-y-2">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label for="outItem" class="block text-[11px] font-extrabold text-sky-900 mb-1">項目（選填）</label>
+                    <label for="outItem" class="block text-[11px] font-extrabold text-sky-900 mb-1">項目（僅管理員可見）</label>
                     <input type="text" id="outItem" maxlength="40" placeholder="品名／規格／客戶" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-sky-200 focus:border-sky-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                   </div>
                   <div>
-                    <label for="outQty" class="block text-[11px] font-extrabold text-sky-900 mb-1">數量（選填）</label>
-                    <input type="text" id="outQty" maxlength="24" placeholder="幾箱／幾棧板／幾袋" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-sky-200 focus:border-sky-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
+                    <label for="outQty" class="block text-[11px] font-extrabold text-sky-900 mb-1">數量（僅管理員可見）</label>
+                    <input type="text" id="outQty" maxlength="24" placeholder="幾箱／幾板／幾袋" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-sky-200 focus:border-sky-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                   </div>
                 </div>
-                <p class="text-[11px] font-bold text-sky-700 flex items-center gap-1"><span>🔒</span><span>填寫後僅管理員看得到</span></p>
+                <p class="text-[11px] font-bold text-sky-700 flex items-center gap-1"><span>🔒</span><span>選填，送出後對外完全隱藏</span></p>
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-5">
-              <button type="button" data-cat="outbound" data-sign="-1" class="act-btn py-4 px-2 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-95 border-2 border-sky-200 text-sky-800 flex flex-col items-center justify-center transition select-none cursor-pointer">
+              <button type="button" data-cat="out" data-dir="-1" class="act-btn py-4 px-2 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-95 border-2 border-sky-200 text-sky-800 flex flex-col items-center justify-center transition select-none cursor-pointer">
                 <span class="text-2xl sm:text-3xl font-black leading-none">－</span>
                 <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
               </button>
-              <button type="button" data-cat="outbound" data-sign="1" class="act-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-sky-200/80 transition select-none cursor-pointer">
+              <button type="button" data-cat="out" data-dir="1" class="act-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-sky-200/80 transition select-none cursor-pointer">
                 <span class="text-2xl sm:text-3xl font-black leading-none">＋</span>
                 <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
               </button>
             </div>
           </article>
 
-          <!-- 卡片 3：🗑️ 排除垃圾（橘色 + 隱藏項目與數量） -->
+          <!-- 卡片 3：🗑️ 排除垃圾 (trash) -->
           <article class="bg-gradient-to-b from-orange-50/45 to-white rounded-3xl p-5 border-2 border-orange-200 shadow-sm flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-2">
@@ -405,28 +432,28 @@
                 <p id="bfSum-trash" class="hidden text-xs font-bold text-amber-700 mt-1.5"></p>
               </div>
 
-              <!-- 隱藏欄位輸入：垃圾項目與數量 -->
+              <!-- 隱藏欄位：垃圾項目與數量 -->
               <div class="rounded-2xl bg-orange-50/60 border border-orange-200 p-3 space-y-2">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label for="trashItem" class="block text-[11px] font-extrabold text-orange-900 mb-1">項目（選填）</label>
+                    <label for="trashItem" class="block text-[11px] font-extrabold text-orange-900 mb-1">項目（僅管理員可見）</label>
                     <input type="text" id="trashItem" maxlength="40" placeholder="廢料種類／區域" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-orange-200 focus:border-orange-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                   </div>
                   <div>
-                    <label for="trashQty" class="block text-[11px] font-extrabold text-orange-900 mb-1">數量（選填）</label>
-                    <input type="text" id="trashQty" maxlength="24" placeholder="幾袋／幾車" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-orange-200 focus:border-orange-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
+                    <label for="trashQty" class="block text-[11px] font-extrabold text-orange-900 mb-1">數量（僅管理員可見）</label>
+                    <input type="text" id="trashQty" maxlength="24" placeholder="幾袋／幾車／幾桶" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-orange-200 focus:border-orange-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                   </div>
                 </div>
-                <p class="text-[11px] font-bold text-orange-700 flex items-center gap-1"><span>🔒</span><span>填寫後僅管理員看得到</span></p>
+                <p class="text-[11px] font-bold text-orange-700 flex items-center gap-1"><span>🔒</span><span>選填，送出後對外完全隱藏</span></p>
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-5">
-              <button type="button" data-cat="trash" data-sign="-1" class="act-btn py-4 px-2 rounded-2xl bg-orange-50 hover:bg-orange-100 active:scale-95 border-2 border-orange-200 text-orange-800 flex flex-col items-center justify-center transition select-none cursor-pointer">
+              <button type="button" data-cat="trash" data-dir="-1" class="act-btn py-4 px-2 rounded-2xl bg-orange-50 hover:bg-orange-100 active:scale-95 border-2 border-orange-200 text-orange-800 flex flex-col items-center justify-center transition select-none cursor-pointer">
                 <span class="text-2xl sm:text-3xl font-black leading-none">－</span>
                 <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
               </button>
-              <button type="button" data-cat="trash" data-sign="1" class="act-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-orange-200/80 transition select-none cursor-pointer">
+              <button type="button" data-cat="trash" data-dir="1" class="act-btn py-4 px-2 rounded-2xl bg-gradient-to-b from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg shadow-orange-200/80 transition select-none cursor-pointer">
                 <span class="text-2xl sm:text-3xl font-black leading-none">＋</span>
                 <span class="btn-kg-label text-sm sm:text-base font-extrabold mt-1 tabular-nums">50 KG</span>
               </button>
@@ -459,7 +486,7 @@
     </section>
 
     <!-- =========================================================
-         分頁 2：📋 流水帳明細（嚴格區分一般人與管理員）
+         分頁 2：📋 流水帳明細（嚴格隱藏項目／數量／備註／修改）
          ========================================================= -->
     <section id="panelLedger" class="hidden space-y-4">
       <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/90 space-y-4">
@@ -469,7 +496,7 @@
             <div>
               <h2 class="text-lg sm:text-xl font-black text-slate-900">流水帳明細</h2>
               <p class="text-xs sm:text-sm text-slate-500 font-semibold">
-                篩選共 <span id="ledgerCount" class="font-black text-slate-800">0</span> 筆（最新排最上）
+                篩選共 <span id="ledgerCount" class="font-black text-slate-800 tabular-nums">0</span> 筆（最新排最上）
               </p>
             </div>
           </div>
@@ -478,9 +505,9 @@
           </button>
         </div>
 
-        <!-- 權限提示列 -->
+        <!-- 角色權限狀態列 -->
         <div id="ledgerRoleTip" class="rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-bold flex flex-wrap items-center justify-between gap-2 bg-slate-100 border border-slate-200 text-slate-600">
-          <span id="ledgerRoleText">🔒 一般模式僅顯示重量與基本資訊；項目、數量與修改／刪除功能僅限管理員使用。</span>
+          <span id="ledgerRoleText">🔒 一般模式僅顯示重量與基本資訊；項目、數量、備註與修改／刪除功能僅限管理員檢視。</span>
           <button type="button" id="ledgerLoginBtn" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold transition cursor-pointer">🔒 管理員登入</button>
         </div>
 
@@ -490,8 +517,8 @@
             <div class="flex flex-wrap items-center gap-1.5">
               <span class="text-xs font-extrabold text-slate-500 mr-1">分類：</span>
               <button type="button" data-fcat="all" class="fcat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">全部</button>
-              <button type="button" data-fcat="inbound" class="fcat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">📦 進貨</button>
-              <button type="button" data-fcat="outbound" class="fcat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">🚚 出貨</button>
+              <button type="button" data-fcat="in" class="fcat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">📦 進貨</button>
+              <button type="button" data-fcat="out" class="fcat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">🚚 出貨</button>
               <button type="button" data-fcat="trash" class="fcat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">🗑️ 排除垃圾</button>
             </div>
             <div class="flex flex-wrap items-center gap-2">
@@ -521,7 +548,7 @@
           </div>
         </div>
 
-        <!-- 電腦版明細表 -->
+        <!-- 電腦版明細表格 -->
         <div class="hidden md:block overflow-x-auto rounded-2xl border border-slate-200">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -530,10 +557,11 @@
                 <th class="py-3 px-3">紀錄時間</th>
                 <th class="py-3 px-3">人員</th>
                 <th class="py-3 px-3">分類</th>
-                <th class="py-3 px-3 text-right">KG 變動</th>
+                <th class="py-3 px-3 text-right">變動 (+/- KG)</th>
                 <th class="py-3 px-3 text-center">庫存影響</th>
                 <th class="admin-col hidden py-3 px-3 bg-amber-50 text-amber-900">🔒 項目</th>
                 <th class="admin-col hidden py-3 px-3 bg-amber-50 text-amber-900">🔒 數量</th>
+                <th class="admin-col hidden py-3 px-3 bg-amber-50 text-amber-900">備註</th>
                 <th class="admin-col hidden py-3 px-3.5 text-right bg-amber-50 text-amber-900">操作</th>
               </tr>
             </thead>
@@ -556,18 +584,18 @@
          分頁 3：📅 每月結算存檔
          ========================================================= -->
     <section id="panelMonthly" class="hidden space-y-5 sm:space-y-6">
-      <!-- 資料量安心提示 -->
+      <!-- 試算表容量安心說明卡 -->
       <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-50 rounded-3xl p-4 sm:p-5 border-2 border-emerald-200 flex items-start gap-3">
         <div class="w-12 h-12 rounded-2xl bg-white text-2xl flex items-center justify-center border border-emerald-200 shrink-0">🛡️</div>
         <div class="space-y-1">
-          <h2 class="text-base sm:text-lg font-black text-emerald-950">目前的資料量非常輕巧，照平常紀錄速度可以放心存好幾年沒問題！</h2>
-          <p class="text-xs sm:text-sm font-bold text-emerald-900/90">
-            目前系統內留存明細 <span id="mTotalLogs" class="text-base font-black text-emerald-700 underline mx-0.5 tabular-nums">0</span> 筆，已存檔歷月成績單 <span id="mTotalSettled" class="text-base font-black text-sky-700 mx-0.5 tabular-nums">0</span> 個月。全部累計會自動整合，不會重複計算。
+          <h2 class="text-base sm:text-lg font-black text-emerald-950">共用 Google 試算表輕鬆裝得下好幾萬筆紀錄，照平常填寫可以用好幾年！</h2>
+          <p class="text-xs sm:text-sm font-bold text-emerald-900/90 leading-relaxed">
+            目前留存每日明細 <span id="mTotalLogs" class="text-base font-black text-emerald-700 underline mx-0.5 tabular-nums">0</span> 筆、已存檔歷月成績單 <span id="mTotalSettled" class="text-base font-black text-sky-700 mx-0.5 tabular-nums">0</span> 個月。每個月底可以自由選擇「保留明細隨時查」，或是「下載備份後精簡瘦身」，全部累計都會自動整合不重複計算。
           </p>
         </div>
       </div>
 
-      <!-- 月結預覽與執行區 -->
+      <!-- 當月結算預覽與操作 -->
       <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/90 space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-2.5">
@@ -612,7 +640,7 @@
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div id="pNetBox" class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5 flex items-center justify-between">
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5 flex items-center justify-between">
               <div><p class="text-xs font-extrabold text-slate-600">淨庫存變化</p><p id="pNetText" class="text-lg font-black text-slate-800 mt-0.5 tabular-nums">0 KG</p></div>
               <span id="pNetIcon" class="text-2xl">⚖️</span>
             </div>
@@ -627,50 +655,70 @@
           </div>
         </div>
 
-        <!-- 管理員專屬結算按鈕區 -->
+        <!-- 管理員專屬結算按鈕 -->
         <div id="adminSettleBox" class="hidden space-y-3 pt-3 border-t border-slate-100">
-          <h3 class="text-sm sm:text-base font-black text-slate-800">管理員專屬結算存檔方式：</h3>
+          <h3 class="text-sm sm:text-base font-black text-slate-800">管理員專屬月結操作：</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <button type="button" id="settleKeepBtn" class="p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/70 hover:bg-emerald-100/80 active:scale-[0.99] text-left transition cursor-pointer space-y-1">
               <div class="flex items-center justify-between gap-2">
-                <span class="text-sm sm:text-base font-black text-emerald-950">💾 只存月結總表，保留明細隨時查</span>
+                <span class="text-sm sm:text-base font-black text-emerald-950">💾 存成月結總表，保留明細隨時查</span>
                 <span class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-black shrink-0">推薦</span>
               </div>
-              <p class="text-xs font-semibold text-emerald-900/80">固定存檔當月成績單，同時保留原本的每日流水帳明細供隨時查詢。</p>
+              <p class="text-xs font-semibold text-emerald-900/80">固定存檔本月成績單，同時完整保留每日流水帳明細方便日後核對。</p>
             </button>
 
             <button type="button" id="settlePurgeBtn" class="p-4 rounded-2xl border-2 border-orange-300 bg-orange-50/70 hover:bg-orange-100/80 active:scale-[0.99] text-left transition cursor-pointer space-y-1">
               <div class="flex items-center justify-between gap-2">
-                <span class="text-sm sm:text-base font-black text-orange-950">🧹 存月結總表＋自動下載備份＋清空該月明細</span>
-                <span class="px-2 py-0.5 rounded-full bg-orange-500 text-white text-[11px] font-black shrink-0">幫系統瘦身</span>
+                <span class="text-sm sm:text-base font-black text-orange-950">🧹 存成月結總表 ＋ 自動下載 Excel 備份檔 ＋ 清空該月零碎明細</span>
               </div>
-              <p class="text-xs font-semibold text-orange-900/80">先自動下載當月完整備份 Excel 檔，再固定存檔總表並清空零碎明細。</p>
+              <p class="text-xs font-semibold text-orange-900/80">先自動下載完整明細備份，再存檔總表並清空該月零碎明細（歷月成績單會永遠留存）。</p>
             </button>
           </div>
         </div>
 
         <!-- 一般人員鎖定提示 -->
         <div id="guestSettleTip" class="rounded-2xl bg-slate-50 border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <span class="text-xs sm:text-sm font-bold text-slate-600">🔒 一般人員可隨時查看當月預覽與歷月成績單；執行結算存檔需由管理員登入操作。</span>
+          <span class="text-xs sm:text-sm font-bold text-slate-600">🔒 一般人員可隨時查看當月成績與歷月紀錄；執行月結存檔需由管理員登入操作。</span>
           <button type="button" id="monthlyLoginBtn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-extrabold transition shrink-0 cursor-pointer">🔒 管理員登入</button>
         </div>
       </div>
 
-      <!-- 歷月固定存檔成績單 -->
+      <!-- 歷月結算成績單總覽 -->
       <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/90 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
             <span class="text-2xl">📚</span>
             <div>
               <h2 class="text-lg sm:text-xl font-black text-slate-900">歷月固定存檔成績單</h2>
-              <p class="text-xs sm:text-sm text-slate-500 font-semibold">每個已結算月份永久保留在此</p>
+              <p class="text-xs sm:text-sm text-slate-500 font-semibold">每個已結算月份永久保存在共用試算表中</p>
             </div>
           </div>
           <button type="button" id="exportMonthlyBtn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer">
-            <span>📥</span><span>匯出歷月成績單 (CSV)</span>
+            <span>📥</span><span>匯出歷月總表 (.csv)</span>
           </button>
         </div>
 
+        <!-- 歷月 4 張彙總 KPI -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5">
+            <p class="text-xs font-extrabold text-slate-500">已結算月數</p>
+            <p class="mt-1 text-xl sm:text-2xl font-black text-slate-900 tabular-nums"><span id="histCount">0</span> <span class="text-xs font-bold text-slate-500">個月</span></p>
+          </div>
+          <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5">
+            <p class="text-xs font-extrabold text-emerald-800">2:1 達標月數</p>
+            <p class="mt-1 text-xl sm:text-2xl font-black text-emerald-700 tabular-nums"><span id="histAchieved">0</span> <span class="text-xs font-bold text-emerald-600">個月</span></p>
+          </div>
+          <div class="rounded-2xl bg-sky-50 border border-sky-200 p-3.5">
+            <p class="text-xs font-extrabold text-sky-800">歷月累計減少</p>
+            <p class="mt-1 text-xl sm:text-2xl font-black text-sky-700 tabular-nums"><span id="histReduced">0</span> <span class="text-xs font-bold text-sky-600">KG</span></p>
+          </div>
+          <div class="rounded-2xl bg-teal-50 border border-teal-200 p-3.5">
+            <p class="text-xs font-extrabold text-teal-800">歷月累計淨降庫存</p>
+            <p class="mt-1 text-xl sm:text-2xl font-black text-teal-700 tabular-nums"><span id="histNetDrop">0</span> <span class="text-xs font-bold text-teal-600">KG</span></p>
+          </div>
+        </div>
+
+        <!-- 電腦版歷月表格 -->
         <div class="hidden lg:block overflow-x-auto rounded-2xl border border-slate-200">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -681,10 +729,10 @@
                 <th class="py-3 px-3 text-right">排除垃圾 (KG)</th>
                 <th class="py-3 px-3 text-right">總減少 (KG)</th>
                 <th class="py-3 px-3 text-right">淨變化 (KG)</th>
-                <th class="py-3 px-3 text-center">2:1 狀態</th>
+                <th class="py-3 px-3 text-center">2:1 結果</th>
                 <th class="py-3 px-3">當月冠軍</th>
                 <th class="py-3 px-3 text-center">明細狀態</th>
-                <th class="py-3 px-3">結算日</th>
+                <th class="py-3 px-3">結算時間</th>
                 <th class="admin-col hidden py-3 px-3.5 text-right bg-amber-50 text-amber-900">操作</th>
               </tr>
             </thead>
@@ -692,6 +740,7 @@
           </table>
         </div>
 
+        <!-- 手機版歷月卡片 -->
         <div id="monthlyMobile" class="lg:hidden space-y-3"></div>
         <div id="monthlyEmpty" class="hidden py-10 text-center space-y-2">
           <div class="text-4xl">🗓️</div>
@@ -702,8 +751,8 @@
 
     <!-- 頁尾 -->
     <footer class="text-center text-xs text-slate-400 pt-2 space-y-1">
-      <p>全員降庫存動起來！KG 流水帳系統・雲端同步＋本機安全快取</p>
-      <p id="footerStatus" class="font-mono text-[11px] break-all px-4">初始化中...</p>
+      <p>全員降庫存動起來！KG 流水帳系統（共用雲端同步版）</p>
+      <p id="footerStatus" class="text-[11px] px-4">本機快取已啟用</p>
     </footer>
   </main>
 
@@ -717,7 +766,7 @@
           <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 text-xl flex items-center justify-center">🔐</span>
           <div>
             <h3 class="text-lg font-black text-slate-900">管理員登入</h3>
-            <p class="text-xs font-semibold text-slate-500">檢視隱藏細項、修改紀錄與系統管理</p>
+            <p class="text-xs font-semibold text-slate-500">檢視隱藏細項、修改紀錄與設定雲端</p>
           </div>
         </div>
         <button type="button" data-close="loginModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
@@ -726,7 +775,7 @@
         <div>
           <label for="loginPwdInput" class="block text-xs font-extrabold text-slate-700 mb-1.5">請輸入管理員密碼</label>
           <input type="password" id="loginPwdInput" placeholder="輸入密碼..." autocomplete="off" class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-lg font-black tracking-widest text-center" />
-          <p class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-2 text-center">💡 預設密碼：8888（可至管理員設定更改）</p>
+          <p class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-2 text-center">💡 預設密碼：8888（登入後可至設定修改）</p>
           <p id="loginErr" class="hidden text-xs font-extrabold text-rose-600 mt-2 text-center"></p>
         </div>
         <div class="flex gap-2.5">
@@ -746,15 +795,15 @@
         <div class="flex items-center gap-2.5">
           <span class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 text-xl flex items-center justify-center">👥</span>
           <div>
-            <h3 class="text-lg font-black text-slate-900">新增／移除人員</h3>
-            <p class="text-xs font-semibold text-slate-500">移除人員不影響過去已儲存的歷史紀錄（至少保留 1 位）</p>
+            <h3 class="text-lg font-black text-slate-900">管理填寫人員</h3>
+            <p class="text-xs font-semibold text-slate-500">移除人員不影響過去已存檔的歷史紀錄（至少保留 1 位）</p>
           </div>
         </div>
         <button type="button" data-close="memberModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
       </div>
 
       <div class="space-y-2">
-        <p class="text-xs font-extrabold text-slate-600">現有人員名單（點右側 ✕ 移除）：</p>
+        <p class="text-xs font-extrabold text-slate-600">目前人員名單（點右側 ✕ 移除）：</p>
         <div id="memberManageList" class="flex flex-wrap gap-2"></div>
       </div>
 
@@ -765,7 +814,7 @@
           <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold transition shrink-0 cursor-pointer">加入名單</button>
         </div>
         <div>
-          <p class="text-[11px] font-bold text-slate-500 mb-1.5">選擇代表圖示：</p>
+          <p class="text-[11px] font-bold text-slate-500 mb-1.5">挑選代表圖示：</p>
           <div id="emojiGrid" class="grid grid-cols-6 sm:grid-cols-12 gap-1.5"></div>
         </div>
         <p id="addMemErr" class="hidden text-xs font-extrabold text-rose-600"></p>
@@ -778,53 +827,108 @@
   </div>
 
   <!-- =========================================================
-       彈窗 3：管理員設定 Modal（改密碼 / 完整備份還原）
+       彈窗 3：管理員設定 Modal（雲端連線 / 下載已綁定網頁 / 改密碼 / 備份還原）
        ========================================================= -->
   <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/55 backdrop-blur-xs">
-    <div class="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-5">
+    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2.5">
           <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 text-xl flex items-center justify-center">⚙️</span>
           <div>
             <h3 class="text-lg font-black text-slate-900">管理員設定</h3>
-            <p class="text-xs font-semibold text-slate-500">修改密碼、人員管理與資料安全備份還原</p>
+            <p class="text-xs font-semibold text-slate-500">共用試算表同步、一鍵打包上傳檔、密碼與資料備份</p>
           </div>
         </div>
         <button type="button" data-close="settingsModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
       </div>
 
-      <!-- 快捷跳轉人員管理 -->
-      <div class="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200">
-        <div>
-          <p class="text-sm font-black text-slate-900">👥 人員名單管理</p>
-          <p class="text-xs font-semibold text-slate-500">新增或移除填寫人員名單</p>
+      <!-- 區塊 1：共用雲端試算表連線設定（最重要） -->
+      <div class="bg-gradient-to-br from-sky-50 to-emerald-50/70 p-4 sm:p-5 rounded-2xl border-2 border-sky-200 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h4 class="text-base font-black text-slate-900">☁️ 共用雲端試算表連線設定（最重要）</h4>
+            <p class="text-xs font-semibold text-slate-600 mt-0.5">貼上你的 Google 試算表專屬連線網址，即可讓公司筆電、家裡筆電與所有員工手機永久同步。</p>
+          </div>
+          <span id="settingsCloudTag" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-orange-100 text-orange-800">未綁定</span>
         </div>
-        <button type="button" id="settingsToMemberBtn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-extrabold cursor-pointer">前往管理</button>
+
+        <div class="space-y-2">
+          <label for="syncUrlInput" class="block text-xs font-extrabold text-slate-700">Google 試算表專屬連線網址（開頭為 https://script.google.com/macros/s/...）</label>
+          <input type="url" id="syncUrlInput" placeholder="https://script.google.com/macros/s/....../exec" autocomplete="off" class="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-sky-200 focus:border-sky-500 focus:outline-none text-xs sm:text-sm font-bold text-slate-800" />
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="testSaveSyncBtn" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm transition cursor-pointer">
+              🔌 測試並儲存連線
+            </button>
+            <button type="button" id="downloadBoundHtmlBtn" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm transition cursor-pointer">
+              📦 下載「已綁定雲端」的網頁檔 (.html)
+            </button>
+          </div>
+          <p id="syncTestMsg" class="hidden text-xs font-extrabold pt-1"></p>
+        </div>
+
+        <!-- 重點說明：為什麼要下載已綁定網頁檔 -->
+        <div class="rounded-xl bg-white/85 border border-sky-200/80 p-3 text-xs font-bold text-slate-700 space-y-1 leading-relaxed">
+          <p class="text-emerald-800 font-black">✨ 讓全公司免設定、打開就同步的小秘訣：</p>
+          <p>測試連線成功後，點上方綠色的 <b>「📦 下載『已綁定雲端』的網頁檔 (.html)」</b>，再把這個新檔案覆蓋上傳到你放網頁的地方。之後不管是公司筆電、家裡筆電還是員工手機，只要打開同一個網址就會自動連上同一張試算表！</p>
+        </div>
+
+        <!-- 搬移與強制同步小工具 -->
+        <div class="pt-2 border-t border-sky-200/70 space-y-2">
+          <p class="text-xs font-extrabold text-slate-700">資料搬家與手動同步工具：</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" id="pushLocalToCloudBtn" class="py-2.5 px-3 rounded-xl bg-white hover:bg-amber-50 border-2 border-amber-300 text-amber-950 text-xs font-extrabold transition cursor-pointer">
+              ⬆️ 將目前電腦的資料上傳至共用試算表
+            </button>
+            <button type="button" id="pullCloudToLocalBtn" class="py-2.5 px-3 rounded-xl bg-white hover:bg-sky-50 border-2 border-sky-300 text-sky-900 text-xs font-extrabold transition cursor-pointer">
+              ⬇️ 從共用試算表重新拉取最新資料
+            </button>
+          </div>
+        </div>
+
+        <!-- 內建試算表小幫手安裝教學（可展開直接複製） -->
+        <details class="rounded-xl bg-white border border-slate-200 p-3">
+          <summary class="text-xs sm:text-sm font-black text-slate-800 cursor-pointer select-none">
+            📖 還沒取得試算表連線網址？點這裡看 4 步驟教學並複製小幫手內容
+          </summary>
+          <div class="mt-3 space-y-2.5 text-xs font-semibold text-slate-700 leading-relaxed">
+            <ol class="list-decimal pl-5 space-y-1.5">
+              <li>在你的 Google 雲端硬碟新增一張空白的 <b>Google 試算表</b>。</li>
+              <li>點上方選單 <b>「擴充功能」→「Apps Script」</b>，把裡面原本的字全部刪掉。</li>
+              <li>點下方按鈕複製完整內容貼進去，按存檔（磁片圖示）。</li>
+              <li>點右上角 <b>「部署」→「新增部署作業」</b> → 類型選<b>「網頁應用程式」</b> → 誰可以存取選<b>「所有人」</b> → 按部署並允許權限，複製產生的網址貼到上方即可！</li>
+            </ol>
+            <div class="flex items-center justify-between gap-2 pt-1">
+              <span class="text-[11px] font-extrabold text-emerald-700">試算表收發小幫手（可直接複製貼上）：</span>
+              <button type="button" id="copyGasCodeBtn" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold cursor-pointer">📋 一鍵複製程式碼</button>
+            </div>
+            <textarea id="gasCodeBox" readonly rows="6" class="w-full p-2.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] leading-snug focus:outline-none"></textarea>
+          </div>
+        </details>
       </div>
 
-      <!-- 修改管理員密碼 -->
+      <!-- 區塊 2：修改管理員密碼 -->
       <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-        <h4 class="text-sm font-black text-slate-900">🔑 修改管理員密碼（即時同步雲端）</h4>
+        <h4 class="text-sm font-black text-slate-900">🔑 修改管理員密碼</h4>
         <form id="pwdForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <input type="password" id="oldPwd" placeholder="目前密碼" autocomplete="off" class="px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-bold" />
-          <input type="password" id="newPwd" placeholder="新密碼(至少4碼)" autocomplete="off" class="px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-bold" />
+          <input type="password" id="newPwd" placeholder="新密碼（至少4碼）" autocomplete="off" class="px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-bold" />
           <button type="submit" class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-extrabold cursor-pointer">儲存密碼</button>
         </form>
         <p id="pwdMsg" class="hidden text-xs font-extrabold"></p>
       </div>
 
-      <!-- 完整備份與還原 -->
+      <!-- 區塊 3：檔案備份與還原 -->
       <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-3">
-        <h4 class="text-sm font-black text-emerald-950">💾 資料安全備份與還原</h4>
+        <h4 class="text-sm font-black text-emerald-950">💾 檔案備份與還原</h4>
         <p class="text-xs font-semibold text-emerald-900/80 leading-relaxed">
-          下載完整 JSON 備份檔保存於電腦或手機；需要時匯入即可一鍵還原所有人員、流水帳明細、隱藏細項與歷月成績單。
+          隨時下載一份完整備份檔 (.json) 保存在電腦裡；匯入還原時，若已綁定共用試算表也會自動同步到雲端。
         </p>
         <div class="flex flex-col sm:flex-row gap-2.5">
           <button type="button" id="backupDownloadBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold flex items-center justify-center gap-1.5 cursor-pointer">
-            <span>📥</span><span>下載完整資料備份檔</span>
+            <span>📥</span><span>下載完整備份檔 (.json)</span>
           </button>
           <label class="flex-1 py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 text-emerald-900 border-2 border-emerald-300 text-sm font-extrabold flex items-center justify-center gap-1.5 cursor-pointer">
-            <span>📤</span><span>從備份檔還原資料</span>
+            <span>📤</span><span>匯入備份檔還原</span>
             <input type="file" id="backupUploadInput" accept=".json,application/json" class="hidden" />
           </label>
         </div>
@@ -846,7 +950,7 @@
           <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 text-xl flex items-center justify-center">✏️</span>
           <div>
             <h3 class="text-lg font-black text-slate-900">修改紀錄</h3>
-            <p class="text-xs font-semibold text-slate-500">儲存後立即同步雲端並重算所有看板數據</p>
+            <p class="text-xs font-semibold text-slate-500">儲存後會立即同步共用試算表並重算所有看板</p>
           </div>
         </div>
         <button type="button" data-close="editModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
@@ -868,16 +972,16 @@
           <div>
             <label for="edCat" class="block text-xs font-extrabold text-slate-700 mb-1">分類</label>
             <select id="edCat" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-bold">
-              <option value="inbound">📦 進貨</option>
-              <option value="outbound">🚚 出貨</option>
+              <option value="in">📦 進貨</option>
+              <option value="out">🚚 出貨</option>
               <option value="trash">🗑️ 排除垃圾</option>
             </select>
           </div>
           <div>
-            <label for="edSign" class="block text-xs font-extrabold text-slate-700 mb-1">方向</label>
-            <select id="edSign" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-bold">
+            <label for="edDir" class="block text-xs font-extrabold text-slate-700 mb-1">方向</label>
+            <select id="edDir" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-bold">
               <option value="1">＋ 正數</option>
-              <option value="-1">－ 負數</option>
+              <option value="-1">－ 負數（更正）</option>
             </select>
           </div>
           <div>
@@ -887,7 +991,7 @@
         </div>
 
         <div class="rounded-2xl bg-amber-50/70 border border-amber-200 p-3.5 space-y-3">
-          <p class="text-xs font-black text-amber-900">🔒 管理員專屬細項（一般人員不可見）</p>
+          <p class="text-xs font-black text-amber-900">🔒 管理員專屬細項（一般人員完全不可見）</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label for="edItem" class="block text-xs font-extrabold text-amber-900 mb-1">項目</label>
@@ -914,9 +1018,9 @@
   </div>
 
   <!-- =========================================================
-       彈窗 5：通用二次確認 Modal（無 browser alert/confirm）
+       彈窗 5：通用二次確認 Modal（不使用瀏覽器 alert/confirm）
        ========================================================= -->
-  <div id="confirmModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-slate-900/55 backdrop-blur-xs">
+  <div id="confirmModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-slate-900/55 backdrop-blur-xs">
     <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-slate-200 space-y-4">
       <div class="flex items-center gap-3">
         <div id="cfIcon" class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 text-2xl flex items-center justify-center shrink-0">⚠️</div>
@@ -935,44 +1039,202 @@
   </div>
 
   <!-- =========================================================
-       主程式腳本：Firebase Firestore 雲端永久存檔 + 本機安全快取
+       主程式腳本：純淨單檔 HTML + localStorage 快取 + Google Apps Script 同步
        ========================================================= -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  <script>
+    // =========================================================
+    // 0. 雲端共用試算表預設網址（匯出「已綁定雲端」網頁檔時會自動填入此處）
+    // =========================================================
+    const DEFAULT_SYNC_URL = /*__SYNC_URL_START__*/""/*__SYNC_URL_END__*/;
+
+    // 啟動渲染前先保存最乾淨的原始 HTML 快照，供「下載已綁定雲端網頁檔」使用
+    const INITIAL_HTML_SNAPSHOT = (function capturePristineHtml() {
+      try {
+        const clone = document.documentElement.cloneNode(true);
+        // 移除瀏覽器執行期由 Tailwind CDN 動態生成的 style 標籤，確保匯出檔案乾淨輕巧
+        clone.querySelectorAll("head style").forEach(function (s) {
+          s.remove();
+        });
+        return "<!DOCTYPE html>\n" + clone.outerHTML;
+      } catch (e) {
+        return "";
+      }
+    })();
 
     // =========================================================
-    // 1. 常數設定
+    // 1. 常數與預設資料
     // =========================================================
-    const CACHE_KEY = "team_kg_ledger_cache_v5";
+    const STORAGE_DATA_KEY = "team_ledger_data_v6";
+    const STORAGE_URL_KEY = "team_ledger_sync_url";
+    const STORAGE_OVERRIDE_FOR_KEY = "team_ledger_sync_override_for";
+    const LEGACY_CACHE_KEY = "team_kg_ledger_cache_v5";
+
     const KG_PRESETS = [1, 10, 25, 50, 100, 500, 1000];
-    const EMOJIS = ["🚀", "🔥", "🍀", "🎯", "🦁", "🐱", "🐼", "🦊", "🌈", "⭐", "💎", "🛠️"];
-    const COLORS = ["sky", "rose", "emerald", "amber", "violet", "indigo", "orange", "teal"];
+    const EMOJIS = ["🧑‍🔧", "👩‍💼", "💪", "🧢", "🚀", "🔥", "🍀", "🎯", "🦁", "🐱", "⭐", "🛠️"];
+    const MEMBER_COLORS = [
+      { on: "bg-sky-500 text-white border-sky-600", off: "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100", bar: "bg-sky-500" },
+      { on: "bg-rose-500 text-white border-rose-600", off: "bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100", bar: "bg-rose-500" },
+      { on: "bg-emerald-500 text-white border-emerald-600", off: "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100", bar: "bg-emerald-500" },
+      { on: "bg-amber-500 text-white border-amber-600", off: "bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100", bar: "bg-amber-500" },
+      { on: "bg-violet-500 text-white border-violet-600", off: "bg-violet-50 text-violet-800 border-violet-200 hover:bg-violet-100", bar: "bg-violet-500" },
+      { on: "bg-teal-500 text-white border-teal-600", off: "bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100", bar: "bg-teal-500" },
+      { on: "bg-indigo-500 text-white border-indigo-600", off: "bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100", bar: "bg-indigo-500" },
+      { on: "bg-orange-500 text-white border-orange-600", off: "bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100", bar: "bg-orange-500" }
+    ];
 
     const DEFAULT_MEMBERS = [
-      { id: "m_xiaoming", name: "小明", emoji: "⚡", color: "sky", order: 1 },
-      { id: "m_xiaomei",  name: "小美", emoji: "🌟", color: "rose", order: 2 },
-      { id: "m_aqiang",   name: "阿強", emoji: "💪", color: "emerald", order: 3 },
-      { id: "m_leader",   name: "班長", emoji: "👑", color: "amber", order: 4 }
+      { name: "小明", icon: "🧑‍🔧" },
+      { name: "小美", icon: "👩‍💼" },
+      { name: "阿強", icon: "💪" },
+      { name: "班長", icon: "🧢" }
     ];
 
     const CATS = {
-      inbound:  { label: "進貨",     emoji: "📦", pill: "bg-emerald-100 text-emerald-800 border border-emerald-200", float: "text-emerald-600" },
-      outbound: { label: "出貨",     emoji: "🚚", pill: "bg-sky-100 text-sky-800 border border-sky-200",             float: "text-sky-600" },
-      trash:    { label: "排除垃圾", emoji: "🗑️", pill: "bg-orange-100 text-orange-800 border border-orange-200",    float: "text-orange-600" }
+      in:    { label: "進貨",     emoji: "📦", pill: "bg-emerald-100 text-emerald-800 border border-emerald-200", float: "text-emerald-600" },
+      out:   { label: "出貨",     emoji: "🚚", pill: "bg-sky-100 text-sky-800 border border-sky-200",             float: "text-sky-600" },
+      trash: { label: "排除垃圾", emoji: "🗑️", pill: "bg-orange-100 text-orange-800 border border-orange-200",    float: "text-orange-600" }
     };
 
-    const COLOR_MAP = {
-      sky:     { on: "bg-sky-500 text-white border-sky-600",         off: "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100",         bar: "bg-sky-500" },
-      rose:    { on: "bg-rose-500 text-white border-rose-600",       off: "bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100",     bar: "bg-rose-500" },
-      emerald: { on: "bg-emerald-500 text-white border-emerald-600", off: "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100", bar: "bg-emerald-500" },
-      amber:   { on: "bg-amber-500 text-white border-amber-600",     off: "bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100", bar: "bg-amber-500" },
-      violet:  { on: "bg-violet-500 text-white border-violet-600",   off: "bg-violet-50 text-violet-800 border-violet-200 hover:bg-violet-100", bar: "bg-violet-500" },
-      indigo:  { on: "bg-indigo-500 text-white border-indigo-600",   off: "bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100", bar: "bg-indigo-500" },
-      orange:  { on: "bg-orange-500 text-white border-orange-600",   off: "bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100", bar: "bg-orange-500" },
-      teal:    { on: "bg-teal-500 text-white border-teal-600",       off: "bg-teal-50 text-teal-800 border-teal-200 hover:bg-teal-100",     bar: "bg-teal-500" }
-    };
+    // 內建可直接複製的 Google Apps Script 程式碼（與本頁 API 100% 對應）
+    const GAS_HELPER_CODE = [
+      "function getSheets_() {",
+      "  var ss = SpreadsheetApp.getActiveSpreadsheet();",
+      "  function ensure(name, headers) {",
+      "    var sh = ss.getSheetByName(name);",
+      "    if (!sh) {",
+      "      sh = ss.insertSheet(name);",
+      "      sh.appendRow(headers);",
+      "    }",
+      "    return sh;",
+      "  }",
+      "  return {",
+      "    entries: ensure('流水帳明細', ['id','date','createdAt','member','category','direction','kg','item','qty','note']),",
+      "    settlements: ensure('歷月結算', ['month','settledAt','inKg','outKg','trashKg','reduceKg','netKg','achieved','champion','detailsCleared','memberStatsJson']),",
+      "    config: ensure('系統設定', ['key','value'])",
+      "  };",
+      "}",
+      "function readConfig_(sh) {",
+      "  var rows = sh.getDataRange().getValues();",
+      "  var map = {};",
+      "  for (var i = 1; i < rows.length; i++) {",
+      "    if (rows[i][0]) map[String(rows[i][0])] = String(rows[i][1] || '');",
+      "  }",
+      "  return map;",
+      "}",
+      "function setConfig_(sh, key, val) {",
+      "  var rows = sh.getDataRange().getValues();",
+      "  for (var i = 1; i < rows.length; i++) {",
+      "    if (String(rows[i][0]) === key) { sh.getRange(i + 1, 2).setValue(val); return; }",
+      "  }",
+      "  sh.appendRow([key, val]);",
+      "}",
+      "function readAll_() {",
+      "  var s = getSheets_();",
+      "  var eRows = s.entries.getDataRange().getValues();",
+      "  var entries = [];",
+      "  for (var i = 1; i < eRows.length; i++) {",
+      "    var r = eRows[i];",
+      "    if (!r[0]) continue;",
+      "    entries.push({ id: String(r[0]), date: String(r[1]), createdAt: String(r[2]), member: String(r[3]), category: String(r[4]), direction: Number(r[5]) < 0 ? -1 : 1, kg: Number(r[6]) || 0, item: String(r[7] || ''), qty: String(r[8] || ''), note: String(r[9] || '') });",
+      "  }",
+      "  var stRows = s.settlements.getDataRange().getValues();",
+      "  var settlements = [];",
+      "  for (var j = 1; j < stRows.length; j++) {",
+      "    var sr = stRows[j];",
+      "    if (!sr[0]) continue;",
+      "    var ms = {};",
+      "    try { ms = JSON.parse(sr[10] || '{}'); } catch (e) {}",
+      "    settlements.push({ month: String(sr[0]), settledAt: String(sr[1]), inKg: Number(sr[2]) || 0, outKg: Number(sr[3]) || 0, trashKg: Number(sr[4]) || 0, reduceKg: Number(sr[5]) || 0, netKg: Number(sr[6]) || 0, achieved: sr[7] === true || sr[7] === 'TRUE', champion: String(sr[8] || ''), detailsCleared: sr[9] === true || sr[9] === 'TRUE', memberStats: ms });",
+      "  }",
+      "  var cfg = readConfig_(s.config);",
+      "  var members = [];",
+      "  try { if (cfg.members) members = JSON.parse(cfg.members); } catch (e) {}",
+      "  return { entries: entries, settlements: settlements, members: members, adminPassword: cfg.adminPassword || '8888' };",
+      "}",
+      "function jsonOut_(obj) {",
+      "  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);",
+      "}",
+      "function doGet(e) {",
+      "  try {",
+      "    var act = (e && e.parameter && e.parameter.action) || 'getAll';",
+      "    if (act === 'getAll') return jsonOut_({ ok: true, data: readAll_() });",
+      "    return jsonOut_({ ok: true });",
+      "  } catch (err) {",
+      "    return jsonOut_({ ok: false, error: String(err) });",
+      "  }",
+      "}",
+      "function doPost(e) {",
+      "  var lock = LockService.getScriptLock();",
+      "  lock.waitLock(15000);",
+      "  try {",
+      "    var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');",
+      "    var act = body.action;",
+      "    if (act === 'ping') return jsonOut_({ ok: true });",
+      "    var s = getSheets_();",
+      "    if (act === 'addEntry' && body.entry) {",
+      "      var en = body.entry;",
+      "      s.entries.appendRow([en.id, en.date, en.createdAt, en.member, en.category, en.direction, en.kg, en.item || '', en.qty || '', en.note || '']);",
+      "    } else if (act === 'updateEntry' && body.entry) {",
+      "      var u = body.entry;",
+      "      var rows = s.entries.getDataRange().getValues();",
+      "      for (var i = 1; i < rows.length; i++) {",
+      "        if (String(rows[i][0]) === String(u.id)) {",
+      "          s.entries.getRange(i + 1, 1, 1, 10).setValues([[u.id, u.date, u.createdAt, u.member, u.category, u.direction, u.kg, u.item || '', u.qty || '', u.note || '']]);",
+      "          break;",
+      "        }",
+      "      }",
+      "    } else if (act === 'deleteEntry' && body.id) {",
+      "      var dRows = s.entries.getDataRange().getValues();",
+      "      for (var d = dRows.length - 1; d >= 1; d--) {",
+      "        if (String(dRows[d][0]) === String(body.id)) { s.entries.deleteRow(d + 1); break; }",
+      "      }",
+      "    } else if (act === 'saveMembers' && Array.isArray(body.members)) {",
+      "      setConfig_(s.config, 'members', JSON.stringify(body.members));",
+      "    } else if (act === 'savePassword' && body.adminPassword) {",
+      "      setConfig_(s.config, 'adminPassword', String(body.adminPassword));",
+      "    } else if (act === 'saveSettlement' && body.settlement) {",
+      "      var st = body.settlement;",
+      "      var stRows = s.settlements.getDataRange().getValues();",
+      "      var rowVal = [st.month, st.settledAt, st.inKg, st.outKg, st.trashKg, st.reduceKg, st.netKg, !!st.achieved, st.champion || '', !!st.detailsCleared, JSON.stringify(st.memberStats || {})];",
+      "      var found = false;",
+      "      for (var k = 1; k < stRows.length; k++) {",
+      "        if (String(stRows[k][0]) === String(st.month)) { s.settlements.getRange(k + 1, 1, 1, 11).setValues([rowVal]); found = true; break; }",
+      "      }",
+      "      if (!found) s.settlements.appendRow(rowVal);",
+      "      if (body.clearMonthEntries) {",
+      "        var allE = s.entries.getDataRange().getValues();",
+      "        for (var m = allE.length - 1; m >= 1; m--) {",
+      "          if (String(allE[m][1]).indexOf(st.month) === 0) s.entries.deleteRow(m + 1);",
+      "        }",
+      "      }",
+      "    } else if (act === 'deleteSettlement' && body.month) {",
+      "      var dsRows = s.settlements.getDataRange().getValues();",
+      "      for (var x = dsRows.length - 1; x >= 1; x--) {",
+      "        if (String(dsRows[x][0]) === String(body.month)) { s.settlements.deleteRow(x + 1); break; }",
+      "      }",
+      "    } else if (act === 'importAll' && body.data) {",
+      "      var dd = body.data;",
+      "      if (s.entries.getLastRow() > 1) s.entries.deleteRows(2, s.entries.getLastRow() - 1);",
+      "      if (Array.isArray(dd.entries) && dd.entries.length > 0) {",
+      "        var eVals = dd.entries.map(function (en) { return [en.id, en.date, en.createdAt, en.member, en.category, en.direction, en.kg, en.item || '', en.qty || '', en.note || '']; });",
+      "        s.entries.getRange(2, 1, eVals.length, 10).setValues(eVals);",
+      "      }",
+      "      if (s.settlements.getLastRow() > 1) s.settlements.deleteRows(2, s.settlements.getLastRow() - 1);",
+      "      if (Array.isArray(dd.settlements) && dd.settlements.length > 0) {",
+      "        var sVals = dd.settlements.map(function (st) { return [st.month, st.settledAt, st.inKg, st.outKg, st.trashKg, st.reduceKg, st.netKg, !!st.achieved, st.champion || '', !!st.detailsCleared, JSON.stringify(st.memberStats || {})]; });",
+      "        s.settlements.getRange(2, 1, sVals.length, 11).setValues(sVals);",
+      "      }",
+      "      if (Array.isArray(dd.members)) setConfig_(s.config, 'members', JSON.stringify(dd.members));",
+      "      if (dd.adminPassword) setConfig_(s.config, 'adminPassword', String(dd.adminPassword));",
+      "    }",
+      "    return jsonOut_({ ok: true });",
+      "  } catch (err) {",
+      "    return jsonOut_({ ok: false, error: String(err) });",
+      "  } finally {",
+      "    lock.releaseLock();",
+      "  }",
+      "}"
+    ].join("\n");
 
     // =========================================================
     // 2. 通用工具函式
@@ -987,13 +1249,16 @@
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     }
-    function nowTime() {
+    function nowTimeStr() {
       const d = new Date();
       return [d.getHours(), d.getMinutes(), d.getSeconds()].map((v) => String(v).padStart(2, "0")).join(":");
     }
-    function monthOf(iso) { return (iso || todayISO()).slice(0, 7); }
+    function nowDateTimeStr() {
+      return `${todayISO()} ${nowTimeStr()}`;
+    }
+    function monthOf(iso) { return String(iso || todayISO()).slice(0, 7); }
     function prevMonthOf(iso) {
-      const [y, m] = (iso || todayISO()).split("-").map(Number);
+      const [y, m] = String(iso || todayISO()).split("-").map(Number);
       const dt = new Date(y, m - 2, 1);
       return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
     }
@@ -1002,50 +1267,115 @@
       const [y, m] = ym.split("-");
       return `${y}年${Number(m)}月`;
     }
-    function fmtSlash(iso) { return iso ? iso.replaceAll("-", "/") : ""; }
+    function fmtSlash(iso) { return iso ? String(iso).replaceAll("-", "/") : ""; }
     function weekdayZh(iso) {
-      const [y, m, d] = iso.split("-").map(Number);
+      const [y, m, d] = String(iso).split("-").map(Number);
       return ["日", "一", "二", "三", "四", "五", "六"][new Date(y, m - 1, d).getDay()];
     }
-    function invDelta(log) {
-      return log.category === "inbound" ? roundKg(log.weightKg) : roundKg(-log.weightKg);
+    function extractTimePart(createdAt) {
+      if (!createdAt) return "00:00:00";
+      const s = String(createdAt);
+      if (s.includes("T")) {
+        const dt = new Date(s);
+        if (!isNaN(dt.getTime())) {
+          return [dt.getHours(), dt.getMinutes(), dt.getSeconds()].map((v) => String(v).padStart(2, "0")).join(":");
+        }
+      }
+      const m = s.match(/(\d{2}:\d{2}(?::\d{2})?)/);
+      return m ? m[1] : s.slice(0, 8);
+    }
+    function entrySortKey(e) {
+      const c = String(e.createdAt || "");
+      const t = Date.parse(c.replace(" ", "T"));
+      if (!isNaN(t)) return t;
+      const d = Date.parse(`${e.date || "1970-01-01"}T00:00:00`);
+      return isNaN(d) ? 0 : d;
     }
 
-    function normLog(r) {
+    // 單筆紀錄對庫存的影響：正值 = 庫存增加，負值 = 庫存減少
+    function entryInventoryDelta(e) {
+      const signed = roundKg(e.direction * e.kg);
+      return e.category === "in" ? signed : roundKg(-signed);
+    }
+
+    // 標準化資料結構（相容舊版備份格式）
+    function normalizeCategory(c) {
+      if (c === "in" || c === "inbound") return "in";
+      if (c === "out" || c === "outbound") return "out";
+      if (c === "trash") return "trash";
+      return "in";
+    }
+
+    function normalizeEntry(raw) {
+      const cat = normalizeCategory(raw.category);
+      let dir = Number(raw.direction);
+      let kg = Number(raw.kg);
+      if (isNaN(kg) && raw.weightKg !== undefined) {
+        const w = Number(raw.weightKg) || 0;
+        dir = w < 0 ? -1 : 1;
+        kg = Math.abs(w);
+      }
+      dir = dir < 0 ? -1 : 1;
+      kg = roundKg(Math.abs(kg || 0));
+      let createdAt = raw.createdAt || "";
+      if (!createdAt && raw.date) {
+        createdAt = `${raw.date} ${raw.time || "00:00:00"}`;
+      }
       return {
-        id: r.id || uid("log"),
-        date: r.date || todayISO(),
-        time: r.time || "00:00:00",
-        timestamp: Number(r.timestamp) || Date.now(),
-        memberName: r.memberName || "夥伴",
-        memberEmoji: r.memberEmoji || "⭐",
-        category: CATS[r.category] ? r.category : "inbound",
-        weightKg: roundKg(r.weightKg || 0),
-        itemName: typeof r.itemName === "string" ? r.itemName.trim() : "",
-        itemQty: typeof r.itemQty === "string" ? r.itemQty.trim() : "",
-        note: typeof r.note === "string" ? r.note.trim() : "",
-        updatedAt: Number(r.updatedAt) || Date.now()
+        id: String(raw.id || uid("e")),
+        date: String(raw.date || todayISO()).slice(0, 10),
+        createdAt: String(createdAt || nowDateTimeStr()),
+        member: String(raw.member || raw.memberName || "夥伴").trim(),
+        category: cat,
+        direction: dir,
+        kg: kg,
+        item: String(raw.item ?? raw.itemName ?? "").trim(),
+        qty: String(raw.qty ?? raw.itemQty ?? "").trim(),
+        note: String(raw.note ?? "").trim()
       };
     }
 
-    function normSettle(r) {
+    function normalizeMember(raw) {
       return {
-        id: r.id || r.month || "",
-        month: r.month || r.id || "",
-        inbound: roundKg(r.inbound || 0),
-        outbound: roundKg(r.outbound || 0),
-        trash: roundKg(r.trash || 0),
-        totalReduced: roundKg(r.totalReduced || 0),
-        netChange: roundKg(r.netChange || 0),
-        isGoalAchieved: Boolean(r.isGoalAchieved),
-        logCount: Number(r.logCount || 0),
-        championName: r.championName || "尚無紀錄",
-        championEmoji: r.championEmoji || "🏆",
-        championReduced: roundKg(r.championReduced || 0),
-        memberBreakdown: r.memberBreakdown && typeof r.memberBreakdown === "object" ? r.memberBreakdown : {},
-        mode: r.mode === "purge" ? "purge" : "keep",
-        settledDate: r.settledDate || todayISO(),
-        settledAt: Number(r.settledAt) || Date.now()
+        name: String(raw.name || "").trim(),
+        icon: String(raw.icon || raw.emoji || "⭐").trim()
+      };
+    }
+
+    function normalizeSettlement(raw) {
+      const inKg = roundKg(raw.inKg ?? raw.inbound ?? 0);
+      const outKg = roundKg(raw.outKg ?? raw.outbound ?? 0);
+      const trashKg = roundKg(raw.trashKg ?? raw.trash ?? 0);
+      const reduceKg = roundKg(raw.reduceKg ?? raw.totalReduced ?? (outKg + trashKg));
+      const netKg = roundKg(raw.netKg ?? raw.netChange ?? (inKg - reduceKg));
+      const achieved = Boolean(raw.achieved ?? raw.isGoalAchieved ?? false);
+      const detailsCleared = Boolean(raw.detailsCleared ?? (raw.mode === "purge"));
+      let memberStats = {};
+      if (raw.memberStats && typeof raw.memberStats === "object") {
+        Object.entries(raw.memberStats).forEach(([k, v]) => {
+          memberStats[k] = roundKg(Number(v) || 0);
+        });
+      } else if (raw.memberBreakdown && typeof raw.memberBreakdown === "object") {
+        Object.entries(raw.memberBreakdown).forEach(([k, v]) => {
+          memberStats[k] = roundKg(Number(v && v.reduced) || 0);
+        });
+      }
+      let champion = String(raw.champion || "").trim();
+      if (!champion && raw.championName) {
+        champion = raw.championReduced > 0 ? `${raw.championName} (${fmtKg(raw.championReduced)} KG)` : "尚無紀錄";
+      }
+      return {
+        month: String(raw.month || raw.id || "").slice(0, 7),
+        settledAt: String(raw.settledAt || raw.settledDate || nowDateTimeStr()),
+        inKg,
+        outKg,
+        trashKg,
+        reduceKg,
+        netKg,
+        achieved,
+        champion: champion || "尚無紀錄",
+        detailsCleared,
+        memberStats
       };
     }
 
@@ -1062,14 +1392,14 @@
       isAdmin: false,
       newEmoji: EMOJIS[0],
 
-      // 核心資料（先由本機快取載入，雲端同步後自動更新）
-      adminPassword: "8888",
-      members: DEFAULT_MEMBERS.map((m) => ({ ...m })),
-      logs: [],
+      // 核心共用資料
+      entries: [],
       settlements: [],
+      members: DEFAULT_MEMBERS.map((m) => ({ ...m })),
+      adminPassword: "8888",
       activeMember: DEFAULT_MEMBERS[0].name,
 
-      // 篩選
+      // 篩選狀態
       fCat: "all",
       fMember: "all",
       fDateMode: "today",
@@ -1079,276 +1409,301 @@
 
       // 月結 & 編輯
       settleMonth: "",
-      editLogId: null,
+      editEntryId: null,
 
-      // 存檔連線狀態：'syncing' | 'synced' | 'local'
-      syncState: "syncing",
-      pendingWrites: 0,
-      user: null,
-      cloudReady: false,
-      seededMembersOnce: false
+      // 雲端同步狀態：'unbound' | 'syncing' | 'synced' | 'error'
+      syncUrl: "",
+      syncStatus: "unbound",
+      lastSyncTime: "",
+      inFlightCount: 0,
+      autoPullTimer: null
     };
 
-    const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
-    let db = null;
-    let refs = null;
-    let confirmAction = null;
+    let confirmCallback = null;
 
     // =========================================================
-    // 4. 安全本機快取（try/catch 完整包覆）
+    // 4. 雲端網址解析與本機快取存取
     // =========================================================
-    function saveCache() {
+    function resolveInitialSyncUrl() {
+      const baked = (DEFAULT_SYNC_URL || "").trim();
+      let stored = "";
+      let overrideFor = "";
       try {
-        const data = {
-          v: 5,
+        stored = (window.localStorage.getItem(STORAGE_URL_KEY) || "").trim();
+        overrideFor = (window.localStorage.getItem(STORAGE_OVERRIDE_FOR_KEY) || "").trim();
+      } catch (e) {}
+
+      // 若網頁已內建綁定網址，優先採用內建網址（除非管理員曾明確覆蓋過這個版本）
+      if (baked) {
+        if (stored && overrideFor === baked) return stored;
+        return baked;
+      }
+      return stored || "";
+    }
+
+    function saveSyncUrlToStorage(url) {
+      const clean = (url || "").trim();
+      state.syncUrl = clean;
+      try {
+        if (clean) {
+          window.localStorage.setItem(STORAGE_URL_KEY, clean);
+          if (DEFAULT_SYNC_URL) {
+            window.localStorage.setItem(STORAGE_OVERRIDE_FOR_KEY, DEFAULT_SYNC_URL.trim());
+          }
+        } else {
+          window.localStorage.removeItem(STORAGE_URL_KEY);
+          window.localStorage.removeItem(STORAGE_OVERRIDE_FOR_KEY);
+        }
+      } catch (e) {}
+    }
+
+    function saveLocalData() {
+      try {
+        const payload = {
+          entries: state.entries,
+          settlements: state.settlements,
+          members: state.members,
           adminPassword: state.adminPassword,
           activeMember: state.activeMember,
-          members: state.members,
-          logs: state.logs,
-          settlements: state.settlements
+          savedAt: nowDateTimeStr()
         };
-        window.localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        window.localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(payload));
       } catch (e) {
-        // 本機快取不可用時略過，不影響主程式運作
+        // 本機空間不可用時略過
       }
     }
 
-    function loadCache() {
+    function loadLocalData() {
       try {
-        const raw = window.localStorage.getItem(CACHE_KEY);
+        let raw = window.localStorage.getItem(STORAGE_DATA_KEY);
+        // 若是從舊版升級，自動把舊本機快取平順轉入新版格式
+        if (!raw) raw = window.localStorage.getItem(LEGACY_CACHE_KEY);
         if (!raw) return;
         const d = JSON.parse(raw);
         if (!d || typeof d !== "object") return;
-        if (typeof d.adminPassword === "string" && d.adminPassword.length >= 4) state.adminPassword = d.adminPassword;
-        if (Array.isArray(d.members) && d.members.length > 0) state.members = d.members;
-        if (Array.isArray(d.logs)) state.logs = d.logs.map(normLog).sort((a, b) => b.timestamp - a.timestamp);
-        if (Array.isArray(d.settlements)) state.settlements = d.settlements.map(normSettle).sort((a, b) => b.month.localeCompare(a.month));
-        if (d.activeMember && state.members.some((m) => m.name === d.activeMember)) state.activeMember = d.activeMember;
-        else if (state.members[0]) state.activeMember = state.members[0].name;
+        const rawEntries = Array.isArray(d.entries) ? d.entries : Array.isArray(d.logs) ? d.logs : [];
+        state.entries = rawEntries.map(normalizeEntry).sort((a, b) => entrySortKey(b) - entrySortKey(a));
+        if (Array.isArray(d.settlements)) {
+          state.settlements = d.settlements.map(normalizeSettlement).filter((s) => s.month).sort((a, b) => b.month.localeCompare(a.month));
+        }
+        if (Array.isArray(d.members) && d.members.length > 0) {
+          state.members = d.members.map(normalizeMember).filter((m) => m.name);
+        }
+        if (typeof d.adminPassword === "string" && d.adminPassword.length >= 4) {
+          state.adminPassword = d.adminPassword;
+        }
+        if (d.activeMember && state.members.some((m) => m.name === d.activeMember)) {
+          state.activeMember = d.activeMember;
+        } else if (state.members[0]) {
+          state.activeMember = state.members[0].name;
+        }
       } catch (e) {
-        // 快取解析失敗時維持初始狀態，等待雲端資料載入
+        // 解析失敗則維持預設初始狀態
       }
     }
 
     // =========================================================
-    // 5. 同步狀態燈號與 Firebase Firestore 永久存檔
+    // 5. Google Apps Script 雲端同步引擎
     // =========================================================
-    function updateSyncBadge() {
-      const badge = $("syncBadge");
-      const dot = $("syncDot");
-      const text = $("syncText");
+    function updateSyncUI() {
+      const pill = $("syncPill");
+      const txt = $("syncPillText");
       const footer = $("footerStatus");
+      const icon = $("manualSyncIcon");
+      const unboundBar = $("unboundNotice");
+      const tag = $("settingsCloudTag");
 
-      if (state.pendingWrites > 0 || (state.syncState === "syncing" && !state.cloudReady)) {
-        badge.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-amber-50 border-amber-200 text-amber-800 shrink-0";
-        dot.textContent = "🟡";
-        text.textContent = "同步中";
-      } else if (state.cloudReady && state.user) {
-        badge.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-emerald-50 border-emerald-200 text-emerald-800 shrink-0";
-        dot.textContent = "🟢";
-        text.textContent = "已存檔同步";
-        footer.textContent = `雲端已連線即時同步（使用者識別碼：${state.user.uid}）＋ 本機安全快取`;
-      } else {
-        badge.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-orange-50 border-orange-200 text-orange-800 shrink-0";
-        dot.textContent = "🟠";
-        text.textContent = "本機暫存";
-        footer.textContent = "目前為本機暫存模式（重新整理資料保留；亦可至管理員設定匯出完整備份）";
-      }
-    }
-
-    async function cloudWrite(taskFn) {
-      if (!state.cloudReady || !state.user || !refs) {
-        state.syncState = "local";
-        updateSyncBadge();
+      if (!state.syncUrl) {
+        state.syncStatus = "unbound";
+        pill.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-orange-50 border-orange-200 text-orange-800 shrink-0";
+        txt.textContent = "🟠 本機暫存（未綁定雲端）";
+        footer.textContent = "目前為本機暫存模式・登入管理員綁定 Google 試算表即可全公司同步";
+        unboundBar.classList.remove("hidden");
+        if (tag) {
+          tag.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-orange-100 text-orange-800";
+          tag.textContent = "未綁定";
+        }
+        icon.classList.remove("animate-spinOnce");
         return;
       }
-      state.pendingWrites++;
-      updateSyncBadge();
-      try {
-        await taskFn();
-        state.syncState = "synced";
-      } catch (err) {
-        console.warn("雲端寫入異常，資料已保存在本機暫存:", err);
-        state.syncState = "local";
-      } finally {
-        state.pendingWrites = Math.max(0, state.pendingWrites - 1);
-        updateSyncBadge();
+
+      unboundBar.classList.add("hidden");
+      if (state.inFlightCount > 0 || state.syncStatus === "syncing") {
+        pill.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-amber-50 border-amber-200 text-amber-800 shrink-0";
+        txt.textContent = "🟡 同步中...";
+        icon.classList.add("animate-spinOnce");
+      } else if (state.syncStatus === "synced") {
+        pill.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-emerald-50 border-emerald-200 text-emerald-800 shrink-0";
+        txt.textContent = state.lastSyncTime ? `🟢 已同步共用試算表 (${state.lastSyncTime})` : "🟢 已同步共用試算表";
+        footer.textContent = `已連線至共用 Google 試算表・上次同步：${state.lastSyncTime || "剛剛"}（每 30 秒自動更新）`;
+        icon.classList.remove("animate-spinOnce");
+        if (tag) {
+          tag.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800";
+          tag.textContent = "🟢 已連線同步";
+        }
+      } else {
+        pill.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-extrabold border bg-rose-50 border-rose-200 text-rose-700 shrink-0";
+        txt.textContent = "🔴 連線異常（已暫存本機）";
+        footer.textContent = "暫時無法連上共用試算表，資料已安全保存在本機，稍後可按「重新同步」";
+        icon.classList.remove("animate-spinOnce");
+        if (tag) {
+          tag.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800";
+          tag.textContent = "🔴 連線異常";
+        }
       }
     }
 
-    async function initFirebase() {
-      state.syncState = "syncing";
-      updateSyncBadge();
+    async function postToCloud(payload, urlOverride = null) {
+      const url = (urlOverride || state.syncUrl || "").trim();
+      if (!url) return { ok: false, skipped: true };
+
+      state.inFlightCount++;
+      state.syncStatus = "syncing";
+      updateSyncUI();
+
       try {
-        if (typeof __firebase_config === "undefined" || !__firebase_config) {
-          throw new Error("未提供雲端設定");
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          redirect: "follow",
+          body: JSON.stringify(payload)
+        });
+        const text = await res.text();
+        let json;
+        try {
+          json = JSON.parse(text);
+        } catch (parseErr) {
+          throw new Error("試算表回傳格式異常，請確認部署權限已設為「所有人」");
         }
-        const cfg = JSON.parse(__firebase_config);
-        if (!cfg || !cfg.projectId) throw new Error("雲端設定不完整");
-
-        const app = initializeApp(cfg);
-        db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // 先完成身分驗證並 await，再進行所有 Firestore 讀寫
-        let cred;
-        if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
-          cred = await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          cred = await signInAnonymously(auth);
+        if (!json || json.ok !== true) {
+          throw new Error((json && json.error) || "試算表處理失敗");
         }
-        state.user = cred.user || auth.currentUser;
-        if (!state.user) throw new Error("登入驗證失敗");
-
-        // 嚴格遵守共用資料路徑規範：/artifacts/{appId}/public/data/{collectionName}
-        refs = {
-          members: collection(db, "artifacts", appId, "public", "data", "kg_ledger_members"),
-          logs: collection(db, "artifacts", appId, "public", "data", "kg_ledger_logs"),
-          settlements: collection(db, "artifacts", appId, "public", "data", "kg_ledger_settlements"),
-          settings: doc(db, "artifacts", appId, "public", "data", "kg_ledger_settings", "config")
-        };
-
-        state.cloudReady = true;
-        state.syncState = "synced";
-        updateSyncBadge();
-
-        // 監聽 1：人員名單（僅在雲端確定為空時建立 4 位預設人員，絕不覆蓋雲端既有資料）
-        onSnapshot(
-          refs.members,
-          (snap) => {
-            if (!state.user) return;
-            if (snap.empty) {
-              if (!state.seededMembersOnce) {
-                state.seededMembersOnce = true;
-                DEFAULT_MEMBERS.forEach((m) => {
-                  cloudWrite(() => setDoc(doc(refs.members, m.id), { ...m }));
-                });
-              }
-              return;
-            }
-            state.seededMembersOnce = true;
-            const list = [];
-            snap.forEach((d) => {
-              const v = d.data();
-              if (v && v.name) {
-                list.push({
-                  id: d.id,
-                  name: v.name,
-                  emoji: v.emoji || "⭐",
-                  color: v.color || "sky",
-                  order: typeof v.order === "number" ? v.order : 999
-                });
-              }
-            });
-            list.sort((a, b) => a.order - b.order);
-            if (list.length > 0) {
-              state.members = list;
-              if (!state.members.some((m) => m.name === state.activeMember)) {
-                state.activeMember = state.members[0].name;
-              }
-              saveCache();
-              renderAll();
-            }
-          },
-          (err) => {
-            console.warn("人員監聽錯誤:", err);
-            state.cloudReady = false;
-            state.syncState = "local";
-            updateSyncBadge();
-          }
-        );
-
-        // 監聽 2：流水帳明細（純讀取同步，絕不以空陣列覆蓋雲端）
-        onSnapshot(
-          refs.logs,
-          (snap) => {
-            if (!state.user) return;
-            const list = [];
-            snap.forEach((d) => {
-              const v = d.data();
-              if (v && v.category) list.push(normLog({ id: d.id, ...v }));
-            });
-            list.sort((a, b) => b.timestamp - a.timestamp);
-            state.logs = list;
-            saveCache();
-            renderAll();
-          },
-          (err) => {
-            console.warn("明細監聽錯誤:", err);
-            state.cloudReady = false;
-            state.syncState = "local";
-            updateSyncBadge();
-          }
-        );
-
-        // 監聽 3：歷月結算存檔
-        onSnapshot(
-          refs.settlements,
-          (snap) => {
-            if (!state.user) return;
-            const list = [];
-            snap.forEach((d) => {
-              const v = d.data();
-              if (v && (v.month || d.id)) list.push(normSettle({ id: d.id, ...v }));
-            });
-            list.sort((a, b) => b.month.localeCompare(a.month));
-            state.settlements = list;
-            saveCache();
-            renderAll();
-          },
-          (err) => {
-            console.warn("月結監聽錯誤:", err);
-          }
-        );
-
-        // 監聽 4：管理員密碼設定
-        onSnapshot(
-          refs.settings,
-          (snap) => {
-            if (!state.user) return;
-            if (snap.exists()) {
-              const v = snap.data();
-              if (v && typeof v.adminPassword === "string" && v.adminPassword.length >= 4) {
-                state.adminPassword = v.adminPassword;
-                saveCache();
-              }
-            }
-          },
-          (err) => {
-            console.warn("設定監聽錯誤:", err);
-          }
-        );
+        state.syncStatus = "synced";
+        state.lastSyncTime = nowTimeStr();
+        return json;
       } catch (err) {
-        console.warn("雲端初始化未連線，切換本機暫存模式:", err.message);
-        state.cloudReady = false;
-        state.syncState = "local";
-        updateSyncBadge();
+        console.warn("雲端寫入失敗:", err);
+        state.syncStatus = "error";
+        return { ok: false, error: err.message || "連線失敗" };
+      } finally {
+        state.inFlightCount = Math.max(0, state.inFlightCount - 1);
+        updateSyncUI();
       }
+    }
+
+    async function pullFromCloud(options = {}) {
+      const { silent = false, showSuccessToast = false } = options;
+      const url = (state.syncUrl || "").trim();
+      if (!url) {
+        updateSyncUI();
+        return { ok: false, skipped: true };
+      }
+
+      state.inFlightCount++;
+      state.syncStatus = "syncing";
+      updateSyncUI();
+
+      try {
+        const sep = url.includes("?") ? "&" : "?";
+        const res = await fetch(`${url}${sep}action=getAll&_ts=${Date.now()}`, {
+          method: "GET",
+          redirect: "follow"
+        });
+        const text = await res.text();
+        let json;
+        try {
+          json = JSON.parse(text);
+        } catch (e) {
+          throw new Error("無法讀取試算表內容，請確認網址正確且權限為「所有人」");
+        }
+        if (!json || json.ok !== true || !json.data) {
+          throw new Error((json && json.error) || "試算表讀取失敗");
+        }
+
+        const data = json.data;
+        const cloudEntries = Array.isArray(data.entries) ? data.entries.map(normalizeEntry).sort((a, b) => entrySortKey(b) - entrySortKey(a)) : [];
+        const cloudSettlements = Array.isArray(data.settlements) ? data.settlements.map(normalizeSettlement).filter((s) => s.month).sort((a, b) => b.month.localeCompare(a.month)) : [];
+        const cloudMembers = Array.isArray(data.members) ? data.members.map(normalizeMember).filter((m) => m.name) : [];
+
+        state.entries = cloudEntries;
+        state.settlements = cloudSettlements;
+
+        if (typeof data.adminPassword === "string" && data.adminPassword.length >= 4) {
+          state.adminPassword = data.adminPassword;
+        }
+
+        // 若是全新空白試算表（members 為空），自動寫入預設 4 位人員；有資料時絕不覆蓋
+        if (cloudMembers.length === 0) {
+          state.members = DEFAULT_MEMBERS.map((m) => ({ ...m }));
+          postToCloud({ action: "saveMembers", members: state.members });
+        } else {
+          state.members = cloudMembers;
+        }
+
+        if (!state.members.some((m) => m.name === state.activeMember)) {
+          state.activeMember = state.members[0] ? state.members[0].name : DEFAULT_MEMBERS[0].name;
+        }
+
+        state.syncStatus = "synced";
+        state.lastSyncTime = nowTimeStr();
+        saveLocalData();
+        renderAll();
+        if (showSuccessToast) toast("🟢 已同步共用試算表最新資料！", "win");
+        return { ok: true };
+      } catch (err) {
+        console.warn("雲端讀取失敗:", err);
+        state.syncStatus = "error";
+        if (!silent) toast(`🔴 無法連線試算表：${err.message}`, "err");
+        return { ok: false, error: err.message };
+      } finally {
+        state.inFlightCount = Math.max(0, state.inFlightCount - 1);
+        updateSyncUI();
+      }
+    }
+
+    function isAnyModalOpen() {
+      const ids = ["loginModal", "memberModal", "settingsModal", "editModal", "confirmModal"];
+      return ids.some((id) => {
+        const el = $(id);
+        return el && !el.classList.contains("hidden");
+      });
+    }
+
+    function startAutoPull() {
+      if (state.autoPullTimer) clearInterval(state.autoPullTimer);
+      state.autoPullTimer = setInterval(() => {
+        if (!state.syncUrl) return;
+        if (document.visibilityState !== "visible") return;
+        if (isAnyModalOpen()) return;
+        if (state.inFlightCount > 0) return;
+        pullFromCloud({ silent: true });
+      }, 30000);
     }
 
     // =========================================================
-    // 6. 輕快提示音（原生 Web Audio API，零外部依賴）與 Toast
+    // 6. 輕快提示音（Web Audio API）與 Toast / 浮動動畫
     // =========================================================
     let audioCtx = null;
-    function beep(kind) {
+    function playChime(type) {
       if (!state.soundOn) return;
       try {
         const AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
         if (!audioCtx) audioCtx = new AC();
         if (audioCtx.state === "suspended") audioCtx.resume();
-        const seq = kind === "win" ? [523, 659, 784, 1046] : kind === "reduce" ? [740] : kind === "minus" ? [280] : [520];
-        seq.forEach((freq, i) => {
+        const notes = type === "win" ? [523, 659, 784, 1046] : type === "reduce" ? [740] : type === "minus" ? [280] : [520];
+        notes.forEach((freq, i) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = "triangle";
           osc.frequency.value = freq;
-          gain.gain.setValueAtTime(0.08, audioCtx.currentTime + i * 0.07);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.07 + 0.14);
+          const start = audioCtx.currentTime + i * 0.07;
+          gain.gain.setValueAtTime(0.08, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.14);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
-          osc.start(audioCtx.currentTime + i * 0.07);
-          osc.stop(audioCtx.currentTime + i * 0.07 + 0.15);
+          osc.start(start);
+          osc.stop(start + 0.15);
         });
       } catch (e) {}
     }
@@ -1372,10 +1727,10 @@
         el.style.opacity = "0";
         el.style.transform = "translateY(-8px)";
         setTimeout(() => el.remove(), 240);
-      }, 2500);
+      }, 2600);
     }
 
-    function floatFeedback(cat, kg) {
+    function triggerCardFeedback(cat, signedKg) {
       const sumEl = $(`sum-${cat}`);
       const anc = $(`float-${cat}`);
       if (sumEl) {
@@ -1385,347 +1740,385 @@
       }
       if (anc) {
         const sp = document.createElement("span");
-        sp.textContent = `${kg > 0 ? "+" : "-"}${fmtKg(Math.abs(kg))} KG`;
-        sp.className = `absolute left-0 top-0 text-lg sm:text-xl font-black animate-floatFade whitespace-nowrap ${kg > 0 ? CATS[cat].float : "text-slate-500"}`;
+        sp.textContent = `${signedKg > 0 ? "+" : "-"}${fmtKg(Math.abs(signedKg))} KG`;
+        sp.className = `absolute left-0 top-0 text-lg sm:text-xl font-black animate-floatFade whitespace-nowrap ${signedKg > 0 ? CATS[cat].float : "text-slate-500"}`;
         anc.appendChild(sp);
         setTimeout(() => sp.remove(), 800);
       }
     }
 
     // =========================================================
-    // 7. 統計與防重複計算核心
+    // 7. 2:1 目標計算、月份彙總與防重複累計核心
     // =========================================================
-    function calcMetrics(inRaw, outRaw, trRaw) {
-      const inbound = roundKg(inRaw);
-      const outbound = roundKg(outRaw);
-      const trash = roundKg(trRaw);
-      const totalReduced = roundKg(outbound + trash);
-      const totalAdded = inbound;
-      const netChange = roundKg(totalAdded - totalReduced);
-      const target = roundKg(Math.max(0, totalAdded * 2));
-      const gap = roundKg(Math.max(0, target - totalReduced));
-      const isGoalAchieved = (totalAdded > 0 && totalReduced >= target) || (totalAdded <= 0 && totalReduced > 0);
-      const pct = totalAdded > 0 ? Math.min(100, Math.max(0, Math.round((totalReduced / (totalAdded * 2)) * 100))) : totalReduced > 0 ? 100 : 0;
-      return { inbound, outbound, trash, totalReduced, totalAdded, netChange, target, gap, isGoalAchieved, pct };
+    function calcMetrics(inRaw, outRaw, trashRaw) {
+      const inKg = roundKg(inRaw);
+      const outKg = roundKg(outRaw);
+      const trashKg = roundKg(trashRaw);
+      const reduceKg = roundKg(outKg + trashKg);
+      const netKg = roundKg(inKg - reduceKg);
+      const targetKg = roundKg(Math.max(0, inKg * 2));
+      const gapKg = roundKg(Math.max(0, targetKg - reduceKg));
+      const achieved = (inKg > 0 && reduceKg >= targetKg) || (inKg <= 0 && reduceKg > 0);
+      const pct = inKg > 0
+        ? Math.min(100, Math.max(0, Math.round((reduceKg / (inKg * 2)) * 100)))
+        : reduceKg > 0 ? 100 : 0;
+      return { inKg, outKg, trashKg, reduceKg, netKg, targetKg, gapKg, achieved, pct };
     }
 
-    function buildMemberMap(logs, settlements = []) {
+    function buildMemberStats(entries, clearedSettlements = []) {
       const map = new Map();
-      const get = (name, emoji = "⭐") => {
-        if (!map.has(name)) map.set(name, { name, emoji, inbound: 0, outbound: 0, trash: 0, reduced: 0 });
+      const ensure = (name) => {
+        if (!map.has(name)) map.set(name, { name, inKg: 0, outKg: 0, trashKg: 0, reduceKg: 0 });
         return map.get(name);
       };
-      settlements.forEach((st) => {
-        Object.entries(st.memberBreakdown || {}).forEach(([name, v]) => {
-          const p = get(name, v.emoji || "⭐");
-          p.inbound = roundKg(p.inbound + (v.inbound || 0));
-          p.outbound = roundKg(p.outbound + (v.outbound || 0));
-          p.trash = roundKg(p.trash + (v.trash || 0));
-          p.reduced = roundKg(p.outbound + p.trash);
+      clearedSettlements.forEach((st) => {
+        Object.entries(st.memberStats || {}).forEach(([name, reduced]) => {
+          const m = ensure(name);
+          m.reduceKg = roundKg(m.reduceKg + (Number(reduced) || 0));
         });
       });
-      logs.forEach((l) => {
-        const p = get(l.memberName, l.memberEmoji || "⭐");
-        if (l.category === "inbound") p.inbound = roundKg(p.inbound + l.weightKg);
-        else if (l.category === "outbound") p.outbound = roundKg(p.outbound + l.weightKg);
-        else if (l.category === "trash") p.trash = roundKg(p.trash + l.weightKg);
-        p.reduced = roundKg(p.outbound + p.trash);
+      entries.forEach((e) => {
+        const m = ensure(e.member);
+        const signed = roundKg(e.direction * e.kg);
+        if (e.category === "in") m.inKg = roundKg(m.inKg + signed);
+        else if (e.category === "out") {
+          m.outKg = roundKg(m.outKg + signed);
+          m.reduceKg = roundKg(m.reduceKg + signed);
+        } else if (e.category === "trash") {
+          m.trashKg = roundKg(m.trashKg + signed);
+          m.reduceKg = roundKg(m.reduceKg + signed);
+        }
       });
       return map;
     }
 
     function calcMonthSummary(ym) {
-      const liveLogs = state.logs.filter((l) => l.date.startsWith(ym));
+      const liveEntries = state.entries.filter((e) => e.date.startsWith(ym));
       const existing = state.settlements.find((s) => s.month === ym) || null;
-      let i = 0, o = 0, t = 0;
-      let mergedSt = [];
+      let inKg = 0, outKg = 0, trashKg = 0;
+      const clearedSt = [];
 
-      if (existing && (existing.mode === "purge" || liveLogs.length === 0)) {
-        i += existing.inbound;
-        o += existing.outbound;
-        t += existing.trash;
-        mergedSt = [existing];
+      // 若該月曾經「清空明細結算」，先納入已結算的歷史數值，再加上任何新補登明細
+      if (existing && existing.detailsCleared) {
+        inKg += existing.inKg;
+        outKg += existing.outKg;
+        trashKg += existing.trashKg;
+        clearedSt.push(existing);
       }
-      liveLogs.forEach((l) => {
-        if (l.category === "inbound") i += l.weightKg;
-        else if (l.category === "outbound") o += l.weightKg;
-        else if (l.category === "trash") t += l.weightKg;
+      liveEntries.forEach((e) => {
+        const signed = roundKg(e.direction * e.kg);
+        if (e.category === "in") inKg += signed;
+        else if (e.category === "out") outKg += signed;
+        else if (e.category === "trash") trashKg += signed;
       });
 
-      const metrics = calcMetrics(i, o, t);
-      const mMap = buildMemberMap(liveLogs, mergedSt);
-      const ranked = Array.from(mMap.values()).sort((a, b) => b.reduced - a.reduced);
+      const metrics = calcMetrics(inKg, outKg, trashKg);
+      const mMap = buildMemberStats(liveEntries, clearedSt);
+      const ranked = Array.from(mMap.values()).sort((a, b) => b.reduceKg - a.reduceKg);
       const top = ranked[0];
-      const champion = top && top.reduced > 0 ? { name: top.name, emoji: top.emoji, reduced: top.reduced } : { name: "尚無紀錄", emoji: "🌱", reduced: 0 };
-      const breakdown = {};
-      mMap.forEach((v, k) => { breakdown[k] = { emoji: v.emoji, inbound: v.inbound, outbound: v.outbound, trash: v.trash, reduced: v.reduced }; });
+      const championStr = top && top.reduceKg > 0 ? `${top.name} (${fmtKg(top.reduceKg)} KG)` : "尚無紀錄";
+      const memberStatsObj = {};
+      mMap.forEach((v, k) => { memberStatsObj[k] = roundKg(v.reduceKg); });
 
       return {
         month: ym,
         metrics,
-        liveLogs,
-        liveCount: liveLogs.length,
-        effCount: existing && existing.mode === "purge" ? existing.logCount + liveLogs.length : liveLogs.length,
+        liveEntries,
+        liveCount: liveEntries.length,
         existing,
-        champion,
+        championStr,
         mMap,
-        breakdown
+        memberStatsObj
       };
     }
 
     function calcScopeSummary(scope = state.scope) {
       const today = state.today;
       if (scope === "today") {
-        const list = state.logs.filter((l) => l.date === today);
-        let i = 0, o = 0, t = 0;
-        list.forEach((l) => { if (l.category === "inbound") i += l.weightKg; else if (l.category === "outbound") o += l.weightKg; else t += l.weightKg; });
-        return { metrics: calcMetrics(i, o, t), mMap: buildMemberMap(list), liveCount: list.length, mergedMonths: 0 };
+        const list = state.entries.filter((e) => e.date === today);
+        let inKg = 0, outKg = 0, trashKg = 0;
+        list.forEach((e) => {
+          const s = roundKg(e.direction * e.kg);
+          if (e.category === "in") inKg += s;
+          else if (e.category === "out") outKg += s;
+          else trashKg += s;
+        });
+        return { metrics: calcMetrics(inKg, outKg, trashKg), mMap: buildMemberStats(list), liveCount: list.length, clearedMonths: 0 };
       }
       if (scope === "month") {
-        const m = calcMonthSummary(monthOf(today));
-        return { metrics: m.metrics, mMap: m.mMap, liveCount: m.liveCount, mergedMonths: m.existing && m.existing.mode === "purge" ? 1 : 0 };
+        const res = calcMonthSummary(monthOf(today));
+        return { metrics: res.metrics, mMap: res.mMap, liveCount: res.liveCount, clearedMonths: res.existing && res.existing.detailsCleared ? 1 : 0 };
       }
-      // 全部累計：自動合併現有明細 + 已清空明細（或無留存明細）的歷月結算，絕不重複計算
-      const liveMonths = new Set(state.logs.map((l) => l.date.slice(0, 7)));
-      const includeSt = state.settlements.filter((s) => s.mode === "purge" || !liveMonths.has(s.month));
-      let i = 0, o = 0, t = 0;
-      state.logs.forEach((l) => { if (l.category === "inbound") i += l.weightKg; else if (l.category === "outbound") o += l.weightKg; else t += l.weightKg; });
-      includeSt.forEach((s) => { i += s.inbound; o += s.outbound; t += s.trash; });
-      return { metrics: calcMetrics(i, o, t), mMap: buildMemberMap(state.logs, includeSt), liveCount: state.logs.length, mergedMonths: includeSt.length };
+      // 全部累計：現有留存 entries + detailsCleared === true 的歷史月結（絕不重複計算）
+      const clearedSettlements = state.settlements.filter((s) => s.detailsCleared === true);
+      let inKg = 0, outKg = 0, trashKg = 0;
+      state.entries.forEach((e) => {
+        const s = roundKg(e.direction * e.kg);
+        if (e.category === "in") inKg += s;
+        else if (e.category === "out") outKg += s;
+        else trashKg += s;
+      });
+      clearedSettlements.forEach((st) => {
+        inKg += st.inKg;
+        outKg += st.outKg;
+        trashKg += st.trashKg;
+      });
+      return {
+        metrics: calcMetrics(inKg, outKg, trashKg),
+        mMap: buildMemberStats(state.entries, clearedSettlements),
+        liveCount: state.entries.length,
+        clearedMonths: clearedSettlements.length
+      };
+    }
+
+    function getMemberIcon(name) {
+      const found = state.members.find((m) => m.name === name);
+      return found ? found.icon : "⭐";
     }
 
     // =========================================================
-    // 8. 核心操作函式（全部立即存雲端 + 本機快取）
+    // 8. 業務操作（即時寫入本機 + 同步至共用 Google 試算表）
     // =========================================================
-    function addLog(category, sign) {
+    async function addEntry(category, direction) {
       const val = parseFloat($("kgInput").value);
       if (isNaN(val) || val <= 0) {
-        toast("請輸入大於 0 的公斤數 (KG)！", "warn");
+        toast("請輸入大於 0 的重量 (KG)！", "warn");
         $("kgInput").focus();
         return;
       }
       state.stepKg = roundKg(val);
       state.today = todayISO();
 
-      const mem = state.members.find((m) => m.name === state.activeMember) || state.members[0];
-      const signedKg = roundKg(state.stepKg * sign);
-      let itemName = "", itemQty = "";
-      if (category === "outbound") {
-        itemName = $("outItem").value.trim();
-        itemQty = $("outQty").value.trim();
+      const memberObj = state.members.find((m) => m.name === state.activeMember) || state.members[0];
+      const memberName = memberObj ? memberObj.name : "夥伴";
+      const memberIcon = memberObj ? memberObj.icon : "⭐";
+
+      let item = "", qty = "";
+      if (category === "out") {
+        item = $("outItem").value.trim();
+        qty = $("outQty").value.trim();
       } else if (category === "trash") {
-        itemName = $("trashItem").value.trim();
-        itemQty = $("trashQty").value.trim();
+        item = $("trashItem").value.trim();
+        qty = $("trashQty").value.trim();
       }
 
-      const beforeWin = calcScopeSummary().metrics.isGoalAchieved;
-      const log = normLog({
-        id: uid("log"),
+      const beforeWin = calcScopeSummary().metrics.achieved;
+      const entry = {
+        id: uid("e"),
         date: state.selectedDate,
-        time: nowTime(),
-        timestamp: Date.now(),
-        memberName: mem ? mem.name : "夥伴",
-        memberEmoji: mem ? mem.emoji : "⭐",
+        createdAt: nowDateTimeStr(),
+        member: memberName,
         category,
-        weightKg: signedKg,
-        itemName,
-        itemQty,
-        note: "",
-        updatedAt: Date.now()
-      });
+        direction: direction < 0 ? -1 : 1,
+        kg: state.stepKg,
+        item,
+        qty,
+        note: ""
+      };
 
-      state.logs.unshift(log);
-      saveCache();
-      cloudWrite(() => setDoc(doc(refs.logs, log.id), { ...log }));
+      // 立即更新本機畫面與快取
+      state.entries.unshift(entry);
+      saveLocalData();
 
-      // 送出後自動清空項目與數量欄
-      if (category === "outbound") { $("outItem").value = ""; $("outQty").value = ""; }
+      // 送出後自動清空項目與數量輸入框
+      if (category === "out") { $("outItem").value = ""; $("outQty").value = ""; }
       if (category === "trash") { $("trashItem").value = ""; $("trashQty").value = ""; }
 
-      const afterWin = calcScopeSummary().metrics.isGoalAchieved;
+      const afterWin = calcScopeSummary().metrics.achieved;
       renderAll();
-      floatFeedback(category, signedKg);
+      const signedKg = roundKg(entry.direction * entry.kg);
+      triggerCardFeedback(category, signedKg);
 
-      const kgStr = `${signedKg > 0 ? "+" : "-"}${fmtKg(Math.abs(signedKg))} KG`;
+      const kgStr = `${signedKg > 0 ? "+" : "-"}${fmtKg(entry.kg)} KG`;
       if (!beforeWin && afterWin) {
-        beep("win");
-        toast(`🎉 恭喜達標 2:1！${log.memberEmoji} ${log.memberName} ${CATS[category].label} ${kgStr}`, "win");
+        playChime("win");
+        toast(`🎉 太棒了！達成 2:1 降庫存目標！${memberIcon} ${memberName} ${CATS[category].label} ${kgStr}`, "win");
       } else if (signedKg < 0) {
-        beep("minus");
-        toast(`${log.memberEmoji} ${log.memberName} 已修正 ${CATS[category].label} ${kgStr}`, "warn");
-      } else if (category === "inbound") {
-        beep("add");
-        toast(`${log.memberEmoji} ${log.memberName} 進貨 ${kgStr}（已存檔）`, "info");
+        playChime("minus");
+        toast(`${memberIcon} ${memberName} 已更正 ${CATS[category].label} ${kgStr}`, "warn");
+      } else if (category === "in") {
+        playChime("add");
+        toast(`${memberIcon} ${memberName} 進貨 ${kgStr}（已紀錄）`, "info");
       } else {
-        beep("reduce");
-        toast(`${log.memberEmoji} ${log.memberName} ${CATS[category].label} ${kgStr}！降庫存超讚 🔥`, "ok");
+        playChime("reduce");
+        toast(`${memberIcon} ${memberName} ${CATS[category].label} ${kgStr}！庫存順利下降 🔥`, "ok");
+      }
+
+      // 背景同步至共用試算表
+      if (state.syncUrl) {
+        const res = await postToCloud({ action: "addEntry", entry });
+        if (!res.ok && !res.skipped) {
+          toast("⚠️ 網路暫時不穩，這筆資料已先保存在本機", "warn");
+        }
       }
     }
 
-    function saveEditLog(e) {
+    async function saveEditEntry(e) {
       e.preventDefault();
-      if (!state.isAdmin || !state.editLogId) return;
-      const idx = state.logs.findIndex((l) => l.id === state.editLogId);
+      if (!state.isAdmin || !state.editEntryId) return;
+      const idx = state.entries.findIndex((x) => x.id === state.editEntryId);
       if (idx < 0) return closeModal("editModal");
 
       const dateVal = $("edDate").value;
-      const memName = $("edMember").value;
-      const cat = $("edCat").value;
-      const sign = Number($("edSign").value);
-      const absKg = parseFloat($("edKg").value);
-      if (!dateVal || isNaN(absKg) || absKg <= 0) {
+      const memberVal = $("edMember").value;
+      const catVal = $("edCat").value;
+      const dirVal = Number($("edDir").value) < 0 ? -1 : 1;
+      const kgVal = parseFloat($("edKg").value);
+
+      if (!dateVal || isNaN(kgVal) || kgVal <= 0) {
         $("editErr").textContent = "請填寫正確的日期與大於 0 的重量！";
         $("editErr").classList.remove("hidden");
         return;
       }
 
-      const mem = state.members.find((m) => m.name === memName);
-      const updated = normLog({
-        ...state.logs[idx],
+      const updated = {
+        ...state.entries[idx],
         date: dateVal,
-        memberName: memName,
-        memberEmoji: mem ? mem.emoji : state.logs[idx].memberEmoji,
-        category: cat,
-        weightKg: roundKg(Math.abs(absKg) * (sign < 0 ? -1 : 1)),
-        itemName: $("edItem").value.trim(),
-        itemQty: $("edQty").value.trim(),
-        note: $("edNote").value.trim(),
-        updatedAt: Date.now()
-      });
+        member: memberVal,
+        category: catVal,
+        direction: dirVal,
+        kg: roundKg(Math.abs(kgVal)),
+        item: $("edItem").value.trim(),
+        qty: $("edQty").value.trim(),
+        note: $("edNote").value.trim()
+      };
 
-      state.logs[idx] = updated;
-      saveCache();
-      cloudWrite(() => setDoc(doc(refs.logs, updated.id), { ...updated }));
+      state.entries[idx] = updated;
+      saveLocalData();
       closeModal("editModal");
       renderAll();
-      beep("win");
-      toast("✅ 已修改紀錄並同步重算所有數據！", "win");
+      playChime("win");
+      toast("✅ 紀錄修改完成，已重新計算所有統計！", "win");
+
+      if (state.syncUrl) {
+        await postToCloud({ action: "updateEntry", entry: updated });
+      }
     }
 
-    function deleteLog(id) {
+    async function deleteEntryById(id) {
       if (!state.isAdmin) return;
-      state.logs = state.logs.filter((l) => l.id !== id);
-      saveCache();
-      cloudWrite(() => deleteDoc(doc(refs.logs, id)));
+      state.entries = state.entries.filter((x) => x.id !== id);
+      saveLocalData();
       renderAll();
       toast("🗑️ 已刪除該筆紀錄", "info");
+      if (state.syncUrl) {
+        await postToCloud({ action: "deleteEntry", id });
+      }
     }
 
-    function addMember(name, emoji) {
-      if (!state.isAdmin) return;
+    async function addMemberAction(name, icon) {
+      if (!state.isAdmin) return "請先登入管理員";
       const trimmed = name.trim();
       if (!trimmed) return "請輸入人員名字！";
       if (state.members.some((m) => m.name === trimmed)) return "名單裡已經有這位人員囉！";
-      const mem = {
-        id: uid("mem"),
-        name: trimmed,
-        emoji: emoji || EMOJIS[0],
-        color: COLORS[state.members.length % COLORS.length],
-        order: Date.now()
-      };
-      state.members.push(mem);
-      saveCache();
-      cloudWrite(() => setDoc(doc(refs.members, mem.id), { ...mem }));
+      state.members.push({ name: trimmed, icon: icon || EMOJIS[0] });
+      saveLocalData();
       renderAll();
       renderMemberManageModal();
-      beep("win");
-      toast(`✨ 已新增人員 ${mem.emoji} ${mem.name}`, "win");
+      playChime("win");
+      toast(`✨ 已新增人員 ${icon} ${trimmed}`, "win");
+      if (state.syncUrl) {
+        await postToCloud({ action: "saveMembers", members: state.members });
+      }
       return "";
     }
 
-    function removeMember(id) {
+    async function removeMemberAction(name) {
       if (!state.isAdmin) return;
-      if (state.members.length <= 1) return toast("至少需保留 1 位人員喔！", "warn");
-      const target = state.members.find((m) => m.id === id);
-      if (!target) return;
-      state.members = state.members.filter((m) => m.id !== id);
-      if (!state.members.some((m) => m.name === state.activeMember)) state.activeMember = state.members[0].name;
-      saveCache();
-      cloudWrite(() => deleteDoc(doc(refs.members, id)));
+      if (state.members.length <= 1) {
+        toast("至少需保留 1 位人員喔！", "warn");
+        return;
+      }
+      state.members = state.members.filter((m) => m.name !== name);
+      if (!state.members.some((m) => m.name === state.activeMember)) {
+        state.activeMember = state.members[0].name;
+      }
+      saveLocalData();
       renderAll();
       renderMemberManageModal();
-      toast(`已移除「${target.name}」（歷史紀錄完整保留）`, "info");
+      toast(`已移除「${name}」（歷史紀錄名字會完整保留）`, "info");
+      if (state.syncUrl) {
+        await postToCloud({ action: "saveMembers", members: state.members });
+      }
     }
 
-    function settleMonth(mode) {
+    function runMonthlySettlement(clearMonthEntries) {
       if (!state.isAdmin) return;
       const ym = state.settleMonth;
       const data = calcMonthSummary(ym);
       if (data.liveCount === 0 && !data.existing) {
-        return toast(`${fmtMonthZh(ym)} 目前沒有任何紀錄可以結算！`, "warn");
+        toast(`${fmtMonthZh(ym)} 目前沒有任何紀錄可以結算！`, "warn");
+        return;
       }
 
-      const isPurge = mode === "purge";
       openConfirm({
-        icon: isPurge ? "🧹" : "💾",
-        title: isPurge ? `確定結算並清空 ${fmtMonthZh(ym)} 明細？` : `確定儲存 ${fmtMonthZh(ym)} 月結成績單？`,
-        sub: isPurge ? "將先自動下載 Excel 備份，再存總表並清空零碎明細" : "保留原本所有每日明細，額外固定存檔本月成績單",
+        icon: clearMonthEntries ? "🧹" : "💾",
+        title: clearMonthEntries ? `確定結算並清空 ${fmtMonthZh(ym)} 明細？` : `確定儲存 ${fmtMonthZh(ym)} 月結總表？`,
+        sub: clearMonthEntries ? "會先下載 Excel 備份檔，再存總表並清空零碎明細" : "保留所有每日明細隨時查，並存檔本月成績單",
         bodyHtml: `
-          <div>📦 總進貨：<b>${fmtKg(data.metrics.inbound)} KG</b></div>
-          <div>🚚 總出貨：<b>${fmtKg(data.metrics.outbound)} KG</b>　🗑️ 排除垃圾：<b>${fmtKg(data.metrics.trash)} KG</b></div>
-          <div>📉 總減少：<b>${fmtKg(data.metrics.totalReduced)} KG</b>　🎯 狀態：<b>${data.metrics.isGoalAchieved ? "已達標 2:1" : "未達標"}</b></div>
+          <div>📦 總進貨：<b>${fmtKg(data.metrics.inKg)} KG</b></div>
+          <div>🚚 總出貨：<b>${fmtKg(data.metrics.outKg)} KG</b>　🗑️ 排除垃圾：<b>${fmtKg(data.metrics.trashKg)} KG</b></div>
+          <div>📉 總減少：<b>${fmtKg(data.metrics.reduceKg)} KG</b>　🎯 結果：<b>${data.metrics.achieved ? "已達標 2:1" : "未達標"}</b></div>
+          <div>🥇 當月冠軍：<b>${esc(data.championStr)}</b></div>
         `,
-        warn: isPurge ? `⚠️ 注意：將會先自動下載 ${data.liveCount} 筆明細備份檔（含管理員項目／數量），接著刪除系統內該月零碎明細（歷月成績單會永久保留）。` : "",
-        okText: isPurge ? "下載備份並結算清空" : "確認存檔月結",
-        okClass: isPurge ? "bg-orange-500 hover:bg-orange-600" : "bg-emerald-600 hover:bg-emerald-700",
-        onOk: () => {
-          if (isPurge && data.liveLogs.length > 0) {
-            exportLogsCsv(data.liveLogs, `月結備份_${ym}_每日明細.csv`, true);
+        warn: clearMonthEntries ? `⚠️ 提醒：確認後將先自動下載 ${data.liveCount} 筆當月明細 Excel 檔（含管理員項目／數量），接著清空該月零碎明細（歷月成績單會永久保留）。` : "",
+        okText: clearMonthEntries ? "下載備份並結算清空" : "確認存成月結總表",
+        okClass: clearMonthEntries ? "bg-orange-500 hover:bg-orange-600" : "bg-emerald-600 hover:bg-emerald-700",
+        onOk: async () => {
+          if (clearMonthEntries && data.liveEntries.length > 0) {
+            exportEntriesCsv(data.liveEntries, `月結備份_${ym}_每日明細.csv`, true);
           }
-          const rec = normSettle({
-            id: ym,
+
+          const settlement = {
             month: ym,
-            inbound: data.metrics.inbound,
-            outbound: data.metrics.outbound,
-            trash: data.metrics.trash,
-            totalReduced: data.metrics.totalReduced,
-            netChange: data.metrics.netChange,
-            isGoalAchieved: data.metrics.isGoalAchieved,
-            logCount: data.effCount,
-            championName: data.champion.name,
-            championEmoji: data.champion.emoji,
-            championReduced: data.champion.reduced,
-            memberBreakdown: data.breakdown,
-            mode,
-            settledDate: todayISO(),
-            settledAt: Date.now()
-          });
+            settledAt: nowDateTimeStr(),
+            inKg: data.metrics.inKg,
+            outKg: data.metrics.outKg,
+            trashKg: data.metrics.trashKg,
+            reduceKg: data.metrics.reduceKg,
+            netKg: data.metrics.netKg,
+            achieved: data.metrics.achieved,
+            champion: data.championStr,
+            detailsCleared: Boolean(clearMonthEntries || (data.existing && data.existing.detailsCleared && data.liveCount === 0)),
+            memberStats: data.memberStatsObj
+          };
 
           const idx = state.settlements.findIndex((s) => s.month === ym);
-          if (idx >= 0) state.settlements[idx] = rec;
-          else state.settlements.push(rec);
+          if (idx >= 0) state.settlements[idx] = settlement;
+          else state.settlements.push(settlement);
           state.settlements.sort((a, b) => b.month.localeCompare(a.month));
 
-          const delIds = isPurge ? data.liveLogs.map((l) => l.id) : [];
-          if (isPurge && delIds.length > 0) {
-            const set = new Set(delIds);
-            state.logs = state.logs.filter((l) => !set.has(l.id));
+          if (clearMonthEntries) {
+            state.entries = state.entries.filter((e) => !e.date.startsWith(ym));
           }
 
-          saveCache();
-          cloudWrite(() => setDoc(doc(refs.settlements, rec.month), { ...rec }));
-          delIds.forEach((id) => cloudWrite(() => deleteDoc(doc(refs.logs, id))));
-
+          saveLocalData();
           renderAll();
-          beep("win");
-          toast(isPurge ? `🎉 ${fmtMonthZh(ym)} 已存檔月結、下載備份並清空明細！` : `🎉 ${fmtMonthZh(ym)} 月結總表已固定存檔！`, "win");
+          playChime("win");
+          toast(clearMonthEntries ? `🎉 ${fmtMonthZh(ym)} 已存檔月結、下載備份並清空明細！` : `🎉 ${fmtMonthZh(ym)} 月結總表已存檔！`, "win");
+
+          if (state.syncUrl) {
+            await postToCloud({ action: "saveSettlement", settlement, clearMonthEntries: Boolean(clearMonthEntries) });
+          }
         }
       });
     }
 
-    function deleteSettlement(ym) {
+    async function deleteSettlementByMonth(ym) {
       if (!state.isAdmin) return;
       state.settlements = state.settlements.filter((s) => s.month !== ym);
-      saveCache();
-      cloudWrite(() => deleteDoc(doc(refs.settlements, ym)));
+      saveLocalData();
       renderAll();
-      toast(`已刪除 ${fmtMonthZh(ym)} 成績單`, "info");
+      toast(`已刪除 ${fmtMonthZh(ym)} 月結紀錄`, "info");
+      if (state.syncUrl) {
+        await postToCloud({ action: "deleteSettlement", month: ym });
+      }
     }
 
     // =========================================================
-    // 9. CSV 匯出 & JSON 完整備份還原
+    // 9. 檔案匯出（CSV / JSON / 已綁定雲端 HTML）與匯入還原
     // =========================================================
-    function downloadFile(content, filename, mime) {
+    function downloadBlob(content, filename, mime) {
       const blob = new Blob([content], { type: mime });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -1737,113 +2130,156 @@
       URL.revokeObjectURL(url);
     }
 
-    function toCsv(headers, rows) {
+    function buildCsv(headers, rows) {
       const q = (v) => `"${String(v ?? "").replaceAll('"', '""')}"`;
       return "\uFEFF" + [headers.map(q).join(","), ...rows.map((r) => r.map(q).join(","))].join("\r\n");
     }
 
-    function exportLogsCsv(list, filename, includeAdmin = state.isAdmin) {
-      if (!list.length) return toast("目前沒有符合條件的紀錄可匯出！", "warn");
-      const headers = includeAdmin
-        ? ["登記日期", "紀錄時間", "人員", "分類", "KG變動", "庫存影響", "項目(僅管理員)", "數量(僅管理員)", "備註(僅管理員)"]
-        : ["登記日期", "紀錄時間", "人員", "分類", "KG變動", "庫存影響"];
-      const rows = list.map((l) => {
-        const inv = invDelta(l);
-        const base = [fmtSlash(l.date), l.time, l.memberName, CATS[l.category].label, l.weightKg, inv < 0 ? "庫存減少" : "庫存增加"];
-        if (includeAdmin) base.push(l.itemName || "", l.itemQty || "", l.note || "");
+    function exportEntriesCsv(list, filename, includeAdminCols = state.isAdmin) {
+      if (!list.length) {
+        toast("目前沒有符合條件的紀錄可匯出！", "warn");
+        return;
+      }
+      const headers = includeAdminCols
+        ? ["登記日期", "紀錄時間", "人員", "分類", "變動(KG)", "庫存影響", "項目(管理員)", "數量(管理員)", "備註(管理員)"]
+        : ["登記日期", "紀錄時間", "人員", "分類", "變動(KG)", "庫存影響"];
+
+      const rows = list.map((e) => {
+        const signed = roundKg(e.direction * e.kg);
+        const inv = entryInventoryDelta(e);
+        const base = [fmtSlash(e.date), extractTimePart(e.createdAt), e.member, CATS[e.category].label, signed, inv < 0 ? "庫存 −" : "庫存 ＋"];
+        if (includeAdminCols) base.push(e.item || "", e.qty || "", e.note || "");
         return base;
       });
-      downloadFile(toCsv(headers, rows), filename, "text/csv;charset=utf-8;");
+      downloadBlob(buildCsv(headers, rows), filename, "text/csv;charset=utf-8;");
       toast(`📥 已匯出 ${list.length} 筆明細 Excel 檔`, "win");
     }
 
     function exportMonthlyCsv() {
-      if (!state.settlements.length) return toast("目前尚無已存檔的歷月成績單！", "warn");
-      const headers = ["月份", "進貨(KG)", "出貨(KG)", "排除垃圾(KG)", "總減少(KG)", "淨變化(KG)", "2:1達標狀態", "當月冠軍", "明細狀態", "結算日期"];
+      if (!state.settlements.length) {
+        toast("目前還沒有已存檔的歷月成績單！", "warn");
+        return;
+      }
+      const headers = ["月份", "進貨(KG)", "出貨(KG)", "排除垃圾(KG)", "總減少(KG)", "淨變化(KG)", "2:1達標結果", "當月冠軍", "明細狀態", "結算時間"];
       const rows = state.settlements.map((s) => {
-        const hasLive = state.logs.some((l) => l.date.startsWith(s.month));
+        const hasLive = state.entries.some((e) => e.date.startsWith(s.month));
         return [
-          fmtMonthZh(s.month), s.inbound, s.outbound, s.trash, s.totalReduced, s.netChange,
-          s.isGoalAchieved ? "已達標" : "未達標",
-          s.championReduced > 0 ? `${s.championName}(${s.championReduced}KG)` : "無",
-          s.mode === "purge" && !hasLive ? "只留總表" : "明細保留中",
-          fmtSlash(s.settledDate)
+          fmtMonthZh(s.month), s.inKg, s.outKg, s.trashKg, s.reduceKg, s.netKg,
+          s.achieved ? "已達標" : "未達標",
+          s.champion || "尚無紀錄",
+          s.detailsCleared && !hasLive ? "已精簡（僅留總表）" : "明細保留中",
+          s.settledAt
         ];
       });
-      downloadFile(toCsv(headers, rows), `歷月結算成績單_${todayISO()}.csv`, "text/csv;charset=utf-8;");
-      toast(`📥 已匯出 ${state.settlements.length} 個月歷月成績單`, "win");
+      downloadBlob(buildCsv(headers, rows), `歷月結算總表_${todayISO()}.csv`, "text/csv;charset=utf-8;");
+      toast(`📥 已匯出 ${state.settlements.length} 個月歷月總表`, "win");
     }
 
     function downloadJsonBackup() {
       const payload = {
-        app: "全員降庫存動起來KG流水帳",
-        v: 5,
-        exportedAt: new Date().toISOString(),
-        adminPassword: state.adminPassword,
+        app: "全員降庫存動起來KG流水帳_共用雲端同步版",
+        version: 6,
+        exportedAt: nowDateTimeStr(),
+        entries: state.entries,
+        settlements: state.settlements,
         members: state.members,
-        logs: state.logs,
-        settlements: state.settlements
+        adminPassword: state.adminPassword
       };
-      downloadFile(JSON.stringify(payload, null, 2), `全員降庫存_完整備份_${todayISO()}.json`, "application/json;charset=utf-8;");
-      toast("📥 完整資料備份檔 (.json) 已下載！", "win");
+      downloadBlob(JSON.stringify(payload, null, 2), `全員降庫存_完整備份_${todayISO()}.json`, "application/json;charset=utf-8;");
+      toast("📥 完整備份檔 (.json) 已下載！", "win");
     }
 
-    function handleRestoreFile(file) {
+    function downloadBoundHtmlFile() {
+      const url = ($("syncUrlInput").value || state.syncUrl || "").trim();
+      if (!url || !url.startsWith("http")) {
+        toast("請先在上方填入並測試共用試算表網址！", "warn");
+        $("syncUrlInput").focus();
+        return;
+      }
+      if (!INITIAL_HTML_SNAPSHOT) {
+        toast("無法產生網頁檔，請重新整理後再試！", "err");
+        return;
+      }
+      // 動態組裝標記字串，避免正規表達式本身誤匹配
+      const mStart = "/" + "*__SYNC_URL_START__*" + "/";
+      const mEnd = "/" + "*__SYNC_URL_END__*" + "/";
+      const sIdx = INITIAL_HTML_SNAPSHOT.indexOf(mStart);
+      const eIdx = INITIAL_HTML_SNAPSHOT.indexOf(mEnd, sIdx + mStart.length);
+      if (sIdx < 0 || eIdx < 0) {
+        toast("無法定位網址標記，請稍後再試！", "err");
+        return;
+      }
+      const boundHtml =
+        INITIAL_HTML_SNAPSHOT.slice(0, sIdx + mStart.length) +
+        JSON.stringify(url) +
+        INITIAL_HTML_SNAPSHOT.slice(eIdx);
+
+      downloadBlob(boundHtml, "team_ledger_雲端同步版.html", "text/html;charset=utf-8;");
+      playChime("win");
+      toast("📦 已下載「已綁定雲端」網頁檔！覆蓋上傳即可全公司自動同步", "win");
+    }
+
+    function handleImportBackup(file) {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         try {
           const d = JSON.parse(String(reader.result || ""));
-          if (!d || !Array.isArray(d.members) || !Array.isArray(d.logs)) {
-            return toast("備份檔格式不正確！", "err");
+          const rawEntries = Array.isArray(d.entries) ? d.entries : Array.isArray(d.logs) ? d.logs : null;
+          if (!d || !Array.isArray(d.members) || !rawEntries) {
+            toast("這份備份檔的格式不正確喔！", "err");
+            return;
           }
-          const newMems = d.members.length ? d.members : DEFAULT_MEMBERS.map((m) => ({ ...m }));
-          const newLogs = d.logs.map(normLog).sort((a, b) => b.timestamp - a.timestamp);
-          const newSts = Array.isArray(d.settlements) ? d.settlements.map(normSettle).sort((a, b) => b.month.localeCompare(a.month)) : [];
+          const newMembers = d.members.map(normalizeMember).filter((m) => m.name);
+          const finalMembers = newMembers.length ? newMembers : DEFAULT_MEMBERS.map((m) => ({ ...m }));
+          const newEntries = rawEntries.map(normalizeEntry).sort((a, b) => entrySortKey(b) - entrySortKey(a));
+          const newSettlements = Array.isArray(d.settlements)
+            ? d.settlements.map(normalizeSettlement).filter((s) => s.month).sort((a, b) => b.month.localeCompare(a.month))
+            : [];
+          const newPwd = typeof d.adminPassword === "string" && d.adminPassword.length >= 4 ? d.adminPassword : state.adminPassword;
 
           openConfirm({
             icon: "📤",
-            title: "確定從備份檔還原全部資料？",
-            sub: "將會覆蓋目前資料並同步至雲端與本機",
-            bodyHtml: `<div>👥 人員：<b>${newMems.length} 位</b>　📋 明細：<b>${newLogs.length} 筆</b>　📅 歷月總表：<b>${newSts.length} 個月</b></div>`,
-            warn: "提醒：還原後將以這份備份檔內容為主。",
+            title: "確定匯入這份備份檔還原資料？",
+            sub: state.syncUrl ? "還原後也會自動同步上傳到共用 Google 試算表" : "將覆蓋目前這台電腦的本機紀錄",
+            bodyHtml: `<div>👥 人員：<b>${finalMembers.length} 位</b>　📋 流水帳：<b>${newEntries.length} 筆</b>　📅 歷月總表：<b>${newSettlements.length} 個月</b></div>`,
+            warn: "提醒：確認後目前畫面資料將會以這份備份檔為主。",
             okText: "確認還原",
             okClass: "bg-emerald-600 hover:bg-emerald-700",
-            onOk: () => {
-              const oldLogIds = state.logs.map((l) => l.id);
-              const oldMemIds = state.members.map((m) => m.id);
-              const oldStMonths = state.settlements.map((s) => s.month);
-
-              state.members = newMems;
-              state.logs = newLogs;
-              state.settlements = newSts;
-              if (typeof d.adminPassword === "string" && d.adminPassword.length >= 4) state.adminPassword = d.adminPassword;
+            onOk: async () => {
+              state.members = finalMembers;
+              state.entries = newEntries;
+              state.settlements = newSettlements;
+              state.adminPassword = newPwd;
               if (!state.members.some((m) => m.name === state.activeMember)) state.activeMember = state.members[0].name;
-              saveCache();
-
-              if (state.cloudReady && state.user && refs) {
-                const keepL = new Set(newLogs.map((l) => l.id));
-                oldLogIds.filter((id) => !keepL.has(id)).forEach((id) => cloudWrite(() => deleteDoc(doc(refs.logs, id))));
-                newLogs.forEach((l) => cloudWrite(() => setDoc(doc(refs.logs, l.id), { ...l })));
-
-                const keepM = new Set(newMems.map((m) => m.id));
-                oldMemIds.filter((id) => !keepM.has(id)).forEach((id) => cloudWrite(() => deleteDoc(doc(refs.members, id))));
-                newMems.forEach((m) => cloudWrite(() => setDoc(doc(refs.members, m.id), { ...m })));
-
-                const keepS = new Set(newSts.map((s) => s.month));
-                oldStMonths.filter((m) => !keepS.has(m)).forEach((m) => cloudWrite(() => deleteDoc(doc(refs.settlements, m))));
-                newSts.forEach((s) => cloudWrite(() => setDoc(doc(refs.settlements, s.month), { ...s })));
-
-                cloudWrite(() => setDoc(refs.settings, { adminPassword: state.adminPassword, updatedAt: Date.now() }));
-              }
+              saveLocalData();
               renderAll();
               closeModal("settingsModal");
-              beep("win");
-              toast("🎉 備份檔已還原並同步完成！", "win");
+
+              if (state.syncUrl) {
+                const res = await postToCloud({
+                  action: "importAll",
+                  data: {
+                    entries: state.entries,
+                    settlements: state.settlements,
+                    members: state.members,
+                    adminPassword: state.adminPassword
+                  }
+                });
+                if (res.ok) {
+                  playChime("win");
+                  toast("🎉 已還原備份並同步上傳到共用試算表！", "win");
+                } else {
+                  toast("⚠️ 本機已還原，但同步到共用試算表時失敗", "warn");
+                }
+              } else {
+                playChime("win");
+                toast("🎉 備份檔已還原完成！", "win");
+              }
             }
           });
         } catch (err) {
-          toast("無法讀取這個備份檔！", "err");
+          toast("無法讀取這個檔案，請確認是本系統下載的 .json 備份檔", "err");
         }
       };
       reader.readAsText(file);
@@ -1853,10 +2289,11 @@
     // 10. 畫面渲染
     // =========================================================
     function renderAll() {
+      updateSyncUI();
       renderHeaderAndTabs();
       renderDashboard();
       renderCheckIn();
-      renderRank();
+      renderLeaderboard();
       renderLedger();
       renderMonthly();
     }
@@ -1865,17 +2302,17 @@
       const isAd = state.isAdmin;
       $("adminBanner").classList.toggle("hidden", !isAd);
       $("headerSettingsBtn").classList.toggle("hidden", !isAd);
-      $("headerSettingsBtn").classList.toggle("flex", isAd);
+      $("headerSettingsBtn").classList.toggle("inline-flex", isAd);
       $("openMemberModalBtn").classList.toggle("hidden", !isAd);
       $("openMemberModalBtn").classList.toggle("inline-flex", isAd);
 
       const btn = $("adminToggleBtn");
       if (isAd) {
-        btn.className = "flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-300 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 active:scale-95 text-amber-950 border border-amber-500 text-xs sm:text-sm font-black shadow-sm transition cursor-pointer";
-        $("adminBtnIcon").textContent = "🔓";
-        $("adminBtnText").textContent = "管理員模式（點擊登出）";
+        btn.className = "inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-300 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 active:scale-95 text-amber-950 border border-amber-500 text-xs sm:text-sm font-black shadow-sm transition cursor-pointer";
+        $("adminBtnIcon").textContent = "👑";
+        $("adminBtnText").textContent = "管理員模式（登出）";
       } else {
-        btn.className = "flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer";
+        btn.className = "inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 active:scale-95 text-white text-xs sm:text-sm font-extrabold shadow-sm transition cursor-pointer";
         $("adminBtnIcon").textContent = "🔒";
         $("adminBtnText").textContent = "管理員登入";
       }
@@ -1888,7 +2325,7 @@
           on ? "bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-200" : "text-slate-500 hover:text-slate-800 hover:bg-white/60"
         }`;
       });
-      $("tabLedgerCount").textContent = state.logs.length;
+      $("tabLedgerCount").textContent = state.entries.length;
       $("tabMonthlyCount").textContent = state.settlements.length;
       $("panelDaily").classList.toggle("hidden", state.tab !== "daily");
       $("panelLedger").classList.toggle("hidden", state.tab !== "ledger");
@@ -1907,34 +2344,34 @@
       const m = res.metrics;
 
       $("dashSubtitle").textContent = state.scope === "today"
-        ? `檢視今日：${fmtSlash(state.today)}（週${weekdayZh(state.today)}）`
+        ? `統計今日：${fmtSlash(state.today)}（週${weekdayZh(state.today)}）`
         : state.scope === "month"
-          ? `檢視本月：${fmtMonthZh(monthOf(state.today))}`
-          : `檢視全部累計：留存明細 ${res.liveCount} 筆${res.mergedMonths > 0 ? ` ＋ 已精簡月結 ${res.mergedMonths} 個月（不重複計算）` : ""}`;
+          ? `統計本月：${fmtMonthZh(monthOf(state.today))}`
+          : `全部累計：留存明細 ${res.liveCount} 筆${res.clearedMonths > 0 ? ` ＋ 已精簡歷史月結 ${res.clearedMonths} 個月（不重複計算）` : ""}`;
 
-      $("kpiReduced").textContent = fmtKg(m.totalReduced);
-      $("kpiReducedSub").textContent = `出貨 ${fmtKg(m.outbound)} ＋ 垃圾 ${fmtKg(m.trash)} KG`;
-      $("kpiAdded").textContent = fmtKg(m.totalAdded);
-      $("kpiAddedSub").textContent = `達標 2:1 需減少 ${fmtKg(m.target)} KG`;
+      $("kpiReduced").textContent = fmtKg(m.reduceKg);
+      $("kpiReducedSub").textContent = `出貨 ${fmtKg(m.outKg)} ＋ 垃圾 ${fmtKg(m.trashKg)} KG`;
+      $("kpiAdded").textContent = fmtKg(m.inKg);
+      $("kpiAddedSub").textContent = `達標 2:1 需減少 ${fmtKg(m.targetKg)} KG`;
 
-      // 淨庫存變化卡
-      if (m.netChange < 0) {
+      // 淨庫存變化卡片
+      if (m.netKg < 0) {
         $("kpiNetCard").className = "rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/70 border-2 border-emerald-300 p-4 flex flex-col justify-between";
         $("kpiNetTitle").className = "text-xs font-extrabold text-emerald-800";
         $("kpiNetIcon").textContent = "✅";
-        $("kpiNetVal").textContent = `-${fmtKg(Math.abs(m.netChange))}`;
+        $("kpiNetVal").textContent = `-${fmtKg(Math.abs(m.netKg))}`;
         $("kpiNetVal").className = "text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums";
         $("kpiNetUnit").className = "text-sm font-extrabold text-emerald-600";
-        $("kpiNetSub").textContent = `庫存淨減少 ${fmtKg(Math.abs(m.netChange))} KG`;
+        $("kpiNetSub").textContent = `庫存淨減少 ${fmtKg(Math.abs(m.netKg))} KG`;
         $("kpiNetSub").className = "text-[11px] font-black text-emerald-700 mt-1.5";
-      } else if (m.netChange > 0) {
+      } else if (m.netKg > 0) {
         $("kpiNetCard").className = "rounded-2xl bg-gradient-to-br from-rose-50 to-orange-100/70 border-2 border-rose-300 p-4 flex flex-col justify-between";
         $("kpiNetTitle").className = "text-xs font-extrabold text-rose-800";
         $("kpiNetIcon").textContent = "⚠️";
-        $("kpiNetVal").textContent = `+${fmtKg(m.netChange)}`;
+        $("kpiNetVal").textContent = `+${fmtKg(m.netKg)}`;
         $("kpiNetVal").className = "text-2xl sm:text-3xl font-black text-rose-600 tabular-nums";
         $("kpiNetUnit").className = "text-sm font-extrabold text-rose-500";
-        $("kpiNetSub").textContent = `庫存淨增加 ${fmtKg(m.netChange)} KG`;
+        $("kpiNetSub").textContent = `庫存淨增加 ${fmtKg(m.netKg)} KG`;
         $("kpiNetSub").className = "text-[11px] font-black text-rose-600 mt-1.5";
       } else {
         $("kpiNetCard").className = "rounded-2xl bg-slate-50 border-2 border-slate-200 p-4 flex flex-col justify-between";
@@ -1947,52 +2384,52 @@
         $("kpiNetSub").className = "text-[11px] font-extrabold text-slate-600 mt-1.5";
       }
 
-      // 目前減增比例卡
-      if (m.totalAdded > 0) {
-        const r = Math.max(0, m.totalReduced / m.totalAdded).toFixed(1).replace(/\.0$/, "");
-        $("kpiRatioVal").textContent = `${r} : 1`;
-        $("kpiRatioSub").textContent = m.isGoalAchieved ? "🎉 已超過 2:1 降庫存目標！" : `目標 2 : 1，持續衝刺中`;
-        $("kpiRatioCard").className = m.isGoalAchieved
+      // 減少:新增比率卡片
+      if (m.inKg > 0) {
+        const ratio = Math.max(0, m.reduceKg / m.inKg).toFixed(1).replace(/\.0$/, "");
+        $("kpiRatioVal").textContent = `${ratio} : 1`;
+        $("kpiRatioSub").textContent = m.achieved ? "🎉 已超過 2:1 降庫存目標！" : "目標 2 : 1，持續衝刺中";
+        $("kpiRatioCard").className = m.achieved
           ? "rounded-2xl bg-emerald-50 border-2 border-emerald-300 p-4 flex flex-col justify-between"
           : "rounded-2xl bg-amber-50/80 border-2 border-amber-200 p-4 flex flex-col justify-between";
-        $("kpiRatioVal").className = m.isGoalAchieved ? "text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums" : "text-2xl sm:text-3xl font-black text-amber-800 tabular-nums";
-      } else if (m.totalReduced > 0) {
+        $("kpiRatioVal").className = m.achieved ? "text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums" : "text-2xl sm:text-3xl font-black text-amber-800 tabular-nums";
+      } else if (m.reduceKg > 0) {
         $("kpiRatioVal").textContent = "純減少";
-        $("kpiRatioSub").textContent = "零進貨且順利清倉中 🎉";
+        $("kpiRatioSub").textContent = "零進貨且庫存持續清空 🎉";
         $("kpiRatioCard").className = "rounded-2xl bg-emerald-50 border-2 border-emerald-300 p-4 flex flex-col justify-between";
         $("kpiRatioVal").className = "text-2xl sm:text-3xl font-black text-emerald-700";
       } else {
         $("kpiRatioVal").textContent = "0 : 0";
-        $("kpiRatioSub").textContent = "尚無紀錄（目標 2:1）";
+        $("kpiRatioSub").textContent = "目標 2 : 1";
         $("kpiRatioCard").className = "rounded-2xl bg-slate-50 border-2 border-slate-200 p-4 flex flex-col justify-between";
         $("kpiRatioVal").className = "text-2xl sm:text-3xl font-black text-slate-700 tabular-nums";
       }
 
-      // 進度條與白話提示
+      // 進度條與激勵提示
       $("dashPct").textContent = `${m.pct}%`;
       $("dashBar").style.width = `${m.pct}%`;
-      $("dashWinTag").classList.toggle("hidden", !m.isGoalAchieved);
+      $("dashWinTag").classList.toggle("hidden", !m.achieved);
 
-      if (m.isGoalAchieved) {
+      if (m.achieved) {
         $("dashBar").className = "h-full rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600";
         $("dashHintBox").className = "rounded-2xl px-4 py-3 text-sm sm:text-base font-black flex items-center gap-2.5 bg-emerald-100/90 text-emerald-900 border-2 border-emerald-300";
         $("dashHintIcon").textContent = "🎉";
-        const extra = roundKg(m.totalReduced - m.target);
-        $("dashHintText").textContent = m.totalAdded > 0 && extra > 0
-          ? `太棒了！已達成 2:1 降庫存目標，還超前 ${fmtKg(extra)} KG！`
-          : "太棒了！已達成降庫存目標，庫存順利下降中！";
-      } else if (m.totalAdded > 0) {
+        const extra = roundKg(m.reduceKg - m.targetKg);
+        $("dashHintText").textContent = m.inKg > 0 && extra > 0
+          ? `🎉 已達成 2:1 降庫存目標！還超前減少了 ${fmtKg(extra)} KG！`
+          : "🎉 已達成 2:1 降庫存目標！庫存順利下降中！";
+      } else if (m.inKg > 0) {
         $("dashBar").className = m.pct >= 50
           ? "h-full rounded-full transition-all duration-500 bg-gradient-to-r from-amber-400 to-sky-500"
           : "h-full rounded-full transition-all duration-500 bg-gradient-to-r from-orange-500 to-amber-500";
         $("dashHintBox").className = "rounded-2xl px-4 py-3 text-sm sm:text-base font-extrabold flex items-center gap-2.5 bg-amber-50 text-amber-950 border-2 border-amber-300";
         $("dashHintIcon").textContent = "💪";
-        $("dashHintText").innerHTML = `還差 <span class="text-rose-600 font-black underline decoration-2 mx-0.5">${fmtKg(m.gap)} KG</span> 出貨或排除垃圾即可達成 2:1 目標！`;
+        $("dashHintText").innerHTML = `還需再減少 <span class="text-rose-600 font-black underline decoration-2 mx-0.5">${fmtKg(m.gapKg)} KG</span> 即可達成 2:1 目標！`;
       } else {
         $("dashBar").className = "h-full rounded-full transition-all duration-500 bg-slate-300";
         $("dashHintBox").className = "rounded-2xl px-4 py-3 text-sm sm:text-base font-bold flex items-center gap-2.5 bg-slate-100 text-slate-700 border border-slate-200";
         $("dashHintIcon").textContent = "🚀";
-        $("dashHintText").textContent = "開始點下方按鈕紀錄進貨、出貨或排除垃圾，全員一起降庫存！";
+        $("dashHintText").textContent = "點下方按鈕開始紀錄，全員一起把庫存降下來！";
       }
     }
 
@@ -2000,25 +2437,25 @@
       const active = state.members.find((m) => m.name === state.activeMember) || state.members[0];
       if (active) {
         state.activeMember = active.name;
-        $("activeMemberTag").textContent = `目前：${active.emoji} ${active.name}`;
+        $("activeMemberTag").textContent = `目前：${active.icon} ${active.name}`;
       }
 
       const row = $("memberBtnRow");
       row.innerHTML = "";
-      state.members.forEach((m) => {
+      state.members.forEach((m, idx) => {
         const on = m.name === state.activeMember;
-        const c = COLOR_MAP[m.color] || COLOR_MAP.sky;
+        const c = MEMBER_COLORS[idx % MEMBER_COLORS.length];
         const b = document.createElement("button");
         b.type = "button";
         b.className = `flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border-2 text-sm sm:text-base font-extrabold transition active:scale-95 cursor-pointer ${
           on ? `${c.on} shadow-md ring-2 ring-offset-1 ring-emerald-300` : c.off
         }`;
-        b.innerHTML = `<span>${esc(m.emoji)}</span><span>${esc(m.name)}</span>${on ? '<span class="text-xs bg-white/25 px-1.5 rounded-full">✓</span>' : ""}`;
+        b.innerHTML = `<span>${esc(m.icon)}</span><span>${esc(m.name)}</span>${on ? '<span class="text-xs bg-white/25 px-1.5 rounded-full">✓</span>' : ""}`;
         b.onclick = () => {
           state.activeMember = m.name;
-          saveCache();
+          saveLocalData();
           renderCheckIn();
-          beep("add");
+          playChime("add");
         };
         row.appendChild(b);
       });
@@ -2030,7 +2467,7 @@
       $("backfillBar").classList.toggle("flex", !isToday);
       if (!isToday) $("backfillDateText").textContent = `${fmtSlash(state.selectedDate)}（週${weekdayZh(state.selectedDate)}）`;
 
-      // KG 快捷鈕
+      // KG 快選
       const wrap = $("kgPresetWrap");
       wrap.innerHTML = "";
       KG_PRESETS.forEach((kg) => {
@@ -2045,7 +2482,7 @@
           state.stepKg = kg;
           $("kgInput").value = kg;
           renderCheckIn();
-          beep("add");
+          playChime("add");
         };
         wrap.appendChild(b);
       });
@@ -2053,19 +2490,21 @@
       const lbl = state.stepKg > 0 ? `${fmtKg(state.stepKg)} KG` : "-- KG";
       document.querySelectorAll(".btn-kg-label").forEach((el) => { el.textContent = lbl; });
 
-      // 三大卡片累計
+      // 三張操作卡的累計數值
       const m = calcScopeSummary(state.scope).metrics;
       const pillTxt = state.scope === "today" ? "今日累計" : state.scope === "month" ? "本月累計" : "全部累計";
       document.querySelectorAll(".card-scope-pill").forEach((el) => { el.textContent = pillTxt; });
-      $("sum-inbound").textContent = fmtKg(m.inbound);
-      $("sum-outbound").textContent = fmtKg(m.outbound);
-      $("sum-trash").textContent = fmtKg(m.trash);
+      $("sum-in").textContent = fmtKg(m.inKg);
+      $("sum-out").textContent = fmtKg(m.outKg);
+      $("sum-trash").textContent = fmtKg(m.trashKg);
 
-      const bf = { inbound: 0, outbound: 0, trash: 0 };
+      const bf = { in: 0, out: 0, trash: 0 };
       if (!isToday) {
-        state.logs.filter((l) => l.date === state.selectedDate).forEach((l) => { bf[l.category] += l.weightKg; });
+        state.entries.filter((e) => e.date === state.selectedDate).forEach((e) => {
+          bf[e.category] += roundKg(e.direction * e.kg);
+        });
       }
-      ["inbound", "outbound", "trash"].forEach((k) => {
+      ["in", "out", "trash"].forEach((k) => {
         const el = $(`bfSum-${k}`);
         if (!isToday) {
           el.classList.remove("hidden");
@@ -2076,59 +2515,57 @@
       });
     }
 
-    function renderRank() {
+    function renderLeaderboard() {
       const sName = state.scope === "today" ? "今日" : state.scope === "month" ? "本月" : "全部累計";
       $("rankBadge").textContent = `${sName}榜單`;
       const res = calcScopeSummary(state.scope);
       const m = res.metrics;
-      $("rankTotal").textContent = fmtKg(m.totalReduced);
+      $("rankTotal").textContent = fmtKg(m.reduceKg);
 
-      $("rankCheer").textContent = m.totalReduced <= 0
+      $("rankCheer").textContent = m.reduceKg <= 0
         ? `${sName}還沒開張喔！出貨或排除垃圾馬上搶下第一名！`
-        : m.isGoalAchieved
-          ? `🔥 太猛了！${sName}全員減少 ${fmtKg(m.totalReduced)} KG，成功達成 2:1 目標！`
-          : `💪 加油！${sName}已減少 ${fmtKg(m.totalReduced)} KG，再減少 ${fmtKg(m.gap)} KG 就達標！`;
+        : m.achieved
+          ? `🔥 太猛了！${sName}全員減少 ${fmtKg(m.reduceKg)} KG，成功達成 2:1 目標！`
+          : `💪 加油！${sName}已減少 ${fmtKg(m.reduceKg)} KG，再減少 ${fmtKg(m.gapKg)} KG 就達標！`;
 
-      const rosterMap = new Map(state.members.map((x) => [x.name, x]));
       const merged = new Map();
-      state.members.forEach((x) => {
-        merged.set(x.name, { name: x.name, emoji: x.emoji, color: x.color, inbound: 0, outbound: 0, trash: 0, reduced: 0 });
+      state.members.forEach((mem, idx) => {
+        merged.set(mem.name, { name: mem.name, icon: mem.icon, colorIdx: idx, inKg: 0, outKg: 0, trashKg: 0, reduceKg: 0 });
       });
       res.mMap.forEach((v, name) => {
-        const r = rosterMap.get(name);
-        merged.set(name, {
-          name,
-          emoji: r ? r.emoji : v.emoji,
-          color: r ? r.color : "slate",
-          inbound: v.inbound,
-          outbound: v.outbound,
-          trash: v.trash,
-          reduced: v.reduced
-        });
+        const existing = merged.get(name);
+        if (existing) {
+          existing.inKg = v.inKg;
+          existing.outKg = v.outKg;
+          existing.trashKg = v.trashKg;
+          existing.reduceKg = v.reduceKg;
+        } else {
+          merged.set(name, { name, icon: "⭐", colorIdx: merged.size, inKg: v.inKg, outKg: v.outKg, trashKg: v.trashKg, reduceKg: v.reduceKg });
+        }
       });
 
-      const list = Array.from(merged.values()).sort((a, b) => b.reduced - a.reduced);
-      const maxVal = Math.max(1, ...list.map((x) => Math.max(0, x.reduced)));
+      const list = Array.from(merged.values()).sort((a, b) => b.reduceKg - a.reduceKg);
+      const maxVal = Math.max(1, ...list.map((x) => Math.max(0, x.reduceKg)));
       const medals = ["🥇", "🥈", "🥉"];
       const grid = $("rankGrid");
       grid.innerHTML = "";
 
       list.forEach((p, idx) => {
-        const pct = p.reduced > 0 ? Math.min(100, Math.round((p.reduced / maxVal) * 100)) : 0;
-        const barCls = (COLOR_MAP[p.color] || COLOR_MAP.emerald).bar;
-        const title = p.reduced <= 0 ? "暖身準備中" : idx === 0 ? "🏆 降庫存王牌" : idx === 1 ? "🔥 清倉主力" : "⚡ 衝刺夥伴";
+        const pct = p.reduceKg > 0 ? Math.min(100, Math.round((p.reduceKg / maxVal) * 100)) : 0;
+        const barCls = MEMBER_COLORS[p.colorIdx % MEMBER_COLORS.length].bar;
+        const title = p.reduceKg <= 0 ? "蓄勢待發" : idx === 0 ? "降庫存戰神" : idx === 1 ? "效率先鋒" : "穩定推手";
         const card = document.createElement("div");
-        card.className = `p-3.5 rounded-2xl border-2 space-y-2 ${idx === 0 && p.reduced > 0 ? "bg-amber-50/70 border-amber-300" : "bg-slate-50/80 border-slate-200"}`;
+        card.className = `p-3.5 rounded-2xl border-2 space-y-2 ${idx === 0 && p.reduceKg > 0 ? "bg-amber-50/70 border-amber-300" : "bg-slate-50/80 border-slate-200"}`;
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="text-lg font-black w-7 text-center shrink-0">${idx < 3 && p.reduced > 0 ? medals[idx] : `#${idx + 1}`}</span>
-              <span class="text-xl shrink-0">${esc(p.emoji)}</span>
+              <span class="text-lg font-black w-7 text-center shrink-0">${idx < 3 && p.reduceKg > 0 ? medals[idx] : `#${idx + 1}`}</span>
+              <span class="text-xl shrink-0">${esc(p.icon)}</span>
               <span class="font-black text-slate-900 truncate">${esc(p.name)}</span>
               <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-white border border-slate-200 text-slate-600 shrink-0">${title}</span>
             </div>
             <div class="text-right shrink-0">
-              <span class="text-lg font-black text-sky-700 tabular-nums">${fmtKg(p.reduced)}</span>
+              <span class="text-lg font-black text-sky-700 tabular-nums">${fmtKg(p.reduceKg)}</span>
               <span class="text-xs font-extrabold text-sky-600"> KG</span>
             </div>
           </div>
@@ -2136,29 +2573,29 @@
             <div class="h-full rounded-full transition-all duration-500 ${barCls}" style="width:${pct}%"></div>
           </div>
           <div class="flex flex-wrap justify-between text-[11px] font-bold text-slate-500 gap-1">
-            <span>🚚 出貨 ${fmtKg(p.outbound)} KG ・ 🗑️ 垃圾 ${fmtKg(p.trash)} KG</span>
-            <span>📦 進貨 ${fmtKg(p.inbound)} KG</span>
+            <span>🚚 出貨 ${fmtKg(p.outKg)} KG ・ 🗑️ 垃圾 ${fmtKg(p.trashKg)} KG</span>
+            <span>📦 進貨 ${fmtKg(p.inKg)} KG</span>
           </div>
         `;
         grid.appendChild(card);
       });
     }
 
-    function getFilteredLogs() {
+    function getFilteredEntries() {
       const q = state.fQuery.trim().toLowerCase();
-      return state.logs.filter((l) => {
-        if (state.fCat !== "all" && l.category !== state.fCat) return false;
-        if (state.fMember !== "all" && l.memberName !== state.fMember) return false;
-        if (state.fDateMode === "today" && l.date !== state.today) return false;
-        if (state.fDateMode === "month" && !l.date.startsWith(monthOf(state.today))) return false;
-        if (state.fDateMode === "specificMonth" && state.fMonth && !l.date.startsWith(state.fMonth)) return false;
-        if (state.fDateMode === "specificDate" && state.fDate && l.date !== state.fDate) return false;
+      return state.entries.filter((e) => {
+        if (state.fCat !== "all" && e.category !== state.fCat) return false;
+        if (state.fMember !== "all" && e.member !== state.fMember) return false;
+        if (state.fDateMode === "today" && e.date !== state.today) return false;
+        if (state.fDateMode === "month" && !e.date.startsWith(monthOf(state.today))) return false;
+        if (state.fDateMode === "specificMonth" && state.fMonth && !e.date.startsWith(state.fMonth)) return false;
+        if (state.fDateMode === "specificDate" && state.fDate && e.date !== state.fDate) return false;
         if (q) {
-          // 嚴格隱私隔離：一般人員搜尋絕不可比對隱藏的項目／數量／備註
-          const hay = state.isAdmin
-            ? `${l.date} ${l.memberName} ${CATS[l.category].label} ${l.itemName} ${l.itemQty} ${l.note}`.toLowerCase()
-            : `${l.date} ${l.memberName} ${CATS[l.category].label}`.toLowerCase();
-          if (!hay.includes(q)) return false;
+          // 嚴格隱私隔離：非管理員搜尋絕不比對 item / qty / note
+          const haystack = state.isAdmin
+            ? `${e.date} ${e.member} ${CATS[e.category].label} ${e.item} ${e.qty} ${e.note}`.toLowerCase()
+            : `${e.date} ${e.member} ${CATS[e.category].label}`.toLowerCase();
+          if (!haystack.includes(q)) return false;
         }
         return true;
       });
@@ -2166,21 +2603,20 @@
 
     function renderLedger() {
       const isAd = state.isAdmin;
-      $("exportLedgerText").textContent = isAd ? "匯出 Excel（含管理員項目／數量）" : "匯出 Excel (CSV)";
+      $("exportLedgerText").textContent = isAd ? "匯出 Excel（含項目／數量／備註）" : "匯出 Excel (CSV)";
       $("fSearchInput").placeholder = isAd ? "搜尋人員、日期、項目或數量..." : "搜尋人員或日期...";
 
       const tip = $("ledgerRoleTip");
       if (isAd) {
         tip.className = "rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-extrabold flex flex-wrap items-center justify-between gap-2 bg-amber-50 border border-amber-300 text-amber-950";
-        $("ledgerRoleText").textContent = "👑 管理員檢視中：已展開「🔒 項目」、「🔒 數量」及每筆紀錄的「✏️ 修改 / 🗑️ 刪除」操作。";
+        $("ledgerRoleText").textContent = "👑 管理員檢視中：已展開「🔒 項目」、「🔒 數量」、「備註」及每筆的「✏️ 修改 / 🗑️ 刪除」功能。";
         $("ledgerLoginBtn").classList.add("hidden");
       } else {
         tip.className = "rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-bold flex flex-wrap items-center justify-between gap-2 bg-slate-100 border border-slate-200 text-slate-600";
-        $("ledgerRoleText").textContent = "🔒 一般模式僅顯示重量與基本資訊；項目、數量與修改／刪除功能僅限管理員使用。";
+        $("ledgerRoleText").textContent = "🔒 一般模式僅顯示重量與基本資訊；項目、數量、備註與修改／刪除功能僅限管理員檢視。";
         $("ledgerLoginBtn").classList.remove("hidden");
       }
 
-      // 篩選鈕樣式
       document.querySelectorAll(".fcat-btn").forEach((b) => {
         const on = b.dataset.fcat === state.fCat;
         b.className = `fcat-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${on ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"}`;
@@ -2190,10 +2626,9 @@
         b.className = `fdate-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${on ? "bg-emerald-600 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"}`;
       });
 
-      // 人員篩選選單（含歷史名字）
       const sel = $("fMemberSelect");
       const names = new Set(state.members.map((m) => m.name));
-      state.logs.forEach((l) => names.add(l.memberName));
+      state.entries.forEach((e) => names.add(e.member));
       const curVal = state.fMember;
       sel.innerHTML = `<option value="all">全部人員</option>`;
       names.forEach((n) => {
@@ -2205,7 +2640,7 @@
       sel.value = names.has(curVal) ? curVal : "all";
       state.fMember = sel.value;
 
-      const list = getFilteredLogs();
+      const list = getFilteredEntries();
       $("ledgerCount").textContent = list.length;
       $("ledgerEmpty").classList.toggle("hidden", list.length > 0);
 
@@ -2214,65 +2649,64 @@
       tbody.innerHTML = "";
       mob.innerHTML = "";
 
-      list.forEach((l) => {
-        const cat = CATS[l.category];
-        const inv = invDelta(l);
-        const kgStr = `${l.weightKg > 0 ? "+" : "-"}${fmtKg(Math.abs(l.weightKg))} KG`;
-        const kgCls = l.weightKg > 0 ? "text-slate-900" : "text-rose-600";
+      list.forEach((e) => {
+        const cat = CATS[e.category];
+        const signed = roundKg(e.direction * e.kg);
+        const inv = entryInventoryDelta(e);
+        const kgStr = `${signed > 0 ? "+" : "-"}${fmtKg(e.kg)} KG`;
+        const kgCls = signed > 0 ? "text-slate-900" : "text-rose-600";
         const invPill = inv < 0
           ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">庫存 −</span>`
           : `<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-700">庫存 ＋</span>`;
+        const icon = getMemberIcon(e.member);
+        const timePart = extractTimePart(e.createdAt);
 
-        // 電腦表格列
+        // 電腦版表格列
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-50/90 transition";
         tr.innerHTML = `
-          <td class="py-3 px-3.5 font-bold text-slate-800 whitespace-nowrap">${fmtSlash(l.date)}</td>
-          <td class="py-3 px-3 text-xs font-mono text-slate-500 whitespace-nowrap">${esc(l.time)}</td>
-          <td class="py-3 px-3 font-extrabold text-slate-800 whitespace-nowrap">${esc(l.memberEmoji)} ${esc(l.memberName)}</td>
+          <td class="py-3 px-3.5 font-bold text-slate-800 whitespace-nowrap">${fmtSlash(e.date)}</td>
+          <td class="py-3 px-3 text-xs font-mono text-slate-500 whitespace-nowrap">${esc(timePart)}</td>
+          <td class="py-3 px-3 font-extrabold text-slate-800 whitespace-nowrap">${esc(icon)} ${esc(e.member)}</td>
           <td class="py-3 px-3 whitespace-nowrap"><span class="px-2.5 py-1 rounded-xl text-xs font-extrabold ${cat.pill}">${cat.emoji} ${cat.label}</span></td>
           <td class="py-3 px-3 text-right font-black tabular-nums whitespace-nowrap ${kgCls}">${kgStr}</td>
           <td class="py-3 px-3 text-center whitespace-nowrap">${invPill}</td>
           ${isAd ? `
-            <td class="py-3 px-3 bg-amber-50/40 text-xs font-bold text-amber-950 max-w-[160px] break-words">
-              ${l.itemName ? esc(l.itemName) : '<span class="text-slate-300">—</span>'}
-              ${l.note ? `<div class="text-[11px] text-amber-700 mt-0.5">註：${esc(l.note)}</div>` : ""}
-            </td>
-            <td class="py-3 px-3 bg-amber-50/40 text-xs font-bold text-amber-950 whitespace-nowrap">
-              ${l.itemQty ? esc(l.itemQty) : '<span class="text-slate-300">—</span>'}
-            </td>
+            <td class="py-3 px-3 bg-amber-50/40 text-xs font-bold text-amber-950 max-w-[150px] break-words">${e.item ? esc(e.item) : '<span class="text-slate-300">—</span>'}</td>
+            <td class="py-3 px-3 bg-amber-50/40 text-xs font-bold text-amber-950 whitespace-nowrap">${e.qty ? esc(e.qty) : '<span class="text-slate-300">—</span>'}</td>
+            <td class="py-3 px-3 bg-amber-50/40 text-xs font-semibold text-amber-900 max-w-[160px] break-words">${e.note ? esc(e.note) : '<span class="text-slate-300">—</span>'}</td>
             <td class="py-3 px-3.5 bg-amber-50/40 text-right whitespace-nowrap space-x-1.5">
-              <button type="button" data-edit="${esc(l.id)}" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold cursor-pointer">✏️ 修改</button>
-              <button type="button" data-del="${esc(l.id)}" class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold cursor-pointer">🗑️ 刪除</button>
+              <button type="button" data-edit="${esc(e.id)}" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold cursor-pointer">✏️ 修改</button>
+              <button type="button" data-del="${esc(e.id)}" class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold cursor-pointer">🗑️ 刪除</button>
             </td>
           ` : ""}
         `;
         tbody.appendChild(tr);
 
-        // 手機卡片
+        // 手機版卡片
         const card = document.createElement("div");
         card.className = "p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-2";
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-0.5 rounded-xl text-xs font-extrabold ${cat.pill}">${cat.emoji} ${cat.label}</span>
-              <span class="text-sm font-extrabold text-slate-900">${esc(l.memberEmoji)} ${esc(l.memberName)}</span>
+              <span class="text-sm font-extrabold text-slate-900">${esc(icon)} ${esc(e.member)}</span>
             </div>
             <span class="text-base font-black tabular-nums ${kgCls}">${kgStr}</span>
           </div>
           <div class="flex items-center justify-between text-xs font-bold text-slate-500">
-            <span>${fmtSlash(l.date)} ${esc(l.time)}</span>
+            <span>${fmtSlash(e.date)} ${esc(timePart)}</span>
             ${invPill}
           </div>
           ${isAd ? `
             <div class="pt-2 border-t border-amber-200/80 flex flex-col gap-2">
               <div class="text-xs font-bold text-amber-950 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 space-y-0.5">
-                <div>🔒 項目：${l.itemName ? esc(l.itemName) : "（未填）"}　｜　數量：${l.itemQty ? esc(l.itemQty) : "（未填）"}</div>
-                ${l.note ? `<div class="text-amber-800">備註：${esc(l.note)}</div>` : ""}
+                <div>🔒 項目：${e.item ? esc(e.item) : "（未填）"}　｜　數量：${e.qty ? esc(e.qty) : "（未填）"}</div>
+                ${e.note ? `<div class="text-amber-800">備註：${esc(e.note)}</div>` : ""}
               </div>
               <div class="flex gap-2">
-                <button type="button" data-edit="${esc(l.id)}" class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold cursor-pointer">✏️ 修改</button>
-                <button type="button" data-del="${esc(l.id)}" class="flex-1 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold cursor-pointer">🗑️ 刪除</button>
+                <button type="button" data-edit="${esc(e.id)}" class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold cursor-pointer">✏️ 修改</button>
+                <button type="button" data-del="${esc(e.id)}" class="flex-1 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold cursor-pointer">🗑️ 刪除</button>
               </div>
             </div>
           ` : ""}
@@ -2280,23 +2714,23 @@
         mob.appendChild(card);
       });
 
-      // 綁定管理員修改與刪除按鈕
       if (isAd) {
         document.querySelectorAll("[data-edit]").forEach((b) => {
-          b.onclick = () => openEditLogModal(b.dataset.edit);
+          b.onclick = () => openEditModal(b.dataset.edit);
         });
         document.querySelectorAll("[data-del]").forEach((b) => {
           b.onclick = () => {
-            const log = state.logs.find((x) => x.id === b.dataset.del);
-            if (!log) return;
+            const entry = state.entries.find((x) => x.id === b.dataset.del);
+            if (!entry) return;
+            const signed = roundKg(entry.direction * entry.kg);
             openConfirm({
               icon: "🗑️",
               title: "確定要刪除這筆紀錄？",
-              sub: "刪除後會立即同步雲端並重算看板數據",
-              bodyHtml: `<div>${fmtSlash(log.date)} ${esc(log.time)}｜${esc(log.memberEmoji)} ${esc(log.memberName)}｜${CATS[log.category].label} <b>${log.weightKg > 0 ? "+" : ""}${fmtKg(log.weightKg)} KG</b></div>`,
+              sub: "刪除後會同步共用試算表並重新計算所有看板",
+              bodyHtml: `<div>${fmtSlash(entry.date)}｜${esc(entry.member)}｜${CATS[entry.category].label} <b>${signed > 0 ? "+" : "-"}${fmtKg(entry.kg)} KG</b></div>`,
               okText: "確認刪除",
               okClass: "bg-rose-500 hover:bg-rose-600",
-              onOk: () => deleteLog(log.id)
+              onOk: () => deleteEntryById(entry.id)
             });
           };
         });
@@ -2304,12 +2738,11 @@
     }
 
     function renderMonthly() {
-      $("mTotalLogs").textContent = state.logs.length;
+      $("mTotalLogs").textContent = state.entries.length;
       $("mTotalSettled").textContent = state.settlements.length;
 
-      // 建立月份下拉選單
       const months = new Set([monthOf(state.today), prevMonthOf(state.today)]);
-      state.logs.forEach((l) => months.add(l.date.slice(0, 7)));
+      state.entries.forEach((e) => months.add(e.date.slice(0, 7)));
       state.settlements.forEach((s) => months.add(s.month));
       const sorted = Array.from(months).sort((a, b) => b.localeCompare(a));
 
@@ -2325,7 +2758,6 @@
       });
       sel.value = state.settleMonth;
 
-      // 當月預覽
       const data = calcMonthSummary(state.settleMonth);
       const m = data.metrics;
       $("prevTitle").textContent = `📊 ${fmtMonthZh(state.settleMonth)} 即時結算預覽`;
@@ -2333,7 +2765,7 @@
       if (data.existing) {
         $("settledNotice").classList.remove("hidden");
         $("settledNotice").classList.add("flex");
-        $("settledNoticeText").textContent = `${fmtMonthZh(state.settleMonth)} 已於 ${fmtSlash(data.existing.settledDate)} 結算存檔過；若有補登或修改，管理員可再次存檔更新。`;
+        $("settledNoticeText").textContent = `${fmtMonthZh(state.settleMonth)} 已於 ${data.existing.settledAt} 結算存檔過；若有補登或修改，管理員可再次結算更新。`;
       } else {
         $("settledNotice").classList.add("hidden");
         $("settledNotice").classList.remove("flex");
@@ -2343,29 +2775,27 @@
       if (data.liveCount === 0 && !data.existing) {
         gp.textContent = "尚無紀錄";
         gp.className = "px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-slate-100 text-slate-600";
-      } else if (m.isGoalAchieved) {
+      } else if (m.achieved) {
         gp.textContent = "🎉 已達標 2:1";
         gp.className = "px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-emerald-500 text-white";
       } else {
-        gp.textContent = `未達標（差 ${fmtKg(m.gap)} KG）`;
+        gp.textContent = `未達標（還差 ${fmtKg(m.gapKg)} KG）`;
         gp.className = "px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-amber-100 text-amber-900 border border-amber-300";
       }
 
-      $("pIn").textContent = fmtKg(m.inbound);
-      $("pOut").textContent = fmtKg(m.outbound);
-      $("pTrash").textContent = fmtKg(m.trash);
-      $("pRed").textContent = fmtKg(m.totalReduced);
+      $("pIn").textContent = fmtKg(m.inKg);
+      $("pOut").textContent = fmtKg(m.outKg);
+      $("pTrash").textContent = fmtKg(m.trashKg);
+      $("pRed").textContent = fmtKg(m.reduceKg);
       $("pCount").textContent = data.liveCount;
-      $("pChamp").textContent = data.champion.reduced > 0
-        ? `${data.champion.emoji} ${data.champion.name}（減少 ${fmtKg(data.champion.reduced)} KG）`
-        : "尚無紀錄";
+      $("pChamp").textContent = data.championStr;
 
-      if (m.netChange < 0) {
-        $("pNetText").textContent = `淨減少 ${fmtKg(Math.abs(m.netChange))} KG`;
+      if (m.netKg < 0) {
+        $("pNetText").textContent = `淨減少 ${fmtKg(Math.abs(m.netKg))} KG`;
         $("pNetText").className = "text-lg font-black text-emerald-700 mt-0.5 tabular-nums";
         $("pNetIcon").textContent = "✅";
-      } else if (m.netChange > 0) {
-        $("pNetText").textContent = `淨增加 +${fmtKg(m.netChange)} KG`;
+      } else if (m.netKg > 0) {
+        $("pNetText").textContent = `淨增加 +${fmtKg(m.netKg)} KG`;
         $("pNetText").className = "text-lg font-black text-rose-600 mt-0.5 tabular-nums";
         $("pNetIcon").textContent = "⚠️";
       } else {
@@ -2377,8 +2807,18 @@
       $("adminSettleBox").classList.toggle("hidden", !state.isAdmin);
       $("guestSettleTip").classList.toggle("hidden", state.isAdmin);
 
-      // 歷月成績單列表
+      // 歷月彙總 KPI
       const list = state.settlements;
+      const achievedCount = list.filter((s) => s.achieved).length;
+      const totalReduced = roundKg(list.reduce((acc, s) => acc + s.reduceKg, 0));
+      const totalNet = roundKg(list.reduce((acc, s) => acc + s.netKg, 0));
+      const netDrop = roundKg(-totalNet);
+
+      $("histCount").textContent = list.length;
+      $("histAchieved").textContent = achievedCount;
+      $("histReduced").textContent = fmtKg(totalReduced);
+      $("histNetDrop").textContent = netDrop >= 0 ? fmtKg(netDrop) : `-${fmtKg(Math.abs(netDrop))}`;
+
       $("monthlyEmpty").classList.toggle("hidden", list.length > 0);
       const tbody = $("monthlyTbody");
       const mob = $("monthlyMobile");
@@ -2386,30 +2826,29 @@
       mob.innerHTML = "";
 
       list.forEach((s) => {
-        const hasLive = state.logs.some((l) => l.date.startsWith(s.month));
-        const stTag = s.mode === "purge" && !hasLive
-          ? `<span class="px-2 py-0.5 rounded-full text-xs font-extrabold bg-orange-100 text-orange-800">只留總表</span>`
+        const hasLive = state.entries.some((e) => e.date.startsWith(s.month));
+        const stTag = s.detailsCleared && !hasLive
+          ? `<span class="px-2 py-0.5 rounded-full text-xs font-extrabold bg-orange-100 text-orange-800">僅留總表</span>`
           : `<span class="px-2 py-0.5 rounded-full text-xs font-extrabold bg-sky-100 text-sky-800">明細保留中</span>`;
-        const goalTag = s.isGoalAchieved
+        const goalTag = s.achieved
           ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">🎉 達標</span>`
           : `<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">未達標</span>`;
-        const netStr = s.netChange < 0 ? `-${fmtKg(Math.abs(s.netChange))}` : s.netChange > 0 ? `+${fmtKg(s.netChange)}` : "0";
-        const netCls = s.netChange < 0 ? "text-emerald-700" : s.netChange > 0 ? "text-rose-600" : "text-slate-600";
-        const champTxt = s.championReduced > 0 ? `${esc(s.championEmoji)} ${esc(s.championName)} (${fmtKg(s.championReduced)}KG)` : "無";
+        const netStr = s.netKg < 0 ? `-${fmtKg(Math.abs(s.netKg))}` : s.netKg > 0 ? `+${fmtKg(s.netKg)}` : "0";
+        const netCls = s.netKg < 0 ? "text-emerald-700" : s.netKg > 0 ? "text-rose-600" : "text-slate-600";
 
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-50/90";
         tr.innerHTML = `
           <td class="py-3 px-3.5 font-black text-slate-900 whitespace-nowrap">${fmtMonthZh(s.month)}</td>
-          <td class="py-3 px-3 text-right font-bold text-emerald-700 tabular-nums">${fmtKg(s.inbound)}</td>
-          <td class="py-3 px-3 text-right font-bold text-sky-700 tabular-nums">${fmtKg(s.outbound)}</td>
-          <td class="py-3 px-3 text-right font-bold text-orange-700 tabular-nums">${fmtKg(s.trash)}</td>
-          <td class="py-3 px-3 text-right font-black text-teal-700 tabular-nums">${fmtKg(s.totalReduced)}</td>
+          <td class="py-3 px-3 text-right font-bold text-emerald-700 tabular-nums">${fmtKg(s.inKg)}</td>
+          <td class="py-3 px-3 text-right font-bold text-sky-700 tabular-nums">${fmtKg(s.outKg)}</td>
+          <td class="py-3 px-3 text-right font-bold text-orange-700 tabular-nums">${fmtKg(s.trashKg)}</td>
+          <td class="py-3 px-3 text-right font-black text-teal-700 tabular-nums">${fmtKg(s.reduceKg)}</td>
           <td class="py-3 px-3 text-right font-black tabular-nums ${netCls}">${netStr}</td>
           <td class="py-3 px-3 text-center whitespace-nowrap">${goalTag}</td>
-          <td class="py-3 px-3 text-xs font-bold text-slate-800 whitespace-nowrap">${champTxt}</td>
+          <td class="py-3 px-3 text-xs font-bold text-slate-800 whitespace-nowrap">${esc(s.champion)}</td>
           <td class="py-3 px-3 text-center whitespace-nowrap">${stTag}</td>
-          <td class="py-3 px-3 text-xs text-slate-500 whitespace-nowrap">${fmtSlash(s.settledDate)}</td>
+          <td class="py-3 px-3 text-xs text-slate-500 whitespace-nowrap">${esc(s.settledAt.slice(0, 10))}</td>
           ${state.isAdmin ? `<td class="py-3 px-3.5 text-right bg-amber-50/40 whitespace-nowrap"><button type="button" data-delst="${esc(s.month)}" class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold cursor-pointer">🗑️ 刪除</button></td>` : ""}
         `;
         tbody.appendChild(tr);
@@ -2422,14 +2861,14 @@
             <div class="flex items-center gap-1.5">${goalTag} ${stTag}</div>
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-            <div class="bg-white p-2 rounded-xl border border-slate-200">📦 進貨：<b>${fmtKg(s.inbound)} KG</b></div>
-            <div class="bg-white p-2 rounded-xl border border-slate-200">📉 總減少：<b>${fmtKg(s.totalReduced)} KG</b></div>
-            <div class="bg-white p-2 rounded-xl border border-slate-200">🚚 出貨：${fmtKg(s.outbound)} / 🗑️ ${fmtKg(s.trash)}</div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200">📦 進貨：<b>${fmtKg(s.inKg)} KG</b></div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200">📉 總減少：<b>${fmtKg(s.reduceKg)} KG</b></div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200">🚚 出貨：${fmtKg(s.outKg)} / 🗑️ ${fmtKg(s.trashKg)}</div>
             <div class="bg-white p-2 rounded-xl border border-slate-200 ${netCls}">淨變化：<b>${netStr} KG</b></div>
           </div>
           <div class="flex items-center justify-between text-xs font-bold text-slate-600">
-            <span>🥇 ${champTxt}</span>
-            <span>結算：${fmtSlash(s.settledDate)}</span>
+            <span>🥇 ${esc(s.champion)}</span>
+            <span>結算：${esc(s.settledAt.slice(0, 10))}</span>
           </div>
           ${state.isAdmin ? `<button type="button" data-delst="${esc(s.month)}" class="w-full py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold cursor-pointer">🗑️ 刪除此月結成績單</button>` : ""}
         `;
@@ -2441,18 +2880,18 @@
           b.onclick = () => openConfirm({
             icon: "🗑️",
             title: `確定刪除 ${fmtMonthZh(b.dataset.delst)} 成績單？`,
-            sub: "刪除後可重新為該月執行結算",
+            sub: "刪除後可隨時重新結算該月份",
             bodyHtml: `<div>月份：<b>${fmtMonthZh(b.dataset.delst)}</b></div>`,
             okText: "確認刪除",
             okClass: "bg-rose-500 hover:bg-rose-600",
-            onOk: () => deleteSettlement(b.dataset.delst)
+            onOk: () => deleteSettlementByMonth(b.dataset.delst)
           });
         });
       }
     }
 
     // =========================================================
-    // 11. 彈窗控制邏輯
+    // 11. 彈窗控制
     // =========================================================
     function openModal(id) {
       const m = $(id);
@@ -2480,7 +2919,7 @@
       }
       $("cfOkBtn").textContent = okText;
       $("cfOkBtn").className = `flex-1 py-3 rounded-2xl text-white text-sm font-black shadow-md cursor-pointer ${okClass}`;
-      confirmAction = onOk;
+      confirmCallback = onOk;
       openModal("confirmModal");
     }
 
@@ -2488,7 +2927,19 @@
       $("loginPwdInput").value = "";
       $("loginErr").classList.add("hidden");
       openModal("loginModal");
-      setTimeout(() => $("loginPwdInput").focus(), 50);
+      setTimeout(() => $("loginPwdInput").focus(), 60);
+    }
+
+    function openSettingsModal() {
+      if (!state.isAdmin) return openLoginModal();
+      $("syncUrlInput").value = state.syncUrl || "";
+      $("syncTestMsg").classList.add("hidden");
+      $("oldPwd").value = "";
+      $("newPwd").value = "";
+      $("pwdMsg").classList.add("hidden");
+      $("gasCodeBox").value = GAS_HELPER_CODE;
+      updateSyncUI();
+      openModal("settingsModal");
     }
 
     function renderMemberManageModal() {
@@ -2497,22 +2948,25 @@
       state.members.forEach((m) => {
         const chip = document.createElement("div");
         chip.className = "inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 border border-slate-200 text-sm font-extrabold text-slate-800";
-        chip.innerHTML = `<span>${esc(m.emoji)} ${esc(m.name)}</span>`;
+        chip.innerHTML = `<span>${esc(m.icon)} ${esc(m.name)}</span>`;
         const del = document.createElement("button");
         del.type = "button";
         del.textContent = "✕";
         del.title = `移除 ${m.name}`;
         del.className = "w-6 h-6 rounded-full bg-rose-100 hover:bg-rose-500 text-rose-700 hover:text-white text-xs font-black transition cursor-pointer";
         del.onclick = () => {
-          if (state.members.length <= 1) return toast("至少需保留 1 位人員喔！", "warn");
+          if (state.members.length <= 1) {
+            toast("至少需保留 1 位人員喔！", "warn");
+            return;
+          }
           openConfirm({
             icon: "👥",
             title: `確定移除人員「${m.name}」？`,
             sub: "過去已登記的歷史紀錄名字會完整保留",
-            bodyHtml: `<div>移除後不會出現在快速填寫列：<b>${esc(m.emoji)} ${esc(m.name)}</b></div>`,
+            bodyHtml: `<div>移除後不會顯示在快速登記列：<b>${esc(m.icon)} ${esc(m.name)}</b></div>`,
             okText: "確認移除",
             okClass: "bg-rose-500 hover:bg-rose-600",
-            onOk: () => removeMember(m.id)
+            onOk: () => removeMemberAction(m.name)
           });
         };
         chip.appendChild(del);
@@ -2532,37 +2986,37 @@
       });
     }
 
-    function openEditLogModal(logId) {
+    function openEditModal(entryId) {
       if (!state.isAdmin) return;
-      const log = state.logs.find((l) => l.id === logId);
-      if (!log) return;
-      state.editLogId = logId;
+      const entry = state.entries.find((x) => x.id === entryId);
+      if (!entry) return;
+      state.editEntryId = entryId;
       $("editErr").classList.add("hidden");
-      $("edDate").value = log.date;
+      $("edDate").value = entry.date;
 
       const sel = $("edMember");
       sel.innerHTML = "";
       const names = new Set(state.members.map((m) => m.name));
-      names.add(log.memberName);
+      names.add(entry.member);
       names.forEach((n) => {
         const o = document.createElement("option");
         o.value = n;
         o.textContent = n;
         sel.appendChild(o);
       });
-      sel.value = log.memberName;
+      sel.value = entry.member;
 
-      $("edCat").value = log.category;
-      $("edSign").value = log.weightKg < 0 ? "-1" : "1";
-      $("edKg").value = Math.abs(log.weightKg);
-      $("edItem").value = log.itemName || "";
-      $("edQty").value = log.itemQty || "";
-      $("edNote").value = log.note || "";
+      $("edCat").value = entry.category;
+      $("edDir").value = entry.direction < 0 ? "-1" : "1";
+      $("edKg").value = entry.kg;
+      $("edItem").value = entry.item || "";
+      $("edQty").value = entry.qty || "";
+      $("edNote").value = entry.note || "";
       openModal("editModal");
     }
 
     // =========================================================
-    // 12. 事件綁定與啟動流程
+    // 12. 全部事件綁定與啟動流程
     // =========================================================
     function bindEvents() {
       // 主分頁切換
@@ -2570,13 +3024,22 @@
         b.onclick = () => { state.tab = b.dataset.tab; renderAll(); };
       });
 
-      // 儀表板範圍切換
+      // 儀表板時間範圍切換
       document.querySelectorAll(".scope-btn").forEach((b) => {
         b.onclick = () => { state.scope = b.dataset.scope; renderAll(); };
       });
 
+      // 手動重新同步
+      $("manualSyncBtn").onclick = () => {
+        if (!state.syncUrl) {
+          toast("尚未綁定共用試算表，請先登入管理員設定連線網址", "warn");
+          return;
+        }
+        pullFromCloud({ silent: false, showSuccessToast: true });
+      };
+
       // 音效開關
-      $("soundBtn").onclick = () => {
+      $("soundToggleBtn").onclick = () => {
         state.soundOn = !state.soundOn;
         $("soundIcon").textContent = state.soundOn ? "🔊" : "🔇";
         toast(state.soundOn ? "已開啟提示音" : "已靜音", "info");
@@ -2585,9 +3048,7 @@
       // 管理員登入 / 登出
       const doLogout = () => {
         state.isAdmin = false;
-        closeModal("settingsModal");
-        closeModal("memberModal");
-        closeModal("editModal");
+        ["settingsModal", "memberModal", "editModal"].forEach(closeModal);
         renderAll();
         toast("已登出管理員模式", "info");
       };
@@ -2595,6 +3056,7 @@
       $("bannerLogoutBtn").onclick = doLogout;
       $("ledgerLoginBtn").onclick = openLoginModal;
       $("monthlyLoginBtn").onclick = openLoginModal;
+      $("unboundGuideBtn").onclick = () => (state.isAdmin ? openSettingsModal() : openLoginModal());
 
       $("loginForm").onsubmit = (e) => {
         e.preventDefault();
@@ -2602,8 +3064,8 @@
           state.isAdmin = true;
           closeModal("loginModal");
           renderAll();
-          beep("win");
-          toast("👑 歡迎管理員！已解鎖隱藏細項與修改權限", "win");
+          playChime("win");
+          toast("👑 管理員登入成功！已解鎖完整檢視與設定權限", "win");
         } else {
           $("loginErr").textContent = "密碼不正確，請再試一次！";
           $("loginErr").classList.remove("hidden");
@@ -2611,29 +3073,20 @@
       };
 
       // 管理員設定與人員管理
-      const openSettings = () => {
-        if (!state.isAdmin) return openLoginModal();
-        $("oldPwd").value = "";
-        $("newPwd").value = "";
-        $("pwdMsg").classList.add("hidden");
-        openModal("settingsModal");
-      };
-      $("headerSettingsBtn").onclick = openSettings;
-      $("bannerSettingsBtn").onclick = openSettings;
+      $("headerSettingsBtn").onclick = openSettingsModal;
+      $("bannerSettingsBtn").onclick = openSettingsModal;
 
-      const openMemberMgr = () => {
+      $("openMemberModalBtn").onclick = () => {
         if (!state.isAdmin) return openLoginModal();
         $("newMemName").value = "";
         $("addMemErr").classList.add("hidden");
         renderMemberManageModal();
         openModal("memberModal");
       };
-      $("openMemberModalBtn").onclick = openMemberMgr;
-      $("settingsToMemberBtn").onclick = () => { closeModal("settingsModal"); openMemberMgr(); };
 
-      $("addMemberForm").onsubmit = (e) => {
+      $("addMemberForm").onsubmit = async (e) => {
         e.preventDefault();
-        const err = addMember($("newMemName").value, state.newEmoji);
+        const err = await addMemberAction($("newMemName").value, state.newEmoji);
         if (err) {
           $("addMemErr").textContent = err;
           $("addMemErr").classList.remove("hidden");
@@ -2643,7 +3096,124 @@
         }
       };
 
-      $("pwdForm").onsubmit = (e) => {
+      // 雲端測試並儲存連線
+      $("testSaveSyncBtn").onclick = async () => {
+        const url = $("syncUrlInput").value.trim();
+        const msgEl = $("syncTestMsg");
+        msgEl.classList.remove("hidden");
+
+        if (!url) {
+          saveSyncUrlToStorage("");
+          updateSyncUI();
+          msgEl.className = "text-xs font-extrabold text-amber-700 pt-1";
+          msgEl.textContent = "已清除雲端連線設定，目前切換為本機暫存模式。";
+          return;
+        }
+        if (!url.startsWith("https://")) {
+          msgEl.className = "text-xs font-extrabold text-rose-600 pt-1";
+          msgEl.textContent = "網址請以 https:// 開頭（例如 https://script.google.com/macros/s/.../exec）";
+          return;
+        }
+
+        msgEl.className = "text-xs font-extrabold text-sky-700 pt-1";
+        msgEl.textContent = "🟡 正在測試連線共用試算表...";
+
+        const pingRes = await postToCloud({ action: "ping" }, url);
+        if (!pingRes.ok) {
+          msgEl.className = "text-xs font-extrabold text-rose-600 pt-1";
+          msgEl.textContent = `🔴 連線失敗：${pingRes.error || "請確認網址正確，且部署權限已設為「所有人」"}`;
+          return;
+        }
+
+        saveSyncUrlToStorage(url);
+        msgEl.className = "text-xs font-extrabold text-emerald-700 pt-1";
+        msgEl.textContent = "🟢 連線成功並已儲存！正在同步共用試算表資料...";
+        playChime("win");
+
+        const hasLocal = state.entries.length > 0 || state.settlements.length > 0;
+        if (hasLocal) {
+          openConfirm({
+            icon: "☁️",
+            title: "連線成功！要如何處理現有資料？",
+            sub: "請選擇以「試算表雲端資料」為主，或把「這台電腦資料」上傳過去",
+            bodyHtml: `<div>目前這台電腦本機有 <b>${state.entries.length} 筆明細</b> 與 <b>${state.settlements.length} 個月結算</b>。</div><div class="text-xs text-slate-500 mt-1">• 若試算表是全新空白的，建議選「先拉取」後再按「上傳本機資料」，或直接拉取最新資料。</div>`,
+            okText: "⬇️ 拉取試算表最新資料",
+            okClass: "bg-sky-600 hover:bg-sky-700",
+            onOk: () => pullFromCloud({ silent: false, showSuccessToast: true })
+          });
+        } else {
+          await pullFromCloud({ silent: false, showSuccessToast: true });
+        }
+        msgEl.textContent = "🟢 連線測試成功並已儲存！現在可點右側按鈕下載「已綁定雲端」的網頁檔。";
+      };
+
+      // 下載已綁定雲端網頁檔
+      $("downloadBoundHtmlBtn").onclick = downloadBoundHtmlFile;
+
+      // 將目前電腦資料上傳覆蓋共用試算表
+      $("pushLocalToCloudBtn").onclick = () => {
+        const url = ($("syncUrlInput").value || state.syncUrl || "").trim();
+        if (!url) {
+          toast("請先貼上並測試儲存共用試算表網址！", "warn");
+          return;
+        }
+        saveSyncUrlToStorage(url);
+        openConfirm({
+          icon: "⬆️",
+          title: "確定將目前這台電腦的資料上傳至共用試算表？",
+          sub: "適合第一次搬家，將公司筆電原本累積的紀錄整批放上雲端",
+          bodyHtml: `<div>即將上傳：<b>${state.members.length} 位人員</b>、<b>${state.entries.length} 筆明細</b>、<b>${state.settlements.length} 個月結算</b>。</div>`,
+          warn: "⚠️ 注意：共用試算表內原本的內容將會被目前畫面上的資料取代。",
+          okText: "確認上傳至雲端",
+          okClass: "bg-amber-500 hover:bg-amber-600",
+          onOk: async () => {
+            const res = await postToCloud({
+              action: "importAll",
+              data: {
+                entries: state.entries,
+                settlements: state.settlements,
+                members: state.members,
+                adminPassword: state.adminPassword
+              }
+            });
+            if (res.ok) {
+              playChime("win");
+              toast("🎉 已將本機資料完整上傳至共用試算表！", "win");
+            } else {
+              toast(`🔴 上傳失敗：${res.error || "請確認連線狀態"}`, "err");
+            }
+          }
+        });
+      };
+
+      // 從共用試算表重新拉取最新資料
+      $("pullCloudToLocalBtn").onclick = () => {
+        const url = ($("syncUrlInput").value || state.syncUrl || "").trim();
+        if (!url) {
+          toast("請先貼上並測試儲存共用試算表網址！", "warn");
+          return;
+        }
+        saveSyncUrlToStorage(url);
+        pullFromCloud({ silent: false, showSuccessToast: true });
+      };
+
+      // 一鍵複製 Google Apps Script 小幫手程式碼（使用 execCommand 相容 iFrame）
+      $("copyGasCodeBtn").onclick = () => {
+        const box = $("gasCodeBox");
+        box.focus();
+        box.select();
+        box.setSelectionRange(0, box.value.length);
+        try {
+          const ok = document.execCommand("copy");
+          if (ok) toast("📋 已複製試算表小幫手內容！直接貼到 Apps Script 即可", "win");
+          else toast("請按 Ctrl+C 手動複製上方文字框內容", "warn");
+        } catch (e) {
+          toast("請按 Ctrl+C 手動複製上方文字框內容", "warn");
+        }
+      };
+
+      // 修改管理員密碼
+      $("pwdForm").onsubmit = async (e) => {
         e.preventDefault();
         const oldP = $("oldPwd").value;
         const newP = $("newPwd").value.trim();
@@ -2656,28 +3226,30 @@
         }
         if (newP.length < 4) {
           msg.className = "text-xs font-extrabold text-rose-600";
-          msg.textContent = "新密碼長度需至少 4 碼！";
+          msg.textContent = "新密碼長度至少需要 4 碼！";
           return;
         }
         state.adminPassword = newP;
-        saveCache();
-        cloudWrite(() => setDoc(refs.settings, { adminPassword: newP, updatedAt: Date.now() }));
+        saveLocalData();
         $("oldPwd").value = "";
         $("newPwd").value = "";
         msg.className = "text-xs font-extrabold text-emerald-700";
-        msg.textContent = "✅ 密碼已更新並同步至雲端！";
+        msg.textContent = "✅ 密碼已更新！";
         toast("🔑 管理員密碼已更新", "win");
+        if (state.syncUrl) {
+          await postToCloud({ action: "savePassword", adminPassword: newP });
+        }
       };
 
-      // 備份與還原
+      // JSON 備份與還原
       $("backupDownloadBtn").onclick = downloadJsonBackup;
       $("backupUploadInput").onchange = (e) => {
         const f = e.target.files && e.target.files[0];
-        if (f) handleRestoreFile(f);
+        if (f) handleImportBackup(f);
         e.target.value = "";
       };
 
-      // 登記日期與重量輸入
+      // 登記日期與重量
       $("recordDateInput").onchange = (e) => {
         state.selectedDate = e.target.value || state.today;
         renderCheckIn();
@@ -2698,9 +3270,9 @@
         document.querySelectorAll(".btn-kg-label").forEach((el) => { el.textContent = lbl; });
       };
 
-      // 三大卡片 ＋ / － 登記按鈕
+      // 三大操作卡 ＋ / － 登記按鈕
       document.querySelectorAll(".act-btn").forEach((b) => {
-        b.onclick = () => addLog(b.dataset.cat, Number(b.dataset.sign));
+        b.onclick = () => addEntry(b.dataset.cat, Number(b.dataset.dir));
       });
 
       // 流水帳篩選與匯出
@@ -2730,26 +3302,26 @@
         renderLedger();
       };
       $("exportLedgerBtn").onclick = () => {
-        exportLogsCsv(getFilteredLogs(), `流水帳明細_${todayISO()}.csv`, state.isAdmin);
+        exportEntriesCsv(getFilteredEntries(), `流水帳明細_${todayISO()}.csv`, state.isAdmin);
       };
 
-      // 修改單筆紀錄表單
-      $("editForm").onsubmit = saveEditLog;
+      // 編輯單筆紀錄
+      $("editForm").onsubmit = saveEditEntry;
 
-      // 每月結算事件
+      // 每月結算
       $("settleMonthSel").onchange = (e) => { state.settleMonth = e.target.value; renderMonthly(); };
-      $("settleKeepBtn").onclick = () => settleMonth("keep");
-      $("settlePurgeBtn").onclick = () => settleMonth("purge");
+      $("settleKeepBtn").onclick = () => runMonthlySettlement(false);
+      $("settlePurgeBtn").onclick = () => runMonthlySettlement(true);
       $("exportMonthlyBtn").onclick = exportMonthlyCsv;
 
-      // 通用關閉與確認視窗
+      // 彈窗通用關閉與確認
       document.querySelectorAll("[data-close]").forEach((b) => {
         b.onclick = () => closeModal(b.dataset.close);
       });
-      $("cfCancelBtn").onclick = () => { confirmAction = null; closeModal("confirmModal"); };
+      $("cfCancelBtn").onclick = () => { confirmCallback = null; closeModal("confirmModal"); };
       $("cfOkBtn").onclick = () => {
-        const fn = confirmAction;
-        confirmAction = null;
+        const fn = confirmCallback;
+        confirmCallback = null;
         closeModal("confirmModal");
         if (fn) fn();
       };
@@ -2760,11 +3332,15 @@
       });
     }
 
-    // 啟動：先安全載入本機快取快速呈現，同時背景連線 Firebase 雲端即時同步
-    loadCache();
+    // 啟動：1. 讀取本機快取立刻呈現畫面 2. 連線共用試算表拉取最新資料 3. 啟動每 30 秒自動同步
+    state.syncUrl = resolveInitialSyncUrl();
+    loadLocalData();
     bindEvents();
     renderAll();
-    initFirebase();
+    if (state.syncUrl) {
+      pullFromCloud({ silent: true });
+    }
+    startAutoPull();
   </script>
 </body>
 </html>
