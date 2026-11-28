@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>全員降庫存動起來！KG 戰情看板與流水帳（單人更新覆蓋版）</title>
+  <title>全員降庫存動起來！KG 戰情看板與流水帳（1:2 降成本防呆修正版）</title>
 
   <!-- 字體：Noto Sans TC + Inter（離線時優雅降級為系統字體） -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,7 +27,7 @@
             },
             popScale: {
               '0%': { transform: 'scale(1)' },
-              '45%': { transform: 'scale(1.09)' },
+              '45%': { transform: 'scale(1.08)' },
               '100%': { transform: 'scale(1)' },
             },
             toastSlide: {
@@ -45,10 +45,10 @@
     };
   </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/35 to-sky-50/45 text-slate-800 antialiased overflow-x-hidden pb-16">
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-sky-50/45 text-slate-800 antialiased overflow-x-hidden pb-16">
 
   <!-- =================================================================
-       內建帳本資料區塊（一鍵下載新版網頁時會自動將最新紀錄打包至此處）
+       內建帳本資料區塊（按下「存檔並下載新版網頁」時會自動更新此處）
        ================================================================= -->
   <script id="embedded-ledger-data" type="application/json">
 {
@@ -60,49 +60,36 @@
   ],
   "records": [
     {
-      "id": "sample_rec_3",
-      "date": "2026-11-28",
-      "member": "阿強",
-      "category": "trash",
-      "direction": 1,
-      "kg": 50,
-      "item": "裁切廢料與舊棧板",
-      "qty": "3 袋",
-      "note": "範例紀錄（可至設定一鍵清除）",
-      "createdAt": "2026/11/28 08:55",
-      "isSample": true
-    },
-    {
-      "id": "sample_rec_2",
+      "id": "sample_rec_out_1",
       "date": "2026-11-28",
       "member": "小美",
-      "category": "out",
-      "direction": 1,
-      "kg": 180,
-      "item": "標準成品出貨",
-      "qty": "6 板",
-      "note": "範例紀錄（可至設定一鍵清除）",
-      "createdAt": "2026/11/28 08:40",
+      "type": "out",
+      "kg": 20000,
+      "isReversal": false,
+      "item": "標準成品出貨（範例）",
+      "qty": "20 板",
+      "note": "範例資料，可在管理員設定一鍵清空",
+      "createdAt": "2026/11/28 09:05",
       "isSample": true
     },
     {
-      "id": "sample_rec_1",
+      "id": "sample_rec_in_1",
       "date": "2026-11-28",
       "member": "小明",
-      "category": "in",
-      "direction": 1,
-      "kg": 100,
+      "type": "in",
+      "kg": 10000,
+      "isReversal": false,
       "item": "",
       "qty": "",
-      "note": "範例紀錄（可至設定一鍵清除）",
-      "createdAt": "2026/11/28 08:15",
+      "note": "範例資料，可在管理員設定一鍵清空",
+      "createdAt": "2026/11/28 09:00",
       "isSample": true
     }
   ],
   "monthlyArchives": [],
   "adminPassword": "8888",
-  "lastUpdated": "2026/11/28 09:00",
-  "dataVersion": 1764291600000,
+  "lastUpdated": "2026/11/28 09:10",
+  "dataVersion": 1764292200000,
   "exportFilename": "index.html",
   "customFilenameSet": false
 }
@@ -118,7 +105,7 @@
     <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs sm:text-sm font-black">
       <div class="flex items-start sm:items-center gap-2">
         <span class="text-base shrink-0">⚠️</span>
-        <span>⚠️ 您有尚未下載覆蓋上傳的新變動！完成記帳後請點「📦 存檔並下載新版網頁」並覆蓋上傳</span>
+        <span>您有尚未下載覆蓋上傳的新變動！記帳完畢請點「📦 存檔並下載新版網頁」並覆蓋上傳，全公司才會同步看到最新版</span>
       </div>
       <button type="button" id="unsavedQuickExportBtn" class="px-3.5 py-1.5 rounded-xl bg-white text-orange-700 hover:bg-orange-50 active:scale-95 text-xs font-black shadow-sm shrink-0 transition cursor-pointer">
         📦 立即下載新版網頁
@@ -139,10 +126,10 @@
           </div>
           <div class="min-w-0">
             <h1 class="text-lg sm:text-xl font-black tracking-tight text-slate-900 truncate">
-              🚀 全員降庫存動起來！
+              全員降庫存動起來！
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 font-bold">
-              目標：減少 2 ： 新增 1（單位：KG）
+              目標：進貨 1 ： 出貨 2（有效降低成本・單位：KG）
             </p>
           </div>
         </div>
@@ -152,7 +139,7 @@
           <!-- 最後更新時間徽章 -->
           <div class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs sm:text-sm font-extrabold">
             <span>🕒</span>
-            <span>最後更新：</span>
+            <span>最後更新時間：</span>
             <span id="headerLastUpdated" class="text-slate-900 tabular-nums">--</span>
           </div>
 
@@ -180,23 +167,21 @@
           <span id="tabLedgerBadge" class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[11px] font-black bg-slate-200 text-slate-700 tabular-nums">0</span>
         </button>
         <button type="button" data-tab="archives" class="main-tab-btn py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm md:text-base font-black flex items-center justify-center gap-1.5 transition cursor-pointer">
-          <span>📅</span><span class="truncate">每月結算成績單</span>
+          <span>📅</span><span class="truncate">每月結算存檔</span>
           <span id="tabArchiveBadge" class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 tabular-nums">0</span>
         </button>
       </nav>
     </div>
 
-    <!-- 管理員專屬金色工具列（預設隱藏，登入後黏貼於頂部導覽列下方） -->
+    <!-- 管理員專屬金色提示工具列（預設隱藏，登入後展開） -->
     <div id="adminToolbar" class="hidden bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-t border-amber-300/90">
       <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
-        <!-- 同步狀態徽章 -->
         <div class="flex items-center gap-2">
           <span id="adminSyncBadge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black border bg-emerald-100 text-emerald-900 border-emerald-300">
             ✅ 已與目前網頁一致
           </span>
         </div>
 
-        <!-- 管理員核心工具按鈕群 -->
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <button type="button" id="exportWebpageBtn" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-md shadow-emerald-200/80 transition cursor-pointer">
             <span>📦</span><span>存檔並下載新版網頁</span>
@@ -208,7 +193,7 @@
             <span>⚙️</span><span>管理員設定</span>
           </button>
           <button type="button" id="toolbarLogoutBtn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-900/10 hover:bg-amber-900/20 active:scale-95 text-amber-950 text-xs sm:text-sm font-extrabold transition cursor-pointer">
-            <span>👁️</span><span>切換回員工視角（登出）</span>
+            <span>👁️</span><span>切回員工視角</span>
           </button>
         </div>
       </div>
@@ -225,14 +210,30 @@
          =============================================================== -->
     <section id="panelDashboard" class="space-y-6">
 
-      <!-- 管理員專屬：✏️ 管理員快速登記區（預設隱藏，員工視角完全看不到） -->
+      <!-- 管理員防呆提醒：若偵測到歷史資料中有誤按負數的出貨／垃圾紀錄，主動提示可一鍵翻正 -->
+      <div id="negativeOutAlertBanner" class="hidden rounded-3xl bg-rose-50 border-2 border-rose-300 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-start sm:items-center gap-2.5 text-rose-950">
+          <span class="text-2xl shrink-0">🔧</span>
+          <div class="text-xs sm:text-sm font-bold leading-relaxed">
+            <p class="font-black text-rose-800">偵測到您目前有 <span id="negativeOutCountText" class="underline">0</span> 筆「負數／退貨沖銷」的出貨或排除垃圾紀錄！</p>
+            <p class="text-rose-700">如果這些是之前「誤按減號」造成的，點右邊按鈕就能一鍵全部翻正為正常出貨與排除垃圾。</p>
+          </div>
+        </div>
+        <button type="button" id="quickFixNegativeOutBtn" class="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm shrink-0 transition cursor-pointer">
+          🔧 一鍵自動翻正
+        </button>
+      </div>
+
+      <!-- 管理員專屬：✏️ 管理員防呆快速登記區（預設隱藏，員工視角完全看不到） -->
       <div id="adminQuickEntryCard" class="hidden bg-white rounded-3xl p-4 sm:p-6 shadow-md shadow-amber-100/60 border-2 border-amber-300 space-y-5">
         <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-amber-100">
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xl flex items-center justify-center shadow-sm shrink-0">✏️</div>
             <div>
-              <h2 class="text-lg sm:text-xl font-black text-slate-900">管理員快速登記區</h2>
-              <p class="text-xs sm:text-sm font-bold text-amber-800">選好日期、人員與公斤數，點擊下方大按鈕即可登記（記完請點上方下載新版網頁）</p>
+              <h2 class="text-lg sm:text-xl font-black text-slate-900">管理員防呆快速登記區</h2>
+              <p class="text-xs sm:text-sm font-bold text-amber-800">
+                選好日期、人員與重量，直接按下方彩色大按鈕即可！進貨入庫按綠色、出貨降庫存按藍色、排垃圾按橘色（絕不按錯方向）
+              </p>
             </div>
           </div>
           <button type="button" id="soundToggleBtn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-extrabold transition cursor-pointer">
@@ -263,159 +264,157 @@
           </div>
         </div>
 
-        <!-- 重量 KG 快選與公開備註 -->
+        <!-- 公斤數選擇區（常用快選 + 大字體輸入框 + 公開備註） -->
         <div class="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200 space-y-3.5">
           <div class="flex flex-col lg:flex-row lg:items-center gap-3">
             <div class="flex-1 space-y-2">
-              <span class="block text-xs sm:text-sm font-black text-emerald-950">⚖️ 本次登記重量（單位：KG）</span>
+              <span class="block text-xs sm:text-sm font-black text-emerald-950">⚖️ 本次登記重量（單位：KG，可直接輸入任意數字與小數）</span>
               <div id="kgPresetsContainer" class="flex flex-wrap gap-1.5 sm:gap-2"></div>
             </div>
             <div class="flex items-center gap-2 bg-white border-2 border-emerald-400 rounded-2xl px-4 py-2.5 shadow-xs self-start lg:self-end shrink-0">
               <label for="kgValueInput" class="text-xs font-black text-emerald-800">重量</label>
-              <input type="number" id="kgValueInput" inputmode="decimal" step="any" min="0.01" value="50" class="w-28 bg-emerald-50/70 rounded-xl border border-emerald-200 px-2.5 py-1.5 text-center text-2xl font-black text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums" />
+              <input type="number" id="kgValueInput" inputmode="decimal" step="any" min="0.01" value="1000" class="w-32 sm:w-36 bg-emerald-50/70 rounded-xl border border-emerald-200 px-2.5 py-1.5 text-center text-2xl font-black text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 tabular-nums" />
               <span class="text-base font-black text-emerald-800">KG</span>
             </div>
           </div>
 
           <div>
             <label for="publicNoteInput" class="block text-xs font-extrabold text-slate-600 mb-1">📝 公開備註（選填，員工在流水帳中看得到）</label>
-            <input type="text" id="publicNoteInput" maxlength="80" placeholder="例如：早班出貨、廠區大掃除、月底盤點調整..." autocomplete="off" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 focus:border-emerald-400 focus:outline-none text-sm font-bold text-slate-800 placeholder:text-slate-400" />
+            <input type="text" id="publicNoteInput" maxlength="80" placeholder="例如：早班出貨、廠區整理清運、月底盤點..." autocomplete="off" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 focus:border-emerald-400 focus:outline-none text-sm font-bold text-slate-800 placeholder:text-slate-400" />
           </div>
         </div>
 
-        <!-- 三大彩色操作卡片 -->
+        <!-- 三大防呆登記卡片 -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <!-- 卡 1：進貨（翠綠） -->
-          <article class="rounded-3xl bg-gradient-to-b from-emerald-50/70 to-white border-2 border-emerald-200 p-4 sm:p-5 flex flex-col justify-between shadow-sm">
+          <!-- 卡 1：📦 進貨 -->
+          <article class="rounded-3xl bg-gradient-to-b from-emerald-50/80 to-white border-2 border-emerald-200 p-4 sm:p-5 flex flex-col justify-between shadow-sm">
             <div class="space-y-3">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
                   <span class="w-11 h-11 rounded-2xl bg-emerald-100 text-2xl flex items-center justify-center shrink-0">📦</span>
                   <div>
                     <h3 class="text-lg font-black text-emerald-950">進貨</h3>
-                    <span class="inline-block px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">新增 1（庫存增加 ▲）</span>
+                    <span class="inline-block px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">庫存增加 ▲（進貨 1）</span>
                   </div>
                 </div>
                 <div class="relative text-right">
                   <div id="floatAnchor-in" class="absolute right-4 -top-2 pointer-events-none z-20"></div>
-                  <div class="text-[11px] font-bold text-emerald-700">目前區間</div>
+                  <div class="text-[11px] font-bold text-emerald-700">目前區間進貨</div>
                   <div id="cardSum-in" class="text-xl font-black text-emerald-700 tabular-nums">0 KG</div>
                 </div>
               </div>
-              <div class="rounded-2xl bg-emerald-50/70 border border-dashed border-emerald-200 p-3 text-xs font-bold text-emerald-800/90 text-center">
-                選好上方公斤數後，點「＋」新增進貨，或點「－」扣回更正
+
+              <div class="rounded-2xl bg-emerald-50/75 border border-dashed border-emerald-200 p-3 text-xs font-bold text-emerald-900/90 leading-relaxed">
+                正常進貨請直接按下方綠色大按鈕；如果剛才多記要扣回，再點最底下的「誤植扣回」。
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2.5 mt-4">
-              <button type="button" data-action-cat="in" data-action-dir="-1" class="quick-action-btn py-3.5 px-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-95 border-2 border-emerald-300 text-emerald-900 flex flex-col items-center justify-center transition select-none cursor-pointer">
-                <span class="text-2xl font-black leading-none">－</span>
-                <span class="action-kg-label text-sm font-black mt-1 tabular-nums">50 KG</span>
+            <div class="space-y-2.5 mt-4">
+              <button type="button" id="btnNormalIn" class="w-full py-4 px-3 rounded-2xl bg-gradient-to-b from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white shadow-md shadow-emerald-200 flex flex-col items-center justify-center transition select-none cursor-pointer">
+                <span class="text-base sm:text-lg font-black">＋ 登記進貨</span>
+                <span class="text-xs sm:text-sm font-extrabold text-emerald-50 mt-0.5 tabular-nums">（入庫 +<span class="action-kg-num">1,000</span> KG）</span>
               </button>
-              <button type="button" data-action-cat="in" data-action-dir="1" class="quick-action-btn py-3.5 px-2 rounded-2xl bg-gradient-to-b from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-md shadow-emerald-200 transition select-none cursor-pointer">
-                <span class="text-2xl font-black leading-none">＋</span>
-                <span class="action-kg-label text-sm font-black mt-1 tabular-nums">50 KG</span>
+              <button type="button" id="btnReverseIn" class="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-emerald-50 text-emerald-800/80 hover:text-emerald-950 text-xs font-extrabold transition cursor-pointer">
+                ↩️ 誤植扣回（進貨 −<span class="action-kg-num">1,000</span> KG）
               </button>
             </div>
           </article>
 
-          <!-- 卡 2：出貨（皇室藍） -->
-          <article class="rounded-3xl bg-gradient-to-b from-blue-50/70 to-white border-2 border-blue-200 p-4 sm:p-5 flex flex-col justify-between shadow-sm">
+          <!-- 卡 2：🚚 出貨 -->
+          <article class="rounded-3xl bg-gradient-to-b from-blue-50/80 to-white border-2 border-blue-200 p-4 sm:p-5 flex flex-col justify-between shadow-sm">
             <div class="space-y-3">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
                   <span class="w-11 h-11 rounded-2xl bg-blue-100 text-2xl flex items-center justify-center shrink-0">🚚</span>
                   <div>
                     <h3 class="text-lg font-black text-blue-950">出貨</h3>
-                    <span class="inline-block px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 text-[11px] font-extrabold">減少 2（庫存減少 ▼）</span>
+                    <span class="inline-block px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 text-[11px] font-extrabold">庫存減少 ▼（目標出貨 2）</span>
                   </div>
                 </div>
                 <div class="relative text-right">
                   <div id="floatAnchor-out" class="absolute right-4 -top-2 pointer-events-none z-20"></div>
-                  <div class="text-[11px] font-bold text-blue-700">目前區間</div>
+                  <div class="text-[11px] font-bold text-blue-700">目前區間出貨</div>
                   <div id="cardSum-out" class="text-xl font-black text-blue-700 tabular-nums">0 KG</div>
                 </div>
               </div>
 
               <!-- 僅管理員可見欄位 -->
-              <div class="rounded-2xl bg-amber-50/75 border border-amber-200 p-3 space-y-2">
+              <div class="rounded-2xl bg-amber-50/80 border border-amber-200 p-3 space-y-2">
                 <div>
-                  <label for="outItemInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 出貨項目（僅管理員可見）</label>
+                  <label for="outItemInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 出貨項目（僅管理員可見，對外隱藏）</label>
                   <input type="text" id="outItemInput" maxlength="40" placeholder="品名／規格／客戶（選填）" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 focus:border-blue-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                 </div>
                 <div>
-                  <label for="outQtyInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 數量（僅管理員可見）</label>
+                  <label for="outQtyInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 數量（僅管理員可見，對外隱藏）</label>
                   <input type="text" id="outQtyInput" maxlength="24" placeholder="幾箱／幾板／幾袋（選填）" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 focus:border-blue-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                 </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2.5 mt-4">
-              <button type="button" data-action-cat="out" data-action-dir="-1" class="quick-action-btn py-3.5 px-2 rounded-2xl bg-blue-50 hover:bg-blue-100 active:scale-95 border-2 border-blue-300 text-blue-900 flex flex-col items-center justify-center transition select-none cursor-pointer">
-                <span class="text-2xl font-black leading-none">－</span>
-                <span class="action-kg-label text-sm font-black mt-1 tabular-nums">50 KG</span>
+            <div class="space-y-2.5 mt-4">
+              <button type="button" id="btnNormalOut" class="w-full py-4 px-3 rounded-2xl bg-gradient-to-b from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.98] text-white shadow-md shadow-blue-200 flex flex-col items-center justify-center transition select-none cursor-pointer">
+                <span class="text-base sm:text-lg font-black">－ 登記出貨</span>
+                <span class="text-xs sm:text-sm font-extrabold text-blue-50 mt-0.5 tabular-nums">（降庫存 <span class="action-kg-num">1,000</span> KG）</span>
               </button>
-              <button type="button" data-action-cat="out" data-action-dir="1" class="quick-action-btn py-3.5 px-2 rounded-2xl bg-gradient-to-b from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-md shadow-blue-200 transition select-none cursor-pointer">
-                <span class="text-2xl font-black leading-none">＋</span>
-                <span class="action-kg-label text-sm font-black mt-1 tabular-nums">50 KG</span>
+              <button type="button" id="btnReverseOut" class="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-blue-50 text-blue-800/80 hover:text-blue-950 text-xs font-extrabold transition cursor-pointer">
+                ↩️ 退貨／沖銷加回
               </button>
             </div>
           </article>
 
-          <!-- 卡 3：排除垃圾（暖橘） -->
-          <article class="rounded-3xl bg-gradient-to-b from-orange-50/70 to-white border-2 border-orange-200 p-4 sm:p-5 flex flex-col justify-between shadow-sm">
+          <!-- 卡 3：🗑️ 排除垃圾 -->
+          <article class="rounded-3xl bg-gradient-to-b from-orange-50/80 to-white border-2 border-orange-200 p-4 sm:p-5 flex flex-col justify-between shadow-sm">
             <div class="space-y-3">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
                   <span class="w-11 h-11 rounded-2xl bg-orange-100 text-2xl flex items-center justify-center shrink-0">🗑️</span>
                   <div>
                     <h3 class="text-lg font-black text-orange-950">排除垃圾</h3>
-                    <span class="inline-block px-2 py-0.5 rounded-lg bg-orange-100 text-orange-800 text-[11px] font-extrabold">減少 2（庫存減少 ▼）</span>
+                    <span class="inline-block px-2 py-0.5 rounded-lg bg-orange-100 text-orange-800 text-[11px] font-extrabold">庫存減少 ▼（併入出貨降量）</span>
                   </div>
                 </div>
                 <div class="relative text-right">
                   <div id="floatAnchor-trash" class="absolute right-4 -top-2 pointer-events-none z-20"></div>
-                  <div class="text-[11px] font-bold text-orange-700">目前區間</div>
+                  <div class="text-[11px] font-bold text-orange-700">目前區間排垃圾</div>
                   <div id="cardSum-trash" class="text-xl font-black text-orange-700 tabular-nums">0 KG</div>
                 </div>
               </div>
 
               <!-- 僅管理員可見欄位 -->
-              <div class="rounded-2xl bg-amber-50/75 border border-amber-200 p-3 space-y-2">
+              <div class="rounded-2xl bg-amber-50/80 border border-amber-200 p-3 space-y-2">
                 <div>
-                  <label for="trashItemInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 垃圾項目（僅管理員可見）</label>
+                  <label for="trashItemInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 垃圾項目（僅管理員可見，對外隱藏）</label>
                   <input type="text" id="trashItemInput" maxlength="40" placeholder="廢料種類／清除區域（選填）" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 focus:border-orange-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                 </div>
                 <div>
-                  <label for="trashQtyInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 數量（僅管理員可見）</label>
+                  <label for="trashQtyInput" class="block text-[11px] font-black text-amber-900 mb-1">🔒 數量（僅管理員可見，對外隱藏）</label>
                   <input type="text" id="trashQtyInput" maxlength="24" placeholder="幾袋／幾車／幾桶（選填）" autocomplete="off" class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 focus:border-orange-400 focus:outline-none text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400" />
                 </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2.5 mt-4">
-              <button type="button" data-action-cat="trash" data-action-dir="-1" class="quick-action-btn py-3.5 px-2 rounded-2xl bg-orange-50 hover:bg-orange-100 active:scale-95 border-2 border-orange-300 text-orange-900 flex flex-col items-center justify-center transition select-none cursor-pointer">
-                <span class="text-2xl font-black leading-none">－</span>
-                <span class="action-kg-label text-sm font-black mt-1 tabular-nums">50 KG</span>
+            <div class="space-y-2.5 mt-4">
+              <button type="button" id="btnNormalTrash" class="w-full py-4 px-3 rounded-2xl bg-gradient-to-b from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 active:scale-[0.98] text-white shadow-md shadow-orange-200 flex flex-col items-center justify-center transition select-none cursor-pointer">
+                <span class="text-base sm:text-lg font-black">－ 登記排除垃圾</span>
+                <span class="text-xs sm:text-sm font-extrabold text-orange-50 mt-0.5 tabular-nums">（降庫存 <span class="action-kg-num">1,000</span> KG）</span>
               </button>
-              <button type="button" data-action-cat="trash" data-action-dir="1" class="quick-action-btn py-3.5 px-2 rounded-2xl bg-gradient-to-b from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-md shadow-orange-200 transition select-none cursor-pointer">
-                <span class="text-2xl font-black leading-none">＋</span>
-                <span class="action-kg-label text-sm font-black mt-1 tabular-nums">50 KG</span>
+              <button type="button" id="btnReverseTrash" class="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-orange-50 text-orange-800/80 hover:text-orange-950 text-xs font-extrabold transition cursor-pointer">
+                ↩️ 誤植加回
               </button>
             </div>
           </article>
         </div>
       </div>
 
-      <!-- 2:1 降庫存核心看板（所有人皆可見） -->
+      <!-- 1:2 降庫存核心看板（所有人皆可見） -->
       <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/90 space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-xl flex items-center justify-center shadow-sm shrink-0">🎯</div>
             <div>
               <div class="flex flex-wrap items-center gap-2">
-                <h2 class="text-lg sm:text-xl font-black text-slate-900">降庫存 2:1 戰情儀表板</h2>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">減少 2 ： 新增 1</span>
+                <h2 class="text-lg sm:text-xl font-black text-slate-900">降庫存 1:2 戰情儀表板</h2>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">目標 進貨 1 : 出貨 2（有效降低成本）</span>
               </div>
               <p id="dashboardScopeDesc" class="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5"></p>
             </div>
@@ -429,65 +428,65 @@
           </div>
         </div>
 
-        <!-- 四大 KPI 卡片 -->
+        <!-- 四大 KPI 卡片（完全對齊：進貨 → 出貨含排垃圾 → 進貨−出貨=結果 → 進貨:出貨比） -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          <!-- KPI 1：總減少量 -->
-          <div class="rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50/70 border-2 border-sky-200 p-4 flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold text-sky-900">總減少量（出貨＋排除垃圾）</span>
-              <span class="text-lg">📉</span>
+          <!-- 卡片 1（綠框）：進貨數量 -->
+          <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50/70 border-2 border-emerald-300 p-4 flex flex-col justify-between">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-xs sm:text-sm font-black text-emerald-950">📦 進貨數量</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">入庫</span>
             </div>
-            <div class="mt-2 flex items-baseline gap-1">
-              <span id="kpiTotalReduced" class="text-2xl sm:text-3xl font-black text-sky-700 tabular-nums">0</span>
-              <span class="text-sm font-extrabold text-sky-600">KG</span>
-            </div>
-            <p id="kpiReducedBreakdown" class="text-xs font-bold text-sky-800/80 mt-1.5">出貨 0 ＋ 垃圾 0 KG</p>
-          </div>
-
-          <!-- KPI 2：總新增量 -->
-          <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50/70 border-2 border-emerald-200 p-4 flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold text-emerald-900">總新增量（進貨）</span>
-              <span class="text-lg">📦</span>
-            </div>
-            <div class="mt-2 flex items-baseline gap-1">
-              <span id="kpiTotalAdded" class="text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums">0</span>
+            <div class="mt-2.5 flex items-baseline gap-1">
+              <span id="kpiTotalIn" class="text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums">0</span>
               <span class="text-sm font-extrabold text-emerald-600">KG</span>
             </div>
-            <p id="kpiAddedTarget" class="text-xs font-bold text-emerald-800/80 mt-1.5">達標 2:1 需減少 0 KG</p>
+            <p id="kpiInSub" class="text-xs font-bold text-emerald-900/85 mt-2">達標 1:2 需出貨＋排垃圾 0 KG</p>
           </div>
 
-          <!-- KPI 3：淨庫存變化 -->
+          <!-- 卡片 2（藍框）：出貨數量（含排除垃圾） -->
+          <div class="rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50/75 border-2 border-blue-300 p-4 flex flex-col justify-between">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-xs sm:text-sm font-black text-blue-950">🚚 出貨數量（含排除垃圾）</span>
+              <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black shrink-0">去化</span>
+            </div>
+            <div class="mt-2.5 flex items-baseline gap-1">
+              <span id="kpiTotalReduction" class="text-2xl sm:text-3xl font-black text-blue-700 tabular-nums">0</span>
+              <span class="text-sm font-extrabold text-blue-600">KG</span>
+            </div>
+            <p id="kpiReductionSub" class="text-xs font-bold text-blue-900/85 mt-2">出貨 0 ＋ 垃圾 0 KG</p>
+          </div>
+
+          <!-- 卡片 3（結果卡）：進貨 − 出貨 ＝ 結果 -->
           <div id="kpiNetCard" class="rounded-2xl bg-slate-50 border-2 border-slate-200 p-4 flex flex-col justify-between transition-colors">
-            <div class="flex items-center justify-between">
-              <span id="kpiNetTitle" class="text-xs font-extrabold text-slate-700">淨庫存變化</span>
+            <div class="flex items-center justify-between gap-1">
+              <span id="kpiNetTitle" class="text-xs sm:text-sm font-black text-slate-800">⚖️ 進貨 − 出貨 ＝ 結果</span>
               <span id="kpiNetIcon" class="text-lg">⚖️</span>
             </div>
-            <div class="mt-2 flex items-baseline gap-1">
+            <div class="mt-2.5 flex items-baseline gap-1">
               <span id="kpiNetValue" class="text-2xl sm:text-3xl font-black text-slate-800 tabular-nums">0</span>
               <span id="kpiNetUnit" class="text-sm font-extrabold text-slate-600">KG</span>
             </div>
-            <p id="kpiNetSub" class="text-xs font-extrabold text-slate-600 mt-1.5">目前庫存持平</p>
+            <p id="kpiNetSub" class="text-xs font-extrabold text-slate-600 mt-2">0 − 0 ＝ 庫存持平</p>
           </div>
 
-          <!-- KPI 4：目前減增比 -->
-          <div id="kpiRatioCard" class="rounded-2xl bg-amber-50/80 border-2 border-amber-200 p-4 flex flex-col justify-between transition-colors">
-            <div class="flex items-center justify-between">
-              <span id="kpiRatioTitle" class="text-xs font-extrabold text-amber-900">目前減增比</span>
+          <!-- 卡片 4（暖金框）：目前進貨 : 出貨比 -->
+          <div id="kpiRatioCard" class="rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50/80 border-2 border-amber-300 p-4 flex flex-col justify-between transition-colors">
+            <div class="flex items-center justify-between gap-1">
+              <span id="kpiRatioTitle" class="text-xs sm:text-sm font-black text-amber-950">🔥 目前進貨 : 出貨比</span>
               <span id="kpiRatioIcon" class="text-lg">🔥</span>
             </div>
-            <div class="mt-2 flex items-baseline gap-1">
-              <span id="kpiRatioValue" class="text-2xl sm:text-3xl font-black text-amber-800 tabular-nums">0.00 : 1</span>
+            <div class="mt-2.5 flex items-baseline gap-1">
+              <span id="kpiRatioValue" class="text-2xl sm:text-3xl font-black text-amber-800 tabular-nums">0 : 0</span>
             </div>
-            <p id="kpiRatioSub" class="text-xs font-extrabold text-amber-800/90 mt-1.5">目標 2.00 : 1</p>
+            <p id="kpiRatioSub" class="text-xs font-extrabold text-amber-900/90 mt-2">目標 1 : 2.00</p>
           </div>
         </div>
 
-        <!-- 2:1 視覺進度條與激勵橫幅 -->
+        <!-- 進貨 1 : 出貨 2 視覺進度條與激勵橫幅 -->
         <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 sm:p-5 space-y-3.5">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-              <span class="text-sm sm:text-base font-black text-slate-900">2:1 降庫存目標達成進度</span>
+              <span class="text-sm sm:text-base font-black text-slate-900">進貨 1 : 出貨 2 目標達成進度</span>
               <span id="goalAchievedPill" class="hidden px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">🎉 達標！</span>
             </div>
             <span id="goalProgressPct" class="text-base font-black text-emerald-700 tabular-nums">0%</span>
@@ -501,14 +500,14 @@
             </div>
             <div class="flex justify-between text-xs font-extrabold mt-2">
               <span class="text-slate-500">0% 起點</span>
-              <span class="text-amber-700">▲ 1:1 打平</span>
-              <span class="text-emerald-700">🔥 2:1 達標</span>
+              <span class="text-amber-700">▲ 1:1 打平 (50%)</span>
+              <span class="text-emerald-700">🔥 1:2 達標 (100%)</span>
             </div>
           </div>
 
           <div id="goalStatusBanner" class="rounded-2xl px-4 py-3.5 text-sm sm:text-base font-black flex items-center gap-2.5 bg-slate-100 text-slate-700 border border-slate-200">
             <span id="goalStatusIcon" class="text-xl shrink-0">🚀</span>
-            <span id="goalStatusText">全員動起來，一起把庫存降下來！</span>
+            <span id="goalStatusText">全員動起來，一起把庫存降下來、有效降低成本！</span>
           </div>
         </div>
       </div>
@@ -520,14 +519,14 @@
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 text-white text-xl flex items-center justify-center shadow-sm shrink-0">🏆</div>
             <div>
               <div class="flex flex-wrap items-center gap-2">
-                <h2 class="text-lg sm:text-xl font-black text-slate-900">🏆 全員降庫存排行榜</h2>
+                <h2 class="text-lg sm:text-xl font-black text-slate-900">全員降庫存排行榜</h2>
                 <span id="leaderboardScopeTag" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-black">今日榜單</span>
               </div>
-              <p id="leaderboardCheerText" class="text-xs sm:text-sm font-bold text-emerald-700 mt-0.5">依總減少量（出貨＋排除垃圾）即時排名</p>
+              <p id="leaderboardCheerText" class="text-xs sm:text-sm font-bold text-emerald-700 mt-0.5">依總去化量（出貨＋排除垃圾）即時排名</p>
             </div>
           </div>
           <div class="inline-flex items-center gap-2 bg-gradient-to-r from-sky-50 to-emerald-50 border border-emerald-200 px-4 py-2 rounded-2xl self-start md:self-auto">
-            <span class="text-xs font-extrabold text-emerald-900">團隊累計減少</span>
+            <span class="text-xs font-extrabold text-emerald-900">團隊累計出貨＋排垃圾</span>
             <span id="leaderboardTotalKg" class="text-2xl font-black text-emerald-700 tabular-nums">0</span>
             <span class="text-xs font-black text-emerald-800">KG</span>
           </div>
@@ -560,7 +559,7 @@
 
         <!-- 管理員展開提示（僅管理員可見） -->
         <div id="ledgerAdminNotice" class="hidden rounded-2xl px-4 py-2.5 bg-amber-50 border border-amber-300 text-amber-950 text-xs sm:text-sm font-extrabold">
-          👑 管理員檢視中：已自動顯示「🔒 項目」、「🔒 數量」及每筆紀錄的「✏️ 修改」與「🗑️ 刪除」按鈕。
+          👑 管理員檢視中：已展開「🔒 項目」、「🔒 數量」及每筆紀錄的「✏️ 修改」與「🗑️ 刪除」按鈕（員工視角完全看不到這些內容）。
         </div>
 
         <!-- 多條件篩選列 -->
@@ -611,7 +610,7 @@
                 <th class="py-3 px-3.5 whitespace-nowrap">登記日期</th>
                 <th class="py-3 px-3 whitespace-nowrap">人員</th>
                 <th class="py-3 px-3 whitespace-nowrap">分類</th>
-                <th class="py-3 px-3 text-center whitespace-nowrap">方向</th>
+                <th class="py-3 px-3 text-center whitespace-nowrap">性質</th>
                 <th class="py-3 px-3 text-right whitespace-nowrap">重量 (KG)</th>
                 <th class="py-3 px-3 text-center whitespace-nowrap">庫存影響</th>
                 <th class="admin-only-col hidden py-3 px-3 bg-amber-50 text-amber-900 whitespace-nowrap">🔒 項目</th>
@@ -636,7 +635,7 @@
     </section>
 
     <!-- ===============================================================
-         分頁 3：📅 每月結算成績單
+         分頁 3：📅 每月結算存檔
          =============================================================== -->
     <section id="panelArchives" class="hidden space-y-6">
 
@@ -646,8 +645,8 @@
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white text-xl flex items-center justify-center shrink-0">🧾</div>
             <div>
-              <h2 class="text-lg sm:text-xl font-black text-slate-900">📅 執行本月／指定月份結算</h2>
-              <p class="text-xs sm:text-sm font-semibold text-slate-500">可選擇保留明細或精簡瘦身，全部累計皆會自動整合且絕不重複計算</p>
+              <h2 class="text-lg sm:text-xl font-black text-slate-900">執行本月／指定月份結算</h2>
+              <p class="text-xs sm:text-sm font-semibold text-slate-500">可保留明細存總表，或自動下載備份後清空瘦身；全部累計皆自動整合且絕不重複計算</p>
             </div>
           </div>
           <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200 self-start sm:self-auto">
@@ -681,7 +680,7 @@
               <p class="mt-1 text-xl sm:text-2xl font-black text-orange-700 tabular-nums"><span id="prevTrashKg">0</span> <span class="text-xs">KG</span></p>
             </div>
             <div class="rounded-2xl bg-teal-50 border border-teal-200 p-3.5">
-              <p class="text-xs font-extrabold text-teal-800">📉 淨庫存變化</p>
+              <p class="text-xs font-extrabold text-teal-800">⚖️ 進貨 − 出貨 ＝ 結果</p>
               <p id="prevNetKg" class="mt-1 text-xl sm:text-2xl font-black text-teal-700 tabular-nums">0 KG</p>
             </div>
           </div>
@@ -705,7 +704,7 @@
 
           <div>
             <label for="closingNoteInput" class="block text-xs font-extrabold text-slate-600 mb-1">月結成績單備註（選填）</label>
-            <input type="text" id="closingNoteInput" maxlength="80" placeholder="例如：11月順利出清舊庫存，全員辛苦了！" autocomplete="off" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 focus:bg-white focus:border-sky-400 focus:outline-none text-sm font-bold text-slate-800" />
+            <input type="text" id="closingNoteInput" maxlength="80" placeholder="例如：11月達成進貨1:出貨2降成本目標，大家辛苦了！" autocomplete="off" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 focus:bg-white focus:border-sky-400 focus:outline-none text-sm font-bold text-slate-800" />
           </div>
         </div>
 
@@ -721,9 +720,9 @@
 
           <button type="button" id="closeClearDetailsBtn" class="p-4 rounded-2xl border-2 border-orange-300 bg-orange-50/70 hover:bg-orange-100/80 active:scale-[0.99] text-left transition cursor-pointer space-y-1">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-sm sm:text-base font-black text-orange-950">🧹 存下月結總表＋自動下載當月備份表格＋清空當月明細瘦身</span>
+              <span class="text-sm sm:text-base font-black text-orange-950">🧹 存下月結總表＋自動下載備份表格＋清空明細瘦身</span>
             </div>
-            <p class="text-xs font-semibold text-orange-900/80">先幫您下載該月完整表格備份，再清空該月零碎明細（歷月成績單與全員戰績永久保留）。</p>
+            <p class="text-xs font-semibold text-orange-900/80">先幫您下載該月 Excel 備份，再清空該月零碎明細（歷月成績單與全員戰績永久保留）。</p>
           </button>
         </div>
       </div>
@@ -735,7 +734,7 @@
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-500 text-white text-xl flex items-center justify-center shrink-0">📅</div>
             <div>
               <h2 class="text-lg sm:text-xl font-black text-slate-900">每月結算成績單</h2>
-              <p class="text-xs sm:text-sm font-semibold text-slate-500">團隊每個月共同努力的降庫存里程碑</p>
+              <p class="text-xs sm:text-sm font-semibold text-slate-500">團隊每個月達成「進貨 1 : 出貨 2」的降成本紀錄</p>
             </div>
           </div>
           <button type="button" id="exportArchivesCsvBtn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm transition cursor-pointer">
@@ -750,15 +749,15 @@
             <p class="mt-1 text-xl sm:text-2xl font-black text-slate-900 tabular-nums"><span id="archStatMonths">0</span> <span class="text-xs font-bold text-slate-500">個月</span></p>
           </div>
           <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5">
-            <p class="text-xs font-extrabold text-emerald-800">達標月數</p>
+            <p class="text-xs font-extrabold text-emerald-800">1:2 達標月數</p>
             <p class="mt-1 text-xl sm:text-2xl font-black text-emerald-700 tabular-nums"><span id="archStatAchieved">0</span> <span class="text-xs font-bold text-emerald-600">個月</span></p>
           </div>
           <div class="rounded-2xl bg-sky-50 border border-sky-200 p-3.5">
-            <p class="text-xs font-extrabold text-sky-800">累計減少 (KG)</p>
+            <p class="text-xs font-extrabold text-sky-800">累計出貨＋排垃圾</p>
             <p class="mt-1 text-xl sm:text-2xl font-black text-sky-700 tabular-nums"><span id="archStatReduced">0</span> <span class="text-xs font-bold text-sky-600">KG</span></p>
           </div>
           <div class="rounded-2xl bg-teal-50 border border-teal-200 p-3.5">
-            <p class="text-xs font-extrabold text-teal-800">累計淨降庫存 (KG)</p>
+            <p class="text-xs font-extrabold text-teal-800">累計淨降庫存</p>
             <p class="mt-1 text-xl sm:text-2xl font-black text-teal-700 tabular-nums"><span id="archStatNetDrop">0</span> <span class="text-xs font-bold text-teal-600">KG</span></p>
           </div>
         </div>
@@ -772,9 +771,10 @@
                 <th class="py-3 px-3 text-right whitespace-nowrap">總進貨</th>
                 <th class="py-3 px-3 text-right whitespace-nowrap">總出貨</th>
                 <th class="py-3 px-3 text-right whitespace-nowrap">總排除垃圾</th>
-                <th class="py-3 px-3 text-right whitespace-nowrap">總減少量</th>
-                <th class="py-3 px-3 text-right whitespace-nowrap">淨變化</th>
-                <th class="py-3 px-3 text-center whitespace-nowrap">2:1 達標結果</th>
+                <th class="py-3 px-3 text-right whitespace-nowrap">出貨含排垃圾</th>
+                <th class="py-3 px-3 text-right whitespace-nowrap">進貨−出貨結果</th>
+                <th class="py-3 px-3 text-center whitespace-nowrap">進貨:出貨比</th>
+                <th class="py-3 px-3 text-center whitespace-nowrap">1:2 達標</th>
                 <th class="py-3 px-3 whitespace-nowrap">當月冠軍</th>
                 <th class="py-3 px-3">備註</th>
                 <th class="admin-only-col hidden py-3 px-3.5 text-right bg-amber-50 text-amber-900 whitespace-nowrap">操作</th>
@@ -797,8 +797,8 @@
 
     <!-- 頁尾 -->
     <footer class="text-center text-xs text-slate-400 font-semibold pt-2 space-y-1">
-      <p>全員降庫存動起來！KG 戰情看板與流水帳（單人更新覆蓋版）</p>
-      <p>若手機畫面停留在舊數字，請點擊頁面上方的「🔄 抓最新進度」按鈕即可更新</p>
+      <p>全員降庫存動起來！KG 戰情看板與流水帳（1:2 降成本防呆修正版）</p>
+      <p>如果手機畫面還停留在舊數字，請點網頁上方的「🔄 抓最新進度」按鈕即可馬上更新</p>
     </footer>
   </main>
 
@@ -821,7 +821,7 @@
         <div>
           <label for="loginPasswordInput" class="block text-xs font-extrabold text-slate-700 mb-1.5">請輸入管理員密碼</label>
           <input type="password" id="loginPasswordInput" placeholder="輸入密碼..." autocomplete="off" class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-lg font-black tracking-widest text-center" />
-          <p class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-2 text-center">💡 預設密碼為 8888（登入後可至設定修改）</p>
+          <p class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mt-2 text-center">💡 預設密碼為 8888（登入後可至管理員設定修改）</p>
           <p id="loginErrorMsg" class="hidden text-xs font-extrabold text-rose-600 mt-2 text-center"></p>
         </div>
         <div class="flex gap-2.5">
@@ -873,7 +873,7 @@
   </div>
 
   <!-- =================================================================
-       彈窗 3：管理員設定
+       彈窗 3：⚙️ 管理員設定
        ================================================================= -->
   <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/55 backdrop-blur-xs">
     <div class="bg-white rounded-3xl w-full max-w-xl max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-5">
@@ -882,17 +882,28 @@
           <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 text-xl flex items-center justify-center">⚙️</span>
           <div>
             <h3 class="text-lg font-black text-slate-900">管理員設定</h3>
-            <p class="text-xs font-semibold text-slate-500">管理密碼、下載檔名、資料備份檔與維護工具</p>
+            <p class="text-xs font-semibold text-slate-500">管理密碼、下載檔名、備份還原與資料防呆修正工具</p>
           </div>
         </div>
         <button type="button" data-close-modal="settingsModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
       </div>
 
-      <!-- 1. 下載新版網頁檔名設定 -->
+      <!-- 1. 一鍵修正誤按負數的出貨／垃圾紀錄 -->
+      <div class="bg-amber-50/80 p-4 rounded-2xl border-2 border-amber-300 space-y-2.5">
+        <h4 class="text-sm font-black text-amber-950">🔧 自動修正誤按負數的出貨／垃圾紀錄</h4>
+        <p class="text-xs font-semibold text-amber-900/90 leading-relaxed">
+          如果您匯入了舊版備份檔，或先前在出貨／排除垃圾時誤按成減號（變成負數出貨），點下面這顆按鈕就會自動把所有「負數／沖銷的出貨與排除垃圾」一次翻正成正常降庫存紀錄！
+        </p>
+        <button type="button" id="autoFixNegativeOutBtn" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white text-xs sm:text-sm font-black shadow-sm transition cursor-pointer">
+          🔧 自動修正誤按負數的出貨／垃圾紀錄
+        </button>
+      </div>
+
+      <!-- 2. 下載新版網頁檔名設定 -->
       <div class="bg-sky-50/70 p-4 rounded-2xl border border-sky-200 space-y-3">
         <h4 class="text-sm font-black text-sky-950">📦 新版網頁檔名稱設定</h4>
         <p class="text-xs font-semibold text-sky-900/80 leading-relaxed">
-          平常會自動沿用目前網址的檔案名稱，您也可以在這裡自訂下載檔名（例如 <span class="font-black">index.html</span> 或 <span class="font-black">kg.html</span>），方便每次覆蓋上傳。
+          預設下載檔名為 <span class="font-black">index.html</span>（或自動沿用目前網址檔名），您也可在此改為您習慣覆蓋上傳的檔名。
         </p>
         <form id="filenameForm" class="flex flex-col sm:flex-row gap-2">
           <input type="text" id="exportFilenameInput" maxlength="60" placeholder="index.html" autocomplete="off" class="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-sky-300 text-sm font-extrabold text-slate-800" />
@@ -901,40 +912,40 @@
         <p id="filenameMsg" class="hidden text-xs font-extrabold"></p>
       </div>
 
-      <!-- 2. 修改管理員密碼 -->
+      <!-- 3. 修改管理員密碼 -->
       <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
         <h4 class="text-sm font-black text-slate-900">🔑 修改管理員密碼</h4>
         <form id="changePasswordForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <input type="password" id="currentPwdInput" placeholder="目前密碼" autocomplete="off" class="px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-bold" />
           <input type="password" id="newPwdInput" placeholder="新密碼（至少4碼）" autocomplete="off" class="px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-bold" />
-          <button type="submit" class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-black cursor-pointer">更新密碼</button>
+          <button type="submit" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-sm font-black cursor-pointer">更新密碼</button>
         </form>
         <p id="passwordMsg" class="hidden text-xs font-extrabold"></p>
       </div>
 
-      <!-- 3. 資料備份檔下載與還原 -->
+      <!-- 4. 完整備份檔下載與匯入還原（完全相容舊版備份檔） -->
       <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-3">
-        <h4 class="text-sm font-black text-emerald-950">💾 資料備份檔管理</h4>
+        <h4 class="text-sm font-black text-emerald-950">💾 完整備份檔管理（相容舊版備份檔）</h4>
         <p class="text-xs font-semibold text-emerald-900/80 leading-relaxed">
-          可額外下載一份純資料備份檔留存在電腦裡；日後若需搬家或還原，直接匯入該檔案即可。
+          可隨時下載一份完整資料備份檔（.json）留存，或把之前舊版網頁下載的備份檔直接匯入這份新版網頁中。
         </p>
         <div class="flex flex-col sm:flex-row gap-2.5">
           <button type="button" id="downloadBackupBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black flex items-center justify-center gap-1.5 cursor-pointer">
-            <span>📥</span><span>下載資料備份檔</span>
+            <span>📥</span><span>下載完整備份檔</span>
           </button>
           <label class="flex-1 py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 text-emerald-900 border-2 border-emerald-300 text-sm font-black flex items-center justify-center gap-1.5 cursor-pointer">
-            <span>📤</span><span>匯入資料備份檔</span>
+            <span>📤</span><span>匯入備份檔還原</span>
             <input type="file" id="restoreBackupInput" accept=".json,.txt" class="hidden" />
           </label>
         </div>
       </div>
 
-      <!-- 4. 快速清理與還原操作 -->
+      <!-- 5. 帳本清理與還原操作 -->
       <div class="bg-rose-50/60 p-4 rounded-2xl border border-rose-200 space-y-3">
-        <h4 class="text-sm font-black text-rose-950">🧹 帳本維護工具</h4>
+        <h4 class="text-sm font-black text-rose-950">🧹 帳本清理工具</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <button type="button" id="clearSampleDataBtn" class="py-2.5 px-4 rounded-xl bg-white hover:bg-rose-50 border-2 border-rose-300 text-rose-700 text-xs sm:text-sm font-black transition cursor-pointer">
-            🗑️ 清除範例資料
+            🗑️ 清空範例資料
           </button>
           <button type="button" id="discardDraftBtn" class="py-2.5 px-4 rounded-xl bg-white hover:bg-amber-50 border-2 border-amber-300 text-amber-900 text-xs sm:text-sm font-black transition cursor-pointer">
             ↩️ 放棄未存檔修改
@@ -959,7 +970,7 @@
           <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 text-xl flex items-center justify-center">✏️</span>
           <div>
             <h3 class="text-lg font-black text-slate-900">修改紀錄</h3>
-            <p class="text-xs font-semibold text-slate-500">儲存後所有看板與排行都會立刻重新計算</p>
+            <p class="text-xs font-semibold text-slate-500">儲存後看板、進貨出貨比與排行榜都會立刻重新計算</p>
           </div>
         </div>
         <button type="button" data-close-modal="editRecordModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
@@ -977,26 +988,27 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label for="editCategorySelect" class="block text-xs font-extrabold text-slate-700 mb-1">分類</label>
-            <select id="editCategorySelect" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-bold">
+            <label for="editTypeSelect" class="block text-xs font-extrabold text-slate-700 mb-1">分類</label>
+            <select id="editTypeSelect" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-bold">
               <option value="in">📦 進貨</option>
               <option value="out">🚚 出貨</option>
               <option value="trash">🗑️ 排除垃圾</option>
             </select>
           </div>
           <div>
-            <label for="editDirectionSelect" class="block text-xs font-extrabold text-slate-700 mb-1">方向</label>
-            <select id="editDirectionSelect" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-bold">
-              <option value="1">＋ 正數</option>
-              <option value="-1">－ 負數（扣回更正）</option>
-            </select>
-          </div>
-          <div>
-            <label for="editKgInput" class="block text-xs font-extrabold text-slate-700 mb-1">重量 (KG)</label>
+            <label for="editKgInput" class="block text-xs font-extrabold text-slate-700 mb-1">重量 (KG，請填正數)</label>
             <input type="number" id="editKgInput" step="any" min="0.01" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-black tabular-nums" />
           </div>
+        </div>
+
+        <div>
+          <label for="editReversalSelect" class="block text-xs font-extrabold text-slate-700 mb-1">紀錄性質（防呆確認）</label>
+          <select id="editReversalSelect" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-bold">
+            <option value="false">✅ 正常登記（進貨入庫／出貨或排垃圾降庫存）</option>
+            <option value="true">↩️ 誤植扣回／退貨沖銷加回（反向扣除該分類數量）</option>
+          </select>
         </div>
 
         <div class="rounded-2xl bg-amber-50/80 border border-amber-200 p-3.5 space-y-3">
@@ -1028,7 +1040,7 @@
   </div>
 
   <!-- =================================================================
-       彈窗 5：通用確認對話框（完全取代瀏覽器原生提示窗）
+       彈窗 5：通用確認對話框（完全取代瀏覽器原生視窗）
        ================================================================= -->
   <div id="confirmModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-slate-900/55 backdrop-blur-xs">
     <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-slate-200 space-y-4">
@@ -1039,7 +1051,7 @@
           <p id="confirmSubtitle" class="text-xs font-semibold text-slate-500"></p>
         </div>
       </div>
-      <div id="confirmBody" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-700 space-y-1"></div>
+      <div id="confirmBody" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-700 space-y-1.5"></div>
       <div id="confirmWarning" class="hidden p-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-xs sm:text-sm font-extrabold text-orange-900"></div>
       <div class="flex gap-2.5">
         <button type="button" id="confirmCancelBtn" class="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold cursor-pointer">先不要</button>
@@ -1049,16 +1061,15 @@
   </div>
 
   <!-- =================================================================
-       主程式邏輯（完全自給自足・無外部資料庫依賴）
+       主程式邏輯（完全單檔獨立運作・內建帳本・一鍵打包覆蓋）
        ================================================================= -->
   <script>
     // =================================================================
-    // 1. 優先擷取最乾淨的初始網頁快照（在任何畫面渲染前執行，確保下載檔永遠是乾淨的員工唯讀視角）
+    // 1. 最優先擷取乾淨初始網頁快照（確保下載的新版網頁永遠以員工唯讀視角啟動）
     // =================================================================
     const PRISTINE_HTML = (function captureCleanSnapshot() {
       try {
         const clone = document.documentElement.cloneNode(true);
-        // 移除執行期自動注入的樣式標籤，保持下載的新版網頁檔精簡乾淨
         clone.querySelectorAll('head style').forEach(function (styleNode) {
           styleNode.remove();
         });
@@ -1069,10 +1080,10 @@
     })();
 
     // =================================================================
-    // 2. 常數與基本工具函式
+    // 2. 常數設定與工具函式
     // =================================================================
-    const DRAFT_STORAGE_KEY = 'kg_inventory_admin_draft_v1';
-    const KG_PRESETS = [1, 10, 25, 50, 100, 500, 1000];
+    const DRAFT_STORAGE_KEY = 'kg_inventory_1to2_admin_draft_v2';
+    const KG_PRESETS = [10, 50, 100, 500, 1000, 5000, 10000, 20000];
     const AVATAR_EMOJIS = ['🧑‍🔧', '👩‍💼', '💪', '🧢', '🚀', '🔥', '🍀', '🎯', '🦁', '🐱', '⭐', '🛠️'];
     const MEMBER_STYLES = [
       { active: 'bg-sky-600 text-white border-sky-700', idle: 'bg-sky-50 text-sky-900 border-sky-200 hover:bg-sky-100', bar: 'bg-sky-500' },
@@ -1085,21 +1096,28 @@
       { active: 'bg-orange-500 text-white border-orange-600', idle: 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100', bar: 'bg-orange-500' }
     ];
 
-    const CATEGORY_META = {
-      in:    { label: '進貨',     emoji: '📦', badge: 'bg-emerald-100 text-emerald-800 border border-emerald-200', floatCls: 'text-emerald-600' },
-      out:   { label: '出貨',     emoji: '🚚', badge: 'bg-blue-100 text-blue-800 border border-blue-200',          floatCls: 'text-blue-600' },
-      trash: { label: '排除垃圾', emoji: '🗑️', badge: 'bg-orange-100 text-orange-800 border border-orange-200',    floatCls: 'text-orange-600' }
+    const TYPE_META = {
+      in:    { label: '進貨',     emoji: '📦', badge: 'bg-emerald-100 text-emerald-800 border border-emerald-200', floatCls: 'text-emerald-600', revLabel: '誤植扣回' },
+      out:   { label: '出貨',     emoji: '🚚', badge: 'bg-blue-100 text-blue-800 border border-blue-200',          floatCls: 'text-blue-600',    revLabel: '退貨加回' },
+      trash: { label: '排除垃圾', emoji: '🗑️', badge: 'bg-orange-100 text-orange-800 border border-orange-200',    floatCls: 'text-orange-600',  revLabel: '誤植加回' }
     };
 
     const $ = (id) => document.getElementById(id);
 
-    // 精準處理小數點兩位，避免浮點數誤差
+    // 精準處理到小數點後兩位，避免浮點數誤差
     function round2(val) {
       return Math.round((Number(val || 0) + Number.EPSILON) * 100) / 100;
     }
 
     function formatKg(val) {
       return round2(val).toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    function formatSignedKg(val) {
+      const n = round2(val);
+      if (n > 0) return `+${formatKg(n)}`;
+      if (n < 0) return `-${formatKg(Math.abs(n))}`;
+      return '0';
     }
 
     function escapeText(str) {
@@ -1155,8 +1173,38 @@
     }
 
     // =================================================================
-    // 3. 資料標準化與內建資料讀取
+    // 3. 資料標準化（同時相容新版 type/isReversal 與舊版 category/direction）
     // =================================================================
+    function normalizeRecord(raw, fallbackMemberName) {
+      const rawType = raw.type || raw.category || 'in';
+      const type = ['in', 'out', 'trash'].includes(rawType) ? rawType : 'in';
+
+      const rawKgNum = Number(raw.kg);
+      const safeKg = isNaN(rawKgNum) ? 0 : round2(Math.abs(rawKgNum));
+
+      // 判斷是否為沖銷/退貨：相容新版 isReversal 與舊版 direction='-' / direction=-1 / 負數 kg
+      let isReversal = false;
+      if (typeof raw.isReversal === 'boolean') {
+        isReversal = raw.isReversal;
+      } else if (raw.direction === '-' || Number(raw.direction) < 0 || rawKgNum < 0) {
+        isReversal = true;
+      }
+
+      return {
+        id: String(raw.id || makeId('rec')),
+        date: String(raw.date || getTodayISO()).slice(0, 10),
+        member: String(raw.member || fallbackMemberName || '小明').trim(),
+        type,
+        kg: safeKg,
+        isReversal,
+        item: String(raw.item || '').trim(),
+        qty: String(raw.qty || '').trim(),
+        note: String(raw.note || '').trim(),
+        createdAt: String(raw.createdAt || formatNowMinute()),
+        isSample: Boolean(raw.isSample)
+      };
+    }
+
     function normalizeData(raw) {
       const fallbackMembers = [
         { name: '小明', icon: '🧑‍🔧' },
@@ -1173,19 +1221,7 @@
         : fallbackMembers;
 
       const records = Array.isArray(safe.records)
-        ? safe.records.map((r) => ({
-            id: String(r.id || makeId('rec')),
-            date: String(r.date || getTodayISO()).slice(0, 10),
-            member: String(r.member || members[0].name).trim(),
-            category: ['in', 'out', 'trash'].includes(r.category) ? r.category : 'in',
-            direction: Number(r.direction) < 0 ? -1 : 1,
-            kg: round2(Math.abs(Number(r.kg) || 0)),
-            item: String(r.item || '').trim(),
-            qty: String(r.qty || '').trim(),
-            note: String(r.note || '').trim(),
-            createdAt: String(r.createdAt || formatNowMinute()),
-            isSample: Boolean(r.isSample)
-          }))
+        ? safe.records.map((r) => normalizeRecord(r, members[0].name))
         : [];
 
       records.sort((a, b) => {
@@ -1196,34 +1232,34 @@
       const monthlyArchives = Array.isArray(safe.monthlyArchives)
         ? safe.monthlyArchives
             .map((a) => {
-              const inKg = round2(a.inKg);
-              const outKg = round2(a.outKg);
-              const trashKg = round2(a.trashKg);
-              const reduceKg = round2(a.reduceKg !== undefined ? a.reduceKg : outKg + trashKg);
-              const netKg = round2(a.netKg !== undefined ? a.netKg : inKg - reduceKg);
+              const totalIn = round2(a.totalIn !== undefined ? a.totalIn : a.inKg);
+              const totalOut = round2(a.totalOut !== undefined ? a.totalOut : a.outKg);
+              const totalTrash = round2(a.totalTrash !== undefined ? a.totalTrash : a.trashKg);
+              const totalReduction = round2(a.totalReduction !== undefined ? a.totalReduction : (a.reduceKg !== undefined ? a.reduceKg : totalOut + totalTrash));
+              const netChange = round2(a.netChange !== undefined ? a.netChange : (a.netKg !== undefined ? a.netKg : totalIn - totalReduction));
               const memberBreakdown = {};
               if (a.memberBreakdown && typeof a.memberBreakdown === 'object') {
                 Object.entries(a.memberBreakdown).forEach(([k, v]) => {
                   if (typeof v === 'number') {
-                    memberBreakdown[k] = { inKg: 0, outKg: round2(v), trashKg: 0, reduceKg: round2(v) };
+                    memberBreakdown[k] = { totalIn: 0, totalOut: round2(v), totalTrash: 0, totalReduction: round2(v) };
                   } else if (v && typeof v === 'object') {
-                    memberBreakdown[k] = {
-                      inKg: round2(v.inKg),
-                      outKg: round2(v.outKg),
-                      trashKg: round2(v.trashKg),
-                      reduceKg: round2(v.reduceKg !== undefined ? v.reduceKg : round2(v.outKg) + round2(v.trashKg))
-                    };
+                    const mIn = round2(v.totalIn !== undefined ? v.totalIn : v.inKg);
+                    const mOut = round2(v.totalOut !== undefined ? v.totalOut : v.outKg);
+                    const mTrash = round2(v.totalTrash !== undefined ? v.totalTrash : v.trashKg);
+                    const mRed = round2(v.totalReduction !== undefined ? v.totalReduction : (v.reduceKg !== undefined ? v.reduceKg : mOut + mTrash));
+                    memberBreakdown[k] = { totalIn: mIn, totalOut: mOut, totalTrash: mTrash, totalReduction: mRed };
                   }
                 });
               }
+              const metrics = computeMetrics(totalIn, totalOut, totalTrash);
               return {
                 month: String(a.month || '').slice(0, 7),
-                inKg,
-                outKg,
-                trashKg,
-                reduceKg,
-                netKg,
-                achieved: Boolean(a.achieved),
+                totalIn,
+                totalOut,
+                totalTrash,
+                totalReduction,
+                netChange,
+                achieved: a.achieved !== undefined ? Boolean(a.achieved) : metrics.achieved,
                 champion: String(a.champion || '尚無紀錄'),
                 note: String(a.note || '').trim(),
                 detailsCleared: Boolean(a.detailsCleared),
@@ -1257,10 +1293,10 @@
       }
     }
 
-    // 內建在目前網頁檔裡的正式資料（員工視角永遠以這份為準）
+    // 內建在網頁裡的正式帳本（員工唯讀視角永遠讀取這份，不受瀏覽器舊快取干擾）
     let embeddedData = readEmbeddedData();
 
-    // 應用程式即時狀態
+    // 執行期狀態
     let dataState = deepClone(embeddedData);
     const ui = {
       isAdmin: false,
@@ -1269,12 +1305,12 @@
       scope: 'today',
       selectedDate: getTodayISO(),
       selectedMember: dataState.members[0] ? dataState.members[0].name : '小明',
-      stepKg: 50,
+      stepKg: 1000,
       soundOn: true,
       newMemberEmoji: AVATAR_EMOJIS[0],
       editingRecordId: null,
       closingMonth: getCurrentMonthYM(),
-      // 流水帳篩選
+      // 流水帳篩選條件
       filterCat: 'all',
       filterMember: 'all',
       filterStart: '',
@@ -1285,7 +1321,7 @@
     let pendingConfirmHandler = null;
 
     // =================================================================
-    // 4. 管理員暫存紀錄讀寫（僅限管理員使用，員工視角完全忽略）
+    // 4. 管理員暫存機制（僅限管理員，員工視角完全忽略）
     // =================================================================
     function readLocalDraft() {
       try {
@@ -1320,7 +1356,7 @@
     }
 
     // =================================================================
-    // 5. 輕快點擊提示音（Web Audio API）與浮動通知
+    // 5. 輕快提示音與浮動通知
     // =================================================================
     let soundCtx = null;
     function playSound(kind) {
@@ -1347,7 +1383,7 @@
       } catch (err) {}
     }
 
-    function showToast(message, tone = 'info', duration = 3000) {
+    function showToast(message, tone = 'info', duration = 3200) {
       const container = $('toastContainer');
       const toneMap = {
         info: 'bg-slate-900/95 text-white border-slate-700',
@@ -1369,9 +1405,9 @@
       }, duration);
     }
 
-    function spawnFloatFeedback(category, signedKg) {
-      const anchor = $(`floatAnchor-${category}`);
-      const sumEl = $(`cardSum-${category}`);
+    function spawnFloatFeedback(type, kg, isReversal) {
+      const anchor = $(`floatAnchor-${type}`);
+      const sumEl = $(`cardSum-${type}`);
       if (sumEl) {
         sumEl.classList.remove('animate-popScale');
         void sumEl.offsetWidth;
@@ -1379,68 +1415,100 @@
       }
       if (anchor) {
         const badge = document.createElement('span');
-        badge.textContent = `${signedKg > 0 ? '+' : '-'}${formatKg(Math.abs(signedKg))} KG`;
-        badge.className = `absolute left-0 top-0 text-lg sm:text-xl font-black whitespace-nowrap animate-floatUp ${signedKg > 0 ? CATEGORY_META[category].floatCls : 'text-slate-500'}`;
+        badge.textContent = `${isReversal ? '↩️ -' : '+'}${formatKg(kg)} KG`;
+        badge.className = `absolute left-0 top-0 text-lg sm:text-xl font-black whitespace-nowrap animate-floatUp ${isReversal ? 'text-rose-500' : TYPE_META[type].floatCls}`;
         anchor.appendChild(badge);
         setTimeout(() => badge.remove(), 880);
       }
     }
 
     // =================================================================
-    // 6. 核心統計與 2:1 目標計算（聰明整合精簡月結、絕不重複計算）
+    // 6. 核心統計公式（嚴格遵守：進貨 1 : 出貨 2 與 進貨 − 出貨 ＝ 結果）
     // =================================================================
-    function computeMetrics(inRaw, outRaw, trashRaw) {
-      const inKg = round2(inRaw);
-      const outKg = round2(outRaw);
-      const trashKg = round2(trashRaw);
-      const reduceKg = round2(outKg + trashKg);
-      const netKg = round2(inKg - reduceKg);
-      const targetKg = round2(Math.max(0, inKg * 2));
-      const gapKg = round2(Math.max(0, targetKg - reduceKg));
-      const achieved = (inKg > 0 && reduceKg >= targetKg) || (inKg <= 0 && reduceKg > 0);
-      const pct = inKg > 0
-        ? Math.min(100, Math.max(0, Math.round((reduceKg / (inKg * 2)) * 100)))
-        : reduceKg > 0 ? 100 : 0;
-      return { inKg, outKg, trashKg, reduceKg, netKg, targetKg, gapKg, achieved, pct };
+    function getRecordSignedContribution(rec) {
+      return round2(rec.isReversal ? -rec.kg : rec.kg);
     }
 
+    // 單筆紀錄對庫存的影響：
+    // 正常進貨 -> +kg（庫存增加）；進貨誤植扣回 -> -kg（庫存減少）
+    // 正常出貨／排垃圾 -> -kg（庫存減少）；出貨退貨／排垃圾誤植加回 -> +kg（庫存增加）
     function getRecordInventoryImpact(rec) {
-      const signed = round2(rec.direction * rec.kg);
-      return rec.category === 'in' ? signed : round2(-signed);
+      const contrib = getRecordSignedContribution(rec);
+      return rec.type === 'in' ? contrib : round2(-contrib);
+    }
+
+    function computeMetrics(inRaw, outRaw, trashRaw) {
+      const totalIn = round2(inRaw);
+      const totalOut = round2(outRaw);
+      const totalTrash = round2(trashRaw);
+      const totalReduction = round2(totalOut + totalTrash);
+      const netChange = round2(totalIn - totalReduction); // 負數 = 庫存淨減少、成功降庫存；正數 = 庫存淨增加
+      const targetOutKg = round2(Math.max(0, totalIn * 2));
+      const gapKg = round2(Math.max(0, targetOutKg - totalReduction));
+
+      let ratioText = '0 : 0';
+      let ratioValue = 0;
+      if (totalIn > 0) {
+        ratioValue = Math.max(0, totalReduction) / totalIn;
+        ratioText = `1 : ${ratioValue.toFixed(2)}`;
+      } else if (totalReduction > 0) {
+        ratioValue = Infinity;
+        ratioText = '0 : 1（純去化）';
+      }
+
+      const pct = totalIn > 0
+        ? Math.min(100, Math.max(0, Math.round((totalReduction / (totalIn * 2)) * 100)))
+        : totalReduction > 0 ? 100 : 0;
+
+      const achieved = (totalIn > 0 && totalReduction >= totalIn * 2) || (totalIn <= 0 && totalReduction > 0);
+
+      return {
+        totalIn,
+        totalOut,
+        totalTrash,
+        totalReduction,
+        netChange,
+        targetOutKg,
+        gapKg,
+        ratioText,
+        ratioValue,
+        pct,
+        achieved
+      };
     }
 
     function buildMemberBreakdown(records, clearedArchives = []) {
       const map = new Map();
       const ensure = (name) => {
         if (!map.has(name)) {
-          map.set(name, { name, inKg: 0, outKg: 0, trashKg: 0, reduceKg: 0 });
+          map.set(name, { name, totalIn: 0, totalOut: 0, totalTrash: 0, totalReduction: 0 });
         }
         return map.get(name);
       };
 
-      // 先累加已清空明細的歷史月結成員戰績
+      // 先計入已瘦身清空明細的歷史結算月成員戰績
       clearedArchives.forEach((arch) => {
         Object.entries(arch.memberBreakdown || {}).forEach(([name, stats]) => {
           const item = ensure(name);
-          item.inKg = round2(item.inKg + (Number(stats.inKg) || 0));
-          item.outKg = round2(item.outKg + (Number(stats.outKg) || 0));
-          item.trashKg = round2(item.trashKg + (Number(stats.trashKg) || 0));
-          item.reduceKg = round2(item.reduceKg + (Number(stats.reduceKg) || 0));
+          item.totalIn = round2(item.totalIn + (Number(stats.totalIn) || 0));
+          item.totalOut = round2(item.totalOut + (Number(stats.totalOut) || 0));
+          item.totalTrash = round2(item.totalTrash + (Number(stats.totalTrash) || 0));
+          item.totalReduction = round2(item.totalReduction + (Number(stats.totalReduction) || 0));
         });
       });
 
-      // 再累加目前留存的每日流水帳
+      // 再計入目前留存的每日流水帳
       records.forEach((rec) => {
         const item = ensure(rec.member);
-        const signed = round2(rec.direction * rec.kg);
-        if (rec.category === 'in') {
-          item.inKg = round2(item.inKg + signed);
-        } else if (rec.category === 'out') {
-          item.outKg = round2(item.outKg + signed);
-          item.reduceKg = round2(item.reduceKg + signed);
-        } else if (rec.category === 'trash') {
-          item.trashKg = round2(item.trashKg + signed);
-          item.reduceKg = round2(item.reduceKg + signed);
+        const contrib = getRecordSignedContribution(rec);
+        if (rec.type === 'in') {
+          item.totalIn = round2(item.totalIn + contrib);
+        } else if (rec.type === 'out') {
+          item.totalOut = round2(item.totalOut + contrib);
+          item.totalReduction = round2(item.totalReduction + contrib);
+        } else if (rec.type === 'trash') {
+          item.totalTrash = round2(item.totalTrash + contrib);
+          item.totalReduction = round2(item.totalReduction + contrib);
         }
       });
 
@@ -1452,39 +1520,38 @@
       const existingArchive = dataState.monthlyArchives.find((a) => a.month === ym) || null;
       const clearedList = existingArchive && existingArchive.detailsCleared ? [existingArchive] : [];
 
-      let inKg = 0;
-      let outKg = 0;
-      let trashKg = 0;
+      let totalIn = 0;
+      let totalOut = 0;
+      let totalTrash = 0;
 
-      // 若該月之前已清空明細，先納入已封存總數，再加上後續補登的新明細（不重複計算）
       if (clearedList.length > 0) {
-        inKg += existingArchive.inKg;
-        outKg += existingArchive.outKg;
-        trashKg += existingArchive.trashKg;
+        totalIn += existingArchive.totalIn;
+        totalOut += existingArchive.totalOut;
+        totalTrash += existingArchive.totalTrash;
       }
 
       liveRecords.forEach((r) => {
-        const signed = round2(r.direction * r.kg);
-        if (r.category === 'in') inKg += signed;
-        else if (r.category === 'out') outKg += signed;
-        else if (r.category === 'trash') trashKg += signed;
+        const contrib = getRecordSignedContribution(r);
+        if (r.type === 'in') totalIn += contrib;
+        else if (r.type === 'out') totalOut += contrib;
+        else if (r.type === 'trash') totalTrash += contrib;
       });
 
-      const metrics = computeMetrics(inKg, outKg, trashKg);
+      const metrics = computeMetrics(totalIn, totalOut, totalTrash);
       const memberMap = buildMemberBreakdown(liveRecords, clearedList);
-      const sortedMembers = Array.from(memberMap.values()).sort((a, b) => b.reduceKg - a.reduceKg);
+      const sortedMembers = Array.from(memberMap.values()).sort((a, b) => b.totalReduction - a.totalReduction);
       const championObj = sortedMembers[0];
-      const championLabel = championObj && championObj.reduceKg > 0
-        ? `${championObj.name} (${formatKg(championObj.reduceKg)} KG)`
+      const championLabel = championObj && championObj.totalReduction > 0
+        ? `${championObj.name} (${formatKg(championObj.totalReduction)} KG)`
         : '尚無紀錄';
 
       const memberBreakdownObj = {};
       memberMap.forEach((v, k) => {
         memberBreakdownObj[k] = {
-          inKg: round2(v.inKg),
-          outKg: round2(v.outKg),
-          trashKg: round2(v.trashKg),
-          reduceKg: round2(v.reduceKg)
+          totalIn: round2(v.totalIn),
+          totalOut: round2(v.totalOut),
+          totalTrash: round2(v.totalTrash),
+          totalReduction: round2(v.totalReduction)
         };
       });
 
@@ -1503,15 +1570,15 @@
       const today = getTodayISO();
       if (scope === 'today') {
         const todayRecs = dataState.records.filter((r) => r.date === today);
-        let inKg = 0, outKg = 0, trashKg = 0;
+        let totalIn = 0, totalOut = 0, totalTrash = 0;
         todayRecs.forEach((r) => {
-          const s = round2(r.direction * r.kg);
-          if (r.category === 'in') inKg += s;
-          else if (r.category === 'out') outKg += s;
-          else trashKg += s;
+          const c = getRecordSignedContribution(r);
+          if (r.type === 'in') totalIn += c;
+          else if (r.type === 'out') totalOut += c;
+          else totalTrash += c;
         });
         return {
-          metrics: computeMetrics(inKg, outKg, trashKg),
+          metrics: computeMetrics(totalIn, totalOut, totalTrash),
           memberMap: buildMemberBreakdown(todayRecs),
           liveCount: todayRecs.length,
           clearedMonthsCount: 0
@@ -1528,23 +1595,23 @@
         };
       }
 
-      // 全部累計：結合目前留存的每日流水帳 + 所有 detailsCleared === true 的歷史結算月（絕不重複計算 detailsCleared === false）
+      // 全部累計：結合留存明細 + 已清空明細的歷史月結（絕不重複計算未清空月份）
       const clearedArchives = dataState.monthlyArchives.filter((a) => a.detailsCleared === true);
-      let inKg = 0, outKg = 0, trashKg = 0;
+      let totalIn = 0, totalOut = 0, totalTrash = 0;
       dataState.records.forEach((r) => {
-        const s = round2(r.direction * r.kg);
-        if (r.category === 'in') inKg += s;
-        else if (r.category === 'out') outKg += s;
-        else trashKg += s;
+        const c = getRecordSignedContribution(r);
+        if (r.type === 'in') totalIn += c;
+        else if (r.type === 'out') totalOut += c;
+        else totalTrash += c;
       });
       clearedArchives.forEach((a) => {
-        inKg += a.inKg;
-        outKg += a.outKg;
-        trashKg += a.trashKg;
+        totalIn += a.totalIn;
+        totalOut += a.totalOut;
+        totalTrash += a.totalTrash;
       });
 
       return {
-        metrics: computeMetrics(inKg, outKg, trashKg),
+        metrics: computeMetrics(totalIn, totalOut, totalTrash),
         memberMap: buildMemberBreakdown(dataState.records, clearedArchives),
         liveCount: dataState.records.length,
         clearedMonthsCount: clearedArchives.length
@@ -1557,7 +1624,7 @@
     }
 
     // =================================================================
-    // 7. 一鍵自我打包下載新版網頁檔 & 強制抓最新進度
+    // 7. 一鍵打包下載新版 HTML 與強制抓最新進度
     // =================================================================
     function detectDownloadFilename() {
       if (dataState.customFilenameSet && dataState.exportFilename) {
@@ -1594,10 +1661,8 @@
       dataState.lastUpdated = updatedAt;
       dataState.dataVersion = newVersion;
 
-      // 安全序列化並跳脫可能中斷腳本標籤的字串
       const safeSerialized = JSON.stringify(dataState, null, 2).replace(/<\/script/gi, '<\\/script');
 
-      // 精準替換乾淨快照中內建資料區塊的內容
       const openMarker = '<script id="embedded-ledger-data" type="application/json">';
       const closeMarker = '</' + 'script>';
       const startIdx = PRISTINE_HTML.indexOf(openMarker);
@@ -1613,23 +1678,21 @@
         '\n' + safeSerialized + '\n  ' +
         PRISTINE_HTML.slice(endIdx);
 
-      // 觸發瀏覽器下載新版網頁檔
       triggerBlobDownload(finalHtml, filename, 'text/html;charset=utf-8');
 
-      // 同步更新記憶體中的內建版本，並清除未存檔暫存旗標
       embeddedData = deepClone(dataState);
       ui.hasUnsavedChanges = false;
       clearLocalDraft();
 
       playSound('win');
       renderAll();
-      showToast(`📦 已下載新版網頁檔「${filename}」！請將此檔案覆蓋上傳，全公司就會同步看到最新進度`, 'success', 4800);
+      showToast(`📦 已下載新版網頁檔「${filename}」！覆蓋上傳後全公司與手機都會立即同步`, 'success', 4800);
     }
 
     function handleRefreshLatestProgress() {
       const proto = window.location.protocol;
       if (proto === 'blob:' || proto === 'about:' || proto === 'data:') {
-        showToast('💡 目前在預覽視窗中；等您把新版網頁檔上傳到網站後，員工用手機或 LINE 點這顆按鈕就會強制抓取您剛上傳的最新進度！', 'sky', 4800);
+        showToast('💡 目前在預覽視窗中；將網頁檔上傳到網路後，員工用手機或 LINE 點這顆按鈕就會自動避開舊快取、強制抓取最新進度！', 'sky', 4800);
         return;
       }
       try {
@@ -1643,7 +1706,7 @@
     }
 
     // =================================================================
-    // 8. 表格 (.csv) 與資料備份檔匯出／還原
+    // 8. 表格 (.csv) 與完整備份檔 (.json) 匯出／還原
     // =================================================================
     function buildExcelCsv(headers, rows) {
       const quoteCell = (val) => `"${String(val ?? '').replaceAll('"', '""')}"`;
@@ -1656,18 +1719,20 @@
         return;
       }
       const headers = includeAdminCols
-        ? ['登記日期', '人員', '分類', '方向', '重量(KG)', '庫存影響', '項目(管理員)', '數量(管理員)', '備註']
-        : ['登記日期', '人員', '分類', '方向', '重量(KG)', '庫存影響', '備註'];
+        ? ['登記日期', '人員', '分類', '紀錄性質', '重量(KG)', '庫存影響', '項目(管理員)', '數量(管理員)', '備註']
+        : ['登記日期', '人員', '分類', '紀錄性質', '重量(KG)', '庫存影響', '備註'];
 
       const rows = recordList.map((r) => {
+        const meta = TYPE_META[r.type];
         const impact = getRecordInventoryImpact(r);
-        const dirText = r.direction < 0 ? '-' : '+';
+        const signedVal = getRecordSignedContribution(r);
+        const kindLabel = r.isReversal ? meta.revLabel : '正常登記';
         const base = [
           formatSlashDate(r.date),
           r.member,
-          CATEGORY_META[r.category].label,
-          dirText,
-          round2(r.direction * r.kg),
+          meta.label,
+          kindLabel,
+          signedVal,
           impact < 0 ? '庫存 −' : '庫存 ＋'
         ];
         if (includeAdminCols) {
@@ -1679,7 +1744,7 @@
       });
 
       triggerBlobDownload(buildExcelCsv(headers, rows), filename, 'text/csv;charset=utf-8');
-      showToast(`📥 已匯出 ${recordList.length} 筆明細表格`, 'success');
+      showToast(`📥 已匯出 ${recordList.length} 筆流水帳表格`, 'success');
     }
 
     function exportArchivesToCsv() {
@@ -1687,31 +1752,35 @@
         showToast('目前還沒有已結算的月份可以匯出！', 'warn');
         return;
       }
-      const headers = ['結算月份', '總進貨(KG)', '總出貨(KG)', '總排除垃圾(KG)', '總減少量(KG)', '淨變化(KG)', '2:1達標結果', '當月冠軍', '明細狀態', '備註'];
-      const rows = dataState.monthlyArchives.map((a) => [
-        formatMonthZh(a.month),
-        a.inKg,
-        a.outKg,
-        a.trashKg,
-        a.reduceKg,
-        a.netKg,
-        a.achieved ? '已達標' : '未達標',
-        a.champion,
-        a.detailsCleared ? '已清空明細瘦身' : '保留明細中',
-        a.note || ''
-      ]);
+      const headers = ['結算月份', '總進貨(KG)', '總出貨(KG)', '總排除垃圾(KG)', '出貨含排垃圾(KG)', '進貨減出貨結果(KG)', '進貨:出貨比', '1:2達標', '當月冠軍', '明細狀態', '備註'];
+      const rows = dataState.monthlyArchives.map((a) => {
+        const m = computeMetrics(a.totalIn, a.totalOut, a.totalTrash);
+        return [
+          formatMonthZh(a.month),
+          a.totalIn,
+          a.totalOut,
+          a.totalTrash,
+          a.totalReduction,
+          a.netChange,
+          m.ratioText,
+          a.achieved ? '已達標' : '未達標',
+          a.champion,
+          a.detailsCleared ? '已清空明細瘦身' : '保留明細中',
+          a.note || ''
+        ];
+      });
       triggerBlobDownload(buildExcelCsv(headers, rows), `歷月結算總表_${getTodayISO()}.csv`, 'text/csv;charset=utf-8');
       showToast(`📥 已匯出 ${dataState.monthlyArchives.length} 個月的歷月總表`, 'success');
     }
 
     function downloadDataBackupFile() {
       const payload = {
-        title: '全員降庫存動起來_資料備份檔',
+        title: '全員降庫存動起來_1比2防呆版_完整備份檔',
         exportedAt: formatNowMinute(),
         data: dataState
       };
-      triggerBlobDownload(JSON.stringify(payload, null, 2), `降庫存資料備份檔_${getTodayISO()}.json`, 'application/json;charset=utf-8');
-      showToast('📥 已下載資料備份檔！', 'success');
+      triggerBlobDownload(JSON.stringify(payload, null, 2), `降庫存完整備份檔_${getTodayISO()}.json`, 'application/json;charset=utf-8');
+      showToast('📥 已下載完整備份檔 (.json)！', 'success');
     }
 
     function importDataBackupFile(file) {
@@ -1726,12 +1795,17 @@
             return;
           }
           const restored = normalizeData(candidate);
+          const suspectNegOut = restored.records.filter((r) => (r.type === 'out' || r.type === 'trash') && r.isReversal).length;
+
           openConfirmModal({
             icon: '📤',
-            title: '確定匯入這份資料備份檔？',
-            subtitle: '匯入後會覆蓋目前畫面上的帳本內容',
-            bodyHtml: `<div>👥 人員：<b>${restored.members.length} 位</b>　📋 流水帳：<b>${restored.records.length} 筆</b>　📅 歷月總表：<b>${restored.monthlyArchives.length} 個月</b></div>`,
-            warning: '提醒：還原完成後，別忘了點「📦 存檔並下載新版網頁」並覆蓋上傳，才會同步更新給大家。',
+            title: '確定匯入這份備份檔？',
+            subtitle: '匯入後會取代目前畫面上的帳本內容（完整相容舊版備份）',
+            bodyHtml: `
+              <div>👥 人員：<b>${restored.members.length} 位</b>　📋 流水帳：<b>${restored.records.length} 筆</b>　📅 歷月總表：<b>${restored.monthlyArchives.length} 個月</b></div>
+              ${suspectNegOut > 0 ? `<div class="text-rose-700 mt-1">🔎 偵測到其中有 <b>${suspectNegOut} 筆</b> 負數／沖銷的出貨或垃圾紀錄，匯入後可用「🔧 一鍵自動翻正」修正！</div>` : ''}
+            `,
+            warning: '提醒：還原後別忘了按「📦 存檔並下載新版網頁」並覆蓋上傳，全公司才會看到更新後的內容。',
             okText: '確認匯入還原',
             okBtnClass: 'bg-emerald-600 hover:bg-emerald-700',
             onConfirm: () => {
@@ -1743,18 +1817,55 @@
               closeModal('settingsModal');
               renderAll();
               playSound('win');
-              showToast('✅ 資料備份檔已還原！請記得下載新版網頁檔覆蓋上傳', 'success', 4000);
+              showToast('✅ 備份檔已還原完成！', 'success', 3800);
             }
           });
         } catch (err) {
-          showToast('無法讀取這份檔案，請確認選擇的是本系統下載的資料備份檔', 'error');
+          showToast('無法讀取這份檔案，請確認選擇的是本系統下載的 JSON 備份檔', 'error');
         }
       };
       reader.readAsText(file);
     }
 
     // =================================================================
-    // 9. 管理員各項業務動作
+    // 9. 一鍵自動修正誤按負數的出貨／垃圾紀錄
+    // =================================================================
+    function triggerAutoFixNegativeOut() {
+      if (!ui.isAdmin) return;
+      const targets = dataState.records.filter((r) => (r.type === 'out' || r.type === 'trash') && r.isReversal);
+      if (targets.length === 0) {
+        showToast('✅ 檢查完成！目前沒有任何負數／沖銷的出貨或排除垃圾紀錄需要修正', 'success', 3200);
+        return;
+      }
+
+      const sumKg = round2(targets.reduce((acc, r) => acc + r.kg, 0));
+      openConfirmModal({
+        icon: '🔧',
+        title: `發現 ${targets.length} 筆負數／沖銷的出貨或垃圾紀錄`,
+        subtitle: '是否將這些紀錄全部一鍵翻正為「正常登記（降庫存）」？',
+        bodyHtml: `
+          <div>受影響筆數：<b>${targets.length} 筆</b>（合計重量 <b>${formatKg(sumKg)} KG</b>）</div>
+          <div class="text-xs text-slate-600 mt-1">翻正後，這些重量都會正確計入「出貨數量（含排除垃圾）」，讓「進貨 − 出貨 ＝ 結果」與「進貨 1 : 出貨 2」比例馬上恢復正確！</div>
+        `,
+        okText: '🔧 立即全部翻正',
+        okBtnClass: 'bg-amber-500 hover:bg-amber-600',
+        onConfirm: () => {
+          dataState.records.forEach((r) => {
+            if ((r.type === 'out' || r.type === 'trash') && r.isReversal) {
+              r.isReversal = false;
+            }
+          });
+          persistAdminDraft();
+          closeModal('settingsModal');
+          renderAll();
+          playSound('win');
+          showToast(`🎉 已成功翻正 ${targets.length} 筆出貨／垃圾紀錄！看板數字已立即更正`, 'success', 4000);
+        }
+      });
+    }
+
+    // =================================================================
+    // 10. 管理員登入／登出、防呆登記、修改與月結
     // =================================================================
     function handleAdminLoginSubmit(event) {
       event.preventDefault();
@@ -1782,13 +1893,12 @@
       if (hasMatchingDraft) {
         dataState = normalizeData(draft.data);
         ui.hasUnsavedChanges = true;
-        showToast('👑 管理員已登入，並已載入您上次尚未打包下載的暫存紀錄', 'warn', 4200);
+        showToast('👑 管理員已登入，並已載入上次尚未下載打包的暫存紀錄', 'warn', 4200);
       } else {
-        // 若目前網頁版本已比舊暫存新，自動丟棄舊暫存改用最新網頁資料
         if (draft) clearLocalDraft();
         dataState = deepClone(embeddedData);
         ui.hasUnsavedChanges = false;
-        showToast('👑 管理員登入成功！已開啟記帳、修改與隱藏細項檢視', 'success');
+        showToast('👑 管理員登入成功！已開啟防呆記帳、修改與隱藏細項檢視', 'success');
       }
 
       if (!dataState.members.some((m) => m.name === ui.selectedMember)) {
@@ -1802,23 +1912,27 @@
     function handleAdminLogout() {
       ui.isAdmin = false;
       ['membersModal', 'settingsModal', 'editRecordModal'].forEach(closeModal);
-
-      // 切換回員工唯讀視角時，一律強制載入網頁檔內的正式資料（忽略任何暫存紀錄）
       dataState = deepClone(embeddedData);
       renderAll();
-      showToast('👁️ 已切換回員工唯讀視角（顯示目前網頁已發佈的正式進度）', 'info');
+      showToast('👁️ 已切回員工唯讀視角（顯示目前網頁已發佈的最新進度）', 'info');
     }
 
-    function addQuickRecord(category, direction) {
-      if (!ui.isAdmin) return;
+    function readValidatedStepKg() {
       const rawKg = parseFloat($('kgValueInput').value);
       if (isNaN(rawKg) || rawKg <= 0) {
         showToast('請輸入大於 0 的重量 (KG)！', 'warn');
         $('kgValueInput').focus();
-        return;
+        return null;
       }
-
       ui.stepKg = round2(rawKg);
+      return ui.stepKg;
+    }
+
+    function commitQuickRecord(type, isReversal) {
+      if (!ui.isAdmin) return;
+      const kg = readValidatedStepKg();
+      if (!kg) return;
+
       const recordDate = $('entryDateInput').value || getTodayISO();
       const member = dataState.members.find((m) => m.name === ui.selectedMember) || dataState.members[0];
       const memberName = member ? member.name : '夥伴';
@@ -1826,10 +1940,10 @@
 
       let item = '';
       let qty = '';
-      if (category === 'out') {
+      if (type === 'out') {
         item = $('outItemInput').value.trim();
         qty = $('outQtyInput').value.trim();
-      } else if (category === 'trash') {
+      } else if (type === 'trash') {
         item = $('trashItemInput').value.trim();
         qty = $('trashQtyInput').value.trim();
       }
@@ -1841,9 +1955,9 @@
         id: makeId('rec'),
         date: recordDate,
         member: memberName,
-        category,
-        direction: direction < 0 ? -1 : 1,
-        kg: ui.stepKg,
+        type,
+        kg,
+        isReversal: Boolean(isReversal),
         item,
         qty,
         note,
@@ -1857,11 +1971,10 @@
         return String(b.createdAt).localeCompare(String(a.createdAt));
       });
 
-      // 送出後清空細項與備註欄，避免誤帶入下一筆
-      if (category === 'out') {
+      if (type === 'out') {
         $('outItemInput').value = '';
         $('outQtyInput').value = '';
-      } else if (category === 'trash') {
+      } else if (type === 'trash') {
         $('trashItemInput').value = '';
         $('trashQtyInput').value = '';
       }
@@ -1871,23 +1984,50 @@
       renderAll();
 
       const afterAchieved = computeScopeAggregation(ui.scope).metrics.achieved;
-      const signedKg = round2(newRecord.direction * newRecord.kg);
-      spawnFloatFeedback(category, signedKg);
+      spawnFloatFeedback(type, kg, isReversal);
 
-      const kgLabel = `${signedKg > 0 ? '+' : '-'}${formatKg(newRecord.kg)} KG`;
-      if (!beforeAchieved && afterAchieved) {
-        playSound('win');
-        showToast(`🎉 太棒了！達成 2:1 降庫存目標！${memberIcon} ${memberName} ${CATEGORY_META[category].label} ${kgLabel}`, 'success', 3600);
-      } else if (signedKg < 0) {
+      const meta = TYPE_META[type];
+      if (isReversal) {
         playSound('minus');
-        showToast(`${memberIcon} ${memberName} 已更正 ${CATEGORY_META[category].label} ${kgLabel}`, 'warn');
-      } else if (category === 'in') {
+        showToast(`↩️ 已登記「${meta.label}・${meta.revLabel}」${formatKg(kg)} KG（${memberIcon} ${memberName}）`, 'warn');
+      } else if (!beforeAchieved && afterAchieved) {
+        playSound('win');
+        showToast(`🎉 太棒了！達成 進貨 1 : 出貨 2 降成本目標！${memberIcon} ${memberName} 登記${meta.label} ${formatKg(kg)} KG`, 'success', 3800);
+      } else if (type === 'in') {
         playSound('add');
-        showToast(`${memberIcon} ${memberName} 登記進貨 ${kgLabel}`, 'info');
+        showToast(`📦 ${memberIcon} ${memberName} 登記進貨 +${formatKg(kg)} KG（入庫）`, 'info');
       } else {
         playSound('reduce');
-        showToast(`${memberIcon} ${memberName} ${CATEGORY_META[category].label} ${kgLabel}！庫存持續下降 🔥`, 'success');
+        showToast(`${meta.emoji} ${memberIcon} ${memberName} 登記${meta.label} ${formatKg(kg)} KG！庫存順利下降 🔥`, 'success');
       }
+    }
+
+    function requestReversalRecord(type) {
+      if (!ui.isAdmin) return;
+      const kg = readValidatedStepKg();
+      if (!kg) return;
+
+      const meta = TYPE_META[type];
+      const explainMap = {
+        in: `這筆操作會將「進貨數量」扣除 ${formatKg(kg)} KG（庫存會減少），僅用於先前多記進貨時的誤植更正。`,
+        out: `這筆操作會將「出貨數量」扣回 ${formatKg(kg)} KG（庫存會加回），僅用於客戶退貨或沖銷多記的出貨。`,
+        trash: `這筆操作會將「排除垃圾數量」扣回 ${formatKg(kg)} KG（庫存會加回），僅用於誤植排除垃圾時的更正。`
+      };
+
+      openConfirmModal({
+        icon: '↩️',
+        title: `確認要登記「${meta.label}・${meta.revLabel}」嗎？`,
+        subtitle: '這是反向沖銷／扣回動作，系統特別為您再次確認避免按錯',
+        bodyHtml: `
+          <div>分類：<b>${meta.emoji} ${meta.label}（${meta.revLabel}）</b></div>
+          <div>扣回重量：<b>${formatKg(kg)} KG</b></div>
+          <div class="text-xs text-slate-600 mt-1">${explainMap[type]}</div>
+        `,
+        warning: type !== 'in' ? '💡 提醒：如果是正常出貨或正常清垃圾要降低庫存，請按「先不要」，改按上方的彩色大按鈕喔！' : '',
+        okText: `確認登記${meta.revLabel}`,
+        okBtnClass: 'bg-amber-600 hover:bg-amber-700',
+        onConfirm: () => commitQuickRecord(type, true)
+      });
     }
 
     function saveEditedRecord(event) {
@@ -1898,8 +2038,8 @@
 
       const dateVal = $('editDateInput').value;
       const memberVal = $('editMemberSelect').value;
-      const catVal = $('editCategorySelect').value;
-      const dirVal = Number($('editDirectionSelect').value) < 0 ? -1 : 1;
+      const typeVal = $('editTypeSelect').value;
+      const isReversalVal = $('editReversalSelect').value === 'true';
       const kgVal = parseFloat($('editKgInput').value);
 
       if (!dateVal || isNaN(kgVal) || kgVal <= 0) {
@@ -1912,9 +2052,9 @@
         ...dataState.records[idx],
         date: dateVal,
         member: memberVal,
-        category: catVal,
-        direction: dirVal,
+        type: typeVal,
         kg: round2(Math.abs(kgVal)),
+        isReversal: isReversalVal,
         item: $('editItemInput').value.trim(),
         qty: $('editQtyInput').value.trim(),
         note: $('editNoteInput').value.trim(),
@@ -1930,7 +2070,7 @@
       closeModal('editRecordModal');
       renderAll();
       playSound('win');
-      showToast('✅ 紀錄已修改完成，看板數字已重新計算', 'success');
+      showToast('✅ 紀錄已修改完成，看板與進貨出貨比已立刻更新', 'success');
     }
 
     function executeMonthlyClosing(clearDetails) {
@@ -1950,16 +2090,16 @@
 
       openConfirmModal({
         icon: clearDetails ? '🧹' : '💾',
-        title: clearDetails ? `確定結算 ${formatMonthZh(ym)} 並清空當月明細？` : `確定儲存 ${formatMonthZh(ym)} 月結總表？`,
-        subtitle: clearDetails ? '會先自動下載當月完整備份表格，再瘦身清空零碎明細' : '存下月結成績單並完整保留當月每日流水帳',
+        title: clearDetails ? `確定結算 ${formatMonthZh(ym)} 並清空明細瘦身？` : `確定存下 ${formatMonthZh(ym)} 月結總表？`,
+        subtitle: clearDetails ? '會先自動下載當月完整備份表格，再清空該月零碎明細' : '存下月結成績單並完整保留當月每日流水帳',
         bodyHtml: `
-          <div>📦 總進貨：<b>${formatKg(agg.metrics.inKg)} KG</b></div>
-          <div>🚚 總出貨：<b>${formatKg(agg.metrics.outKg)} KG</b>　🗑️ 排除垃圾：<b>${formatKg(agg.metrics.trashKg)} KG</b></div>
-          <div>📉 總減少：<b>${formatKg(agg.metrics.reduceKg)} KG</b>　🎯 2:1 結果：<b>${agg.metrics.achieved ? '已達標' : '未達標'}</b></div>
+          <div>📦 總進貨：<b>${formatKg(agg.metrics.totalIn)} KG</b></div>
+          <div>🚚 總出貨：<b>${formatKg(agg.metrics.totalOut)} KG</b>　🗑️ 排除垃圾：<b>${formatKg(agg.metrics.totalTrash)} KG</b></div>
+          <div>⚖️ 進貨 − 出貨 ＝ <b>${formatSignedKg(agg.metrics.netChange)} KG</b>　🔥 比例：<b>${agg.metrics.ratioText}</b></div>
           <div>🥇 當月冠軍：<b>${escapeText(agg.championLabel)}</b></div>
         `,
         warning: clearDetails
-          ? `⚠️ 確認後會先自動下載 ${agg.liveRecords.length} 筆明細備份表格（含管理員項目與數量），接著清空該月明細；歷月總表與全部累計戰績皆會完整保留。`
+          ? `⚠️ 確認後會先自動下載 ${agg.liveRecords.length} 筆 Excel 明細備份（含管理員項目與數量），再清空該月零碎明細；歷月總表與全員累計戰績都會永久保留。`
           : '',
         okText: clearDetails ? '下載備份並清空結算' : '確認存下月結總表',
         okBtnClass: clearDetails ? 'bg-orange-500 hover:bg-orange-600' : 'bg-emerald-600 hover:bg-emerald-700',
@@ -1970,11 +2110,11 @@
 
           const archiveItem = {
             month: ym,
-            inKg: agg.metrics.inKg,
-            outKg: agg.metrics.outKg,
-            trashKg: agg.metrics.trashKg,
-            reduceKg: agg.metrics.reduceKg,
-            netKg: agg.metrics.netKg,
+            totalIn: agg.metrics.totalIn,
+            totalOut: agg.metrics.totalOut,
+            totalTrash: agg.metrics.totalTrash,
+            totalReduction: agg.metrics.totalReduction,
+            netChange: agg.metrics.netChange,
             achieved: agg.metrics.achieved,
             champion: agg.championLabel,
             note: closingNote,
@@ -2008,7 +2148,7 @@
     }
 
     // =================================================================
-    // 10. 畫面渲染函式群
+    // 11. 畫面渲染函式群
     // =================================================================
     function renderAll() {
       renderHeaderAndTabs();
@@ -2023,7 +2163,6 @@
     function renderHeaderAndTabs() {
       $('headerLastUpdated').textContent = dataState.lastUpdated || '--';
 
-      // 管理員登入 / 登出按鈕樣式
       const authBtn = $('adminAuthBtn');
       if (ui.isAdmin) {
         authBtn.className = 'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 active:scale-95 text-amber-950 border border-amber-500 text-xs sm:text-sm font-black shadow-sm transition cursor-pointer';
@@ -2035,7 +2174,6 @@
         $('adminAuthText').textContent = '管理員登入';
       }
 
-      // 分頁按鈕樣式與數量標記
       document.querySelectorAll('.main-tab-btn').forEach((btn) => {
         const isCurrent = btn.dataset.tab === ui.activeTab;
         btn.className = `main-tab-btn py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm md:text-base font-black flex items-center justify-center gap-1.5 transition cursor-pointer ${
@@ -2064,15 +2202,18 @@
         el.classList.toggle('hidden', !isAd);
       });
 
-      // 頂部橘色未打包提醒條
+      // 管理員模式下，若偵測到有負數／沖銷的出貨或排除垃圾紀錄，主動跳出友善修正條
+      const negOutCount = dataState.records.filter((r) => (r.type === 'out' || r.type === 'trash') && r.isReversal).length;
+      $('negativeOutCountText').textContent = negOutCount;
+      $('negativeOutAlertBanner').classList.toggle('hidden', !(isAd && negOutCount > 0));
+
       const showReminder = isAd && ui.hasUnsavedChanges;
       $('unsavedReminderBar').classList.toggle('hidden', !showReminder);
 
-      // 工具列同步徽章
       const badge = $('adminSyncBadge');
       if (ui.hasUnsavedChanges) {
         badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black border bg-orange-500 text-white border-orange-600 animate-pulse';
-        badge.textContent = '⚠️ 有未打包的新變動';
+        badge.textContent = '⚠️ 有未下載覆蓋的新變動';
       } else {
         badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black border bg-emerald-100 text-emerald-900 border-emerald-300';
         badge.textContent = '✅ 已與目前網頁一致';
@@ -2087,13 +2228,12 @@
       const isBackdate = ui.selectedDate !== today;
       $('backToTodayBtn').classList.toggle('hidden', !isBackdate);
       $('backdateHint').textContent = isBackdate
-        ? `📌 補登模式：接下來點按鈕會登記在 ${formatSlashDate(ui.selectedDate)}（週${getWeekdayZh(ui.selectedDate)}）`
+        ? `📌 補登模式：接下來會登記在 ${formatSlashDate(ui.selectedDate)}（週${getWeekdayZh(ui.selectedDate)}）`
         : '預設今天，更改日期即可補登過去紀錄';
       $('backdateHint').className = isBackdate
         ? 'text-[11px] font-black text-amber-700'
         : 'text-[11px] font-bold text-slate-500';
 
-      // 確保選中人員存在
       const activeMemberObj = dataState.members.find((m) => m.name === ui.selectedMember) || dataState.members[0];
       if (activeMemberObj) {
         ui.selectedMember = activeMemberObj.name;
@@ -2120,15 +2260,15 @@
         chipWrap.appendChild(btn);
       });
 
-      // KG 快捷鈕
+      // KG 快選按鈕（含大公斤數 5000 / 10000 / 20000）
       const presetWrap = $('kgPresetsContainer');
       presetWrap.innerHTML = '';
       KG_PRESETS.forEach((kg) => {
         const selected = round2(ui.stepKg) === kg;
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.textContent = `${kg} KG`;
-        btn.className = `px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black border-2 transition active:scale-95 tabular-nums cursor-pointer ${
+        btn.textContent = `${kg.toLocaleString('zh-TW')} KG`;
+        btn.className = `px-3 py-2 rounded-xl text-xs sm:text-sm font-black border-2 transition active:scale-95 tabular-nums cursor-pointer ${
           selected
             ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
             : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 hover:border-emerald-300'
@@ -2142,16 +2282,15 @@
         presetWrap.appendChild(btn);
       });
 
-      const kgText = ui.stepKg > 0 ? `${formatKg(ui.stepKg)} KG` : '-- KG';
-      document.querySelectorAll('.action-kg-label').forEach((el) => {
-        el.textContent = kgText;
+      const kgDisplay = ui.stepKg > 0 ? formatKg(ui.stepKg) : '--';
+      document.querySelectorAll('.action-kg-num').forEach((el) => {
+        el.textContent = kgDisplay;
       });
 
-      // 更新三張卡的區間累計數字
       const m = computeScopeAggregation(ui.scope).metrics;
-      $('cardSum-in').textContent = `${formatKg(m.inKg)} KG`;
-      $('cardSum-out').textContent = `${formatKg(m.outKg)} KG`;
-      $('cardSum-trash').textContent = `${formatKg(m.trashKg)} KG`;
+      $('cardSum-in').textContent = `${formatKg(m.totalIn)} KG`;
+      $('cardSum-out').textContent = `${formatKg(m.totalOut)} KG`;
+      $('cardSum-trash').textContent = `${formatKg(m.totalTrash)} KG`;
     }
 
     function renderDashboardKpis() {
@@ -2174,65 +2313,65 @@
         $('dashboardScopeDesc').textContent = `統計全部累計：含目前明細 ${agg.liveCount} 筆${agg.clearedMonthsCount > 0 ? ` ＋ 已瘦身結算 ${agg.clearedMonthsCount} 個月` : ''}`;
       }
 
-      $('kpiTotalReduced').textContent = formatKg(m.reduceKg);
-      $('kpiReducedBreakdown').textContent = `出貨 ${formatKg(m.outKg)} ＋ 垃圾 ${formatKg(m.trashKg)} KG`;
-      $('kpiTotalAdded').textContent = formatKg(m.inKg);
-      $('kpiAddedTarget').textContent = `達標 2:1 需減少 ${formatKg(m.targetKg)} KG`;
+      // 卡片 1：📦 進貨數量
+      $('kpiTotalIn').textContent = formatKg(m.totalIn);
+      $('kpiInSub').textContent = `達標 1:2 需出貨＋排垃圾 ${formatKg(m.targetOutKg)} KG`;
 
-      // 淨庫存變化卡片（負數綠色代表成功降庫存）
-      if (m.netKg < 0) {
-        $('kpiNetCard').className = 'rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/70 border-2 border-emerald-300 p-4 flex flex-col justify-between';
-        $('kpiNetTitle').className = 'text-xs font-extrabold text-emerald-800';
+      // 卡片 2：🚚 出貨數量（含排除垃圾）
+      $('kpiTotalReduction').textContent = formatKg(m.totalReduction);
+      $('kpiReductionSub').textContent = `出貨 ${formatKg(m.totalOut)} ＋ 垃圾 ${formatKg(m.totalTrash)} KG`;
+
+      // 卡片 3：⚖️ 進貨 − 出貨 ＝ 結果
+      const formulaPrefix = `${formatKg(m.totalIn)} − ${formatKg(m.totalReduction)} ＝ `;
+      if (m.netChange < 0) {
+        $('kpiNetCard').className = 'rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/75 border-2 border-emerald-400 p-4 flex flex-col justify-between';
+        $('kpiNetTitle').className = 'text-xs sm:text-sm font-black text-emerald-950';
         $('kpiNetIcon').textContent = '✅';
-        $('kpiNetValue').textContent = `-${formatKg(Math.abs(m.netKg))}`;
+        $('kpiNetValue').textContent = `-${formatKg(Math.abs(m.netChange))}`;
         $('kpiNetValue').className = 'text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums';
         $('kpiNetUnit').className = 'text-sm font-extrabold text-emerald-600';
-        $('kpiNetSub').textContent = `成功淨降庫存 ${formatKg(Math.abs(m.netKg))} KG`;
-        $('kpiNetSub').className = 'text-xs font-black text-emerald-700 mt-1.5';
-      } else if (m.netKg > 0) {
-        $('kpiNetCard').className = 'rounded-2xl bg-gradient-to-br from-rose-50 to-orange-100/70 border-2 border-rose-300 p-4 flex flex-col justify-between';
-        $('kpiNetTitle').className = 'text-xs font-extrabold text-rose-800';
+        $('kpiNetSub').textContent = `${formulaPrefix}庫存淨減少 ${formatKg(Math.abs(m.netChange))} KG`;
+        $('kpiNetSub').className = 'text-xs font-black text-emerald-800 mt-2';
+      } else if (m.netChange > 0) {
+        $('kpiNetCard').className = 'rounded-2xl bg-gradient-to-br from-rose-50 to-red-100/70 border-2 border-rose-300 p-4 flex flex-col justify-between';
+        $('kpiNetTitle').className = 'text-xs sm:text-sm font-black text-rose-950';
         $('kpiNetIcon').textContent = '⚠️';
-        $('kpiNetValue').textContent = `+${formatKg(m.netKg)}`;
+        $('kpiNetValue').textContent = `+${formatKg(m.netChange)}`;
         $('kpiNetValue').className = 'text-2xl sm:text-3xl font-black text-rose-600 tabular-nums';
         $('kpiNetUnit').className = 'text-sm font-extrabold text-rose-500';
-        $('kpiNetSub').textContent = `庫存淨增加 ${formatKg(m.netKg)} KG`;
-        $('kpiNetSub').className = 'text-xs font-black text-rose-600 mt-1.5';
+        $('kpiNetSub').textContent = `${formulaPrefix}庫存淨增加 ${formatKg(m.netChange)} KG`;
+        $('kpiNetSub').className = 'text-xs font-black text-rose-700 mt-2';
       } else {
         $('kpiNetCard').className = 'rounded-2xl bg-slate-50 border-2 border-slate-200 p-4 flex flex-col justify-between';
-        $('kpiNetTitle').className = 'text-xs font-extrabold text-slate-700';
+        $('kpiNetTitle').className = 'text-xs sm:text-sm font-black text-slate-800';
         $('kpiNetIcon').textContent = '⚖️';
         $('kpiNetValue').textContent = '0';
         $('kpiNetValue').className = 'text-2xl sm:text-3xl font-black text-slate-800 tabular-nums';
         $('kpiNetUnit').className = 'text-sm font-extrabold text-slate-600';
-        $('kpiNetSub').textContent = '目前庫存持平';
-        $('kpiNetSub').className = 'text-xs font-extrabold text-slate-600 mt-1.5';
+        $('kpiNetSub').textContent = `${formulaPrefix}庫存持平`;
+        $('kpiNetSub').className = 'text-xs font-extrabold text-slate-600 mt-2';
       }
 
-      // 目前減增比卡片
-      if (m.inKg > 0) {
-        const ratio = Math.max(0, m.reduceKg / m.inKg).toFixed(2);
-        $('kpiRatioValue').textContent = `${ratio} : 1`;
-        $('kpiRatioSub').textContent = m.achieved ? '🎉 已超越 2.00 : 1 目標！' : '目標 2.00 : 1，持續衝刺中';
-        $('kpiRatioCard').className = m.achieved
-          ? 'rounded-2xl bg-emerald-50 border-2 border-emerald-300 p-4 flex flex-col justify-between'
-          : 'rounded-2xl bg-amber-50/80 border-2 border-amber-200 p-4 flex flex-col justify-between';
-        $('kpiRatioValue').className = m.achieved
-          ? 'text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums'
-          : 'text-2xl sm:text-3xl font-black text-amber-800 tabular-nums';
-      } else if (m.reduceKg > 0) {
-        $('kpiRatioValue').textContent = '純減少';
-        $('kpiRatioSub').textContent = '零進貨且持續出清庫存 🎉';
-        $('kpiRatioCard').className = 'rounded-2xl bg-emerald-50 border-2 border-emerald-300 p-4 flex flex-col justify-between';
-        $('kpiRatioValue').className = 'text-2xl sm:text-3xl font-black text-emerald-700';
+      // 卡片 4：🔥 目前進貨 : 出貨比
+      $('kpiRatioValue').textContent = m.ratioText;
+      if (m.achieved) {
+        $('kpiRatioCard').className = 'rounded-2xl bg-gradient-to-br from-amber-50 via-yellow-50 to-emerald-50 border-2 border-amber-400 p-4 flex flex-col justify-between';
+        $('kpiRatioValue').className = 'text-2xl sm:text-3xl font-black text-emerald-700 tabular-nums';
+        $('kpiRatioSub').textContent = '🎉 已達成 1 : 2.00 降成本目標！';
+        $('kpiRatioSub').className = 'text-xs font-black text-emerald-800 mt-2';
+      } else if (m.totalIn > 0) {
+        $('kpiRatioCard').className = 'rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50/80 border-2 border-amber-300 p-4 flex flex-col justify-between';
+        $('kpiRatioValue').className = 'text-2xl sm:text-3xl font-black text-amber-800 tabular-nums';
+        $('kpiRatioSub').textContent = `目標 1 : 2.00（還差 ${formatKg(m.gapKg)} KG）`;
+        $('kpiRatioSub').className = 'text-xs font-extrabold text-amber-900/90 mt-2';
       } else {
-        $('kpiRatioValue').textContent = '0.00 : 1';
-        $('kpiRatioSub').textContent = '目標 2.00 : 1';
-        $('kpiRatioCard').className = 'rounded-2xl bg-slate-50 border-2 border-slate-200 p-4 flex flex-col justify-between';
-        $('kpiRatioValue').className = 'text-2xl sm:text-3xl font-black text-slate-700 tabular-nums';
+        $('kpiRatioCard').className = 'rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50/70 border-2 border-amber-200 p-4 flex flex-col justify-between';
+        $('kpiRatioValue').className = 'text-2xl sm:text-3xl font-black text-amber-800 tabular-nums';
+        $('kpiRatioSub').textContent = '目標 1 : 2.00（有效降低成本）';
+        $('kpiRatioSub').className = 'text-xs font-extrabold text-amber-900/80 mt-2';
       }
 
-      // 2:1 目標進度條與橫幅
+      // 進貨 1 : 出貨 2 目標進度條與橫幅
       $('goalProgressPct').textContent = `${m.pct}%`;
       $('goalProgressBar').style.width = `${m.pct}%`;
       $('goalAchievedPill').classList.toggle('hidden', !m.achieved);
@@ -2241,22 +2380,22 @@
         $('goalProgressBar').className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600';
         $('goalStatusBanner').className = 'rounded-2xl px-4 py-3.5 text-sm sm:text-base font-black flex items-center gap-2.5 bg-emerald-100/90 text-emerald-950 border-2 border-emerald-300';
         $('goalStatusIcon').textContent = '🎉';
-        const surplus = round2(m.reduceKg - m.targetKg);
-        $('goalStatusText').textContent = m.inKg > 0 && surplus > 0
-          ? `🎉 恭喜！已達成 2:1 降庫存目標！還超前多減少了 ${formatKg(surplus)} KG！`
-          : '🎉 恭喜！已達成 2:1 降庫存目標！';
-      } else if (m.inKg > 0) {
+        const surplus = round2(m.totalReduction - m.targetOutKg);
+        $('goalStatusText').textContent = m.totalIn > 0 && surplus > 0
+          ? `🎉 恭喜達標！已超越「進貨 1 : 出貨 2」降成本目標，還多出清了 ${formatKg(surplus)} KG！`
+          : '🎉 恭喜達標！已順利達成「進貨 1 : 出貨 2」有效降成本目標！';
+      } else if (m.totalIn > 0) {
         $('goalProgressBar').className = m.pct >= 50
           ? 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-amber-400 to-sky-500'
           : 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-orange-500 to-amber-400';
         $('goalStatusBanner').className = 'rounded-2xl px-4 py-3.5 text-sm sm:text-base font-black flex items-center gap-2.5 bg-amber-50 text-amber-950 border-2 border-amber-300';
         $('goalStatusIcon').textContent = '💪';
-        $('goalStatusText').innerHTML = `💪 加油！還需要再出貨或排除垃圾 <span class="text-rose-600 underline decoration-2 mx-0.5">${formatKg(m.gapKg)} KG</span> 就能達到 2:1 目標`;
+        $('goalStatusText').innerHTML = `💪 全員加油！還需要再出貨或排除垃圾 <span class="text-rose-600 underline decoration-2 mx-0.5">${formatKg(m.gapKg)} KG</span>，就能達成 1 : 2 降成本目標`;
       } else {
         $('goalProgressBar').className = 'h-full rounded-full transition-all duration-500 bg-slate-300';
         $('goalStatusBanner').className = 'rounded-2xl px-4 py-3.5 text-sm sm:text-base font-bold flex items-center gap-2.5 bg-slate-100 text-slate-700 border border-slate-200';
         $('goalStatusIcon').textContent = '🚀';
-        $('goalStatusText').textContent = '目前這段期間尚無紀錄，一起動起來把庫存降下去！';
+        $('goalStatusText').textContent = '這段期間還沒有紀錄喔，全員動起來一起降低庫存成本！';
       }
     }
 
@@ -2266,85 +2405,84 @@
 
       const agg = computeScopeAggregation(ui.scope);
       const m = agg.metrics;
-      $('leaderboardTotalKg').textContent = formatKg(m.reduceKg);
+      $('leaderboardTotalKg').textContent = formatKg(m.totalReduction);
 
-      if (m.reduceKg <= 0) {
+      if (m.totalReduction <= 0) {
         $('leaderboardCheerText').textContent = `${scopeName}還沒開張喔！出貨或排除垃圾就能搶下第一名！`;
       } else if (m.achieved) {
-        $('leaderboardCheerText').textContent = `🔥 太強了！${scopeName}全員合力減少 ${formatKg(m.reduceKg)} KG，順利達成 2:1 降庫存目標！`;
+        $('leaderboardCheerText').textContent = `🔥 太強了！${scopeName}全員合力去化 ${formatKg(m.totalReduction)} KG，達成進貨 1 : 出貨 2 目標！`;
       } else {
-        $('leaderboardCheerText').textContent = `💪 加油！${scopeName}已減少 ${formatKg(m.reduceKg)} KG，再衝 ${formatKg(m.gapKg)} KG 就達標！`;
+        $('leaderboardCheerText').textContent = `💪 加油！${scopeName}已去化 ${formatKg(m.totalReduction)} KG，再衝 ${formatKg(m.gapKg)} KG 就達標！`;
       }
 
-      // 合併現有名單與歷史出現過的成員
       const merged = new Map();
       dataState.members.forEach((mem, idx) => {
-        merged.set(mem.name, { name: mem.name, icon: mem.icon, colorIdx: idx, inKg: 0, outKg: 0, trashKg: 0, reduceKg: 0 });
+        merged.set(mem.name, { name: mem.name, icon: mem.icon, colorIdx: idx, totalIn: 0, totalOut: 0, totalTrash: 0, totalReduction: 0 });
       });
       agg.memberMap.forEach((stats, name) => {
         const existing = merged.get(name);
         if (existing) {
-          existing.inKg = stats.inKg;
-          existing.outKg = stats.outKg;
-          existing.trashKg = stats.trashKg;
-          existing.reduceKg = stats.reduceKg;
+          existing.totalIn = stats.totalIn;
+          existing.totalOut = stats.totalOut;
+          existing.totalTrash = stats.totalTrash;
+          existing.totalReduction = stats.totalReduction;
         } else {
           merged.set(name, {
             name,
             icon: '⭐',
             colorIdx: merged.size,
-            inKg: stats.inKg,
-            outKg: stats.outKg,
-            trashKg: stats.trashKg,
-            reduceKg: stats.reduceKg
+            totalIn: stats.totalIn,
+            totalOut: stats.totalOut,
+            totalTrash: stats.totalTrash,
+            totalReduction: stats.totalReduction
           });
         }
       });
 
-      const ranked = Array.from(merged.values()).sort((a, b) => b.reduceKg - a.reduceKg);
-      const maxReduced = Math.max(1, ...ranked.map((x) => Math.max(0, x.reduceKg)));
+      const ranked = Array.from(merged.values()).sort((a, b) => b.totalReduction - a.totalReduction);
+      const maxReduced = Math.max(1, ...ranked.map((x) => Math.max(0, x.totalReduction)));
       const medals = ['🥇', '🥈', '🥉'];
       const grid = $('leaderboardGrid');
       grid.innerHTML = '';
 
       ranked.forEach((person, idx) => {
-        const barPct = person.reduceKg > 0 ? Math.min(100, Math.round((person.reduceKg / maxReduced) * 100)) : 0;
+        const barPct = person.totalReduction > 0 ? Math.min(100, Math.round((person.totalReduction / maxReduced) * 100)) : 0;
         const barColor = MEMBER_STYLES[person.colorIdx % MEMBER_STYLES.length].bar;
-        const badgeTitle = person.reduceKg <= 0
+        const badgeTitle = person.totalReduction <= 0
           ? '蓄勢待發'
           : idx === 0
             ? '降庫存王牌'
             : idx === 1
-              ? '清倉先鋒'
+              ? '出貨先鋒'
               : idx === 2
-                ? '減量達人'
+                ? '去化達人'
                 : '穩定推手';
 
         const card = document.createElement('div');
         card.className = `p-4 rounded-2xl border-2 space-y-2.5 ${
-          idx === 0 && person.reduceKg > 0
+          idx === 0 && person.totalReduction > 0
             ? 'bg-gradient-to-br from-amber-50/90 to-yellow-50/40 border-amber-300 shadow-xs'
             : 'bg-slate-50/80 border-slate-200'
         }`;
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="text-lg font-black w-7 text-center shrink-0">${idx < 3 && person.reduceKg > 0 ? medals[idx] : `#${idx + 1}`}</span>
+              <span class="text-lg font-black w-7 text-center shrink-0">${idx < 3 && person.totalReduction > 0 ? medals[idx] : `#${idx + 1}`}</span>
               <span class="text-xl shrink-0">${escapeText(person.icon)}</span>
               <span class="font-black text-slate-900 truncate">${escapeText(person.name)}</span>
               <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-white border border-slate-200 text-slate-600 shrink-0">${badgeTitle}</span>
             </div>
             <div class="text-right shrink-0">
-              <span class="text-lg sm:text-xl font-black text-sky-700 tabular-nums">${formatKg(person.reduceKg)}</span>
-              <span class="text-xs font-extrabold text-sky-600"> KG</span>
+              <span class="text-lg sm:text-xl font-black text-blue-700 tabular-nums">${formatKg(person.totalReduction)}</span>
+              <span class="text-xs font-extrabold text-blue-600"> KG</span>
             </div>
           </div>
           <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
             <div class="h-full rounded-full transition-all duration-500 ${barColor}" style="width: ${barPct}%"></div>
           </div>
           <div class="flex flex-wrap justify-between text-xs font-bold text-slate-500 gap-1">
-            <span>🚚 出貨 ${formatKg(person.outKg)} KG ・ 🗑️ 垃圾 ${formatKg(person.trashKg)} KG</span>
-            <span>📦 進貨 ${formatKg(person.inKg)} KG</span>
+            <span>🚚 出貨 ${formatKg(person.totalOut)} KG ・ 🗑️ 垃圾 ${formatKg(person.totalTrash)} KG</span>
+            <span>📦 進貨 ${formatKg(person.totalIn)} KG</span>
           </div>
         `;
         grid.appendChild(card);
@@ -2354,15 +2492,15 @@
     function getFilteredRecords() {
       const kw = ui.filterKeyword.trim().toLowerCase();
       return dataState.records.filter((r) => {
-        if (ui.filterCat !== 'all' && r.category !== ui.filterCat) return false;
+        if (ui.filterCat !== 'all' && r.type !== ui.filterCat) return false;
         if (ui.filterMember !== 'all' && r.member !== ui.filterMember) return false;
         if (ui.filterStart && r.date < ui.filterStart) return false;
         if (ui.filterEnd && r.date > ui.filterEnd) return false;
         if (kw) {
-          // 嚴格隱私隔離：非管理員搜尋絕不比對 item 與 qty
+          // 嚴格隱私隔離：員工視角絕不搜尋 item 與 qty
           const searchPool = ui.isAdmin
-            ? `${r.date} ${r.member} ${CATEGORY_META[r.category].label} ${r.note} ${r.item} ${r.qty}`.toLowerCase()
-            : `${r.date} ${r.member} ${CATEGORY_META[r.category].label} ${r.note}`.toLowerCase();
+            ? `${r.date} ${r.member} ${TYPE_META[r.type].label} ${r.note} ${r.item} ${r.qty}`.toLowerCase()
+            : `${r.date} ${r.member} ${TYPE_META[r.type].label} ${r.note}`.toLowerCase();
           if (!searchPool.includes(kw)) return false;
         }
         return true;
@@ -2381,7 +2519,6 @@
         }`;
       });
 
-      // 更新人員下拉選單（包含歷史紀錄中出現過的人名）
       const memberSelect = $('filterMemberSelect');
       const allNames = new Set(dataState.members.map((m) => m.name));
       dataState.records.forEach((r) => allNames.add(r.member));
@@ -2406,14 +2543,13 @@
       mobileList.innerHTML = '';
 
       filtered.forEach((rec) => {
-        const cat = CATEGORY_META[rec.category];
+        const meta = TYPE_META[rec.type];
         const impact = getRecordInventoryImpact(rec);
-        const isPositiveDir = rec.direction >= 0;
-        const dirBadge = isPositiveDir
-          ? '<span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-800 font-black text-xs">＋</span>'
-          : '<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 font-black text-xs">－</span>';
-        const kgDisplay = `${isPositiveDir ? '+' : '-'}${formatKg(rec.kg)} KG`;
-        const kgCls = isPositiveDir ? 'text-slate-900' : 'text-rose-600';
+        const kindBadge = rec.isReversal
+          ? `<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 font-black text-xs">↩️ ${meta.revLabel}</span>`
+          : '<span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs">正常登記</span>';
+        const kgDisplay = rec.isReversal ? `-${formatKg(rec.kg)} KG` : `${formatKg(rec.kg)} KG`;
+        const kgCls = rec.isReversal ? 'text-rose-600' : 'text-slate-900';
         const impactBadge = impact < 0
           ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">庫存 −</span>'
           : '<span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-100 text-rose-700">庫存 ＋</span>';
@@ -2425,8 +2561,8 @@
         tr.innerHTML = `
           <td class="py-3 px-3.5 font-bold text-slate-800 whitespace-nowrap">${formatSlashDate(rec.date)}</td>
           <td class="py-3 px-3 font-extrabold text-slate-900 whitespace-nowrap">${escapeText(icon)} ${escapeText(rec.member)}</td>
-          <td class="py-3 px-3 whitespace-nowrap"><span class="px-2.5 py-1 rounded-xl text-xs font-black ${cat.badge}">${cat.emoji} ${cat.label}</span></td>
-          <td class="py-3 px-3 text-center whitespace-nowrap">${dirBadge}</td>
+          <td class="py-3 px-3 whitespace-nowrap"><span class="px-2.5 py-1 rounded-xl text-xs font-black ${meta.badge}">${meta.emoji} ${meta.label}</span></td>
+          <td class="py-3 px-3 text-center whitespace-nowrap">${kindBadge}</td>
           <td class="py-3 px-3 text-right font-black tabular-nums whitespace-nowrap ${kgCls}">${kgDisplay}</td>
           <td class="py-3 px-3 text-center whitespace-nowrap">${impactBadge}</td>
           ${isAd ? `
@@ -2448,8 +2584,9 @@
         card.className = 'p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-2';
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-xl text-xs font-black ${cat.badge}">${cat.emoji} ${cat.label}</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-xl text-xs font-black ${meta.badge}">${meta.emoji} ${meta.label}</span>
+              ${rec.isReversal ? kindBadge : ''}
               <span class="text-sm font-black text-slate-900">${escapeText(icon)} ${escapeText(rec.member)}</span>
             </div>
             <span class="text-base font-black tabular-nums ${kgCls}">${kgDisplay}</span>
@@ -2482,12 +2619,12 @@
           btn.onclick = () => {
             const target = dataState.records.find((r) => r.id === btn.dataset.delRec);
             if (!target) return;
-            const signed = round2(target.direction * target.kg);
+            const meta = TYPE_META[target.type];
             openConfirmModal({
               icon: '🗑️',
               title: '確定要刪除這筆紀錄？',
-              subtitle: '刪除後看板與排行榜會立即重新計算',
-              bodyHtml: `<div>${formatSlashDate(target.date)}｜${escapeText(target.member)}｜${CATEGORY_META[target.category].label} <b>${signed > 0 ? '+' : '-'}${formatKg(target.kg)} KG</b></div>`,
+              subtitle: '刪除後看板、比例與排行榜會立即重新計算',
+              bodyHtml: `<div>${formatSlashDate(target.date)}｜${escapeText(target.member)}｜${meta.label}${target.isReversal ? `（${meta.revLabel}）` : ''} <b>${formatKg(target.kg)} KG</b></div>`,
               okText: '確認刪除',
               okBtnClass: 'bg-rose-500 hover:bg-rose-600',
               onConfirm: () => {
@@ -2503,12 +2640,11 @@
     }
 
     function renderArchivesTab() {
-      // 若為管理員，渲染指定月份結算預覽
       if (ui.isAdmin) {
         $('closingMonthInput').value = ui.closingMonth;
         const agg = computeMonthAggregation(ui.closingMonth);
         const m = agg.metrics;
-        $('closingPreviewHeading').textContent = `📊 ${formatMonthZh(ui.closingMonth)} 即時結算預覽`;
+        $('closingPreviewHeading').textContent = `📊 ${formatMonthZh(ui.closingMonth)} 即時結算預覽（比例 ${m.ratioText}）`;
 
         if (agg.existingArchive) {
           $('closingExistingNotice').classList.remove('hidden');
@@ -2524,33 +2660,31 @@
           goalBadge.textContent = '尚無紀錄';
           goalBadge.className = 'px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-slate-100 text-slate-600';
         } else if (m.achieved) {
-          goalBadge.textContent = '🎉 2:1 已達標';
+          goalBadge.textContent = '🎉 1:2 已達標';
           goalBadge.className = 'px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-emerald-600 text-white';
         } else {
           goalBadge.textContent = `未達標（還差 ${formatKg(m.gapKg)} KG）`;
           goalBadge.className = 'px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-amber-100 text-amber-900 border border-amber-300';
         }
 
-        $('prevInKg').textContent = formatKg(m.inKg);
-        $('prevOutKg').textContent = formatKg(m.outKg);
-        $('prevTrashKg').textContent = formatKg(m.trashKg);
-        $('prevNetKg').textContent = m.netKg < 0
-          ? `-${formatKg(Math.abs(m.netKg))} KG`
-          : m.netKg > 0 ? `+${formatKg(m.netKg)} KG` : '0 KG';
-        $('prevNetKg').className = m.netKg < 0
+        $('prevInKg').textContent = formatKg(m.totalIn);
+        $('prevOutKg').textContent = formatKg(m.totalOut);
+        $('prevTrashKg').textContent = formatKg(m.totalTrash);
+        $('prevNetKg').textContent = `${formatSignedKg(m.netChange)} KG`;
+        $('prevNetKg').className = m.netChange < 0
           ? 'mt-1 text-xl sm:text-2xl font-black text-emerald-700 tabular-nums'
-          : m.netKg > 0
+          : m.netChange > 0
             ? 'mt-1 text-xl sm:text-2xl font-black text-rose-600 tabular-nums'
             : 'mt-1 text-xl sm:text-2xl font-black text-slate-700 tabular-nums';
         $('prevChampion').textContent = agg.championLabel;
         $('prevRecordCount').textContent = agg.liveRecords.length;
       }
 
-      // 歷月總覽 KPI
+      // 歷月統計 KPI
       const list = dataState.monthlyArchives;
       const achievedCount = list.filter((a) => a.achieved).length;
-      const totalReduced = round2(list.reduce((sum, a) => sum + a.reduceKg, 0));
-      const totalNetDrop = round2(list.reduce((sum, a) => sum + (-a.netKg), 0));
+      const totalReduced = round2(list.reduce((sum, a) => sum + a.totalReduction, 0));
+      const totalNetDrop = round2(list.reduce((sum, a) => sum + (-a.netChange), 0));
 
       $('archStatMonths').textContent = list.length;
       $('archStatAchieved').textContent = achievedCount;
@@ -2565,11 +2699,12 @@
       mobileList.innerHTML = '';
 
       list.forEach((arch) => {
+        const m = computeMetrics(arch.totalIn, arch.totalOut, arch.totalTrash);
         const goalBadge = arch.achieved
           ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">🎉 已達標</span>'
           : '<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">未達標</span>';
-        const netStr = arch.netKg < 0 ? `-${formatKg(Math.abs(arch.netKg))}` : arch.netKg > 0 ? `+${formatKg(arch.netKg)}` : '0';
-        const netCls = arch.netKg < 0 ? 'text-emerald-700' : arch.netKg > 0 ? 'text-rose-600' : 'text-slate-600';
+        const netStr = formatSignedKg(arch.netChange);
+        const netCls = arch.netChange < 0 ? 'text-emerald-700' : arch.netChange > 0 ? 'text-rose-600' : 'text-slate-600';
         const clearTag = arch.detailsCleared
           ? '<span class="ml-1 px-2 py-0.5 rounded-md bg-orange-100 text-orange-800 text-[10px] font-black">已瘦身</span>'
           : '';
@@ -2578,14 +2713,15 @@
         tr.className = 'hover:bg-slate-50/90 transition';
         tr.innerHTML = `
           <td class="py-3 px-3.5 font-black text-slate-900 whitespace-nowrap">${formatMonthZh(arch.month)}${clearTag}</td>
-          <td class="py-3 px-3 text-right font-bold text-emerald-700 tabular-nums">${formatKg(arch.inKg)} KG</td>
-          <td class="py-3 px-3 text-right font-bold text-blue-700 tabular-nums">${formatKg(arch.outKg)} KG</td>
-          <td class="py-3 px-3 text-right font-bold text-orange-700 tabular-nums">${formatKg(arch.trashKg)} KG</td>
-          <td class="py-3 px-3 text-right font-black text-sky-700 tabular-nums">${formatKg(arch.reduceKg)} KG</td>
+          <td class="py-3 px-3 text-right font-bold text-emerald-700 tabular-nums">${formatKg(arch.totalIn)} KG</td>
+          <td class="py-3 px-3 text-right font-bold text-blue-700 tabular-nums">${formatKg(arch.totalOut)} KG</td>
+          <td class="py-3 px-3 text-right font-bold text-orange-700 tabular-nums">${formatKg(arch.totalTrash)} KG</td>
+          <td class="py-3 px-3 text-right font-black text-sky-700 tabular-nums">${formatKg(arch.totalReduction)} KG</td>
           <td class="py-3 px-3 text-right font-black tabular-nums ${netCls}">${netStr} KG</td>
+          <td class="py-3 px-3 text-center font-black text-amber-800 tabular-nums whitespace-nowrap">${m.ratioText}</td>
           <td class="py-3 px-3 text-center whitespace-nowrap">${goalBadge}</td>
           <td class="py-3 px-3 text-xs font-extrabold text-slate-800 whitespace-nowrap">🥇 ${escapeText(arch.champion)}</td>
-          <td class="py-3 px-3 text-xs font-semibold text-slate-600 max-w-[180px] break-words">${arch.note ? escapeText(arch.note) : '<span class="text-slate-300">—</span>'}</td>
+          <td class="py-3 px-3 text-xs font-semibold text-slate-600 max-w-[170px] break-words">${arch.note ? escapeText(arch.note) : '<span class="text-slate-300">—</span>'}</td>
           ${ui.isAdmin ? `
             <td class="py-3 px-3.5 text-right bg-amber-50/50 whitespace-nowrap">
               <button type="button" data-del-arch="${escapeText(arch.month)}" class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-black cursor-pointer">🗑️ 刪除</button>
@@ -2599,13 +2735,16 @@
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <span class="text-base font-black text-slate-900">${formatMonthZh(arch.month)}${clearTag}</span>
-            ${goalBadge}
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-900 text-xs font-black">${m.ratioText}</span>
+              ${goalBadge}
+            </div>
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-            <div class="bg-white p-2 rounded-xl border border-slate-200">📦 進貨：<b>${formatKg(arch.inKg)} KG</b></div>
-            <div class="bg-white p-2 rounded-xl border border-slate-200">📉 總減少：<b>${formatKg(arch.reduceKg)} KG</b></div>
-            <div class="bg-white p-2 rounded-xl border border-slate-200">🚚 出貨：${formatKg(arch.outKg)} / 🗑️ ${formatKg(arch.trashKg)}</div>
-            <div class="bg-white p-2 rounded-xl border border-slate-200 ${netCls}">淨變化：<b>${netStr} KG</b></div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200">📦 進貨：<b>${formatKg(arch.totalIn)} KG</b></div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200">🚚 出貨含排垃圾：<b>${formatKg(arch.totalReduction)} KG</b></div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200">出貨 ${formatKg(arch.totalOut)} / 垃圾 ${formatKg(arch.totalTrash)}</div>
+            <div class="bg-white p-2 rounded-xl border border-slate-200 ${netCls}">進貨−出貨：<b>${netStr} KG</b></div>
           </div>
           <div class="text-xs font-extrabold text-slate-700">🥇 當月冠軍：${escapeText(arch.champion)}</div>
           ${arch.note ? `<div class="text-xs font-semibold text-slate-600 bg-white px-3 py-1.5 rounded-xl border border-slate-200">備註：${escapeText(arch.note)}</div>` : ''}
@@ -2638,7 +2777,7 @@
     }
 
     // =================================================================
-    // 11. 彈窗開啟、關閉與內部渲染
+    // 12. 彈窗管理與內容渲染
     // =================================================================
     function openModal(id) {
       const m = $(id);
@@ -2751,8 +2890,8 @@
       });
       sel.value = rec.member;
 
-      $('editCategorySelect').value = rec.category;
-      $('editDirectionSelect').value = rec.direction < 0 ? '-1' : '1';
+      $('editTypeSelect').value = rec.type;
+      $('editReversalSelect').value = rec.isReversal ? 'true' : 'false';
       $('editKgInput').value = rec.kg;
       $('editItemInput').value = rec.item || '';
       $('editQtyInput').value = rec.qty || '';
@@ -2761,13 +2900,12 @@
     }
 
     // =================================================================
-    // 12. 事件綁定與系統初始化
+    // 13. 事件綁定與初始化
     // =================================================================
     function bindAllEvents() {
-      // 抓最新進度
       $('refreshLatestBtn').onclick = handleRefreshLatestProgress;
 
-      // 管理員登入 / 登出
+      // 管理員登入與登出
       $('adminAuthBtn').onclick = () => {
         if (ui.isAdmin) {
           handleAdminLogout();
@@ -2781,15 +2919,13 @@
       $('toolbarLogoutBtn').onclick = handleAdminLogout;
       $('loginForm').onsubmit = handleAdminLoginSubmit;
 
-      // 主分頁切換
+      // 分頁與區間切換
       document.querySelectorAll('.main-tab-btn').forEach((btn) => {
         btn.onclick = () => {
           ui.activeTab = btn.dataset.tab;
           renderAll();
         };
       });
-
-      // 看板區間切換
       document.querySelectorAll('.scope-switch-btn').forEach((btn) => {
         btn.onclick = () => {
           ui.scope = btn.dataset.scope;
@@ -2803,6 +2939,10 @@
       $('exportWebpageBtn').onclick = exportSelfContainedWebpage;
       $('unsavedQuickExportBtn').onclick = exportSelfContainedWebpage;
 
+      // 一鍵自動修正誤按負數的出貨／垃圾紀錄
+      $('quickFixNegativeOutBtn').onclick = triggerAutoFixNegativeOut;
+      $('autoFixNegativeOutBtn').onclick = triggerAutoFixNegativeOut;
+
       // 音效開關
       $('soundToggleBtn').onclick = () => {
         ui.soundOn = !ui.soundOn;
@@ -2811,7 +2951,7 @@
         showToast(ui.soundOn ? '🔊 已開啟提示音' : '🔇 已靜音', 'info', 1800);
       };
 
-      // 管理員快速登記控制
+      // 防呆快速登記按鈕群
       $('entryDateInput').onchange = (e) => {
         ui.selectedDate = e.target.value || getTodayISO();
         renderQuickEntryPanel();
@@ -2824,16 +2964,21 @@
       $('kgValueInput').oninput = (e) => {
         const val = parseFloat(e.target.value);
         ui.stepKg = !isNaN(val) && val > 0 ? round2(val) : 0;
-        const lbl = ui.stepKg > 0 ? `${formatKg(ui.stepKg)} KG` : '-- KG';
-        document.querySelectorAll('.action-kg-label').forEach((el) => {
+        const lbl = ui.stepKg > 0 ? formatKg(ui.stepKg) : '--';
+        document.querySelectorAll('.action-kg-num').forEach((el) => {
           el.textContent = lbl;
         });
       };
-      document.querySelectorAll('.quick-action-btn').forEach((btn) => {
-        btn.onclick = () => addQuickRecord(btn.dataset.actionCat, Number(btn.dataset.actionDir));
-      });
 
-      // 人員管理視窗
+      // 三大主按鈕（正常登記）與三個底部沖銷小按鈕（確認防呆）
+      $('btnNormalIn').onclick = () => commitQuickRecord('in', false);
+      $('btnReverseIn').onclick = () => requestReversalRecord('in');
+      $('btnNormalOut').onclick = () => commitQuickRecord('out', false);
+      $('btnReverseOut').onclick = () => requestReversalRecord('out');
+      $('btnNormalTrash').onclick = () => commitQuickRecord('trash', false);
+      $('btnReverseTrash').onclick = () => requestReversalRecord('trash');
+
+      // 人員名單管理
       $('openMembersBtn').onclick = () => {
         if (!ui.isAdmin) return;
         $('newMemberNameInput').value = '';
@@ -2864,7 +3009,7 @@
         showToast(`✨ 已新增人員「${name}」`, 'success');
       };
 
-      // 管理員設定視窗
+      // 管理員設定
       $('openSettingsBtn').onclick = () => {
         if (!ui.isAdmin) return;
         $('exportFilenameInput').value = detectDownloadFilename();
@@ -2929,31 +3074,29 @@
         e.target.value = '';
       };
 
-      // 一鍵清除範例資料
       $('clearSampleDataBtn').onclick = () => {
-        const sampleCount = dataState.records.filter((r) => r.isSample || r.note.includes('範例紀錄')).length;
+        const sampleCount = dataState.records.filter((r) => r.isSample || r.note.includes('範例資料')).length;
         if (sampleCount === 0) {
-          showToast('目前帳本中沒有範例資料囉！', 'info');
+          showToast('目前帳本中已經沒有範例資料囉！', 'info');
           return;
         }
         openConfirmModal({
           icon: '🗑️',
-          title: '確定清除所有範例資料？',
-          subtitle: '只會移除系統預設的範例紀錄，不會動到您自己輸入的正式紀錄',
-          bodyHtml: `<div>即將移除 <b>${sampleCount} 筆</b> 範例紀錄。</div>`,
-          okText: '確認清除範例',
+          title: '確定清空所有範例資料？',
+          subtitle: '只會移除預設範例紀錄，不會動到您自己登記的正式資料',
+          bodyHtml: `<div>即將移除 <b>${sampleCount} 筆</b> 範例資料。</div>`,
+          okText: '確認清空範例',
           okBtnClass: 'bg-rose-500 hover:bg-rose-600',
           onConfirm: () => {
-            dataState.records = dataState.records.filter((r) => !(r.isSample || r.note.includes('範例紀錄')));
+            dataState.records = dataState.records.filter((r) => !(r.isSample || r.note.includes('範例資料')));
             persistAdminDraft();
             renderAll();
             closeModal('settingsModal');
-            showToast(`🧹 已清除 ${sampleCount} 筆範例資料！`, 'success');
+            showToast(`🧹 已清空 ${sampleCount} 筆範例資料！`, 'success');
           }
         });
       };
 
-      // 放棄未存檔修改
       $('discardDraftBtn').onclick = () => {
         if (!ui.hasUnsavedChanges) {
           showToast('目前沒有未存檔的修改，畫面已與網頁內容一致', 'info');
@@ -3007,7 +3150,7 @@
         exportRecordsToCsv(getFilteredRecords(), `降庫存流水帳明細_${getTodayISO()}.csv`, ui.isAdmin);
       };
 
-      // 修改單筆紀錄送出
+      // 修改單筆紀錄
       $('editRecordForm').onsubmit = saveEditedRecord;
 
       // 每月結算
@@ -3019,7 +3162,7 @@
       $('closeClearDetailsBtn').onclick = () => executeMonthlyClosing(true);
       $('exportArchivesCsvBtn').onclick = exportArchivesToCsv;
 
-      // 彈窗關閉與確認對話框
+      // 彈窗與確認對話框
       document.querySelectorAll('[data-close-modal]').forEach((btn) => {
         btn.onclick = () => closeModal(btn.dataset.closeModal);
       });
@@ -3040,7 +3183,7 @@
       });
     }
 
-    // 啟動：一律以乾淨的員工唯讀視角載入網頁內建正式帳本
+    // 啟動：預設永遠以乾淨的員工唯讀視角載入網頁內建正式帳本
     bindAllEvents();
     renderAll();
   </script>
