@@ -19,8 +19,10 @@
   <style id="appCustomStyle">
     body {
       font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: #f4f7fb;
-      color: #0f172a;
+      background-color: #f3e8ff;
+      background-image: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #f3e8ff 100%);
+      background-attachment: fixed;
+      color: #1e1b4b;
       -webkit-tap-highlight-color: transparent;
     }
     .tabular-nums {
@@ -38,15 +40,15 @@
       height: 7px;
     }
     .custom-scroll::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: #f3e8ff;
       border-radius: 9999px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: #c4b5fd;
       border-radius: 9999px;
     }
     .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
+      background: #a78bfa;
     }
   </style>
 </head>
@@ -180,7 +182,7 @@
   </div>
 
   <!-- 頁首導覽列 -->
-  <header class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg sticky top-0 z-30">
+  <header class="bg-gradient-to-r from-violet-700 via-purple-700 to-fuchsia-700 text-white shadow-lg sticky top-0 z-30">
     <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
@@ -194,7 +196,7 @@
                 進貨 1 : 出貨 2
               </span>
             </div>
-            <div class="flex items-center gap-2 flex-wrap mt-0.5 text-xs text-emerald-50 font-semibold">
+            <div class="flex items-center gap-2 flex-wrap mt-0.5 text-xs text-purple-100 font-semibold">
               <span id="lastUpdatedLabel">🕒 最後更新：--</span>
               <span id="cloudStatusBadge" class="hidden px-2 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold">☁️ 雲端同步</span>
             </div>
@@ -230,7 +232,7 @@
             <span>📦</span>
             <span>存檔下載網頁</span>
           </button>
-          <button type="button" id="openSettingsBtn" class="px-3 py-2 rounded-xl bg-white text-teal-800 hover:bg-teal-50 active:scale-95 text-xs sm:text-sm font-black shadow transition flex items-center gap-1 cursor-pointer">
+          <button type="button" id="openSettingsBtn" class="px-3 py-2 rounded-xl bg-white text-purple-800 hover:bg-purple-50 active:scale-95 text-xs sm:text-sm font-black shadow transition flex items-center gap-1 cursor-pointer">
             <span>⚙️</span>
             <span>設定／匯入</span>
           </button>
@@ -254,21 +256,21 @@
   </header>
 
   <!-- 三大主分頁切換列 -->
-  <nav class="bg-white border-b border-slate-200 shadow-sm">
+  <nav class="bg-white/90 backdrop-blur border-b border-purple-200/80 shadow-sm">
     <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex items-center gap-2 overflow-x-auto">
-      <button type="button" data-tab="dashboard" class="tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-emerald-600 text-white shadow-sm">
+      <button type="button" data-tab="dashboard" class="tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-purple-600 text-white shadow-sm">
         <span>📊</span>
         <span>戰情看板與登記</span>
       </button>
-      <button type="button" data-tab="ledger" class="tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200">
+      <button type="button" data-tab="ledger" class="tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-purple-50 text-purple-700 hover:bg-purple-100">
         <span>📋</span>
         <span>流水帳明細</span>
-        <span id="ledgerCountPill" class="px-2 py-0.5 rounded-full text-xs bg-white/80 text-slate-700">0</span>
+        <span id="ledgerCountPill" class="px-2 py-0.5 rounded-full text-xs bg-white/80 text-purple-800">0</span>
       </button>
-      <button type="button" data-tab="monthly" class="tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200">
+      <button type="button" data-tab="monthly" class="tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-purple-50 text-purple-700 hover:bg-purple-100">
         <span>📅</span>
         <span>每月結算存檔</span>
-        <span id="archiveCountPill" class="px-2 py-0.5 rounded-full text-xs bg-white/80 text-slate-700">0</span>
+        <span id="archiveCountPill" class="px-2 py-0.5 rounded-full text-xs bg-white/80 text-purple-800">0</span>
       </button>
     </div>
   </nav>
@@ -280,16 +282,16 @@
     <section id="tab-dashboard" class="tab-panel space-y-6">
 
       <!-- 1. 彩色 1:2 降庫存戰情儀表板（登入前後數據完全一致！） -->
-      <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-5">
+      <div class="bg-white/95 backdrop-blur rounded-3xl p-4 sm:p-6 shadow-sm border border-purple-200/80 space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-2xl shadow-sm shrink-0">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-2xl shadow-sm shrink-0">
               🎯
             </div>
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <h2 class="text-lg sm:text-xl font-black text-slate-900">降庫存 1:2 戰情儀表板</h2>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">
+                <span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-black">
                   目標 進貨 1 : 出貨 2（有效降低成本）
                 </span>
               </div>
@@ -300,14 +302,14 @@
           </div>
 
           <!-- 統計時間區間切換 -->
-          <div class="inline-flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200 self-start sm:self-auto">
-            <button type="button" data-period="today" class="period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer text-slate-600 hover:text-slate-900">
+          <div class="inline-flex items-center p-1 rounded-2xl bg-purple-100/80 border border-purple-200 self-start sm:self-auto">
+            <button type="button" data-period="today" class="period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer text-purple-700/80 hover:text-purple-950">
               今日
             </button>
-            <button type="button" data-period="month" class="period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer text-slate-600 hover:text-slate-900">
+            <button type="button" data-period="month" class="period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer text-purple-700/80 hover:text-purple-950">
               本月
             </button>
-            <button type="button" data-period="all" class="period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer bg-white text-emerald-700 shadow-sm">
+            <button type="button" data-period="all" class="period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer bg-white text-purple-700 shadow-sm">
               全部累計
             </button>
           </div>
@@ -373,7 +375,7 @@
         </div>
 
         <!-- 1:2 目標達成進度條 -->
-        <div class="rounded-2xl p-4 bg-slate-50 border border-slate-200 space-y-2.5">
+        <div class="rounded-2xl p-4 bg-purple-50/70 border border-purple-200/80 space-y-2.5">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-sm font-black text-slate-800">進貨 1 : 出貨 2 目標達成進度</span>
@@ -381,13 +383,13 @@
                 衝刺中
               </span>
             </div>
-            <span id="progressPercentText" class="text-base font-black text-emerald-700 tabular-nums">0%</span>
+            <span id="progressPercentText" class="text-base font-black text-purple-700 tabular-nums">0%</span>
           </div>
 
-          <div class="relative h-5 rounded-full bg-slate-200 overflow-hidden shadow-inner">
+          <div class="relative h-5 rounded-full bg-purple-200/70 overflow-hidden shadow-inner">
             <!-- 50% 刻度線（1:1 打平） -->
-            <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-slate-500/70 z-10" title="1:1 庫存打平線"></div>
-            <div id="progressBarFill" class="h-full rounded-full bg-gradient-to-r from-amber-400 via-teal-500 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
+            <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-purple-600/60 z-10" title="1:1 庫存打平線"></div>
+            <div id="progressBarFill" class="h-full rounded-full bg-gradient-to-r from-violet-500 via-purple-500 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
           </div>
 
           <div class="flex items-center justify-between text-[11px] sm:text-xs font-bold text-slate-500">
@@ -396,8 +398,60 @@
             <span class="text-emerald-700 font-black">100%（1:2 達標降成本）</span>
           </div>
 
-          <div id="motivationalMessage" class="pt-1 text-xs sm:text-sm font-extrabold text-teal-800">
+          <div id="motivationalMessage" class="pt-1 text-xs sm:text-sm font-extrabold text-purple-800">
             💪 全員動起來！出貨與排除垃圾達進貨的 2 倍，就能有效降低庫存與成本！
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 管理員專屬：防呆快速記帳操作區（登出時完全隱藏） -->
+      <div id="adminEntryPanel" class="hidden bg-white/95 backdrop-blur rounded-3xl p-4 sm:p-6 shadow-md border-2 border-purple-300 space-y-5 animate-pop">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-purple-100">
+          <div class="flex items-center gap-2.5">
+            <span class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl">✍️</span>
+            <div>
+              <h2 class="text-lg font-black text-slate-900">管理員防呆快速登記區</h2>
+              <p class="text-xs font-semibold text-slate-500">直接選好「料別／人員」與「公斤數」，按對應大按鈕立即記帳並更新上方看板</p>
+            </div>
+          </div>
+
+          <div class="flex items-center flex-wrap gap-2">
+            <label class="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-xl border border-purple-200 text-xs sm:text-sm font-black text-purple-900">
+              <span>📅 登記日期</span>
+              <input type="date" id="entryDateInput" class="bg-transparent font-black text-slate-900 focus:outline-none cursor-pointer">
+            </label>
+            <button type="button" id="openMembersModalBtn" class="px-3.5 py-2 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 text-xs sm:text-sm font-black transition cursor-pointer">
+              🏷️ 管理料別／人員
+            </button>
+          </div>
+        </div>
+
+        <!-- 步驟 A：選擇料別／人員 -->
+        <div class="space-y-2">
+          <div class="text-xs font-black text-purple-700/80 uppercase tracking-wider">步驟 1｜選擇料別／人員</div>
+          <div id="memberSelectorList" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- 步驟 B：輸入公斤數（KG） -->
+        <div class="rounded-2xl p-4 bg-purple-50/70 border border-purple-200 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-black text-purple-800">步驟 2｜輸入或快選重量（單位：KG）</div>
+              <div class="text-xs font-semibold text-purple-600/70 mt-0.5">支援大數值與小數點，按下方按鈕即可登記</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="number" id="entryKgInput" min="0.1" step="any" value="1000" placeholder="輸入公斤數"
+                class="w-40 sm:w-48 px-4 py-2.5 rounded-2xl bg-white border-2 border-purple-400 text-2xl font-black text-right text-slate-900 tabular-nums focus:outline-none focus:ring-4 focus:ring-purple-200">
+              <span class="text-lg font-black text-purple-900">KG</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-kg="100" class="kg-preset-btn px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 border border-purple-200 text-xs sm:text-sm font-black text-purple-900 active:scale-95 transition cursor-pointer">100 KG</button>
+            <button type="button" data-kg="500" class="kg-preset-btn px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 border border-purple-200 text-xs sm:text-sm font-black text-purple-900 active:scale-95 transition cursor-pointer">500 KG</button>
+            <button type="button" data-kg="1000" class="kg-preset-btn px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 border border-purple-200 text-xs sm:text-sm font-black text-purple-900 active:scale-95 transition cursor-pointer">1,000 KG</button>
+            <button type="button" data-kg="5000" class="kg-preset-btn px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 border border-purple-200 text-xs sm:text-sm font-black text-purple-900 active:scale-95 transition cursor-pointer">5,000 KG</button>
+            <button type="button" data-kg="10000" class="kg-preset-btn px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 border border-purple-200 text-xs sm:text-sm font-black text-purple-900 active:scale-95 transition cursor-pointer">10,000 KG</button>
+            <button type="button" data-kg="20000" class="kg-preset-btn px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 border border-purple-200 text-xs sm:text-sm font-black text-purple-900 active:scale-95 transition cursor-pointer">20,000 KG</button>
           </div>
         </div>
       </div>
@@ -541,7 +595,7 @@
       </div>
 
       <!-- 3. 各料別／人員降庫存排行榜 -->
-      <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-4">
+      <div class="bg-white/95 backdrop-blur rounded-3xl p-4 sm:p-6 shadow-sm border border-purple-200/80 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-2.5">
             <span class="text-2xl">🏆</span>
@@ -550,7 +604,7 @@
               <p class="text-xs font-semibold text-slate-500">依「出貨＋排除垃圾」總去化公斤數排序，與上方統計區間同步</p>
             </div>
           </div>
-          <span id="leaderboardPeriodTag" class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-black">全部累計</span>
+          <span id="leaderboardPeriodTag" class="px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-black">全部累計</span>
         </div>
 
         <div id="leaderboardContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
@@ -559,7 +613,7 @@
 
     <!-- ==================== 分頁 2：流水帳明細 ==================== -->
     <section id="tab-ledger" class="tab-panel hidden space-y-4">
-      <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-4">
+      <div class="bg-white/95 backdrop-blur rounded-3xl p-4 sm:p-6 shadow-sm border border-purple-200/80 space-y-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
@@ -570,38 +624,38 @@
               目前為一般檢視模式：對外自動隱藏「項目」與「數量」機密欄位
             </p>
           </div>
-          <button type="button" id="exportLedgerCsvBtn" class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm transition flex items-center gap-1.5 self-start md:self-auto cursor-pointer">
+          <button type="button" id="exportLedgerCsvBtn" class="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm transition flex items-center gap-1.5 self-start md:self-auto cursor-pointer">
             <span>📥</span>
             <span>匯出 Excel 表格 (.csv)</span>
           </button>
         </div>
 
         <!-- 篩選條件列 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-          <select id="filterType" class="px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-teal-500">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-purple-50/70 p-3 rounded-2xl border border-purple-200/80">
+          <select id="filterType" class="px-3 py-2 rounded-xl bg-white border border-purple-200 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-purple-500">
             <option value="all">全部分類</option>
             <option value="in">📦 僅看進貨</option>
             <option value="out">🚚 僅看出貨</option>
             <option value="trash">🗑️ 僅看排除垃圾</option>
           </select>
 
-          <select id="filterMember" class="px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-teal-500">
+          <select id="filterMember" class="px-3 py-2 rounded-xl bg-white border border-purple-200 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-purple-500">
             <option value="all">全部料別／人員</option>
           </select>
 
-          <select id="filterMonth" class="px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-teal-500">
+          <select id="filterMonth" class="px-3 py-2 rounded-xl bg-white border border-purple-200 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-purple-500">
             <option value="all">全部月份</option>
           </select>
 
           <input type="text" id="filterSearch" placeholder="搜尋日期、料別或備註..."
-            class="px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-teal-500">
+            class="px-3 py-2 rounded-xl bg-white border border-purple-200 text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:border-purple-500">
         </div>
 
         <!-- 明細表格 -->
-        <div class="overflow-x-auto custom-scroll rounded-2xl border border-slate-200">
+        <div class="overflow-x-auto custom-scroll rounded-2xl border border-purple-200/80">
           <table class="w-full text-left border-collapse min-w-[640px]">
-            <thead id="ledgerTableHead" class="bg-slate-100 text-slate-600 text-xs font-black uppercase"></thead>
-            <tbody id="ledgerTableBody" class="divide-y divide-slate-100 text-sm font-semibold text-slate-800"></tbody>
+            <thead id="ledgerTableHead" class="bg-purple-50 text-purple-900 text-xs font-black uppercase"></thead>
+            <tbody id="ledgerTableBody" class="divide-y divide-purple-100/70 text-sm font-semibold text-slate-800"></tbody>
           </table>
         </div>
       </div>
@@ -611,26 +665,26 @@
     <section id="tab-monthly" class="tab-panel hidden space-y-5">
       <!-- 歷月累計概覽 -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+        <div class="bg-white/95 rounded-2xl p-4 border border-purple-200/80 shadow-sm">
           <div class="text-xs font-bold text-slate-500">已結算月數</div>
           <div id="archTotalMonths" class="text-2xl font-black text-slate-900 mt-1 tabular-nums">0 個月</div>
         </div>
-        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+        <div class="bg-white/95 rounded-2xl p-4 border border-purple-200/80 shadow-sm">
           <div class="text-xs font-bold text-slate-500">達成 1:2 月數</div>
           <div id="archPassedMonths" class="text-2xl font-black text-emerald-600 mt-1 tabular-nums">0 個月</div>
         </div>
-        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+        <div class="bg-white/95 rounded-2xl p-4 border border-purple-200/80 shadow-sm">
           <div class="text-xs font-bold text-slate-500">歷月結算總去化</div>
           <div id="archTotalReduce" class="text-2xl font-black text-blue-600 mt-1 tabular-nums">0 KG</div>
         </div>
-        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+        <div class="bg-white/95 rounded-2xl p-4 border border-purple-200/80 shadow-sm">
           <div class="text-xs font-bold text-slate-500">歷月結算淨變化</div>
-          <div id="archTotalNet" class="text-2xl font-black text-teal-700 mt-1 tabular-nums">0 KG</div>
+          <div id="archTotalNet" class="text-2xl font-black text-purple-700 mt-1 tabular-nums">0 KG</div>
         </div>
       </div>
 
       <!-- 管理員專屬：執行月份結算卡片 -->
-      <div id="adminSettlePanel" class="hidden bg-white rounded-3xl p-4 sm:p-6 shadow-sm border-2 border-teal-200 space-y-4">
+      <div id="adminSettlePanel" class="hidden bg-white/95 rounded-3xl p-4 sm:p-6 shadow-sm border-2 border-purple-300 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h3 class="text-base sm:text-lg font-black text-slate-900">📅 執行每月結算存檔（管理員專用）</h3>
@@ -638,14 +692,14 @@
           </div>
           <div class="flex items-center gap-2">
             <label class="text-xs font-black text-slate-600">選擇結算月份：</label>
-            <input type="month" id="settleMonthInput" class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-sm font-black text-slate-800">
+            <input type="month" id="settleMonthInput" class="px-3 py-2 rounded-xl bg-purple-50 border border-purple-200 text-sm font-black text-slate-800">
           </div>
         </div>
 
-        <div id="settlePreviewBox" class="rounded-2xl p-4 bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center"></div>
+        <div id="settlePreviewBox" class="rounded-2xl p-4 bg-purple-50/70 border border-purple-200 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center"></div>
 
         <div class="flex flex-col sm:flex-row gap-3">
-          <button type="button" id="settleKeepBtn" class="flex-1 py-3 px-4 rounded-2xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white text-sm font-black shadow-sm transition cursor-pointer">
+          <button type="button" id="settleKeepBtn" class="flex-1 py-3 px-4 rounded-2xl bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-sm font-black shadow-sm transition cursor-pointer">
             💾 存月結總表（保留該月明細隨時查）
           </button>
           <button type="button" id="settlePruneBtn" class="flex-1 py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-sm font-black shadow-sm transition cursor-pointer">
@@ -655,20 +709,20 @@
       </div>
 
       <!-- 歷月固定存檔成績單 -->
-      <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-4">
+      <div class="bg-white/95 rounded-3xl p-4 sm:p-6 shadow-sm border border-purple-200/80 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 class="text-base sm:text-lg font-black text-slate-900">🗂️ 歷月固定存檔成績單</h3>
             <p class="text-xs font-semibold text-slate-500">系統在計算「全部累計」時會自動防重複統計</p>
           </div>
-          <button type="button" id="exportArchivesCsvBtn" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-black transition cursor-pointer">
+          <button type="button" id="exportArchivesCsvBtn" class="px-3.5 py-2 rounded-xl bg-purple-800 hover:bg-purple-900 text-white text-xs font-black transition cursor-pointer">
             📥 匯出歷月成績單 (.csv)
           </button>
         </div>
 
-        <div class="overflow-x-auto custom-scroll rounded-2xl border border-slate-200">
+        <div class="overflow-x-auto custom-scroll rounded-2xl border border-purple-200/80">
           <table class="w-full text-left border-collapse min-w-[680px]">
-            <thead class="bg-slate-100 text-slate-600 text-xs font-black">
+            <thead class="bg-purple-50 text-purple-900 text-xs font-black">
               <tr>
                 <th class="px-4 py-3">結算月份</th>
                 <th class="px-4 py-3 text-right">進貨 (KG)</th>
@@ -681,14 +735,14 @@
                 <th id="archiveActionTh" class="hidden px-4 py-3 text-center">操作</th>
               </tr>
             </thead>
-            <tbody id="archivesTableBody" class="divide-y divide-slate-100 text-sm font-semibold text-slate-800"></tbody>
+            <tbody id="archivesTableBody" class="divide-y divide-purple-100/70 text-sm font-semibold text-slate-800"></tbody>
           </table>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="py-5 text-center text-xs font-semibold text-slate-400">
+  <footer class="py-5 text-center text-xs font-semibold text-purple-700/70">
     全員降庫存動起來！KG 戰情看板 ｜ 目標 進貨 1 : 出貨 2 ｜ 登入前後數據一致保護已啟用
   </footer>
 
@@ -697,18 +751,18 @@
   ================================================================== -->
 
   <!-- 1. 管理員登入視窗 -->
-  <div id="loginModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4 animate-pop">
+  <div id="loginModal" class="hidden fixed inset-0 z-50 bg-purple-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-purple-100 space-y-4 animate-pop">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-black text-slate-900">🔒 管理員登入</h3>
-        <button type="button" data-close-modal="loginModal" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer">✕</button>
+        <button type="button" data-close-modal="loginModal" class="p-1.5 rounded-xl text-slate-400 hover:bg-purple-50 hover:text-purple-700 cursor-pointer">✕</button>
       </div>
-      <p class="text-xs font-semibold text-slate-500">登入後即可記帳、修改資料、匯入 kg.xlsx 與檢視隱藏項目（預設密碼：<span class="font-black text-teal-700">8888</span>）</p>
+      <p class="text-xs font-semibold text-slate-500">登入後即可記帳、修改資料、匯入 kg.xlsx 與檢視隱藏項目（預設密碼：<span class="font-black text-purple-700">8888</span>）</p>
       <form id="loginForm" class="space-y-3">
         <input type="password" id="loginPasswordInput" placeholder="請輸入管理員密碼" autocomplete="current-password"
-          class="w-full px-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-200 text-base font-black text-center tracking-widest focus:outline-none focus:border-teal-500">
+          class="w-full px-4 py-3 rounded-2xl bg-purple-50/70 border-2 border-purple-200 text-base font-black text-center tracking-widest focus:outline-none focus:border-purple-500">
         <p id="loginErrorMsg" class="hidden text-xs font-black text-rose-600 text-center"></p>
-        <button type="submit" class="w-full py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-sm shadow transition cursor-pointer">
+        <button type="submit" class="w-full py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow transition cursor-pointer">
           確認登入
         </button>
       </form>
@@ -771,21 +825,21 @@
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" data-close-modal="editRecordModal" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-black cursor-pointer">取消</button>
-          <button type="submit" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-black shadow cursor-pointer">💾 儲存修改</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-black shadow cursor-pointer">💾 儲存修改</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- 3. 管理料別／人員名單視窗 -->
-  <div id="membersModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto custom-scroll animate-pop">
+  <div id="membersModal" class="hidden fixed inset-0 z-50 bg-purple-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-purple-100 space-y-4 max-h-[88vh] overflow-y-auto custom-scroll animate-pop">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-black text-slate-900">🏷️ 管理料別／人員名單</h3>
-        <button type="button" data-close-modal="membersModal" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 cursor-pointer">✕</button>
+        <button type="button" data-close-modal="membersModal" class="p-1.5 rounded-xl text-slate-400 hover:bg-purple-50 cursor-pointer">✕</button>
       </div>
       <form id="addMemberForm" class="flex gap-2">
-        <select id="newMemberIcon" class="px-2.5 py-2 rounded-xl bg-slate-100 border border-slate-300 text-lg">
+        <select id="newMemberIcon" class="px-2.5 py-2 rounded-xl bg-purple-50 border border-purple-200 text-lg">
           <option value="🧪">🧪</option>
           <option value="📦">📦</option>
           <option value="🧱">🧱</option>
@@ -797,8 +851,8 @@
           <option value="🚛">🚛</option>
         </select>
         <input type="text" id="newMemberName" placeholder="輸入新料別或人名" required
-          class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:border-teal-500">
-        <button type="submit" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-black cursor-pointer">＋ 新增</button>
+          class="flex-1 px-3 py-2 rounded-xl border border-purple-200 text-sm font-bold focus:outline-none focus:border-purple-500">
+        <button type="submit" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-black cursor-pointer">＋ 新增</button>
       </form>
       <div id="membersManageList" class="space-y-2 max-h-64 overflow-y-auto custom-scroll"></div>
     </div>
@@ -1347,8 +1401,8 @@
         document.querySelectorAll('.period-btn').forEach((btn) => {
           const active = btn.dataset.period === ui.period;
           btn.className = active
-            ? 'period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer bg-white text-emerald-700 shadow-sm'
-            : 'period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer text-slate-600 hover:text-slate-900';
+            ? 'period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer bg-white text-purple-700 shadow-sm'
+            : 'period-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer text-purple-700/80 hover:text-purple-950';
         });
 
         const periodNames = {
@@ -1445,7 +1499,7 @@
               ? `<span class="text-rose-600 font-black">淨增 ${formatNum(m.netKg)} KG</span>`
               : `<span class="text-slate-400 font-bold">持平</span>`);
           return `
-            <div class="rounded-2xl p-3.5 bg-slate-50 border border-slate-200/80 space-y-2">
+            <div class="rounded-2xl p-3.5 bg-purple-50/50 border border-purple-200/70 space-y-2">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 min-w-0">
                   <span class="text-sm font-black w-7 text-center shrink-0">${medal}</span>
@@ -1457,8 +1511,8 @@
                   <div class="text-[11px] tabular-nums">${netBadge}</div>
                 </div>
               </div>
-              <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
-                <div class="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-300" style="width:${barW}%"></div>
+              <div class="h-2 rounded-full bg-purple-200/60 overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-500 transition-all duration-300" style="width:${barW}%"></div>
               </div>
               <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 tabular-nums">
                 <span>進貨 ${formatNum(m.inKg)} KG</span>
@@ -1477,8 +1531,8 @@
         $('memberSelectorList').innerHTML = dataState.members.map((m) => {
           const active = m.name === ui.selectedMember;
           const cls = active
-            ? 'bg-teal-600 text-white border-teal-600 shadow-sm scale-[1.02]'
-            : 'bg-white text-slate-700 border-slate-300 hover:bg-teal-50 hover:border-teal-300';
+            ? 'bg-purple-600 text-white border-purple-600 shadow-sm scale-[1.02]'
+            : 'bg-white text-slate-700 border-purple-200 hover:bg-purple-50 hover:border-purple-400';
           return `
             <button type="button" data-select-member="${escapeHtml(m.name)}"
               class="member-pill px-3.5 py-2 rounded-2xl border-2 text-xs sm:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${cls}">
@@ -2122,8 +2176,8 @@
             document.querySelectorAll('.tab-btn').forEach((b) => {
               const active = b.dataset.tab === ui.activeTab;
               b.className = active
-                ? 'tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-emerald-600 text-white shadow-sm'
-                : 'tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200';
+                ? 'tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-purple-600 text-white shadow-sm'
+                : 'tab-btn px-4 py-2.5 rounded-2xl text-sm font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer bg-purple-50 text-purple-700 hover:bg-purple-100';
             });
           });
         });
